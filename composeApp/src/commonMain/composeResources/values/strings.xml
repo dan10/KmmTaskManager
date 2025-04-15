@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TaskIt</string>
+
+    <!-- Component strings -->
+    <string name="content_description_show_password_icon">Show password</string>
+    <string name="content_description_hide_password_icon">Hide password</string>
+
+    <!-- LoginScreen strings -->
+    <string name="title_without_account">Don't have an account?</string>
+    <string name="button_sign_up">Sign Up</string>
+
+    <!-- LoginScreen and RegisterScreen strings -->
+    <string name="title_email">Email</string>
+    <string name="title_password">Password</string>
+    <string name="title_login_button">Login</string>
+    <string name="title_email_error">Please enter a valid email address</string>
+    <string name="title_password_error">Password must be at least 8 characters</string>
+
+    <!-- RegisterScreen strings -->
+    <string name="title_register_button">Register</string>
+    <string name="title_confirm_password">Confirm Password</string>
+    <string name="title_confirm_password_error">Passwords do not match</string>
+    <string name="title_already_have_account">Already have an account?</string>
+    <string name="button_sign_in">Sign in</string>
+
+    <!-- HomeScreen strings -->
+    <string-array name="empty_task_list">
+        <item>📝 Create a to-do list</item>
+        <item>📅 Schedule meetings</item>
+        <item>📚 Plan study sessions</item>
+        <item>🏃 Track workout goals</item>
+    </string-array>
+</resources>
