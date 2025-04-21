@@ -1,10 +1,14 @@
 package com.danioliveira.taskmanager.domain
 
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+
+@OptIn(ExperimentalUuidApi::class)
 data class Task(
-    val id: Int,
+    val id: Uuid,
     val title: String,
     val description: String,
-    val isDone: Boolean = false,
+    val status: TaskStatus,
     val priority: Priority,
     val dueDate: String
 )
