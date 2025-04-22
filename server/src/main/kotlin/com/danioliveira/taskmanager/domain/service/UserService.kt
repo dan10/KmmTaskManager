@@ -3,6 +3,7 @@ package com.danioliveira.taskmanager.domain.service
 import com.danioliveira.taskmanager.api.request.GoogleLoginRequest
 import com.danioliveira.taskmanager.api.request.LoginRequest
 import com.danioliveira.taskmanager.api.request.RegisterRequest
+import com.danioliveira.taskmanager.api.response.AuthResponse
 import com.danioliveira.taskmanager.auth.GoogleTokenVerifier
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.auth.PasswordHasher
@@ -40,10 +41,10 @@ class UserService(
      * Registers a new user with the given information.
      *
      * @param request The registration request containing email, password, and display name
-     * @return A pair of the JWT token and the user object
+     * @return An AuthResponse containing the JWT token and the user object
      * @throws ValidationException if the email is already registered
      */
-    suspend fun register(request: RegisterRequest): Pair<String, User> {
+    suspend fun register(request: RegisterRequest): AuthResponse {
         val existingUser = findByEmail(request.email)
         if (existingUser != null) {
             throw ValidationException(
@@ -57,17 +58,17 @@ class UserService(
         val token = JwtConfig.generateToken(userWithPassword.id, userWithPassword.email)
         val safeUser = toSafeUser(userWithPassword)
 
-        return token to safeUser
+        return AuthResponse(token = token, user = safeUser)
     }
 
     /**
      * Authenticates a user with the given credentials.
      *
      * @param request The login request containing email and password
-     * @return A pair of the JWT token and the user object
+     * @return An AuthResponse containing the JWT token and the user object
      * @throws UnauthorizedException if the credentials are invalid
      */
-    suspend fun login(request: LoginRequest): Pair<String, User> {
+    suspend fun login(request: LoginRequest): AuthResponse {
         val userWithPassword = findByEmail(request.email)
         if (userWithPassword == null ||
             userWithPassword.passwordHash == null ||
@@ -79,17 +80,17 @@ class UserService(
         val token = JwtConfig.generateToken(userWithPassword.id, userWithPassword.email)
         val safeUser = toSafeUser(userWithPassword)
 
-        return token to safeUser
+        return AuthResponse(token = token, user = safeUser)
     }
 
     /**
      * Authenticates a user with Google.
      *
      * @param request The Google login request containing the ID token
-     * @return A pair of the JWT token and the user object
+     * @return An AuthResponse containing the JWT token and the user object
      * @throws UnauthorizedException if the Google ID token is invalid
      */
-    suspend fun googleLogin(request: GoogleLoginRequest): Pair<String, User> {
+    suspend fun googleLogin(request: GoogleLoginRequest): AuthResponse {
         val clientId = appConfig.google.clientId
         val payload = GoogleTokenVerifier.verify(request.idToken, clientId)
         if (payload == null) {
@@ -108,6 +109,6 @@ class UserService(
         val token = JwtConfig.generateToken(userWithPassword.id, userWithPassword.email)
         val safeUser = toSafeUser(userWithPassword)
 
-        return token to safeUser
+        return AuthResponse(token = token, user = safeUser)
     }
 }

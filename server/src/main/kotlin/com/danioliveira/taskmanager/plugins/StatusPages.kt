@@ -5,6 +5,7 @@ import com.danioliveira.taskmanager.domain.exceptions.ErrorResponse
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import org.slf4j.LoggerFactory
@@ -16,6 +17,18 @@ fun Application.configureStatusPages() {
     val logger = LoggerFactory.getLogger("ExceptionHandler")
 
     install(StatusPages) {
+        exception<RequestValidationException> { call, cause ->
+            val errors = cause.reasons.associateWith { it }
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    status = HttpStatusCode.BadRequest.value,
+                    code = "VALIDATION_ERROR",
+                    message = errors.map { it.key }.joinToString(", "),
+                )
+            )
+        }
+
         // Handle AppException and its subclasses
         exception<AppException> { call, cause ->
             logger.error("AppException: ${cause.message}", cause)

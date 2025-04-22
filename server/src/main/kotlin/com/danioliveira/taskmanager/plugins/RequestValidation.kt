@@ -1,10 +1,8 @@
 package com.danioliveira.taskmanager.plugins
 
 import com.danioliveira.taskmanager.api.request.*
-import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*
-import io.ktor.server.plugins.statuspages.*
 
 /**
  * Configures the RequestValidation plugin to validate request models.
@@ -153,17 +151,6 @@ fun Application.configureRequestValidation() {
             }
 
             ValidationResult.Valid
-        }
-    }
-
-    // Configure exception handling for validation errors
-    install(StatusPages) {
-        exception<RequestValidationException> { call, cause ->
-            val errors = cause.reasons.associateWith { it }
-            throw ValidationException(
-                message = "Validation failed",
-                errors = errors
-            )
         }
     }
 }

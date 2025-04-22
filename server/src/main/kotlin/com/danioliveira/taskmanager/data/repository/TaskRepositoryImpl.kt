@@ -6,6 +6,7 @@ import com.danioliveira.taskmanager.data.entity.ProjectDAOEntity
 import com.danioliveira.taskmanager.data.entity.TaskDAOEntity
 import com.danioliveira.taskmanager.data.entity.UserDAOEntity
 import com.danioliveira.taskmanager.data.tables.TasksTable
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import org.jetbrains.exposed.sql.SizedIterable
@@ -31,7 +32,7 @@ class TaskRepositoryImpl : TaskRepository {
         entity.title = title
         entity.description = description
         entity.status = status
-        entity.dueDate = dueDate?.let { LocalDateTime.parse(it) }
+        entity.dueDate = dueDate?.takeIf { it.isNotEmpty() }?.let { LocalDateTime.parse(it) }
         entity.assignee = assigneeId?.let { UUID.fromString(it) }?.let { UserDAOEntity.findById(it) }
         return entity.toResponse()
     }
@@ -128,6 +129,7 @@ class TaskRepositoryImpl : TaskRepository {
             this.assignee = assigneeId?.let { UserDAOEntity.findById(it) }
             this.creator = creator
             this.status = status
+            this.priority = Priority.MEDIUM // Default priority
             this.dueDate = dueDate
             this.createdAt = LocalDateTime.now()
         }

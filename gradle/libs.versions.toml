@@ -16,11 +16,12 @@ compose-multiplatform = "1.7.3"
 exposed = "0.61.0"
 junit = "4.13.2"
 googleApi = "2.7.2"
-koin = "4.0.4"
+koin = "4.1.0-Beta7"
 kotlin = "2.1.20"
 ktor = "3.1.2"
 logback = "1.5.18"
 postgresql = "42.7.5"
+h2 = "2.2.224"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -40,8 +41,9 @@ logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 google-api = { module = "com.google.api-client:google-api-client", version.ref = "googleApi" }
 
-koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
+koin-ktor = { module = "io.insert-koin:koin-ktor3", version.ref = "koin" }
 koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
@@ -61,6 +63,7 @@ exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version
 exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
 
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

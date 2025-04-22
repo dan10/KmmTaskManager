@@ -41,6 +41,10 @@ dependencies {
     implementation(libs.google.api)
     implementation(libs.koin.ktor)
     implementation(libs.koin.logger.slf4j)
+
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.koin.test)
+    // H2 Database for testing
+    testImplementation(libs.h2)
 }
