@@ -6,9 +6,6 @@ import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepositor
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
 import java.util.*
 import kotlin.test.*
 
@@ -19,7 +16,7 @@ class ProjectAssignmentRepositoryImplTest {
     private lateinit var testUserId: UUID
     private lateinit var testProjectId: UUID
 
-    @Before
+    @BeforeTest
     fun setUp() = runBlocking {
         // Initialize the H2 database
         TestDatabase.init()
@@ -30,7 +27,7 @@ class ProjectAssignmentRepositoryImplTest {
         // Create a test user
         val user = dbQuery {
             with(userRepository) {
-                create("test@example.com", "password", "Test User", null)
+                create("test_assign@example.com", "password", "Test User", null)
             }
         }
         testUserId = UUID.fromString(user.id)
@@ -44,7 +41,7 @@ class ProjectAssignmentRepositoryImplTest {
         testProjectId = UUID.fromString(project.id)
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         // Clear the database after each test
         TestDatabase.clearDatabase()
@@ -86,7 +83,7 @@ class ProjectAssignmentRepositoryImplTest {
         // Create a second user
         val secondUser = dbQuery {
             with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
+                create("second4@example.com", "password", "Second User", null)
             }
         }
         val secondUserId = UUID.fromString(secondUser.id)

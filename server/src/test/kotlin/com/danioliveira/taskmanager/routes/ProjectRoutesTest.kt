@@ -285,14 +285,14 @@ class ProjectRoutesTest : KoinTest {
 
         // Create a test user
         val userId = createTestUser(
-            email = "owner@example.com",
+            email = "owner_project@example.com",
             displayName = "Project Owner"
         )
 
         // Create a project
         val createResponse = client.post("/projects") {
             contentType(ContentType.Application.Json)
-            withAuth(generateTestToken(userId, "owner@example.com"))
+            withAuth(generateTestToken(userId, "owner_projec@example.com"))
             jsonBody(ProjectCreateRequest("Original Name", "Original Description"))
         }
 

@@ -11,6 +11,7 @@ import io.ktor.http.*
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
+import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 import kotlin.test.*
 
@@ -26,6 +27,7 @@ class AuthRoutesTest : KoinTest {
     fun tearDown() {
         // Clear the database after each test
         TestDatabase.clearDatabase()
+        stopKoin()
     }
 
     @Test

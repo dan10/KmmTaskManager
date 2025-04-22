@@ -27,7 +27,7 @@ class ProjectRepositoryImplTest {
         // Create a test user to be used as the owner in project tests
         val user = dbQuery {
             with(userRepository) {
-                create("test@example.com", "password", "Test User", null)
+                create("test_withp@example.com", "password", "Test User", null)
             }
         }
         testUserId = UUID.fromString(user.id)
