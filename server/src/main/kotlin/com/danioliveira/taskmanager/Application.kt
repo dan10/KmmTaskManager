@@ -26,6 +26,7 @@ fun Application.module() {
     configureSecurity()
     configureStatusPages()
     configureRequestValidation()
+    configureMetrics()
 
     routing {
         authRoutes()

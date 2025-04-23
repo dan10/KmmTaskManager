@@ -16,12 +16,16 @@ compose-multiplatform = "1.7.3"
 exposed = "0.61.0"
 junit = "4.13.2"
 googleApi = "2.7.2"
+gatling = "3.10.5"
 koin = "4.1.0-Beta7"
 kotlin = "2.1.20"
 ktor = "3.1.2"
 logback = "1.5.18"
+micrometer = "1.12.5"
 postgresql = "42.7.5"
+prometheus = "1.12.5"
 h2 = "2.2.224"
+graalvm = "0.10.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -65,6 +69,17 @@ exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 
+# Metrics and monitoring
+ktor-server-metrics-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "prometheus" }
+
+# Load testing
+gatling-core = { module = "io.gatling:gatling-core", version.ref = "gatling" }
+gatling-http = { module = "io.gatling:gatling-http", version.ref = "gatling" }
+gatling-app = { module = "io.gatling:gatling-app", version.ref = "gatling" }
+gatling-recorder = { module = "io.gatling:gatling-recorder", version.ref = "gatling" }
+gatling-charts = { module = "io.gatling:gatling-charts", version.ref = "gatling" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
@@ -74,3 +89,4 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+graalvmNative = { id = "org.graalvm.buildtools.native", version.ref = "graalvm" }
