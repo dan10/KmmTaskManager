@@ -147,6 +147,13 @@ class TaskRoutesTest : KoinTest {
         // Verify the project ID is not null
         assertNotNull(projectId)
 
+        // Assign the user to the project (needed for the assignee validation)
+        client.post("/projects/$projectId/assign") {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "user@example.com"))
+            jsonBody(mapOf("userId" to userId))
+        }
+
         // Create a task for the project
         client.post("/tasks") {
             contentType(ContentType.Application.Json)

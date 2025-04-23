@@ -7,6 +7,7 @@ import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.createTestUser
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
+import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.getTestModule
 import io.ktor.server.config.*
 import kotlinx.coroutines.runBlocking
@@ -65,6 +66,9 @@ class TaskServiceTest : KoinTest {
             )
         )
         val projectId = projectResponse.id
+
+        // Assign the assignee to the project
+        projectService.assignUserToProject(projectId, assigneeId)
 
         // Create task 1
         val request1 = TaskCreateRequest(
@@ -296,6 +300,9 @@ class TaskServiceTest : KoinTest {
         )
         val projectId = projectResponse.id
 
+        // Assign the assignee to the project
+        projectService.assignUserToProject(projectId, assigneeId)
+
         val dueDate = LocalDateTime.now().plusDays(7).toString()
         val request = TaskCreateRequest(
             title = "New Task",
@@ -315,6 +322,73 @@ class TaskServiceTest : KoinTest {
         assertEquals(request.description, task.description)
         assertEquals(request.projectId, task.projectId)
         assertEquals(request.assigneeId, task.assigneeId)
+        assertEquals(creatorId, task.creatorId)
+        assertEquals(TaskStatus.TODO, task.status)
+    }
+
+    @Test
+    fun `test create task with assignee not in project fails`() = runBlocking {
+        // Create actual users in the database
+        val creatorId =
+            createTestUser(email = "creator_not_in_project@example.com", displayName = "Task Creator Not In Project")
+        val assigneeId =
+            createTestUser(email = "assignee_not_in_project@example.com", displayName = "Task Assignee Not In Project")
+
+        // Create an actual project in the database
+        val projectResponse = projectService.createProject(
+            creatorId, ProjectCreateRequest(
+                name = "Test Project Not In",
+                description = "Test Project Description Not In"
+            )
+        )
+        val projectId = projectResponse.id
+
+        // Note: We deliberately do NOT assign the assignee to the project
+
+        val dueDate = LocalDateTime.now().plusDays(7).toString()
+        val request = TaskCreateRequest(
+            title = "New Task Not In Project",
+            description = "New Task Description Not In Project",
+            projectId = projectId,
+            assigneeId = assigneeId,
+            status = TaskStatus.TODO.name,
+            dueDate = dueDate
+        )
+
+        // Try to create the task, which should fail
+        try {
+            taskService.create(request, creatorId)
+            fail("Expected ValidationException was not thrown")
+        } catch (e: ValidationException) {
+            // Expected exception
+            assertTrue(e.message.contains("Assignee must be a member of the project"))
+        }
+    }
+
+    @Test
+    fun `test create task with no assignee automatically assigns creator`() = runBlocking {
+        // Create actual user in the database
+        val creatorId =
+            createTestUser(email = "creator_auto_assign@example.com", displayName = "Task Creator Auto Assign")
+
+        // Create a task without specifying an assignee
+        val request = TaskCreateRequest(
+            title = "Auto Assigned Task",
+            description = "This task should be auto-assigned to creator",
+            projectId = null,
+            assigneeId = null, // No assignee specified
+            status = TaskStatus.TODO.name,
+            dueDate = null
+        )
+
+        // Create the task
+        val task = taskService.create(request, creatorId)
+
+        // Verify the task was created correctly and assigned to the creator
+        assertNotNull(task)
+        assertEquals(request.title, task.title)
+        assertEquals(request.description, task.description)
+        assertEquals(creatorId, task.assigneeId) // Creator should be the assignee
         assertEquals(creatorId, task.creatorId)
         assertEquals(TaskStatus.TODO, task.status)
     }
@@ -389,6 +463,102 @@ class TaskServiceTest : KoinTest {
         } catch (e: NotFoundException) {
             // Expected exception
             assertTrue(e.message.contains("Task"))
+        }
+    }
+
+    @Test
+    fun `test assign task to user not in project fails`() = runBlocking {
+        // Create actual users in the database
+        val creatorId =
+            createTestUser(email = "creator_assign_fail@example.com", displayName = "Task Creator Assign Fail")
+        val assigneeId =
+            createTestUser(email = "assignee_assign_fail@example.com", displayName = "Task Assignee Assign Fail")
+        val nonProjectMemberId =
+            createTestUser(email = "non_project_member@example.com", displayName = "Non Project Member")
+
+        // Create an actual project in the database
+        val projectResponse = projectService.createProject(
+            creatorId, ProjectCreateRequest(
+                name = "Test Project Assign Fail",
+                description = "Test Project Description Assign Fail"
+            )
+        )
+        val projectId = projectResponse.id
+
+        // Assign the assignee to the project
+        projectService.assignUserToProject(projectId, assigneeId)
+
+        // Create a task with a project and assignee
+        val request = TaskCreateRequest(
+            title = "Task Assign Fail",
+            description = "Task Description Assign Fail",
+            projectId = projectId,
+            assigneeId = assigneeId,
+            status = TaskStatus.TODO.name,
+            dueDate = null
+        )
+
+        val task = taskService.create(request, creatorId)
+
+        // Try to assign the task to a user who is not part of the project
+        try {
+            taskService.assign(task.id, nonProjectMemberId)
+            fail("Expected ValidationException was not thrown")
+        } catch (e: ValidationException) {
+            // Expected exception
+            assertTrue(e.message.contains("Assignee must be a member of the project"))
+        }
+    }
+
+    @Test
+    fun `test update task with assignee not in project fails`() = runBlocking {
+        // Create actual users in the database
+        val creatorId =
+            createTestUser(email = "creator_update_fail@example.com", displayName = "Task Creator Update Fail")
+        val assigneeId =
+            createTestUser(email = "assignee_update_fail@example.com", displayName = "Task Assignee Update Fail")
+        val nonProjectMemberId =
+            createTestUser(email = "non_project_member_update@example.com", displayName = "Non Project Member Update")
+
+        // Create an actual project in the database
+        val projectResponse = projectService.createProject(
+            creatorId, ProjectCreateRequest(
+                name = "Test Project Update Fail",
+                description = "Test Project Description Update Fail"
+            )
+        )
+        val projectId = projectResponse.id
+
+        // Assign the assignee to the project
+        projectService.assignUserToProject(projectId, assigneeId)
+
+        // Create a task with a project and assignee
+        val request = TaskCreateRequest(
+            title = "Task Update Fail",
+            description = "Task Description Update Fail",
+            projectId = projectId,
+            assigneeId = assigneeId,
+            status = TaskStatus.TODO.name,
+            dueDate = null
+        )
+
+        val task = taskService.create(request, creatorId)
+
+        // Try to update the task to assign it to a user who is not part of the project
+        val updateRequest = TaskUpdateRequest(
+            title = null,
+            description = null,
+            status = null,
+            dueDate = null,
+            assigneeId = nonProjectMemberId
+        )
+
+        try {
+            taskService.update(task.id, updateRequest)
+            fail("Expected ValidationException was not thrown")
+        } catch (e: ValidationException) {
+            // Expected exception
+            assertTrue(e.message.contains("Assignee must be a member of the project"))
         }
     }
 

@@ -1,14 +1,91 @@
 version: "3.8"
 services:
+  # Application server
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=jdbc:postgresql://db:5432/taskitdb
+      - DATABASE_USER=taskituser
+      - DATABASE_PASSWORD=password
+      - JWT_SECRET=your_jwt_secret_here
+      - JWT_ISSUER=task-manager
+      - JWT_AUDIENCE=task-manager-users
+      - JWT_REALM=task-manager-api
+    depends_on:
+      - db
+    networks:
+      - app-network
+    # AWS-like resource constraints (similar to t3.small)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # PostgreSQL database
   db:
     image: postgres:15
     environment:
       POSTGRES_DB: taskitdb
       POSTGRES_USER: taskituser
       POSTGRES_PASSWORD: password
+      # PostgreSQL tuning parameters for constrained environment
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+      POSTGRES_SHARED_BUFFERS: "1GB"
+      POSTGRES_EFFECTIVE_CACHE_SIZE: "3GB"
+      POSTGRES_WORK_MEM: "16MB"
+      POSTGRES_MAINTENANCE_WORK_MEM: "256MB"
+      POSTGRES_MAX_CONNECTIONS: "100"
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    # AWS-like resource constraints (similar to db.t3.medium)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-network
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
 volumes:
   db_data:
+  grafana-data:

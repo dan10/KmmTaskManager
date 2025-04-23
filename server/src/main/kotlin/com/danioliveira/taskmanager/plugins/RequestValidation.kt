@@ -91,8 +91,10 @@ fun Application.configureRequestValidation() {
                 errors["title"] = "Task title cannot be empty"
             }
 
-            if (request.assigneeId.isBlank()) {
-                errors["assigneeId"] = "Assignee ID cannot be empty"
+            // Assignee ID is now optional, so we don't need to validate it
+            // If it's provided, it shouldn't be blank
+            if (request.assigneeId?.isBlank() == true) {
+                errors["assigneeId"] = "Assignee ID cannot be empty if provided"
             }
 
             if (request.status.isBlank()) {
