@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   # Application server
   app:
@@ -29,7 +28,7 @@ services:
 
   # PostgreSQL database
   db:
-    image: postgres:15
+    image: postgres:latest
     environment:
       POSTGRES_DB: taskitdb
       POSTGRES_USER: taskituser

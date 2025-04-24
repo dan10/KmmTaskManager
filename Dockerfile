@@ -1,29 +1,23 @@
-# Use the official Gradle image as a build stage
-FROM gradle:8.7.0-jdk17 AS build
+# Stage 1: Cache Gradle dependencies
+FROM gradle:latest AS cache
+RUN mkdir -p /home/gradle/cache_home
+ENV GRADLE_USER_HOME=/home/gradle/cache_home
+COPY build.gradle.* gradle.properties settings.gradle.kts /home/gradle/app/
+COPY gradle /home/gradle/app/gradle
+WORKDIR /home/gradle/app
+RUN gradle dependencies --no-daemon
 
-# Set the working directory
-WORKDIR /app
+# Stage 2: Build Application
+FROM gradle:latest AS build
+COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
+COPY --chown=gradle:gradle . /home/gradle/src
+WORKDIR /home/gradle/src
+# Build the server module
+RUN gradle buildFatJar --no-daemon
 
-# Copy the entire project
-COPY . .
-
-# Build the application
-RUN gradle :server:build --no-daemon
-
-# Use the official OpenJDK image for the runtime stage
-FROM openjdk:17-slim
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the built JAR file from the build stage
-COPY --from=build /app/server/build/libs/server-1.0.0.jar /app/server.jar
-
-# Expose the port the app runs on
+# Stage 3: Create the Runtime Image
+FROM amazoncorretto:22 AS runtime
 EXPOSE 8080
-
-# Set environment variables
-ENV JAVA_OPTS="-Xms256m -Xmx512m"
-
-# Command to run the application
-CMD ["java", "-jar", "server.jar"]
+RUN mkdir /app
+COPY --from=build /home/gradle/src/server/build/libs/*.jar /app/server.jar
+ENTRYPOINT ["java","-jar","/app/server.jar"]
