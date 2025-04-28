@@ -44,8 +44,8 @@ fun Route.taskRoutes() {
                     dueDate = request.dueDate
                 )
 
-                val task = service.create(taskRequest, creatorId)
-                call.respond(task)
+                service.create(taskRequest, creatorId)
+                call.respond(HttpStatusCode.Created)
             }
 
             // Get a specific task from a project
@@ -53,7 +53,7 @@ fun Route.taskRoutes() {
                 val taskId = call.parameters["taskId"] ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val projectId = call.parameters["projectId"] ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-                val task = service.findById(taskId) ?: return@get call.respond(HttpStatusCode.NotFound)
+                val task = service.findById(taskId)
 
                 // Verify that the task belongs to the specified project
                 if (task.projectId != projectId) {
@@ -70,7 +70,8 @@ fun Route.taskRoutes() {
                 val request = call.receive<ProjectTaskUpdateRequest>()
 
                 // First check if the task exists and belongs to the project
-                val existingTask = service.findById(taskId) ?: return@put call.respond(HttpStatusCode.NotFound)
+                val existingTask = service.findById(taskId)
+
                 if (existingTask.projectId != projectId) {
                     return@put call.respond(HttpStatusCode.NotFound)
                 }
@@ -149,7 +150,7 @@ fun Route.taskRoutes() {
             }
             get("/{id}") {
                 val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val task = service.findById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                val task = service.findById(id)
                 call.respond(task)
             }
             put("/{id}") {

@@ -116,6 +116,8 @@ To run the extended load test that runs for 30 minutes:
 ./gradlew :server:gatlingRunLong
 ```
 
+> **Note:** The `gatlingRunLong` task runs all Gatling simulations, including the TaskApiSimulation.
+
 This is useful for:
 
 - Testing application stability over longer periods

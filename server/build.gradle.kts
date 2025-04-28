@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.gatling)
 }
-
 
 group = "com.danioliveira.taskmanager"
 version = "1.0.0"
@@ -19,14 +19,6 @@ ktor {
         archiveFileName.set("fat.jar")
     }
 }
-
-// Task for running Gatling load test for 30 minutes
-tasks.register("gatlingRunLong") {
-    group = "load testing"
-    description = "Runs Gatling load tests for 30 minutes"
-    dependsOn("gatlingRun-com.danioliveira.taskmanager.loadtest.TaskApiSimulation")
-}
-
 
 dependencies {
     implementation(projects.shared)
@@ -67,8 +59,12 @@ dependencies {
     testImplementation(libs.h2)
 
     // Load testing with Gatling
-    testImplementation(libs.gatling.core)
-    testImplementation(libs.gatling.http)
-    testImplementation(libs.gatling.app)
-    testImplementation(libs.gatling.charts)
+    // Required for Java DSL
+    // Supporting Gatling modules (may or may not be needed depending on exact usage/reporting)
+    gatlingImplementation(libs.gatling.core) // Keep scala core if other parts depend on it implicitly
+    gatlingImplementation(libs.gatling.http) // Keep scala http if needed
+    gatlingImplementation(libs.gatling.app)
+    gatlingImplementation(libs.gatling.charts)
+    gatlingImplementation(libs.ktor.serialization.kotlinx.json)
+    gatlingImplementation(projects.shared)
 }

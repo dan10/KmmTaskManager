@@ -1,9 +1,10 @@
 services:
-  # Application server
+  # Application server (Ktor Backend)
   app:
     build: .
+    container_name: ktor-app # Explicit container name can be helpful
     ports:
-      - "8080:8080"
+      - "8081:8081" # Assuming Ktor runs on 8081 internally
     environment:
       - DATABASE_URL=jdbc:postgresql://db:5432/taskitdb
       - DATABASE_USER=taskituser
@@ -13,14 +14,19 @@ services:
       - JWT_AUDIENCE=task-manager-users
       - JWT_REALM=task-manager-api
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Optional: Wait for DB healthcheck if defined
     networks:
       - app-network
-    # AWS-like resource constraints (similar to t3.small)
+
+      # AWS-like resource constraints (syntax primarily for Swarm, but often works in Compose V3+)
     deploy:
+      # Labels for easier targeting in Prometheus/Grafana
+      labels:
+        app: "ktor-backend"
       resources:
         limits:
-          cpus: '1'
+          cpus: '1.0' # Use decimals for CPUs
           memory: 2G
         reservations:
           cpus: '0.5'
@@ -29,57 +35,142 @@ services:
   # PostgreSQL database
   db:
     image: postgres:latest
+    container_name: postgres-db
     environment:
       POSTGRES_DB: taskitdb
       POSTGRES_USER: taskituser
       POSTGRES_PASSWORD: password
-      # PostgreSQL tuning parameters for constrained environment
-      POSTGRES_INITDB_ARGS: "--data-checksums"
-      POSTGRES_SHARED_BUFFERS: "1GB"
-      POSTGRES_EFFECTIVE_CACHE_SIZE: "3GB"
+      # Consider adjusting these based on actual load testing results
+      POSTGRES_SHARED_BUFFERS: "512MB" # 1GB might be too high if app uses significant memory too
+      POSTGRES_EFFECTIVE_CACHE_SIZE: "1536MB" # Typically 3x shared_buffers
       POSTGRES_WORK_MEM: "16MB"
-      POSTGRES_MAINTENANCE_WORK_MEM: "256MB"
+      POSTGRES_MAINTENANCE_WORK_MEM: "128MB" # 256MB might be high for maintenance
       POSTGRES_MAX_CONNECTIONS: "100"
+    # Add a healthcheck for depends_on condition (optional but good)
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U taskituser -d taskitdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
       - app-network
-    # AWS-like resource constraints (similar to db.t3.medium)
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: '2.0'
           memory: 4G
         reservations:
-          cpus: '1'
+          cpus: '1.0'
           memory: 2G
 
   # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus # Persistent storage for metrics
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle' # Allows hot-reloading config
     networks:
       - app-network
+    restart: unless-stopped
+    depends_on: # Wait for targets to potentially be available
+      - cadvisor
+      - node_exporter
+      - app
 
   # Grafana for metrics visualization
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin # Change this in production!
       - GF_USERS_ALLOW_SIGN_UP=false
+      # Example for auto-provisioning Prometheus datasource (if using provisioning below)
+      # - GF_DATASOURCES_DEFAULT_NAME=Prometheus
     volumes:
-      - grafana-data:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
+      # Uncomment and create these local folders/files if using provisioning
+      # - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      # - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # - ./grafana/dashboards:/var/lib/grafana/dashboards # Alternative dashboard persistence
     depends_on:
       - prometheus
     networks:
       - app-network
+    restart: unless-stopped
+
+  # cAdvisor for container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    privileged: true # Often required for full metric access (security consideration)
+    ports:
+      - "8082:8080" # Changed host port to 8082 to avoid conflict
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw # Needs rw for docker socket access
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro # Only if needed for detailed disk IO stats
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    command:
+      - '--store_container_labels=true'
+      - 'allowlisted_container_labels=ktor-app,app,ktor-backend'
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on: # Optional: suggest starting after app
+      - app
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+
+  # Node Exporter for host metrics (optional, monitors the machine running docker)
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
 
 networks:
   app-network:
@@ -87,4 +178,5 @@ networks:
 
 volumes:
   db_data:
-  grafana-data:
+  grafana_data:
+  prometheus_data: # Added Prometheus volume definition

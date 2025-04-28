@@ -29,8 +29,10 @@ fun Application.module() {
     configureMetrics()
 
     routing {
-        authRoutes()
-        projectRoutes()
-        taskRoutes()
+        route("/api") {
+            authRoutes()
+            projectRoutes()
+            taskRoutes()
+        }
     }
 }

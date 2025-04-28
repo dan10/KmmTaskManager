@@ -16,7 +16,7 @@ compose-multiplatform = "1.7.3"
 exposed = "0.61.0"
 junit = "4.13.2"
 googleApi = "2.7.2"
-gatling = "3.10.5"
+gatling = "3.13.5"
 koin = "4.1.0-Beta7"
 kotlin = "2.1.20"
 ktor = "3.1.2"
@@ -86,6 +86,7 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+gatling = { id = "io.gatling.gradle", version.ref = "gatling" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

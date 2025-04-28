@@ -23,6 +23,170 @@
   "liveNow": false,
   "panels": [
     {
+      "title": "Container CPU Usage (cAdvisor - Ktor App)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 11,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max",
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "axisPlacement": "auto",
+            "stacking": {
+              "mode": "none"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "unit": "percent",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{name=\"ktor-app\"}[1m])) by (container_label_com_docker_compose_service) * 100",
+          "legendFormat": "{{ container_label_com_docker_compose_service }} CPU %",
+          "range": true,
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "title": "Container Memory Usage (cAdvisor - Ktor App)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 12,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max",
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "axisPlacement": "auto",
+            "stacking": {
+              "mode": "none"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "unit": "bytes(IEC)",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "container_memory_usage_bytes{name=\"ktor-app\"}",
+          "legendFormat": "{{ container_label_com_docker_compose_service }} Memory",
+          "range": true,
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -33,19 +197,11 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -72,15 +228,14 @@
               }
             ]
           },
-          "unit": "reqps"
-        },
-        "overrides": []
+          "unit": "requests"
+        }
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 12,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 5,
       "options": {
@@ -88,7 +243,8 @@
           "calcs": [
             "mean",
             "max",
-            "min"
+            "min",
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -106,13 +262,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(ktor_http_server_requests_active[1m])",
-          "legendFormat": "Active Requests per Minute",
+          "expr": "ktor_http_server_requests_active{job=\"task-manager-app\"}",
+          "legendFormat": "Active Requests",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Active Requests per Minute",
+      "title": "Ktor: Active HTTP Requests",
       "type": "timeseries"
     },
     {
@@ -126,19 +282,11 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -161,99 +309,6 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "min"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(ktor_http_server_requests_seconds_count{status=~\"2..\"}[1m]))",
-          "legendFormat": "Success Responses",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Success Responses (2xx)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
                 "value": null
               }
             ]
@@ -268,13 +323,14 @@
         "x": 12,
         "y": 8
       },
-      "id": 2,
+      "id": 1,
       "options": {
         "legend": {
           "calcs": [
             "mean",
             "max",
-            "min"
+            "min",
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -292,8 +348,8 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(ktor_http_server_requests_seconds_count{status=~\"4..\"}[1m]))",
-          "legendFormat": "Client Errors (4xx)",
+          "expr": "sum(rate(ktor_http_server_requests_seconds_count{job=\"task-manager-app\", status=~\"2..\"}[1m])) by (job)",
+          "legendFormat": "Success (2xx)",
           "range": true,
           "refId": "A"
         },
@@ -303,15 +359,126 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(ktor_http_server_requests_seconds_count{status=~\"5..\"}[1m]))",
+          "expr": "sum(rate(ktor_http_server_requests_seconds_count{job=\"task-manager-app\", status=~\"4..\"}[1m])) by (job)",
           "hide": false,
-          "legendFormat": "Server Errors (5xx)",
+          "legendFormat": "Client Error (4xx)",
           "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(ktor_http_server_requests_seconds_count{job=\"task-manager-app\", status=~\"5..\"}[1m])) by (job)",
+          "hide": false,
+          "legendFormat": "Server Error (5xx)",
+          "range": true,
+          "refId": "C"
         }
       ],
-      "title": "Error Responses (4xx/5xx)",
+      "title": "Ktor: Response Rate by Status",
       "type": "timeseries"
+    },
+    {
+      "title": "Ktor: Request Latency (P95/P99)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 13,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max",
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "descending"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "axisPlacement": "auto",
+            "stacking": {
+              "mode": "none"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "unit": "ms",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 500
+              },
+              {
+                "color": "red",
+                "value": 1000
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum(rate(ktor_http_server_requests_seconds_bucket{job=\"task-manager-app\"}[5m])) by (le, job)) * 1000",
+          "legendFormat": "P95 Latency",
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B",
+          "expr": "histogram_quantile(0.99, sum(rate(ktor_http_server_requests_seconds_bucket{job=\"task-manager-app\"}[5m])) by (le, job)) * 1000",
+          "legendFormat": "P99 Latency",
+          "range": true,
+          "editorMode": "code"
+        }
+      ]
     },
     {
       "datasource": {
@@ -324,19 +491,11 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
+            "gradientMode": "opacity",
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -368,13 +527,12 @@
             ]
           },
           "unit": "percent"
-        },
-        "overrides": []
+        }
       },
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 16
       },
       "id": 3,
@@ -383,7 +541,8 @@
           "calcs": [
             "mean",
             "max",
-            "min"
+            "min",
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -401,13 +560,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(process_cpu_usage[1m]) * 100",
-          "legendFormat": "JVM CPU Usage",
+          "expr": "process_cpu_usage{job=\"task-manager-app\"} * 100",
+          "legendFormat": "JVM CPU % (of 1 core)",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "JVM CPU Usage (per minute)",
+      "title": "JVM CPU Usage (Micrometer)",
       "type": "timeseries"
     },
     {
@@ -421,20 +580,12 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
+            "axisPlacement": "right",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -444,7 +595,7 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "none"
+              "mode": "normal"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -457,14 +608,10 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
-          "unit": "percent"
+          "unit": "bytes(IEC)"
         },
         "overrides": []
       },
@@ -474,21 +621,22 @@
         "x": 0,
         "y": 24
       },
-      "id": 6,
+      "id": 4,
       "options": {
         "legend": {
           "calcs": [
             "mean",
             "max",
-            "min"
+            "min",
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "descending"
         }
       },
       "targets": [
@@ -498,19 +646,79 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(system_cpu_usage[1m]) * 100",
-          "legendFormat": "System CPU Usage",
+          "expr": "jvm_memory_used_bytes{job=\"task-manager-app\", area=\"heap\"}",
+          "legendFormat": "Heap Used {{area}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "jvm_memory_committed_bytes{job=\"task-manager-app\", area=\"heap\"}",
+          "hide": false,
+          "legendFormat": "Heap Committed {{area}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "jvm_memory_used_bytes{job=\"task-manager-app\", area=\"nonheap\"}",
+          "hide": false,
+          "legendFormat": "Non-Heap Used {{area}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "jvm_memory_committed_bytes{job=\"task-manager-app\", area=\"nonheap\"}",
+          "hide": false,
+          "legendFormat": "Non-Heap Committed {{area}}",
+          "range": true,
+          "refId": "D"
         }
       ],
-      "title": "System CPU Usage (per minute)",
+      "title": "JVM Memory Usage (Micrometer)",
       "type": "timeseries"
     },
     {
+      "title": "JVM Garbage Collection",
+      "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
+      },
+      "id": 14,
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 24
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "sum",
+            "mean"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
       },
       "fieldConfig": {
         "defaults": {
@@ -518,35 +726,135 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
+            "drawStyle": "bars",
             "lineInterpolation": "linear",
+            "barAlignment": 0,
             "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
+            "fillOpacity": 80,
+            "gradientMode": "none",
             "spanNulls": false,
+            "showPoints": "auto",
+            "axisPlacement": "left",
+            "axisLabel": "Count / sec",
             "stacking": {
-              "group": "A",
               "mode": "none"
             },
-            "thresholdsStyle": {
-              "mode": "off"
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
             }
           },
+          "unit": "ops",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/.*Time/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Time Spent / sec"
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(jvm_gc_pause_seconds_count{job=\"task-manager-app\"}[1m])",
+          "legendFormat": "GC Count {{action}} {{cause}}",
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(jvm_gc_pause_seconds_sum{job=\"task-manager-app\"}[1m]) * 1000",
+          "legendFormat": "GC Time {{action}} {{cause}}",
+          "editorMode": "code"
+        }
+      ]
+    },
+    {
+      "title": "JVM Threads",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "id": 15,
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 24
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "auto",
+            "axisPlacement": "auto",
+            "stacking": {
+              "mode": "none"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "unit": "short",
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -554,67 +862,43 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "min"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          }
         }
       },
       "targets": [
         {
+          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{area=\"heap\"}",
-          "legendFormat": "Heap Memory Used",
-          "range": true,
-          "refId": "A"
+          "expr": "jvm_threads_live_threads{job=\"task-manager-app\"}",
+          "legendFormat": "Live",
+          "editorMode": "code"
         },
         {
+          "refId": "B",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{area=\"nonheap\"}",
-          "hide": false,
-          "legendFormat": "Non-Heap Memory Used",
-          "range": true,
-          "refId": "B"
+          "expr": "jvm_threads_daemon_threads{job=\"task-manager-app\"}",
+          "legendFormat": "Daemon",
+          "editorMode": "code"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "jvm_threads_peak_threads{job=\"task-manager-app\"}",
+          "legendFormat": "Peak",
+          "editorMode": "code"
         }
-      ],
-      "title": "Memory Usage",
-      "type": "timeseries"
+      ]
     },
     {
       "datasource": {
@@ -627,19 +911,11 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -671,8 +947,7 @@
             ]
           },
           "unit": "percent"
-        },
-        "overrides": []
+        }
       },
       "gridPos": {
         "h": 8,
@@ -686,14 +961,15 @@
           "calcs": [
             "mean",
             "max",
-            "min"
+            "min",
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -704,13 +980,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(node_cpu_seconds_total{mode=\"system\"}[1m])",
-          "legendFormat": "CPU {{cpu}} - System Mode",
+          "expr": "avg by (instance) (rate(node_cpu_seconds_total{mode!=\"idle\", mode!=\"iowait\"}[1m])) * 100",
+          "legendFormat": "Host CPU Usage (excl. idle/iowait)",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "System Mode CPU Usage",
+      "title": "Host CPU Usage (Node Exporter)",
       "type": "timeseries"
     },
     {
@@ -724,116 +1000,11 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 32
-      },
-      "id": 8,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "min"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "container_memory_usage_bytes{image!=\"\"}",
-          "legendFormat": "{{name}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Container Memory Usage",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -865,14 +1036,13 @@
             ]
           },
           "unit": "percent"
-        },
-        "overrides": []
+        }
       },
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 40
+        "x": 12,
+        "y": 32
       },
       "id": 9,
       "options": {
@@ -880,14 +1050,15 @@
           "calcs": [
             "mean",
             "max",
-            "min"
+            "min",
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -898,13 +1069,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "100 - ((node_filesystem_avail_bytes{fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{fstype!=\"rootfs\"})",
-          "legendFormat": "{{mountpoint}}",
+          "expr": "100 - (node_filesystem_avail_bytes{mountpoint !~\"^/run(/.*)?$|^/var/lib/docker(/.*)?$|^/sys(/.*)?$|^/proc(/.*)?$|^/dev(/.*)?$|^/etc(/.*)?$\"} / node_filesystem_size_bytes{mountpoint !~\"^/run(/.*)?$|^/var/lib/docker(/.*)?$|^/sys(/.*)?$|^/proc(/.*)?$|^/dev(/.*)?$|^/etc(/.*)?$\"} * 100)",
+          "legendFormat": "{{mountpoint}} Usage %",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Host Disk Usage",
+      "title": "Host Disk Usage % (Node Exporter)",
       "type": "timeseries"
     },
     {
@@ -918,19 +1089,11 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -954,21 +1117,17 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
-          "unit": "Bps"
+          "unit": "bps"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
+        "x": 0,
         "y": 40
       },
       "id": 10,
@@ -977,14 +1136,15 @@
           "calcs": [
             "mean",
             "max",
-            "min"
+            "min",
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -995,7 +1155,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(node_network_receive_bytes_total[1m])",
+          "expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|br.*\"}[1m])",
           "legendFormat": "{{device}} Received",
           "range": true,
           "refId": "A"
@@ -1006,24 +1166,44 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(node_network_transmit_bytes_total[1m])",
+          "expr": "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|br.*\"}[1m])",
           "hide": false,
           "legendFormat": "{{device}} Transmitted",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "Host Network Traffic",
+      "title": "Host Network Traffic (Node Exporter)",
       "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 8,
+      "options": {
+        "content": "**Notes:**\n\n*   **Container CPU:** Shows Ktor app CPU usage relative to host limits, via cAdvisor.\n*   **Container Memory:** Shows Ktor app memory usage, via cAdvisor.\n*   **JVM CPU:** Shows process CPU usage relative to 1 core, via Micrometer.\n*   **Latency:** P95/P99 calculated over 5m interval.\n*   **Host Metrics:** Provided by Node Exporter running on the Docker host.\n*   Ensure Ktor Micrometer endpoint (`/metrics`) is enabled and scraped by Prometheus job `task-manager-app`.\n*   Ensure cAdvisor is running and scraped by Prometheus job `cadvisor`.\n*   Ensure Node Exporter is running and scraped by Prometheus job `node_exporter`.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.5.3",
+      "title": "Dashboard Notes",
+      "type": "text"
     }
   ],
-  "refresh": "5s",
+  "refresh": "15s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
     "ktor",
     "kotlin",
-    "monitoring"
+    "monitoring",
+    "docker",
+    "cadvisor",
+    "prometheus"
   ],
   "templating": {
     "list": []
@@ -1032,23 +1212,10 @@
     "from": "now-1h",
     "to": "now"
   },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ]
-  },
-  "timezone": "",
-  "title": "Task Manager Application Dashboard",
-  "uid": "task-manager-dashboard",
-  "version": 1,
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Ktor Backend Monitoring (Docker/cAdvisor)",
+  "uid": "task-manager-dashboard-v2",
+  "version": 2,
   "weekStart": ""
 }

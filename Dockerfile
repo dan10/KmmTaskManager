@@ -29,7 +29,7 @@ RUN gradle server:buildFatJar --no-daemon --no-build-cache
 
 # Stage 3: Create the Runtime Image
 FROM amazoncorretto:22 AS runtime
-EXPOSE 8080
+EXPOSE 8081
 RUN mkdir /app
 COPY --from=build /home/gradle/src/server/build/libs/fat.jar /app/server.jar
 ENTRYPOINT ["java","-jar","/app/server.jar"]
