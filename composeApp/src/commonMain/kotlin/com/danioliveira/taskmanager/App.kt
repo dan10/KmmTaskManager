@@ -67,19 +67,13 @@ fun TaskItApp() {
                                     }
                                 },
                                 label = { Text(stringResource(item.title)) },
-                                selected = currentDestination?.hierarchy?.any { it == item.destination } == true,
+                                selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                                 onClick = {
-                                    navController.navigate(item.destination) {
-                                        // Pop up to the start destination of the graph to
-                                        // avoid building up a large stack of destinations
-                                        // on the back stack as users select items
-                                        popUpTo(navController.graph.findStartDestination()) {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
                                             saveState = true
                                         }
-                                        // Avoid multiple copies of the same destination when
-                                        // reselecting the same item
                                         launchSingleTop = true
-                                        // Restore state when reselecting a previously selected item
                                         restoreState = true
                                     }
                                 }
@@ -97,9 +91,9 @@ fun TaskItApp() {
 }
 
 private fun shouldShowBottomBar(currentRoute: String?): Boolean {
-    return currentRoute == Screen.Tasks.toString() ||
-            currentRoute == Screen.Projects.toString() ||
-            currentRoute == Screen.Profile.toString()
+    return currentRoute == BottomNavItem.Tasks.route ||
+            currentRoute == BottomNavItem.Projects.route ||
+            currentRoute == BottomNavItem.Profile.route
 }
 
 @Composable
@@ -122,20 +116,20 @@ fun TaskItNavHost(
         }
 
         // Top level destinations
-        composable<Screen.Tasks> {
+        composable(BottomNavItem.Tasks.route) {
             TasksScreen()
         }
 
-        composable<Screen.Projects> {
+        composable(BottomNavItem.Projects.route) {
             ProjectsScreen()
         }
 
-        composable<Screen.Profile> {
+        composable(BottomNavItem.Profile.route) {
             Text("Profile Screen - Coming Soon")
         }
 
-        composable<Screen.CreateTask> { backStackEntry ->
-            val task = backStackEntry.toRoute<Screen.Task>()
+        composable<Screen.CreateEditTask> { backStackEntry ->
+            val task = backStackEntry.toRoute<Screen.CreateEditTask>()
             val taskId = task.taskId
             TaskCreatEditScreen(
                 taskId = taskId,
@@ -165,7 +159,7 @@ fun TaskItNavHost(
         }
 
         composable<Screen.TasksComments> { backStackEntry ->
-            val taskId = backStackEntry.arguments?.getString("taskId")
+            val taskId = backStackEntry.toRoute<Screen.TasksComments>().taskId
             TasksCommentsScreen(
                 taskId = taskId,
                 onBack = { navController.popBackStack() }
