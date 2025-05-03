@@ -43,12 +43,15 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(projects.shared)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose.viewmodel)
             implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
         }
 
         all {
             languageSettings {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+                optIn("kotlin.uuid.ExperimentalUuidAp")
             }
         }
     }

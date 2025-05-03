@@ -1,166 +1,183 @@
 package com.danioliveira.taskmanager
 
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.danioliveira.taskmanager.navigation.*
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.danioliveira.taskmanager.navigation.BottomNavItem
+import com.danioliveira.taskmanager.navigation.NavIcon
+import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.ui.login.LoginScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
-import com.danioliveira.taskmanager.ui.task.TaskScreen
+import com.danioliveira.taskmanager.ui.task.TaskCreatEditScreen
 import com.danioliveira.taskmanager.ui.task.TasksCommentsScreen
 import com.danioliveira.taskmanager.ui.task.TasksDetailsScreen
 import com.danioliveira.taskmanager.ui.task.TasksFilesScreen
 import com.danioliveira.taskmanager.ui.tasks.TasksScreen
-import com.danioliveira.taskmanager.ui.tasks.TasksViewModel
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
-import kmmtaskmanager.composeapp.generated.resources.Res
-import kmmtaskmanager.composeapp.generated.resources.ic_folder
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-// Icons for bottom navigation
-sealed class NavIcon {
-    data class ImageVectorIcon(val imageVector: ImageVector) : NavIcon()
-    data class DrawableResourceIcon(val drawableResource: DrawableResource) : NavIcon()
-}
-
-sealed class BottomNavItem(val route: String, val title: String, val icon: NavIcon) {
-    object Tasks : BottomNavItem(Screen.Tasks.route, "Tasks", NavIcon.ImageVectorIcon(Icons.Default.Check))
-    object Projects :
-        BottomNavItem(Screen.Projects.route, "Projects", NavIcon.DrawableResourceIcon(Res.drawable.ic_folder))
-
-    object Profile : BottomNavItem(Screen.Profile.route, "Profile", NavIcon.ImageVectorIcon(Icons.Default.Person))
-}
 
 @Composable
 @Preview
-fun App() {
+fun TaskItApp() {
     TaskItTheme {
-        AppNavigationProvider {
-            val navController = LocalNavController.current
-            val navActions = rememberNavigationActions()
-            val currentBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = currentBackStackEntry?.destination?.route
+        val navController = rememberNavController()
+        val currentBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = currentBackStackEntry?.destination
 
-            Scaffold(
-                bottomBar = {
-                    if (shouldShowBottomBar(currentRoute)) {
-                        BottomNavigation {
-                            val items = listOf(
-                                BottomNavItem.Tasks,
-                                BottomNavItem.Projects,
-                                BottomNavItem.Profile
-                            )
 
-                            items.forEach { item ->
-                                BottomNavigationItem(
-                                    icon = {
-                                        when (val icon = item.icon) {
-                                            is NavIcon.ImageVectorIcon -> Icon(
-                                                imageVector = icon.imageVector,
-                                                contentDescription = item.title
-                                            )
+        Scaffold(
+            bottomBar = {
+                if (shouldShowBottomBar(currentDestination?.route)) {
+                    BottomNavigation {
+                        val items = listOf(
+                            BottomNavItem.Tasks,
+                            BottomNavItem.Projects,
+                            BottomNavItem.Profile
+                        )
 
-                                            is NavIcon.DrawableResourceIcon -> Icon(
-                                                painter = painterResource(icon.drawableResource),
-                                                contentDescription = item.title
-                                            )
-                                        }
-                                    },
-                                    label = { Text(item.title) },
-                                    selected = currentRoute == item.route,
-                                    onClick = {
-                                        if (currentRoute != item.route) {
-                                            when (item) {
-                                                BottomNavItem.Tasks -> navActions.navigateToTasks()
-                                                BottomNavItem.Projects -> navActions.navigateToProjects()
-                                                BottomNavItem.Profile -> navActions.navigateToProfile()
-                                            }
-                                        }
+                        items.forEach { item ->
+                            BottomNavigationItem(
+                                icon = {
+                                    when (val icon = item.icon) {
+                                        is NavIcon.ImageVectorIcon -> Icon(
+                                            imageVector = icon.imageVector,
+                                            contentDescription = stringResource(item.title)
+                                        )
+
+                                        is NavIcon.DrawableResourceIcon -> Icon(
+                                            painter = painterResource(icon.drawableResource),
+                                            contentDescription = stringResource(item.title)
+                                        )
                                     }
-                                )
-                            }
+                                },
+                                label = { Text(stringResource(item.title)) },
+                                selected = currentDestination?.hierarchy?.any { it == item.destination } == true,
+                                onClick = {
+                                    navController.navigate(item.destination) {
+                                        // Pop up to the start destination of the graph to
+                                        // avoid building up a large stack of destinations
+                                        // on the back stack as users select items
+                                        popUpTo(navController.graph.findStartDestination()) {
+                                            saveState = true
+                                        }
+                                        // Avoid multiple copies of the same destination when
+                                        // reselecting the same item
+                                        launchSingleTop = true
+                                        // Restore state when reselecting a previously selected item
+                                        restoreState = true
+                                    }
+                                }
+                            )
                         }
                     }
                 }
-            ) {
-                AppNavGraph(
-                    navController = navController,
-                    startDestination = Screen.Login.route,
-                    onLoginScreen = {
-                        LoginScreen()
-                    },
-                    onRegisterScreen = {
-                        RegisterScreen()
-                    },
-                    onTasksScreen = {
-                        TasksScreen(TasksViewModel())
-                    },
-                    onProjectsScreen = {
-                        ProjectsScreen()
-                    },
-                    onProfileScreen = {
-                        // Profile screen will be implemented later
-                        Text("Profile Screen - Coming Soon")
-                    },
-                    onTaskScreen = { taskId ->
-                        TaskScreen(
-                            taskId = taskId,
-                            isCreating = false,
-                            onBack = navActions.navigateBack,
-                            onTaskUpdated = navActions.navigateBack,
-                            onTaskDeleted = navActions.navigateBack
-                        )
-                    },
-                    onCreateTaskScreen = {
-                        TaskScreen(
-                            isCreating = true,
-                            onBack = navActions.navigateBack,
-                            onTaskCreated = navActions.navigateToTasks
-                        )
-                    },
-                    onTaskDetailsScreen = { taskId ->
-                        TasksDetailsScreen(
-                            taskId = taskId,
-                            onBack = navActions.navigateBack,
-                            onFilesClick = navActions.navigateToTaskFiles,
-                            onCommentsClick = navActions.navigateToTaskComments
-                        )
-                    },
-                    onTaskFilesScreen = { taskId ->
-                        TasksFilesScreen(
-                            taskId = taskId,
-                            onBack = navActions.navigateBack
-                        )
-                    },
-                    onTaskCommentsScreen = { taskId ->
-                        TasksCommentsScreen(
-                            taskId = taskId,
-                            onBack = navActions.navigateBack
-                        )
-                    },
-                    onProjectDetailsScreen = { projectId ->
-                        ProjectDetailsScreen(
-                            projectId = projectId,
-                            onBack = navActions.navigateBack
-                        )
-                    }
-                )
             }
+        ) {
+            TaskItNavHost(
+                navController = navController
+            )
         }
     }
 }
 
 private fun shouldShowBottomBar(currentRoute: String?): Boolean {
-    return currentRoute == Screen.Tasks.route ||
-            currentRoute == Screen.Projects.route ||
-            currentRoute == Screen.Profile.route
+    return currentRoute == Screen.Tasks.toString() ||
+            currentRoute == Screen.Projects.toString() ||
+            currentRoute == Screen.Profile.toString()
+}
+
+@Composable
+fun TaskItNavHost(
+    navController: NavHostController
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Login
+    ) {
+        // Authentication
+        composable<Screen.Login> {
+            LoginScreen()
+        }
+
+        composable<Screen.Register> {
+            RegisterScreen(navigateToLogin = {
+                navController.popBackStack()
+            })
+        }
+
+        // Top level destinations
+        composable<Screen.Tasks> {
+            TasksScreen()
+        }
+
+        composable<Screen.Projects> {
+            ProjectsScreen()
+        }
+
+        composable<Screen.Profile> {
+            Text("Profile Screen - Coming Soon")
+        }
+
+        composable<Screen.CreateTask> { backStackEntry ->
+            val task = backStackEntry.toRoute<Screen.Task>()
+            val taskId = task.taskId
+            TaskCreatEditScreen(
+                taskId = taskId,
+                isCreating = false,
+                onBack = { navController.popBackStack() },
+                onTaskUpdated = { navController.popBackStack() },
+                onTaskDeleted = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.TasksDetails> { backStackEntry ->
+            val taskId = backStackEntry.toRoute<Screen.TasksDetails>().taskId
+            TasksDetailsScreen(
+                taskId = taskId,
+                onBack = { navController.popBackStack() },
+                onFilesClick = { navController.navigate(Screen.TasksFiles(taskId)) },
+                onCommentsClick = { navController.navigate(Screen.TasksComments(taskId)) }
+            )
+        }
+
+        composable<Screen.TasksFiles> { backStackEntry ->
+            val taskId = backStackEntry.toRoute<Screen.TasksFiles>().taskId
+            TasksFilesScreen(
+                taskId = taskId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.TasksComments> { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getString("taskId")
+            TasksCommentsScreen(
+                taskId = taskId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.ProjectDetails> { backStackEntry ->
+            val projectId = backStackEntry.toRoute<Screen.ProjectDetails>().projectId
+            ProjectDetailsScreen(
+                projectId = projectId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+    }
 }

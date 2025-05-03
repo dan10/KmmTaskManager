@@ -24,7 +24,9 @@ import com.danioliveira.taskmanager.ui.components.TrackItPasswordField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.app_name
+import kmmtaskmanager.composeapp.generated.resources.button_sign_in
 import kmmtaskmanager.composeapp.generated.resources.ic_app_logo
+import kmmtaskmanager.composeapp.generated.resources.title_already_have_account
 import kmmtaskmanager.composeapp.generated.resources.title_confirm_password
 import kmmtaskmanager.composeapp.generated.resources.title_confirm_password_error
 import kmmtaskmanager.composeapp.generated.resources.title_email
@@ -32,14 +34,16 @@ import kmmtaskmanager.composeapp.generated.resources.title_email_error
 import kmmtaskmanager.composeapp.generated.resources.title_password
 import kmmtaskmanager.composeapp.generated.resources.title_password_error
 import kmmtaskmanager.composeapp.generated.resources.title_register_button
-import kmmtaskmanager.composeapp.generated.resources.title_already_have_account
-import kmmtaskmanager.composeapp.generated.resources.button_sign_in
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun RegisterScreen(viewModel: RegisterViewModel = RegisterViewModel()) {
+fun RegisterScreen(
+    viewModel: RegisterViewModel = koinViewModel(),
+    navigateToLogin: () -> Unit
+) {
     RegisterScreen(
         state = viewModel.state,
         email = viewModel.emailText,
@@ -49,12 +53,13 @@ fun RegisterScreen(viewModel: RegisterViewModel = RegisterViewModel()) {
         passwordHasError = viewModel.passwordHasError.value,
         confirmPasswordHasError = viewModel.confirmPasswordHasError.value,
         isFormValid = viewModel.isFormValid.value,
+        navigateToLogin = navigateToLogin,
         onAction = viewModel::handleActions
     )
 }
 
 @Composable
-fun RegisterScreen(
+private fun RegisterScreen(
     state: RegisterState,
     email: String,
     password: String,
@@ -63,6 +68,7 @@ fun RegisterScreen(
     passwordHasError: Boolean,
     confirmPasswordHasError: Boolean,
     isFormValid: Boolean,
+    navigateToLogin: () -> Unit,
     onAction: (RegisterAction) -> Unit
 ) {
     Column(
@@ -143,7 +149,7 @@ fun RegisterScreen(
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                     )
-                    TextButton(onClick = { /* TODO: Navigate to login */ }) {
+                    TextButton(onClick = { navigateToLogin() }) {
                         Text(
                             text = stringResource(Res.string.button_sign_in),
                             color = MaterialTheme.colors.primary,
@@ -169,6 +175,7 @@ fun RegisterScreenPreview() {
             passwordHasError = false,
             confirmPasswordHasError = false,
             isFormValid = true,
+            navigateToLogin = {},
             onAction = {}
         )
     }
