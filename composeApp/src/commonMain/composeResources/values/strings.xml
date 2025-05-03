@@ -5,6 +5,10 @@
     <!-- Component strings -->
     <string name="content_description_show_password_icon">Show password</string>
     <string name="content_description_hide_password_icon">Hide password</string>
+    <string name="content_description_back">Back</string>
+    <string name="content_description_delete">Delete</string>
+    <string name="content_description_add_task">Add Task</string>
+    <string name="content_description_search">Search</string>
 
     <!-- LoginScreen strings -->
     <string name="title_without_account">Don't have an account?</string>
@@ -31,4 +35,57 @@
         <item>📚 Plan study sessions</item>
         <item>🏃 Track workout goals</item>
     </string-array>
+
+    <!-- Bottom Navigation strings -->
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_projects">Projects</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- TasksScreen strings -->
+    <string name="tasks_title">My Tasks</string>
+    <string name="tasks_search_placeholder">Search tasks...</string>
+    <string name="tasks_progress_title">Your Progress</string>
+    <string name="tasks_progress_percentage">%d%%</string>
+    <string name="tasks_progress_completed">%d of %d tasks completed</string>
+    <string name="tasks_empty_title">Ready to Get Started?</string>
+    <string name="tasks_empty_subtitle">Here are some ideas to help you begin:</string>
+
+    <!-- TasksDetailsScreen strings -->
+    <string name="task_details_title">Task Details</string>
+    <string name="task_id">Task ID: %s</string>
+    <string name="task_details_placeholder">Task details will be displayed here</string>
+    <string name="task_resources">Task Resources</string>
+    <string name="task_view_files">View Files</string>
+    <string name="task_view_comments">View Comments</string>
+
+    <!-- TasksFilesScreen strings -->
+    <string name="task_files_title">Task Files</string>
+    <string name="files_for_task">Files for Task: %s</string>
+
+    <!-- TasksCommentsScreen strings -->
+    <string name="task_comments_title">Task Comments</string>
+    <string name="comments_for_task">Comments for Task: %s</string>
+    <string name="add_comment">Add a comment</string>
+    <string name="post_comment">Post Comment</string>
+
+    <!-- ProjectsScreen strings -->
+    <string name="projects_title">Projects Screen</string>
+
+    <!-- ProjectDetailsScreen strings -->
+    <string name="project_details_title">Project Details</string>
+    <string name="project_id">Project ID: %s</string>
+    <string name="project_details_placeholder">Project details will be displayed here</string>
+
+    <!-- ProfileScreen strings -->
+    <string name="profile_coming_soon">Profile Screen - Coming Soon</string>
+
+    <!-- TaskScreen strings -->
+    <string name="create_task">Create Task</string>
+    <string name="task_title_label">Title</string>
+    <string name="task_description_label">Description</string>
+    <string name="task_status_label">Status</string>
+    <string name="task_priority_label">Priority</string>
+    <string name="task_due_date_label">Due Date (YYYY-MM-DD)</string>
+    <string name="task_create_button">Create</string>
+    <string name="task_update_button">Update</string>
 </resources>

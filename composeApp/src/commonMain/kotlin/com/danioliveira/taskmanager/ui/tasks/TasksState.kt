@@ -5,6 +5,8 @@ import com.danioliveira.taskmanager.domain.Task
 data class TasksState(
     val isLoading: Boolean = false,
     val tasks: List<Task> = emptyList(),
+    val completedTasks: Int = 0,
+    val totalTasks: Int = 0,
     val errorMessage: String? = null
 )
 

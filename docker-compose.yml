@@ -18,6 +18,10 @@ services:
         condition: service_healthy # Optional: Wait for DB healthcheck if defined
     networks:
       - app-network
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 
       # AWS-like resource constraints (syntax primarily for Swarm, but often works in Compose V3+)
     deploy:

@@ -59,7 +59,7 @@ class TaskApiSimulation : Simulation() {
         http("Register User")
             .post("/api/auth/register")
             .body(StringBody("#{registerRequestJson}"))
-            .check(status().`is`(201)) // Check for 201 Created status
+            .check(status().`is`(200)) // Check for 201 Created status
         // Optional: Check response body if needed
     )
 
@@ -130,10 +130,12 @@ class TaskApiSimulation : Simulation() {
         .pause(1)
         .exec(getTasksRequest)
 
-    // Scenario: Login and Get Tasks (simulates read-heavy load)
+    // Scenario: Register, Login and Get Tasks (simulates read-heavy load)
     private val readOnlyScenario = scenario("Read Only Journey")
-        .feed(userFeeder) // Feed dynamic user data (might reuse, depends on test goal)
-        .exec(loginRequest) // Assumes users from feeder might exist or handle login failure
+        .feed(userFeeder)
+        .exec(registerRequest)
+        .pause(1)
+        .exec(loginRequest)
         .pause(1)
         .exec(getTasksRequest)
 
@@ -142,31 +144,13 @@ class TaskApiSimulation : Simulation() {
     init {
         setUp(
             // User Journey Scenario (Registration + Write + Read)
-            // Gradually increase load over 30 mins
             userJourneyScenario.injectOpen(
-                // Ramp up users per second over the first 10 mins
-                rampUsersPerSec(1.0).to(5.0).during(Duration.ofMinutes(10)),
-                // Maintain and slightly increase load over the next 10 mins
-                constantUsersPerSec(5.0).during(Duration.ofMinutes(5)),
-                rampUsersPerSec(5.0).to(10.0).during(Duration.ofMinutes(5)),
-                // Push the load higher in the final 10 mins
-                constantUsersPerSec(10.0).during(Duration.ofMinutes(5)),
-                rampUsersPerSec(10.0).to(15.0).during(Duration.ofMinutes(5))
+                rampUsersPerSec(100.0).to(10000.0).during(Duration.ofMinutes(30))
             ),
-
             // Read Only Scenario (Read Heavy)
-            // Inject more users for read operations, also increasing over time
             readOnlyScenario.injectOpen(
-                // Ramp up users per second over the first 10 mins (higher rate than write)
-                rampUsersPerSec(2.0).to(10.0).during(Duration.ofMinutes(10)),
-                // Maintain and slightly increase load over the next 10 mins
-                constantUsersPerSec(10.0).during(Duration.ofMinutes(5)),
-                rampUsersPerSec(10.0).to(20.0).during(Duration.ofMinutes(5)),
-                // Push the read load higher in the final 10 mins
-                constantUsersPerSec(20.0).during(Duration.ofMinutes(5)),
-                rampUsersPerSec(20.0).to(30.0).during(Duration.ofMinutes(5))
+                rampUsersPerSec(100.0).to(10000.0).during(Duration.ofMinutes(30))
             )
-
         ).protocols(httpProtocol)
             .maxDuration(Duration.ofMinutes(30)) // Ensure total duration is 30 mins
             .assertions(

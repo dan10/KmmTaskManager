@@ -43,6 +43,7 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(projects.shared)
+            implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
         }
 
         all {

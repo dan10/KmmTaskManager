@@ -1,4 +1,4 @@
-<vector xmlns:android="https://schemas.android.com/apk/res/android"
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="240dp"
     android:height="240dp"
     android:viewportWidth="240"
@@ -54,6 +54,6 @@
       android:fillColor="#FF000000"
       android:pathData="M160,170L160,190M150,180L170,180"
       android:strokeWidth="4"
-      android:strokeColor="#ffffff"
+      android:strokeColor="#FFFFFF"
       android:strokeLineCap="round"/>
 </vector>

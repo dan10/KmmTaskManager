@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.1"
+agp = "8.9.2"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
@@ -12,19 +12,20 @@ androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
 androidx-navigation = "2.8.0-alpha13"
 androidx-test-junit = "1.2.1"
-compose-multiplatform = "1.7.3"
+compose-multiplatform = "1.8.0-rc01"
 exposed = "0.61.0"
+hikaricp = "6.3.0"
 junit = "4.13.2"
 googleApi = "2.7.2"
 gatling = "3.13.5"
-koin = "4.1.0-Beta7"
+koin = "4.1.0-Beta8"
 kotlin = "2.1.20"
 ktor = "3.1.2"
 logback = "1.5.18"
 micrometer = "1.12.5"
 postgresql = "42.7.5"
-prometheus = "1.12.5"
-h2 = "2.2.224"
+prometheus = "1.14.6"
+h2 = "2.3.232"
 graalvm = "0.10.1"
 
 [libraries]
@@ -68,6 +69,7 @@ exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time
 
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
 
 # Metrics and monitoring
 ktor-server-metrics-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TaskIt</string>
+
+    <!-- Component strings -->
+    <string name="content_description_show_password_icon">Mostrar senha</string>
+    <string name="content_description_hide_password_icon">Ocultar senha</string>
+    <string name="content_description_back">Voltar</string>
+    <string name="content_description_delete">Excluir</string>
+    <string name="content_description_add_task">Adicionar Tarefa</string>
+    <string name="content_description_search">Pesquisar</string>
+
+    <!-- LoginScreen strings -->
+    <string name="title_without_account">Não tem uma conta?</string>
+    <string name="button_sign_up">Cadastrar</string>
+
+    <!-- LoginScreen and RegisterScreen strings -->
+    <string name="title_email">Email</string>
+    <string name="title_password">Senha</string>
+    <string name="title_login_button">Entrar</string>
+    <string name="title_email_error">Por favor, insira um endereço de email válido</string>
+    <string name="title_password_error">A senha deve ter pelo menos 8 caracteres</string>
+
+    <!-- RegisterScreen strings -->
+    <string name="title_register_button">Registrar</string>
+    <string name="title_confirm_password">Confirmar Senha</string>
+    <string name="title_confirm_password_error">As senhas não coincidem</string>
+    <string name="title_already_have_account">Já tem uma conta?</string>
+    <string name="button_sign_in">Entrar</string>
+
+    <!-- HomeScreen strings -->
+    <string-array name="empty_task_list">
+        <item>📝 Criar uma lista de tarefas</item>
+        <item>📅 Agendar reuniões</item>
+        <item>📚 Planejar sessões de estudo</item>
+        <item>🏃 Acompanhar metas de exercícios</item>
+    </string-array>
+
+    <!-- Bottom Navigation strings -->
+    <string name="nav_tasks">Tarefas</string>
+    <string name="nav_projects">Projetos</string>
+    <string name="nav_profile">Perfil</string>
+
+    <!-- TasksScreen strings -->
+    <string name="tasks_title">Minhas Tarefas</string>
+    <string name="tasks_search_placeholder">Pesquisar tarefas...</string>
+    <string name="tasks_progress_title">Seu Progresso</string>
+    <string name="tasks_progress_percentage">%d%%</string>
+    <string name="tasks_progress_completed">%d de %d tarefas concluídas</string>
+    <string name="tasks_empty_title">Pronto para Começar?</string>
+    <string name="tasks_empty_subtitle">Aqui estão algumas ideias para ajudá-lo a começar:</string>
+
+    <!-- TasksDetailsScreen strings -->
+    <string name="task_details_title">Detalhes da Tarefa</string>
+    <string name="task_id">ID da Tarefa: %s</string>
+    <string name="task_details_placeholder">Os detalhes da tarefa serão exibidos aqui</string>
+    <string name="task_resources">Recursos da Tarefa</string>
+    <string name="task_view_files">Ver Arquivos</string>
+    <string name="task_view_comments">Ver Comentários</string>
+
+    <!-- TasksFilesScreen strings -->
+    <string name="task_files_title">Arquivos da Tarefa</string>
+    <string name="files_for_task">Arquivos para Tarefa: %s</string>
+
+    <!-- TasksCommentsScreen strings -->
+    <string name="task_comments_title">Comentários da Tarefa</string>
+    <string name="comments_for_task">Comentários para Tarefa: %s</string>
+    <string name="add_comment">Adicionar um comentário</string>
+    <string name="post_comment">Publicar Comentário</string>
+
+    <!-- ProjectsScreen strings -->
+    <string name="projects_title">Tela de Projetos</string>
+
+    <!-- ProjectDetailsScreen strings -->
+    <string name="project_details_title">Detalhes do Projeto</string>
+    <string name="project_id">ID do Projeto: %s</string>
+    <string name="project_details_placeholder">Os detalhes do projeto serão exibidos aqui</string>
+
+    <!-- ProfileScreen strings -->
+    <string name="profile_coming_soon">Tela de Perfil - Em Breve</string>
+
+    <!-- TaskScreen strings -->
+    <string name="create_task">Criar Tarefa</string>
+    <string name="task_title_label">Título</string>
+    <string name="task_description_label">Descrição</string>
+    <string name="task_status_label">Status</string>
+    <string name="task_priority_label">Prioridade</string>
+    <string name="task_due_date_label">Data de Vencimento (AAAA-MM-DD)</string>
+    <string name="task_create_button">Criar</string>
+    <string name="task_update_button">Atualizar</string>
+</resources>

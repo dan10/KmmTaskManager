@@ -1,25 +1,11 @@
 package com.danioliveira.taskmanager.ui.tasks
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
@@ -30,7 +16,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Task
-import com.danioliveira.taskmanager.ui.tasks.components.TaskItem
+import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.empty_task_list
@@ -38,6 +25,7 @@ import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.uuid.ExperimentalUuidApi
 
 @Composable
 fun TasksScreen(viewModel: TasksViewModel) {
@@ -136,6 +124,7 @@ fun EmptyTasksList() {
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun TasksList(
     tasks: List<Task>,
@@ -152,9 +141,9 @@ fun TasksList(
         ) { task ->
             TaskItem(
                 task = task,
-                onAction = onAction,
+                onClick = { onAction(TasksAction.OpenTask(task)) },
                 onCheckedChange = { isChecked ->
-                    onAction(TasksAction.UpdateTask(task.copy(isDone = isChecked)))
+                    onAction(TasksAction.UpdateTask(task.copy(status = TaskStatus.DONE)))
                 }
             )
         }

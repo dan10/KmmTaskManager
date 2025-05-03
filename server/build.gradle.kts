@@ -35,6 +35,8 @@ dependencies {
     implementation(libs.exposed.java.time)
     // PostgreSQL Driver
     implementation(libs.postgresql)
+    // HikariCP for connection pooling
+    implementation(libs.hikaricp)
     // Ktor Content Negotiation (for JSON)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)
@@ -51,6 +53,7 @@ dependencies {
     // Metrics and monitoring
     implementation(libs.ktor.server.metrics.micrometer)
     implementation(libs.micrometer.registry.prometheus)
+    implementation(project(":composeApp"))
 
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)

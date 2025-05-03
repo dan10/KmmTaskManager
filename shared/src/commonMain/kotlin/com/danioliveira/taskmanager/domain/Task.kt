@@ -8,6 +8,7 @@ data class Task(
     val id: Uuid,
     val title: String,
     val description: String,
+    val projectName: String?,
     val status: TaskStatus,
     val priority: Priority,
     val dueDate: String
