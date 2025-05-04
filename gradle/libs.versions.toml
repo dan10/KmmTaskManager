@@ -13,6 +13,7 @@ androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
 androidx-navigation = "2.9.0-alpha17"
 androidx-test-junit = "1.2.1"
+androidx-paging = "3.3.6"
 compose-multiplatform = "1.8.0-rc01"
 exposed = "0.61.0"
 hikaricp = "6.3.0"
@@ -44,6 +45,8 @@ androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", nam
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidx-datastore" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "androidx-paging" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "androidx-paging" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 google-api = { module = "com.google.api-client:google-api-client", version.ref = "googleApi" }

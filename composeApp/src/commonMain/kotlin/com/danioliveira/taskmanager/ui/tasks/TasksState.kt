@@ -1,10 +1,9 @@
 package com.danioliveira.taskmanager.ui.tasks
 
-import com.danioliveira.taskmanager.domain.Task
+import kotlin.uuid.Uuid
 
 data class TasksState(
     val isLoading: Boolean = false,
-    val tasks: List<Task> = emptyList(),
     val completedTasks: Int = 0,
     val totalTasks: Int = 0,
     val errorMessage: String? = null
@@ -12,8 +11,9 @@ data class TasksState(
 
 sealed interface TasksAction {
     data object LoadTasks : TasksAction
-    data class DeleteTask(val task: Task) : TasksAction
-    data object CreateTask : TasksAction
-    data class OpenTask(val task: Task) : TasksAction
-    data class UpdateTask(val task: Task) : TasksAction
+    data object RefreshTasks : TasksAction
+
+    data object OpenCreateTask : TasksAction
+    data class OpenTaskDetails(val taskId: Uuid) : TasksAction
+    data class UpdateSearchQuery(val query: String) : TasksAction
 }

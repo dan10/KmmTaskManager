@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation("app.cash.paging:paging-compose-common:3.3.0-alpha02-0.5.1")
             implementation(projects.shared)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
@@ -61,7 +62,7 @@ kotlin {
         all {
             languageSettings {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-                optIn("kotlin.uuid.ExperimentalUuidAp")
+                optIn("kotlin.uuid.ExperimentalUuidApi")
             }
         }
     }

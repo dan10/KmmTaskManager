@@ -1,11 +1,12 @@
 package com.danioliveira.taskmanager.domain.repository
 
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
+import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.domain.TaskStatus
 import org.jetbrains.exposed.sql.Transaction
 
-interface TaskRepository {
+internal interface TaskRepository {
     suspend fun Transaction.findAllByProjectId(
         projectId: String?,
         page: Int = 0,
@@ -21,7 +22,8 @@ interface TaskRepository {
     suspend fun Transaction.findAllByAssigneeId(
         assigneeId: String,
         page: Int = 0,
-        size: Int = 10
+        size: Int = 10,
+        query: String? = null
     ): PaginatedResponse<TaskResponse>
 
     suspend fun Transaction.findById(id: String): TaskResponse?
@@ -51,4 +53,12 @@ interface TaskRepository {
     suspend fun Transaction.delete(id: String): Boolean
 
     suspend fun Transaction.findAllTasksForUser(userId: String): PaginatedResponse<TaskResponse>
+
+    /**
+     * Get the task progress for a user.
+     * @param userId The ID of the user.
+     * @param query Optional query to filter tasks by title.
+     * @return The task progress for the user.
+     */
+    suspend fun Transaction.getUserTaskProgress(userId: String): TaskProgressResponse
 }

@@ -2,8 +2,8 @@ package com.danioliveira.taskmanager.ui.tasks
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -27,10 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,10 +32,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.Task
-import com.danioliveira.taskmanager.domain.TaskStatus
-import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.empty_task_list
@@ -54,21 +44,28 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Composable
-fun TasksScreen(viewModel: TasksViewModel = koinViewModel()) {
+fun TasksScreen(
+    viewModel: TasksViewModel = koinViewModel(),
+    navigateToTaskDetail: (Uuid) -> Unit,
+    navigateToCreateTask: () -> Unit
+) {
     Surface(color = Color(0XFFF1F5F9)) {
         TasksScreen(
             state = viewModel.state,
-            onAction = viewModel::handleActions
+            searchText = viewModel.searchQuery,
+            onAction = viewModel::handleActions,
+            onSearchTextChange = viewModel::updateSearchQuery
         )
     }
 }
 
 @Composable
-fun TasksScreen(
+private fun TasksScreen(
     state: TasksState,
-    onAction: (TasksAction) -> Unit
+    searchText: String,
+    onAction: (TasksAction) -> Unit,
+    onSearchTextChange: (String) -> Unit
 ) {
-    var searchText by remember { mutableStateOf("") }
 
     Scaffold(
         backgroundColor = Color(0xFFF1F5F9),
@@ -77,7 +74,9 @@ fun TasksScreen(
                 completedTasks = state.completedTasks,
                 totalTasks = state.totalTasks,
                 searchText = searchText,
-                onSearchTextChange = { searchText = it })
+                onSearchTextChange = {
+                    onSearchTextChange(it)
+                })
         },
         floatingActionButton = { AddTaskButton(onAction) }
     ) { paddingValues ->
@@ -87,14 +86,21 @@ fun TasksScreen(
                 .padding(paddingValues)
         ) {
             when {
-                state.isLoading -> {} // Show loading indicator
-                state.tasks.isEmpty() -> EmptyTasksList()
+                state.isLoading -> {
+                    // Show full-screen loading indicator when loading
+                    LoadingIndicator()
+                }
+
+                state.totalTasks == 0 -> EmptyTasksList()
                 else -> {
-                    TasksList(
-                        tasks = state.tasks,
-                        onAction = onAction,
-                        searchText = searchText
-                    )
+                    // Show a message that tasks are filtered by search
+                    if (searchText.isNotBlank()) {
+                        Text(
+                            text = "Showing progress for tasks matching: \"$searchText\"",
+                            style = MaterialTheme.typography.subtitle1,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -231,45 +237,22 @@ fun EmptyTasksList() {
     }
 }
 
-@OptIn(ExperimentalUuidApi::class)
 @Composable
-fun TasksList(
-    tasks: List<Task>,
-    onAction: (TasksAction) -> Unit,
-    searchText: String
-) {
-    val filteredTasks = if (searchText.isNotBlank()) {
-        tasks.filter { it.title.contains(searchText, ignoreCase = true) }
-    } else {
-        tasks
-    }
-    LazyColumn(
+private fun LoadingIndicator() {
+    Box(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentAlignment = Alignment.Center
     ) {
-        items(
-            items = filteredTasks,
-            key = { it.id }
-        ) { task ->
-            TaskItem(
-                task = task,
-                onClick = { onAction(TasksAction.OpenTask(task)) },
-                onCheckedChange = { isChecked ->
-                    onAction(TasksAction.UpdateTask(task.copy(status = if (isChecked) TaskStatus.DONE else TaskStatus.TODO)))
-                }
-            )
-        }
+        androidx.compose.material.CircularProgressIndicator()
     }
 }
-
 
 @Composable
 fun AddTaskButton(
     onAction: (TasksAction) -> Unit
 ) {
     FloatingActionButton(
-        onClick = { onAction(TasksAction.CreateTask) },
+        onClick = { onAction(TasksAction.OpenCreateTask) },
         backgroundColor = MaterialTheme.colors.primary
     ) {
         Icon(
@@ -287,38 +270,13 @@ fun TasksScreenPreview() {
     TaskItTheme {
         TasksScreen(
             state = TasksState(
-                tasks = listOf(
-                    Task(
-                        id = Uuid.random(),
-                        title = "Urgent Meeting",
-                        description = "Prepare presentation for client meeting",
-                        dueDate = "2024-11-25",
-                        priority = Priority.HIGH,
-                        status = TaskStatus.TODO,
-                        projectName = "Website Redesign"
-                    ),
-                    Task(
-                        id = Uuid.random(),
-                        title = "Review Code",
-                        description = "Review pull requests for feature branch",
-                        dueDate = "2024-11-26",
-                        priority = Priority.MEDIUM,
-                        status = TaskStatus.TODO,
-                        projectName = "Website Redesign"
-                    ),
-                    Task(
-                        id = Uuid.random(),
-                        title = "Update Documentation",
-                        description = "Update project wiki with new features",
-                        dueDate = "2024-11-30",
-                        priority = Priority.LOW,
-                        status = TaskStatus.DONE,
-                        projectName = "API Integration"
-                    )
-                ),
+                completedTasks = 3,
+                totalTasks = 5,
                 isLoading = false,
             ),
-            onAction = {}
+            searchText = "",
+            onAction = {},
+            onSearchTextChange = {}
         )
     }
 }
@@ -329,10 +287,13 @@ fun EmptyTasksScreenPreview() {
     TaskItTheme {
         TasksScreen(
             state = TasksState(
-                tasks = emptyList(),
+                completedTasks = 0,
+                totalTasks = 0,
                 isLoading = false,
             ),
-            onAction = {}
+            searchText = "",
+            onAction = {},
+            onSearchTextChange = {}
         )
     }
 }

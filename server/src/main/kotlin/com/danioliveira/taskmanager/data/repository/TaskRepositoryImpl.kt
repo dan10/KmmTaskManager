@@ -1,6 +1,7 @@
 package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
+import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.entity.ProjectDAOEntity
 import com.danioliveira.taskmanager.data.entity.TaskDAOEntity
@@ -9,15 +10,19 @@ import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
+import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SizedIterable
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.ceil
 
-class TaskRepositoryImpl : TaskRepository {
+internal class TaskRepositoryImpl : TaskRepository {
 
     override suspend fun Transaction.update(
         id: String,
@@ -76,12 +81,19 @@ class TaskRepositoryImpl : TaskRepository {
     override suspend fun Transaction.findAllByAssigneeId(
         assigneeId: String,
         page: Int,
-        size: Int
+        size: Int,
+        query: String?
     ): PaginatedResponse<TaskResponse> {
-        val uuid = UUID.fromString(assigneeId)
-        val query = TaskDAOEntity.find { TasksTable.assignee eq uuid }
+        val assigneeUuid = UUID.fromString(assigneeId)
 
-        return query.toPaginatedResponse(page, size)
+        var condition: Op<Boolean> = TasksTable.assignee eq assigneeUuid
+        if (!query.isNullOrBlank()) {
+            condition = condition and (TasksTable.title like "%${query}%")
+        }
+
+        val taskQuery = TaskDAOEntity.find { condition }
+        return taskQuery.toPaginatedResponse(page, size)
+
     }
 
     override suspend fun Transaction.findAllTasksForUser(userId: String): PaginatedResponse<TaskResponse> {
@@ -89,6 +101,19 @@ class TaskRepositoryImpl : TaskRepository {
         val query = TaskDAOEntity.find { (TasksTable.creator eq uuid) or (TasksTable.assignee eq uuid) }
 
         return query.toPaginatedResponse(0, 100) // Default to first page with 100 items
+    }
+
+    override suspend fun Transaction.getUserTaskProgress(userId: String): TaskProgressResponse {
+        val uuid = UUID.fromString(userId)
+        val userTasks = TaskDAOEntity.find { (TasksTable.creator eq uuid) or (TasksTable.assignee eq uuid) }
+
+        val totalTasks = userTasks.count()
+        val completedTasks = userTasks.count { it.status == TaskStatus.DONE }
+
+        return TaskProgressResponse(
+            totalTasks = totalTasks.toInt(),
+            completedTasks = completedTasks,
+        )
     }
 
     private fun SizedIterable<TaskDAOEntity>.toPaginatedResponse(

@@ -1,6 +1,11 @@
 package com.danioliveira.taskmanager.routes
 
-import com.danioliveira.taskmanager.api.request.*
+import com.danioliveira.taskmanager.api.request.ProjectTaskCreateRequest
+import com.danioliveira.taskmanager.api.request.ProjectTaskUpdateRequest
+import com.danioliveira.taskmanager.api.request.TaskAssignRequest
+import com.danioliveira.taskmanager.api.request.TaskCreateRequest
+import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
+import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.domain.service.TaskService
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -100,18 +105,35 @@ fun Route.taskRoutes() {
                 val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
                 val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
                 val assigneeId = call.request.queryParameters["assigneeId"]
+                val query = call.request.queryParameters["query"]
 
                 val tasks = when {
-                    assigneeId != null -> service.findAllByAssigneeId(assigneeId, page, size)
+                    assigneeId != null -> service.findAllByAssigneeId(assigneeId, page, size, query)
                     projectId != null -> service.findAll(
                         projectId,
                         page,
                         size
                     ) // Keep backward compatibility for project ID query parameter
-                    else -> service.findAllByAssigneeId(userId, page, size) // Get all tasks where user is assignee
+                    else -> service.findAllByAssigneeId(
+                        userId,
+                        page,
+                        size,
+                        query
+                    ) // Get all tasks where user is assignee
                 }
 
                 call.respond(tasks)
+            }
+
+            // Get task progress for the current user
+            get("/progress") {
+                val principal = call.principal<JWTPrincipal>()
+                val userId = principal?.payload?.getClaim("userId")?.asString() ?: return@get call.respond(
+                    HttpStatusCode.Unauthorized
+                )
+
+                val progress = service.getUserTaskProgress(userId)
+                call.respond(progress)
             }
 
             get("/user") {

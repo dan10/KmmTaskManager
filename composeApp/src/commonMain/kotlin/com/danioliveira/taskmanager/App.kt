@@ -177,7 +177,10 @@ fun TaskItNavHost(
 
         // Top level destinations
         composable(BottomNavItem.Tasks.route) {
-            TasksScreen()
+            TasksScreen(
+                navigateToTaskDetail = { taskId -> navController.navigate(Screen.TasksDetails(taskId)) },
+                navigateToCreateTask = { navController.navigate(Screen.CreateEditTask(null)) }
+            )
         }
 
         composable(BottomNavItem.Projects.route) {
@@ -205,8 +208,8 @@ fun TaskItNavHost(
             TasksDetailsScreen(
                 taskId = taskId,
                 onBack = { navController.popBackStack() },
-                onFilesClick = { navController.navigate(Screen.TasksFiles(taskId)) },
-                onCommentsClick = { navController.navigate(Screen.TasksComments(taskId)) }
+                onFilesClick = { /*navController.navigate(Screen.TasksFiles(taskId)) */ },
+                onCommentsClick = { /*navController.navigate(Screen.TasksComments(taskId))*/ }
             )
         }
 

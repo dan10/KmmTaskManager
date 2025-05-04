@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.Transaction
 import java.time.LocalDateTime
 import java.util.*
 
-class UserRepositoryImpl : UserRepository {
+internal class UserRepositoryImpl : UserRepository {
 
     override suspend fun Transaction.findByEmail(email: String): UserWithPassword? =
         UserDAOEntity.find { UsersTable.email eq email }.singleOrNull()?.toDomain()

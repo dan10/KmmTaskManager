@@ -3,6 +3,7 @@ package com.danioliveira.taskmanager.domain.service
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
+import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
@@ -11,7 +12,7 @@ import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepositor
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import java.util.*
 
-class TaskService(
+internal class TaskService(
     private val repository: TaskRepository,
     private val projectAssignmentRepository: ProjectAssignmentRepository
 ) {
@@ -27,9 +28,11 @@ class TaskService(
     suspend fun findAllByAssigneeId(
         assigneeId: String,
         page: Int = 0,
-        size: Int = 10
+        size: Int = 10,
+        query: String? = null
     ): PaginatedResponse<TaskResponse> = dbQuery {
-        with(repository) { findAllByAssigneeId(assigneeId, page, size) }
+        // The repository now handles filtering by query and including progress information
+        with(repository) { findAllByAssigneeId(assigneeId, page, size, query) }
     }
 
     suspend fun findById(id: String): TaskResponse = dbQuery {
@@ -146,5 +149,14 @@ class TaskService(
             )
             updated ?: throw NotFoundException("Task", id)
         }
+    }
+
+    /**
+     * Get the task progress for a user.
+     * @param userId The ID of the user.
+     * @return The task progress for the user.
+     */
+    suspend fun getUserTaskProgress(userId: String): TaskProgressResponse = dbQuery {
+        with(repository) { getUserTaskProgress(userId) }
     }
 }
