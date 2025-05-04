@@ -1,6 +1,7 @@
 package com.danioliveira.taskmanager.domain.repository
 
 import com.danioliveira.taskmanager.api.request.LoginRequest
+import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.api.response.AuthResponse
 
 /**
@@ -14,6 +15,14 @@ interface AuthRepository {
      * @return AuthResponse containing the JWT token and user information
      */
     suspend fun login(loginRequest: LoginRequest): Result<AuthResponse>
+
+    /**
+     * Registers a new user with email, password, and display name.
+     *
+     * @param registerRequest The register request containing email, password, and display name
+     * @return AuthResponse containing the JWT token and user information
+     */
+    suspend fun register(registerRequest: RegisterRequest): Result<AuthResponse>
 
     /**
      * Saves the authentication token for future requests.

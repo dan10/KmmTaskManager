@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.danioliveira.taskmanager.domain.usecase.register.RegisterUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -15,7 +15,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(
+    private val registerUseCase: RegisterUseCase
+) : ViewModel() {
+
+    // Navigation callback to be set from outside
+    var onRegistrationSuccess: () -> Unit = {}
+
     var state by mutableStateOf(RegisterState())
         private set
 
@@ -71,12 +77,27 @@ class RegisterViewModel : ViewModel() {
             try {
                 state = state.copy(isLoading = true, errorMessage = null)
 
-                // TODO: Implement actual registration logic here
-                delay(2000) // Simulate network delay
+                // Use the display name as the email username if not provided
+                val displayName = emailText.substringBefore("@")
 
-                // Registration success
-                // TODO: Navigate to next screen
+                // Call the register use case
+                val result = registerUseCase(
+                    email = emailText,
+                    password = passwordText,
+                    displayName = displayName
+                )
 
+                result.fold(
+                    onSuccess = {
+                        // Registration success - navigate to next screen
+                        onRegistrationSuccess()
+                    },
+                    onFailure = { error ->
+                        state = state.copy(
+                            errorMessage = error.message ?: "An error occurred during registration"
+                        )
+                    }
+                )
             } catch (e: Exception) {
                 state = state.copy(
                     errorMessage = e.message ?: "An error occurred during registration"

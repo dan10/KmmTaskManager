@@ -6,12 +6,16 @@ import com.danioliveira.taskmanager.data.repository.AuthRepositoryImpl
 import com.danioliveira.taskmanager.data.storage.DataStorePreferencesFactory
 import com.danioliveira.taskmanager.data.storage.DataStoreTokenStorage
 import com.danioliveira.taskmanager.data.storage.TokenStorage
+import com.danioliveira.taskmanager.domain.manager.AuthManager
 import com.danioliveira.taskmanager.domain.repository.AuthRepository
 import com.danioliveira.taskmanager.domain.usecase.login.LoginUseCase
+import com.danioliveira.taskmanager.domain.usecase.register.RegisterUseCase
 import com.danioliveira.taskmanager.ui.login.LoginViewModel
+import com.danioliveira.taskmanager.ui.register.RegisterViewModel
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -31,9 +35,14 @@ val appModule = module {
     // Repositories
     singleOf(::AuthRepositoryImpl) bind AuthRepository::class
 
+    // Managers
+    singleOf(::AuthManager)
+
     // Use Cases
     factoryOf(::LoginUseCase)
+    factoryOf(::RegisterUseCase)
 
     // ViewModels
-    factoryOf(::LoginViewModel)
+    viewModelOf(::LoginViewModel)
+    viewModelOf(::RegisterViewModel)
 }

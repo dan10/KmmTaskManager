@@ -6,7 +6,12 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -15,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.danioliveira.taskmanager.domain.manager.AuthManager
 import com.danioliveira.taskmanager.navigation.BottomNavItem
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
@@ -31,15 +37,50 @@ import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 
 @Composable
 @Preview
 fun TaskItApp() {
     TaskItTheme {
+        val authManager = koinInject<AuthManager>()
+        val isAuthenticated by authManager.isAuthenticated.collectAsState()
+        var isInitialAuthCheckDone by remember { mutableStateOf(false) }
+
         val navController = rememberNavController()
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = currentBackStackEntry?.destination
 
+        // Check authentication state when the app starts
+        LaunchedEffect(Unit) {
+            authManager.checkAuthState()
+            isInitialAuthCheckDone = true
+        }
+
+        // Listen for authentication state changes
+        LaunchedEffect(isAuthenticated) {
+            if (isInitialAuthCheckDone) {
+                if (isAuthenticated) {
+                    // If authenticated, navigate to home
+                    navController.navigate(BottomNavItem.Tasks.route) {
+                        popUpTo(Screen.Login) {
+                            inclusive = true
+                        }
+                    }
+                } else {
+                    // If not authenticated, navigate to login
+                    val currentRoute = currentDestination?.route
+                    // Check if current route is not login or register
+                    if (currentRoute != null && !isLoginOrRegisterScreen(currentRoute)) {
+                        navController.navigate(Screen.Login) {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         Scaffold(
             bottomBar = {
@@ -96,6 +137,12 @@ private fun shouldShowBottomBar(currentRoute: String?): Boolean {
             currentRoute == BottomNavItem.Profile.route
 }
 
+private fun isLoginOrRegisterScreen(route: String): Boolean {
+    // Since Screen.Login and Screen.Register don't have route properties,
+    // we need to check the route string directly
+    return route == "login" || route == "register"
+}
+
 @Composable
 fun TaskItNavHost(
     navController: NavHostController
@@ -106,13 +153,26 @@ fun TaskItNavHost(
     ) {
         // Authentication
         composable<Screen.Login> {
-            LoginScreen()
+            LoginScreen(
+                navigateToRegister = {
+                    navController.navigate(Screen.Register)
+                }
+            )
         }
 
         composable<Screen.Register> {
-            RegisterScreen(navigateToLogin = {
-                navController.popBackStack()
-            })
+            RegisterScreen(
+                navigateToLogin = {
+                    navController.popBackStack()
+                },
+                navigateToHome = {
+                    navController.navigate(BottomNavItem.Tasks.route) {
+                        popUpTo(Screen.Login) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
         // Top level destinations

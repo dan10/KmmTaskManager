@@ -43,7 +43,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
+fun LoginScreen(
+    viewModel: LoginViewModel = koinViewModel(),
+    navigateToRegister: () -> Unit = {}
+) {
     LoginScreen(
         state = LoginState(),
         email = viewModel.loginText,
@@ -51,7 +54,8 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
         password = viewModel.passwordText,
         passwordHasError = viewModel.passwordHasError.value,
         isFormValid = viewModel.isFormValid.value,
-        onAction = viewModel::handleActions
+        onAction = viewModel::handleActions,
+        navigateToRegister = navigateToRegister
     )
 }
 
@@ -63,7 +67,8 @@ fun LoginScreen(
     password: String,
     passwordHasError: Boolean,
     isFormValid: Boolean,
-    onAction: (LoginAction) -> Unit
+    onAction: (LoginAction) -> Unit,
+    navigateToRegister: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -130,7 +135,7 @@ fun LoginScreen(
 
                 LoginAccountLink(
                     modifier = Modifier.fillMaxWidth(),
-                    onLinkClick = { /* TODO: Navigate to register */ }
+                    onLinkClick = navigateToRegister
                 )
             }
         }
@@ -181,7 +186,8 @@ fun LoginScreenPreview() {
                     is LoginAction.UpdatePassword -> password = it.password
                     is LoginAction.Login -> Unit
                 }
-            }
+            },
+            navigateToRegister = {}
         )
     }
 }

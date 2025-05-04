@@ -42,8 +42,12 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = koinViewModel(),
-    navigateToLogin: () -> Unit
+    navigateToLogin: () -> Unit,
+    navigateToHome: () -> Unit
 ) {
+    // Set the navigation callback for successful registration
+    viewModel.onRegistrationSuccess = navigateToHome
+
     RegisterScreen(
         state = viewModel.state,
         email = viewModel.emailText,

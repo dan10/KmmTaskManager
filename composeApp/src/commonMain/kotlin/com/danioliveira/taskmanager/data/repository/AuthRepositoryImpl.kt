@@ -1,12 +1,12 @@
 package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.api.request.LoginRequest
+import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.api.response.AuthResponse
 import com.danioliveira.taskmanager.data.network.AuthApiService
 import com.danioliveira.taskmanager.data.storage.TokenStorage
 import com.danioliveira.taskmanager.domain.repository.AuthRepository
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.ServerResponseException
+import io.ktor.client.plugins.*
 
 /**
  * Implementation of AuthRepository that uses AuthApiService and TokenStorage.
@@ -26,6 +26,22 @@ class AuthRepositoryImpl(
         } catch (e: ClientRequestException) {
             // Handle client errors (4xx)
             Result.failure(Exception("Login failed: ${e.message}"))
+        } catch (e: ServerResponseException) {
+            // Handle server errors (5xx)
+            Result.failure(Exception("Server error: ${e.message}"))
+        } catch (e: Exception) {
+            // Handle other exceptions
+            Result.failure(Exception("Unknown error: ${e.message}"))
+        }
+    }
+
+    override suspend fun register(registerRequest: RegisterRequest): Result<AuthResponse> {
+        return try {
+            val response = apiService.register(registerRequest)
+            Result.success(response)
+        } catch (e: ClientRequestException) {
+            // Handle client errors (4xx)
+            Result.failure(Exception("Registration failed: ${e.message}"))
         } catch (e: ServerResponseException) {
             // Handle server errors (5xx)
             Result.failure(Exception("Server error: ${e.message}"))
