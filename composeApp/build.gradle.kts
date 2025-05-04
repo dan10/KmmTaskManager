@@ -16,7 +16,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -27,11 +27,14 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
+            implementation(libs.androidx.appcompat)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -49,6 +52,9 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.androidx.datastore.preferences.core)
             implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
         }
 
@@ -81,7 +87,7 @@ android {
     buildFeatures {
         compose = true
     }
-    
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
@@ -96,4 +102,3 @@ android {
 dependencies {
     debugImplementation(compose.uiTooling)
 }
-
