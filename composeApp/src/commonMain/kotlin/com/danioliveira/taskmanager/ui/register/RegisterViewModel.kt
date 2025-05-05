@@ -10,6 +10,7 @@ import com.danioliveira.taskmanager.domain.usecase.register.RegisterUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -36,7 +37,8 @@ class RegisterViewModel(
 
 
     val emailHasError: StateFlow<Boolean> = snapshotFlow { emailText }
-        .mapLatest { !it.contains("@") || !it.contains(".") }
+        .mapLatest { !it.isNotEmpty() }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

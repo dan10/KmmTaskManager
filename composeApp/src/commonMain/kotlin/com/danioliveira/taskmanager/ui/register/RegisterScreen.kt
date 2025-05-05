@@ -14,6 +14,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,16 +49,20 @@ fun RegisterScreen(
 ) {
     // Set the navigation callback for successful registration
     viewModel.onRegistrationSuccess = navigateToHome
+    val isFormInvalid by viewModel.isFormValid.collectAsState()
+    val emailHasError by viewModel.emailHasError.collectAsState()
+    val passwordHasError by viewModel.passwordHasError.collectAsState()
+    val confirmPasswordHasError by viewModel.confirmPasswordHasError.collectAsState()
 
     RegisterScreen(
         state = viewModel.state,
         email = viewModel.emailText,
         password = viewModel.passwordText,
         confirmPassword = viewModel.confirmPasswordText,
-        emailHasError = viewModel.emailHasError.value,
-        passwordHasError = viewModel.passwordHasError.value,
-        confirmPasswordHasError = viewModel.confirmPasswordHasError.value,
-        isFormValid = viewModel.isFormValid.value,
+        emailHasError = { emailHasError },
+        passwordHasError = { passwordHasError },
+        confirmPasswordHasError = { confirmPasswordHasError },
+        isFormValid = { isFormInvalid },
         navigateToLogin = navigateToLogin,
         onAction = viewModel::handleActions
     )
@@ -68,10 +74,10 @@ private fun RegisterScreen(
     email: String,
     password: String,
     confirmPassword: String,
-    emailHasError: Boolean,
-    passwordHasError: Boolean,
-    confirmPasswordHasError: Boolean,
-    isFormValid: Boolean,
+    emailHasError: () -> Boolean,
+    passwordHasError: () -> Boolean,
+    confirmPasswordHasError: () -> Boolean,
+    isFormValid: () -> Boolean,
     navigateToLogin: () -> Unit,
     onAction: (RegisterAction) -> Unit
 ) {
@@ -112,7 +118,7 @@ private fun RegisterScreen(
                     onValueChange = { onAction(RegisterAction.UpdateEmail(it)) },
                     label = stringResource(Res.string.title_email),
                     enabled = !state.isLoading,
-                    isError = emailHasError,
+                    isError = emailHasError(),
                     errorMessage = stringResource(Res.string.title_email_error),
                 )
 
@@ -121,7 +127,7 @@ private fun RegisterScreen(
                     onValueChange = { onAction(RegisterAction.UpdatePassword(it)) },
                     label = stringResource(Res.string.title_password),
                     enabled = !state.isLoading,
-                    isError = passwordHasError,
+                    isError = passwordHasError(),
                     errorMessage = stringResource(Res.string.title_password_error),
                 )
 
@@ -130,7 +136,7 @@ private fun RegisterScreen(
                     onValueChange = { onAction(RegisterAction.UpdateConfirmPassword(it)) },
                     label = stringResource(Res.string.title_confirm_password),
                     enabled = !state.isLoading,
-                    isError = confirmPasswordHasError,
+                    isError = confirmPasswordHasError(),
                     errorMessage = stringResource(Res.string.title_confirm_password_error),
                 )
 
@@ -138,7 +144,7 @@ private fun RegisterScreen(
                     label = stringResource(Res.string.title_register_button),
                     onClick = { onAction(RegisterAction.Register) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = isFormValid && !state.isLoading,
+                    enabled = isFormValid() && !state.isLoading,
                     isLoading = state.isLoading
                 )
 
@@ -175,10 +181,10 @@ fun RegisterScreenPreview() {
             email = "email",
             password = "password",
             confirmPassword = "password",
-            emailHasError = false,
-            passwordHasError = false,
-            confirmPasswordHasError = false,
-            isFormValid = true,
+            emailHasError = { false },
+            passwordHasError = { false },
+            confirmPasswordHasError = { false },
+            isFormValid = { true },
             navigateToLogin = {},
             onAction = {}
         )
