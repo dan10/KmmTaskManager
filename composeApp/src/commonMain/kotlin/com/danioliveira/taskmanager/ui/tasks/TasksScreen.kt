@@ -50,10 +50,30 @@ fun TasksScreen(
     navigateToCreateTask: () -> Unit
 ) {
     Surface(color = Color(0XFFF1F5F9)) {
+        // Create a wrapper for the onAction function that handles navigation
+        val onAction: (TasksAction) -> Unit = { action ->
+            when (action) {
+                is TasksAction.OpenTaskDetails -> {
+                    // Handle navigation directly
+                    navigateToTaskDetail(action.taskId)
+                }
+
+                is TasksAction.OpenCreateTask -> {
+                    // Handle navigation to create task
+                    navigateToCreateTask()
+                }
+
+                else -> {
+                    // Pass other actions to the ViewModel
+                    viewModel.handleActions(action)
+                }
+            }
+        }
+
         TasksScreen(
             state = viewModel.state,
             searchText = viewModel.searchQuery,
-            onAction = viewModel::handleActions,
+            onAction = onAction,
             onSearchTextChange = viewModel::updateSearchQuery
         )
     }

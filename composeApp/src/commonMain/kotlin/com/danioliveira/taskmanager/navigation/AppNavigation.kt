@@ -12,7 +12,6 @@ import kmmtaskmanager.composeapp.generated.resources.nav_tasks
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
-import kotlin.uuid.Uuid
 
 sealed class NavIcon {
     data class ImageVectorIcon(val imageVector: ImageVector) : NavIcon()
@@ -39,7 +38,7 @@ sealed interface Screen {
 
     // Task-related screens
     @Serializable
-    data class TasksDetails(val taskId: Uuid) : Screen
+    data class TasksDetails(val taskId: String) : Screen
 
     @Serializable
     data class TasksFiles(val taskId: String) : Screen

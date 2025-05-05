@@ -12,6 +12,7 @@ import com.danioliveira.taskmanager.domain.usecase.login.LoginUseCase
 import com.danioliveira.taskmanager.domain.usecase.register.RegisterUseCase
 import com.danioliveira.taskmanager.ui.login.LoginViewModel
 import com.danioliveira.taskmanager.ui.register.RegisterViewModel
+import com.danioliveira.taskmanager.ui.tasks.TasksViewModel
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
@@ -45,4 +46,5 @@ val appModule = module {
     // ViewModels
     viewModelOf(::LoginViewModel)
     viewModelOf(::RegisterViewModel)
+    viewModelOf(::TasksViewModel)
 }

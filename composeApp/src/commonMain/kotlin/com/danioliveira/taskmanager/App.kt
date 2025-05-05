@@ -29,9 +29,9 @@ import com.danioliveira.taskmanager.ui.projects.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
 import com.danioliveira.taskmanager.ui.task.TaskCreatEditScreen
-import com.danioliveira.taskmanager.ui.task.TasksCommentsScreen
-import com.danioliveira.taskmanager.ui.task.TasksDetailsScreen
-import com.danioliveira.taskmanager.ui.task.TasksFilesScreen
+import com.danioliveira.taskmanager.ui.task.comments.TasksCommentsScreen
+import com.danioliveira.taskmanager.ui.task.details.TasksDetailsScreen
+import com.danioliveira.taskmanager.ui.task.files.TasksFilesScreen
 import com.danioliveira.taskmanager.ui.tasks.TasksScreen
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
@@ -178,7 +178,7 @@ fun TaskItNavHost(
         // Top level destinations
         composable(BottomNavItem.Tasks.route) {
             TasksScreen(
-                navigateToTaskDetail = { taskId -> navController.navigate(Screen.TasksDetails(taskId)) },
+                navigateToTaskDetail = { taskId -> navController.navigate(Screen.TasksDetails(taskId.toString())) },
                 navigateToCreateTask = { navController.navigate(Screen.CreateEditTask(null)) }
             )
         }
@@ -206,10 +206,9 @@ fun TaskItNavHost(
         composable<Screen.TasksDetails> { backStackEntry ->
             val taskId = backStackEntry.toRoute<Screen.TasksDetails>().taskId
             TasksDetailsScreen(
-                taskId = taskId,
                 onBack = { navController.popBackStack() },
-                onFilesClick = { /*navController.navigate(Screen.TasksFiles(taskId)) */ },
-                onCommentsClick = { /*navController.navigate(Screen.TasksComments(taskId))*/ }
+                onFilesClick = { id -> navController.navigate(Screen.TasksFiles(id)) },
+                onCommentsClick = { id -> navController.navigate(Screen.TasksComments(id)) }
             )
         }
 

@@ -67,6 +67,8 @@ class TasksViewModel(
 
 
     private fun openTask(taskId: Uuid) {
+        // This method is now empty because navigation is handled in the UI layer
+        // We keep it for compatibility with the existing code
     }
 
     fun handleActions(action: TasksAction) {

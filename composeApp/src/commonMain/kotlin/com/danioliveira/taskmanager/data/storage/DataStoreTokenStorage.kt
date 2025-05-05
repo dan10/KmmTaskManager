@@ -14,9 +14,8 @@ class DataStoreTokenStorage(
     // Define the key for the token
     private val tokenKey = stringPreferencesKey("auth_token")
 
-    // Create the preferences datastore with the platform-specific path
     private val dataStore = PreferenceDataStoreFactory.createWithPath(
-        produceFile = { factory.create("auth_token")().toPath() }
+        produceFile = { factory.create("auth_token.preferences_pb")().toPath() }
     )
 
     override suspend fun saveToken(token: String) {
