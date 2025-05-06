@@ -1,5 +1,8 @@
 package com.danioliveira.taskmanager
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
@@ -12,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -83,9 +87,10 @@ fun TaskItApp() {
         }
 
         Scaffold(
+            modifier = Modifier,
             bottomBar = {
                 if (shouldShowBottomBar(currentDestination?.route)) {
-                    BottomNavigation {
+                    BottomNavigation(modifier = Modifier.navigationBarsPadding()) {
                         val items = listOf(
                             BottomNavItem.Tasks,
                             BottomNavItem.Projects,
@@ -123,9 +128,12 @@ fun TaskItApp() {
                     }
                 }
             }
-        ) {
+        ) { innerPadding ->
             TaskItNavHost(
-                navController = navController
+                navController = navController,
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .statusBarsPadding()
             )
         }
     }
@@ -145,9 +153,11 @@ private fun isLoginOrRegisterScreen(route: String): Boolean {
 
 @Composable
 fun TaskItNavHost(
-    navController: NavHostController
+    navController: NavHostController,
+    modifier: Modifier = Modifier
 ) {
     NavHost(
+        modifier = modifier,
         navController = navController,
         startDestination = Screen.Login
     ) {
@@ -204,7 +214,6 @@ fun TaskItNavHost(
         }
 
         composable<Screen.TasksDetails> { backStackEntry ->
-            val taskId = backStackEntry.toRoute<Screen.TasksDetails>().taskId
             TasksDetailsScreen(
                 onBack = { navController.popBackStack() },
                 onFilesClick = { id -> navController.navigate(Screen.TasksFiles(id)) },

@@ -1,17 +1,27 @@
 package com.danioliveira.taskmanager.data.network
 
 import com.danioliveira.taskmanager.data.storage.TokenStorage
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.bearer
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.*
+import io.ktor.client.engine.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+
+/**
+ * Platform-specific HTTP client engine factory
+ */
+expect fun createPlatformEngine(): HttpClientEngine
+
+/**
+ * Platform-specific base URL
+ */
+expect fun getBaseUrl(): String
 
 /**
  * Ktor HTTP client for making API requests.
@@ -26,7 +36,8 @@ class KtorClient(private val tokenStorage: TokenStorage) {
     }
 
     // Create the HTTP client
-    fun generateClient() = HttpClient {
+    fun generateClient() = HttpClient(createPlatformEngine()) {
+        expectSuccess
         install(Auth) {
             bearer {
                 loadTokens {
@@ -37,14 +48,17 @@ class KtorClient(private val tokenStorage: TokenStorage) {
         install(ContentNegotiation) {
             json(json)
         }
+        install(Logging) {
+            level = LogLevel.INFO
+        }
 
         defaultRequest {
-            url(BASE_URL)
+            url(getBaseUrl())
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }
     }
 
     companion object {
-        private const val BASE_URL = "http://localhost:8081"
+        // Base URL is now platform-specific
     }
 }

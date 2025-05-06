@@ -7,6 +7,9 @@ import com.danioliveira.taskmanager.data.network.AuthApiService
 import com.danioliveira.taskmanager.data.storage.TokenStorage
 import com.danioliveira.taskmanager.domain.repository.AuthRepository
 import io.ktor.client.plugins.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 
 /**
  * Implementation of AuthRepository that uses AuthApiService and TokenStorage.
@@ -37,7 +40,7 @@ class AuthRepositoryImpl(
 
     override suspend fun register(registerRequest: RegisterRequest): Result<AuthResponse> {
         return try {
-            val response = apiService.register(registerRequest)
+            val response = withContext(Dispatchers.IO) { apiService.register(registerRequest) }
             Result.success(response)
         } catch (e: ClientRequestException) {
             // Handle client errors (4xx)

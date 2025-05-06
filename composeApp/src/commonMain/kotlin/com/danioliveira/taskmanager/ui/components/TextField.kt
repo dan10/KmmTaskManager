@@ -89,7 +89,7 @@ fun TrackItPasswordField(
         enabled = enabled,
         modifier = modifier,
         singleLine = singleLine,
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             PasswordIcon(
                 passwordVisible = passwordVisible,
