@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager
 
 import com.danioliveira.taskmanager.data.tables.UsersTable
-import com.danioliveira.taskmanager.model.UserWithPassword
+import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils

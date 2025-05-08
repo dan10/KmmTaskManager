@@ -15,6 +15,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,15 +46,21 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = koinViewModel(),
-    navigateToRegister: () -> Unit = {}
+    navigateToRegister: () -> Unit = {},
+    navigateToHome: () -> Unit = {}
 ) {
+
+    val isFormValid by viewModel.isFormValid.collectAsState()
+    val emailHasError by viewModel.emailHasError.collectAsState()
+    val passwordHasError by viewModel.passwordHasError.collectAsState()
+
     LoginScreen(
         state = LoginState(),
         email = viewModel.loginText,
-        emailHasError = viewModel.emailHasError.value,
+        emailHasError = emailHasError,
         password = viewModel.passwordText,
-        passwordHasError = viewModel.passwordHasError.value,
-        isFormValid = viewModel.isFormValid.value,
+        passwordHasError = passwordHasError,
+        isFormValid = isFormValid,
         onAction = viewModel::handleActions,
         navigateToRegister = navigateToRegister
     )

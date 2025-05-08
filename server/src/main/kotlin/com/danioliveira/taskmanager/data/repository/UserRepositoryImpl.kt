@@ -3,8 +3,8 @@ package com.danioliveira.taskmanager.data.repository
 import com.danioliveira.taskmanager.data.entity.UserDAOEntity
 import com.danioliveira.taskmanager.data.tables.UsersTable
 import com.danioliveira.taskmanager.domain.User
+import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import com.danioliveira.taskmanager.model.UserWithPassword
 import org.jetbrains.exposed.sql.Transaction
 import java.time.LocalDateTime
 import java.util.*

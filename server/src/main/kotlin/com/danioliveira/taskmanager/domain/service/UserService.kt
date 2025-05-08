@@ -13,8 +13,8 @@ import com.danioliveira.taskmanager.domain.User
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
+import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import com.danioliveira.taskmanager.model.UserWithPassword
 
 class UserService(
     private val repository: UserRepository,

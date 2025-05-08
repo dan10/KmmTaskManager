@@ -18,16 +18,13 @@ sealed class NavIcon {
     data class DrawableResourceIcon(val drawableResource: DrawableResource) : NavIcon()
 }
 
-sealed class BottomNavItem(val route: String, val title: StringResource, val icon: NavIcon) : Screen {
+data class TopLevelRoute<T : Any>(val name: StringResource, val route: T, val icon: NavIcon)
 
-    object Tasks : BottomNavItem("tasks", Res.string.nav_tasks, NavIcon.ImageVectorIcon(Icons.Default.Check))
-    object Projects :
-        BottomNavItem("projects", Res.string.nav_projects, NavIcon.DrawableResourceIcon(Res.drawable.ic_folder))
-
-    object Profile :
-        BottomNavItem("profile", Res.string.nav_profile, NavIcon.ImageVectorIcon(Icons.Default.Person))
-}
-
+val topLevelRoutes = listOf(
+    TopLevelRoute(Res.string.nav_tasks, Screen.Tasks, NavIcon.ImageVectorIcon(Icons.Default.Check)),
+    TopLevelRoute(Res.string.nav_projects, Screen.Projects, NavIcon.DrawableResourceIcon(Res.drawable.ic_folder)),
+    TopLevelRoute(Res.string.nav_profile, Screen.Profile, NavIcon.ImageVectorIcon(Icons.Default.Person))
+)
 sealed interface Screen {
     // Authentication
     @Serializable
@@ -35,6 +32,15 @@ sealed interface Screen {
 
     @Serializable
     object Register : Screen
+
+    @Serializable
+    data object Tasks : Screen
+
+    @Serializable
+    data object Projects : Screen
+
+    @Serializable
+    data object Profile : Screen
 
     // Task-related screens
     @Serializable

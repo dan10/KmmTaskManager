@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.domain.repository
 
 import com.danioliveira.taskmanager.domain.User
-import com.danioliveira.taskmanager.model.UserWithPassword
+import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import org.jetbrains.exposed.sql.Transaction
 
 interface UserRepository {

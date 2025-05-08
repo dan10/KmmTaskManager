@@ -7,14 +7,14 @@ androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.2.1"
 androidx-core-ktx = "1.16.0"
-androidx-datastore = "1.1.0"
+androidx-datastore = "1.1.6"
 androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
-androidx-navigation = "2.9.0-alpha17"
+androidx-navigation = "2.9.0-beta01"
 androidx-test-junit = "1.2.1"
 androidx-paging = "3.3.6"
-compose-multiplatform = "1.8.0-rc01"
+compose-multiplatform = "1.8.0"
 exposed = "0.61.0"
 hikaricp = "6.3.0"
 junit = "4.13.2"
@@ -22,9 +22,10 @@ googleApi = "2.7.2"
 gatling = "3.13.5"
 koin = "4.1.0-Beta8"
 kotlin = "2.1.20"
-ktor = "3.1.2"
+ktor = "3.1.3"
 logback = "1.5.18"
 micrometer = "1.12.5"
+kermit = "2.0.4"
 postgresql = "42.7.5"
 prometheus = "1.14.6"
 h2 = "2.3.232"
@@ -50,6 +51,7 @@ androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-p
 androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "androidx-paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "androidx-paging" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 
 google-api = { module = "com.google.api-client:google-api-client", version.ref = "googleApi" }
 

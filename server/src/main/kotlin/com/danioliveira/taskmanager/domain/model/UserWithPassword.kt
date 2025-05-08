@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.model
+package com.danioliveira.taskmanager.domain.model
 
 data class UserWithPassword(
     val id: String,
