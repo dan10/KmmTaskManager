@@ -54,6 +54,8 @@ fun LoginScreen(
     val emailHasError by viewModel.emailHasError.collectAsState()
     val passwordHasError by viewModel.passwordHasError.collectAsState()
 
+    viewModel.navigateToHome = navigateToHome
+
     LoginScreen(
         state = LoginState(),
         email = viewModel.loginText,

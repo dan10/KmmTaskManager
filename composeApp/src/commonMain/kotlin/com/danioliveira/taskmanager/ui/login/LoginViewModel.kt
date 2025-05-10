@@ -20,6 +20,8 @@ class LoginViewModel(
     private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 
+    var navigateToHome: () -> Unit = {}
+
     var uiState: LoginState by mutableStateOf(LoginState())
         private set
 
@@ -28,7 +30,6 @@ class LoginViewModel(
 
     var passwordText by mutableStateOf("")
         private set
-
 
     val emailHasError: StateFlow<Boolean> = snapshotFlow { loginText }
         .mapLatest { !it.matches(emailAddressRegex) }
@@ -64,12 +65,10 @@ class LoginViewModel(
 
             loginUseCase(loginText, passwordText)
                 .onSuccess {
-                    // Login successful, navigate to home screen
                     uiState = uiState.copy(isLoading = false)
-                    // Navigation would be handled here or through a callback
+                    navigateToHome()
                 }
                 .onFailure { error ->
-                    // Login failed, show error message
                     uiState = uiState.copy(
                         isLoading = false,
                         errorMessage = error.message ?: "Login failed"
