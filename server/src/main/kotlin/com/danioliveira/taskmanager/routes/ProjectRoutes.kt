@@ -3,12 +3,18 @@ package com.danioliveira.taskmanager.routes
 import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
 import com.danioliveira.taskmanager.domain.service.ProjectService
-import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.route
 import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
 
@@ -27,14 +33,16 @@ fun Route.projectRoutes() {
                 )
                 val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
                 val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-                val projects = service.getProjectsByOwner(userId, page, size)
+                val query = call.request.queryParameters["query"]
+                val projects = service.getProjectsByOwner(userId, page, size, query)
                 call.respond(projects)
             }
 
             get("/all") {
                 val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
                 val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-                val projects = service.getAllProjects(page, size)
+                val query = call.request.queryParameters["query"]
+                val projects = service.getAllProjects(page, size, query)
                 call.respond(projects)
             }
 
@@ -50,7 +58,7 @@ fun Route.projectRoutes() {
 
             get("/{id}") {
                 val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val project = service.getProjectById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                val project = service.getProjectById(id)
                 call.respond(project)
             }
 

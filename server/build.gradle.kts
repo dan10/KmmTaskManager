@@ -53,7 +53,6 @@ dependencies {
     // Metrics and monitoring
     implementation(libs.ktor.server.metrics.micrometer)
     implementation(libs.micrometer.registry.prometheus)
-    implementation(project(":composeApp"))
 
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)

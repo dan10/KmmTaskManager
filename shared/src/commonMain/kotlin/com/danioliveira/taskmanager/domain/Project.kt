@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 data class Project(
     val id: String,
     val name: String,
+    val completed: Int,
+    val inProgress: Int,
+    val total: Int,
     val description: String?,
-    val ownerId: String,
-    val createdAt: String
 )

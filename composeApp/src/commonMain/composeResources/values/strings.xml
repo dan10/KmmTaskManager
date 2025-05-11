@@ -72,7 +72,16 @@
     <string name="post_comment">Post Comment</string>
 
     <!-- ProjectsScreen strings -->
-    <string name="projects_title">Projects Screen</string>
+    <string name="projects_title">Projects</string>
+    <string name="projects_search_placeholder">Search projects...</string>
+    <string name="projects_all">All Projects</string>
+    <string name="projects_add">Add Project</string>
+    <string name="projects_empty_title">No Projects Found</string>
+    <string name="projects_empty_subtitle">Create your first project to get started</string>
+    <string name="project_icon">Project icon</string>
+    <string name="project_completed">%d completed</string>
+    <string name="project_in_progress">%d in progress</string>
+    <string name="project_total">%d total</string>
 
     <!-- ProjectDetailsScreen strings -->
     <string name="project_details_title">Project Details</string>

@@ -71,7 +71,16 @@
     <string name="post_comment">Publicar Comentario</string>
 
     <!-- ProjectsScreen strings -->
-    <string name="projects_title">Pantalla de Proyectos</string>
+    <string name="projects_title">Proyectos</string>
+    <string name="projects_search_placeholder">Buscar proyectos...</string>
+    <string name="projects_all">Todos los Proyectos</string>
+    <string name="projects_add">Añadir Proyecto</string>
+    <string name="projects_empty_title">No se encontraron Proyectos</string>
+    <string name="projects_empty_subtitle">Crea tu primer proyecto para comenzar</string>
+    <string name="project_icon">Icono del proyecto</string>
+    <string name="project_completed">%d completadas</string>
+    <string name="project_in_progress">%d en progreso</string>
+    <string name="project_total">%d total</string>
 
     <!-- ProjectDetailsScreen strings -->
     <string name="project_details_title">Detalles del Proyecto</string>

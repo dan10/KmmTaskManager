@@ -3,18 +3,25 @@ package com.danioliveira.taskmanager.data.repository
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.data.dbQuery
+import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
+import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.util.*
-import kotlin.test.*
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ProjectRepositoryImplTest {
     private lateinit var projectRepository: ProjectRepository
     private lateinit var userRepository: UserRepository
+    private lateinit var taskRepository: TaskRepository
     private lateinit var testUserId: UUID
 
     @Before
@@ -23,6 +30,7 @@ class ProjectRepositoryImplTest {
         TestDatabase.init()
         projectRepository = ProjectRepositoryImpl()
         userRepository = UserRepositoryImpl()
+        taskRepository = TaskRepositoryImpl()
 
         // Create a test user to be used as the owner in project tests
         val user = dbQuery {
@@ -250,5 +258,82 @@ class ProjectRepositoryImplTest {
 
         // Verify the deletion failed
         assertFalse(deleted)
+    }
+
+    @Test
+    fun `test project task counts`() = runBlocking {
+        // Create a project
+        val project = dbQuery {
+            with(projectRepository) {
+                create("Project with Tasks", "A project with tasks in different states", testUserId)
+            }
+        }
+
+        val projectId = UUID.fromString(project.id)
+
+        // Create tasks with different statuses
+        // 2 TODO tasks
+        repeat(2) { i ->
+            dbQuery {
+                with(taskRepository) {
+                    create(
+                        "TODO Task $i",
+                        "Description for TODO task $i",
+                        projectId,
+                        null,
+                        testUserId,
+                        TaskStatus.TODO,
+                        null
+                    )
+                }
+            }
+        }
+
+        // 3 IN_PROGRESS tasks
+        repeat(3) { i ->
+            dbQuery {
+                with(taskRepository) {
+                    create(
+                        "In Progress Task $i",
+                        "Description for in progress task $i",
+                        projectId,
+                        null,
+                        testUserId,
+                        TaskStatus.IN_PROGRESS,
+                        null
+                    )
+                }
+            }
+        }
+
+        // 4 DONE tasks
+        repeat(4) { i ->
+            dbQuery {
+                with(taskRepository) {
+                    create(
+                        "Done Task $i",
+                        "Description for done task $i",
+                        projectId,
+                        null,
+                        testUserId,
+                        TaskStatus.DONE,
+                        null
+                    )
+                }
+            }
+        }
+
+        // Fetch the project to get the updated task counts
+        val updatedProject = dbQuery {
+            with(projectRepository) {
+                findById(projectId)
+            }
+        }
+
+        // Verify task counts
+        assertNotNull(updatedProject)
+        assertEquals(9, updatedProject.total)
+        assertEquals(4, updatedProject.completed)
+        assertEquals(3, updatedProject.inProgress)
     }
 }

@@ -8,19 +8,28 @@ import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
-import java.util.*
+import java.util.UUID
 
 class ProjectService(
     private val repository: ProjectRepository,
     private val assignmentRepository: ProjectAssignmentRepository
 ) {
-    suspend fun getProjectsByOwner(ownerId: String, page: Int = 0, size: Int = 10): PaginatedResponse<ProjectResponse> =
+    suspend fun getProjectsByOwner(
+        ownerId: String,
+        page: Int = 0,
+        size: Int = 10,
+        query: String? = null
+    ): PaginatedResponse<ProjectResponse> =
         dbQuery {
-            with(repository) { findByOwner(UUID.fromString(ownerId), page, size) }
+            with(repository) { findByOwner(UUID.fromString(ownerId), page, size, query) }
         }
 
-    suspend fun getAllProjects(page: Int = 0, size: Int = 10): PaginatedResponse<ProjectResponse> = dbQuery {
-        with(repository) { findAll(page, size) }
+    suspend fun getAllProjects(
+        page: Int = 0,
+        size: Int = 10,
+        query: String? = null
+    ): PaginatedResponse<ProjectResponse> = dbQuery {
+        with(repository) { findAll(page, size, query) }
     }
 
     suspend fun createProject(ownerId: String, request: ProjectCreateRequest): ProjectResponse = dbQuery {

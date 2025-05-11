@@ -293,7 +293,7 @@ private fun LoadingIndicator() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        androidx.compose.material.CircularProgressIndicator()
+        CircularProgressIndicator()
     }
 }
 

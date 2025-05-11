@@ -11,5 +11,8 @@ data class ProjectResponse(
     val name: String,
     val description: String?,
     val ownerId: String,
-    val createdAt: String
+    val createdAt: String,
+    val completed: Int = 0,
+    val inProgress: Int = 0,
+    val total: Int = 0
 )

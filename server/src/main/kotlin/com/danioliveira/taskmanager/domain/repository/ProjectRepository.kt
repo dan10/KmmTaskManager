@@ -3,7 +3,7 @@ package com.danioliveira.taskmanager.domain.repository
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.ProjectResponse
 import org.jetbrains.exposed.sql.Transaction
-import java.util.*
+import java.util.UUID
 
 interface ProjectRepository {
 
@@ -31,12 +31,14 @@ interface ProjectRepository {
      * @param ownerId the id of the user
      * @param page the page number (0-based)
      * @param size the page size
+     * @param query optional query to filter projects by name
      * @return a paginated response of projects [ProjectResponse] owned by the user
      */
     suspend fun Transaction.findByOwner(
         ownerId: UUID,
         page: Int = 0,
-        size: Int = 10
+        size: Int = 10,
+        query: String? = null
     ): PaginatedResponse<ProjectResponse>
 
     /**
@@ -44,9 +46,14 @@ interface ProjectRepository {
      *
      * @param page the page number (0-based)
      * @param size the page size
+     * @param query optional query to filter projects by name
      * @return a paginated response of all projects [ProjectResponse]
      */
-    suspend fun Transaction.findAll(page: Int = 0, size: Int = 10): PaginatedResponse<ProjectResponse>
+    suspend fun Transaction.findAll(
+        page: Int = 0,
+        size: Int = 10,
+        query: String? = null
+    ): PaginatedResponse<ProjectResponse>
 
     /**
      * Updates an existing project.

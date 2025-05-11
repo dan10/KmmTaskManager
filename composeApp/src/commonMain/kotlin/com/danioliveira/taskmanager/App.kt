@@ -24,7 +24,7 @@ import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
 import com.danioliveira.taskmanager.ui.login.LoginScreen
-import com.danioliveira.taskmanager.ui.projects.ProjectDetailsScreen
+import com.danioliveira.taskmanager.ui.project.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
 import com.danioliveira.taskmanager.ui.task.TaskCreatEditScreen
@@ -50,13 +50,9 @@ fun TaskItApp() {
             coroutineScope = rememberCoroutineScope()
         )
 
-        // Check authentication state when the app starts
-        LaunchedEffect(Unit) {
-            appState.checkAuthState()
-        }
 
         // Listen for authentication state changes
-        LaunchedEffect(appState.isAuthenticated, appState.isInitialAuthCheckDone) {
+        LaunchedEffect(appState) {
             appState.handleAuthNavigation()
         }
 
@@ -156,19 +152,26 @@ fun TaskItNavHost(
         }
 
         // Top level destinations
-        composable<Screen.Tasks>() {
+        composable<Screen.Tasks> {
             TasksScreen(
                 navigateToTaskDetail = { taskId -> navController.navigate(Screen.TasksDetails(taskId.toString())) },
                 navigateToCreateTask = { navController.navigate(Screen.CreateEditTask(null)) }
             )
         }
 
-        composable<Screen.Projects>() {
-            ProjectsScreen()
+        composable<Screen.Projects> {
+            ProjectsScreen(
+                navigateToCreateProject = { navController.navigate(Screen.CreateEditProject(null)) },
+                navigateToProjectDetail = { projectId -> navController.navigate(Screen.ProjectDetails(projectId)) }
+            )
         }
 
-        composable<Screen.Profile>() {
+        composable<Screen.Profile> {
             Text("Profile Screen - Coming Soon")
+        }
+
+        composable<Screen.CreateEditProject> {
+            Text("Create Project Screen - Coming Soon")
         }
 
         composable<Screen.CreateEditTask> { backStackEntry ->
