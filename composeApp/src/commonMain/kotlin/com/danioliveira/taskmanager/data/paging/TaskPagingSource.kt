@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.data.paging
 
-import app.cash.paging.PagingSource
-import app.cash.paging.PagingState
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.network.TaskApiService
 import com.danioliveira.taskmanager.domain.Task

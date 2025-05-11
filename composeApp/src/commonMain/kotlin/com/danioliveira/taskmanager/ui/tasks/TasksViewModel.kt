@@ -5,8 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.cash.paging.cachedIn
-import com.danioliveira.taskmanager.domain.repository.TaskRepository
+import androidx.paging.cachedIn
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
 import kotlinx.coroutines.launch
@@ -15,7 +14,6 @@ import kotlin.uuid.Uuid
 class TasksViewModel(
     private val getTasksUseCase: GetTasksUseCase,
     private val getTaskProgressUseCase: GetTaskProgressUseCase,
-    private val taskRepository: TaskRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(TasksState())
@@ -23,6 +21,9 @@ class TasksViewModel(
 
     var searchQuery by mutableStateOf("")
         private set
+
+    val taskFlow = getTasksUseCase(10, searchQuery.takeIf { it.isNotBlank() })
+        .cachedIn(viewModelScope)
 
     init {
         loadTasks()
@@ -32,8 +33,7 @@ class TasksViewModel(
     // This method uses GetTasksUseCase to load tasks
     private fun loadTasks() {
         // Use the paginated version of GetTasksUseCase
-        val taskFlow = getTasksUseCase(10, searchQuery.takeIf { it.isNotBlank() })
-            .cachedIn(viewModelScope)
+        getTasksUseCase(10, searchQuery.takeIf { it.isNotBlank() })
     }
 
     // This method uses GetTaskProgressUseCase to load progress information for the screen header

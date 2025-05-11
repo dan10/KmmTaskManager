@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
@@ -32,10 +35,21 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.domain.Task
+import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
+import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
+import com.danioliveira.taskmanager.paging.compose.itemContentType
+import com.danioliveira.taskmanager.paging.compose.itemKey
+import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.empty_task_list
 import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -49,6 +63,7 @@ fun TasksScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
     navigateToCreateTask: () -> Unit
 ) {
+
     Surface(color = Color(0XFFF1F5F9)) {
         // Create a wrapper for the onAction function that handles navigation
         val onAction: (TasksAction) -> Unit = { action ->
@@ -72,6 +87,7 @@ fun TasksScreen(
 
         TasksScreen(
             state = viewModel.state,
+            pagingItems = viewModel.taskFlow.collectAsLazyPagingItems(),
             searchText = viewModel.searchQuery,
             onAction = onAction,
             onSearchTextChange = viewModel::updateSearchQuery
@@ -82,6 +98,7 @@ fun TasksScreen(
 @Composable
 private fun TasksScreen(
     state: TasksState,
+    pagingItems: LazyPagingItems<Task>,
     searchText: String,
     onAction: (TasksAction) -> Unit,
     onSearchTextChange: (String) -> Unit
@@ -105,21 +122,34 @@ private fun TasksScreen(
                 .fillMaxWidth()
                 .padding(paddingValues)
         ) {
-            when {
-                state.isLoading -> {
-                    // Show full-screen loading indicator when loading
-                    LoadingIndicator()
+            LazyColumn {
+                items(
+                    count = pagingItems.itemCount,
+                    key = pagingItems.itemKey { it.id },
+                    contentType = pagingItems.itemContentType { "task" }) { index ->
+                    val task = pagingItems[index]
+                    if (task != null) {
+                        TaskItem(
+                            task = task,
+                            onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
+                            onCheckedChange = {},
+                        )
+                    }
                 }
 
-                state.totalTasks == 0 -> EmptyTasksList()
-                else -> {
-                    // Show a message that tasks are filtered by search
-                    if (searchText.isNotBlank()) {
-                        Text(
-                            text = "Showing progress for tasks matching: \"$searchText\"",
-                            style = MaterialTheme.typography.subtitle1,
-                            modifier = Modifier.padding(16.dp)
+                if (pagingItems.loadState.append == LoadState.Loading) {
+                    item {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally)
                         )
+                    }
+                }
+
+                if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
+                    item {
+                        EmptyTasksList()
                     }
                 }
             }
@@ -283,17 +313,44 @@ fun AddTaskButton(
     }
 }
 
+/**
+ * The preview function should be responsible for creating the fake data and passing it to the
+ * function that displays it.
+ */
 @OptIn(ExperimentalUuidApi::class)
 @Preview
 @Composable
 fun TasksScreenPreview() {
+    // create list of fake data for preview
+    val fakeData = List(10) { index ->
+        Task(
+            id = Uuid.parse("00000000-0000-0000-0000-00000000000$index"),
+            title = "Preview Task $index",
+            description = "This is a preview task description",
+            projectName = "Preview Project",
+            status = if (index < 3) TaskStatus.DONE else TaskStatus.TODO,
+            priority = when (index % 3) {
+                0 -> Priority.HIGH
+                1 -> Priority.MEDIUM
+                else -> Priority.LOW
+            },
+            dueDate = "2023-12-31"
+        )
+    }
+    // create pagingData from a list of fake data
+    val pagingData = PagingData.from(fakeData)
+    // pass pagingData containing fake data to a MutableStateFlow
+    val fakeDataFlow = MutableStateFlow(pagingData)
+
     TaskItTheme {
         TasksScreen(
             state = TasksState(
                 completedTasks = 3,
-                totalTasks = 5,
+                totalTasks = 10,
                 isLoading = false,
             ),
+            // pass flow to composable
+            pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
             searchText = "",
             onAction = {},
             onSearchTextChange = {}
@@ -301,9 +358,31 @@ fun TasksScreenPreview() {
     }
 }
 
+/**
+ * The preview function should be responsible for creating the fake data and passing it to the
+ * function that displays it.
+ */
+@OptIn(ExperimentalUuidApi::class)
 @Preview
 @Composable
 fun EmptyTasksScreenPreview() {
+    // create list of fake data for preview
+    val fakeData = List(0) {
+        Task(
+            id = Uuid.parse("00000000-0000-0000-0000-000000000000"),
+            title = "Preview Task",
+            description = "This is a preview task description",
+            projectName = "Preview Project",
+            status = TaskStatus.TODO,
+            priority = Priority.MEDIUM,
+            dueDate = "2023-12-31"
+        )
+    }
+    // create pagingData from a list of fake data
+    val pagingData = PagingData.from(fakeData)
+    // pass pagingData containing fake data to a MutableStateFlow
+    val fakeDataFlow = MutableStateFlow(pagingData)
+
     TaskItTheme {
         TasksScreen(
             state = TasksState(
@@ -311,6 +390,8 @@ fun EmptyTasksScreenPreview() {
                 totalTasks = 0,
                 isLoading = false,
             ),
+            // pass flow to composable
+            pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
             searchText = "",
             onAction = {},
             onSearchTextChange = {}

@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.domain.repository
 
-import app.cash.paging.PagingData
+import androidx.paging.PagingData
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse

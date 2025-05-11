@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.domain.usecase.tasks
 
-import app.cash.paging.PagingData
+import androidx.paging.PagingData
 import com.danioliveira.taskmanager.domain.Task
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow

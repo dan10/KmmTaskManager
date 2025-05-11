@@ -5,10 +5,17 @@ import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 
 /**
  * API service for task operations.
@@ -25,7 +32,7 @@ class TaskApiService(
      * @return PaginatedResponse containing the tasks and task progress information
      */
     suspend fun getTasks(page: Int, size: Int, query: String? = null): PaginatedResponse<TaskResponse> {
-        return client.get("/tasks") {
+        return client.get("api/tasks") {
             parameter("page", page)
             parameter("size", size)
             if (query != null && query.isNotBlank()) {
@@ -41,7 +48,7 @@ class TaskApiService(
      * @return TaskResponse containing the task details
      */
     suspend fun getTask(taskId: String): TaskResponse {
-        return client.get("/tasks/$taskId").body()
+        return client.get("api/tasks/$taskId").body()
     }
 
     /**
@@ -52,7 +59,7 @@ class TaskApiService(
      * @return TaskResponse containing the updated task details
      */
     suspend fun updateTaskStatus(taskId: String, status: String): TaskResponse {
-        return client.post("/tasks/$taskId/status") {
+        return client.post("api/tasks/$taskId/status") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("status" to status))
         }.body()
@@ -65,7 +72,7 @@ class TaskApiService(
      * @return TaskProgressResponse containing the task progress information
      */
     suspend fun getTaskProgress(query: String? = null): TaskProgressResponse {
-        return client.get("/tasks/progress") {
+        return client.get("api/tasks/progress") {
             if (query != null && query.isNotBlank()) {
                 parameter("query", query)
             }
@@ -79,7 +86,7 @@ class TaskApiService(
      * @return TaskResponse containing the created task details
      */
     suspend fun createTask(request: TaskCreateRequest): TaskResponse {
-        return client.post("/tasks") {
+        return client.post("api/tasks") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -93,7 +100,7 @@ class TaskApiService(
      * @return TaskResponse containing the updated task details
      */
     suspend fun updateTask(taskId: String, request: TaskUpdateRequest): TaskResponse {
-        return client.put("/tasks/$taskId") {
+        return client.put("api/tasks/$taskId") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -106,7 +113,7 @@ class TaskApiService(
      * @return True if the task was deleted successfully, false otherwise
      */
     suspend fun deleteTask(taskId: String): Boolean {
-        val response = client.delete("/tasks/$taskId")
+        val response = client.delete("api/tasks/$taskId")
         return response.status == HttpStatusCode.NoContent
     }
 }

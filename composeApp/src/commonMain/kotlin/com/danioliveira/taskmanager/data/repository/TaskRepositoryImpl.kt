@@ -1,8 +1,8 @@
 package com.danioliveira.taskmanager.data.repository
 
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
-import app.cash.paging.PagingData
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
@@ -12,7 +12,8 @@ import com.danioliveira.taskmanager.data.network.TaskApiService
 import com.danioliveira.taskmanager.data.paging.TaskPagingSource
 import com.danioliveira.taskmanager.domain.Task
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
-import io.ktor.client.plugins.*
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.flow.Flow
 
 /**
