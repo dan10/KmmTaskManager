@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager.ui.login
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,6 +8,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.danioliveira.taskmanager.domain.usecase.login.LoginUseCase
+import com.danioliveira.taskmanager.ui.validation.ValidationUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,19 +30,18 @@ class LoginViewModel(
     var loginText by mutableStateOf("")
         private set
 
-    var passwordText by mutableStateOf("")
-        private set
+    val passwordText = TextFieldState()
 
     val emailHasError: StateFlow<Boolean> = snapshotFlow { loginText }
-        .mapLatest { !it.matches(emailAddressRegex) }
+        .mapLatest { !ValidationUtils.isEmailValid(it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = false
         )
 
-    val passwordHasError: StateFlow<Boolean> = snapshotFlow { passwordText }
-        .mapLatest { it.length < 8 }
+    val passwordHasError: StateFlow<Boolean> = snapshotFlow { passwordText.text }
+        .mapLatest { !ValidationUtils.isPasswordValid(it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -63,7 +64,7 @@ class LoginViewModel(
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, errorMessage = null)
 
-            loginUseCase(loginText, passwordText)
+            loginUseCase(loginText, passwordText.text.toString())
                 .onSuccess {
                     uiState = uiState.copy(isLoading = false)
                     navigateToHome()
@@ -80,20 +81,8 @@ class LoginViewModel(
     fun handleActions(action: LoginAction) {
         when(action) {
             is LoginAction.UpdateEmail -> loginText = action.email
-            is LoginAction.UpdatePassword -> passwordText = action.password
             is LoginAction.Login -> login()
         }
     }
 
-    companion object {
-        private val emailAddressRegex = Regex(
-            "[a-zA-Z0-9+._%\\-]{1,256}" +
-                    "@" +
-                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-                    "(" +
-                    "\\." +
-                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-                    ")+"
-        )
-    }
 }

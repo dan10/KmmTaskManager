@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -33,6 +35,8 @@ import kmmtaskmanager.composeapp.generated.resources.title_confirm_password
 import kmmtaskmanager.composeapp.generated.resources.title_confirm_password_error
 import kmmtaskmanager.composeapp.generated.resources.title_email
 import kmmtaskmanager.composeapp.generated.resources.title_email_error
+import kmmtaskmanager.composeapp.generated.resources.title_name
+import kmmtaskmanager.composeapp.generated.resources.title_name_error
 import kmmtaskmanager.composeapp.generated.resources.title_password
 import kmmtaskmanager.composeapp.generated.resources.title_password_error
 import kmmtaskmanager.composeapp.generated.resources.title_register_button
@@ -49,20 +53,12 @@ fun RegisterScreen(
 ) {
     // Set the navigation callback for successful registration
     viewModel.onRegistrationSuccess = navigateToHome
-    val isFormInvalid by viewModel.isFormValid.collectAsState()
-    val emailHasError by viewModel.emailHasError.collectAsState()
-    val passwordHasError by viewModel.passwordHasError.collectAsState()
-    val confirmPasswordHasError by viewModel.confirmPasswordHasError.collectAsState()
+
+    // Collect state
+    val state by viewModel.uiState.collectAsState()
 
     RegisterScreen(
-        state = viewModel.state,
-        email = viewModel.emailText,
-        password = viewModel.passwordText,
-        confirmPassword = viewModel.confirmPasswordText,
-        emailHasError = { emailHasError },
-        passwordHasError = { passwordHasError },
-        confirmPasswordHasError = { confirmPasswordHasError },
-        isFormValid = { isFormInvalid },
+        state = state,
         navigateToLogin = navigateToLogin,
         onAction = viewModel::handleActions
     )
@@ -71,13 +67,6 @@ fun RegisterScreen(
 @Composable
 private fun RegisterScreen(
     state: RegisterState,
-    email: String,
-    password: String,
-    confirmPassword: String,
-    emailHasError: () -> Boolean,
-    passwordHasError: () -> Boolean,
-    confirmPasswordHasError: () -> Boolean,
-    isFormValid: () -> Boolean,
     navigateToLogin: () -> Unit,
     onAction: (RegisterAction) -> Unit
 ) {
@@ -101,90 +90,128 @@ private fun RegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_app_logo),
-                    tint = Color.Unspecified,
-                    contentDescription = stringResource(Res.string.app_name),
-                    modifier = Modifier.size(64.dp)
+                RegisterHeader()
+
+                RegisterForm(
+                    name = state.name,
+                    email = state.email,
+                    password = state.password,
+                    confirmPassword = state.confirmPassword,
+                    isLoading = state.isLoading,
+                    nameHasError = { state.nameHasError },
+                    emailHasError = { state.emailHasError },
+                    passwordHasError = { state.passwordHasError },
+                    confirmPasswordHasError = { state.confirmPasswordHasError },
+                    buttonEnabled = { state.isButtonEnabled },
+                    onRegisterClick = { onAction(RegisterAction.Register) }
                 )
 
-                Text(
-                    text = "Create Account",
-                    style = MaterialTheme.typography.h4
-                )
-
-                TrackItInputField(
-                    value = email,
-                    onValueChange = { onAction(RegisterAction.UpdateEmail(it)) },
-                    label = stringResource(Res.string.title_email),
-                    enabled = !state.isLoading,
-                    isError = emailHasError(),
-                    errorMessage = stringResource(Res.string.title_email_error),
-                )
-
-                TrackItPasswordField(
-                    value = password,
-                    onValueChange = { onAction(RegisterAction.UpdatePassword(it)) },
-                    label = stringResource(Res.string.title_password),
-                    enabled = !state.isLoading,
-                    isError = passwordHasError(),
-                    errorMessage = stringResource(Res.string.title_password_error),
-                )
-
-                TrackItPasswordField(
-                    value = confirmPassword,
-                    onValueChange = { onAction(RegisterAction.UpdateConfirmPassword(it)) },
-                    label = stringResource(Res.string.title_confirm_password),
-                    enabled = !state.isLoading,
-                    isError = confirmPasswordHasError(),
-                    errorMessage = stringResource(Res.string.title_confirm_password_error),
-                )
-
-                TrackItButton(
-                    label = stringResource(Res.string.title_register_button),
-                    onClick = { onAction(RegisterAction.Register) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = isFormValid() && !state.isLoading,
-                    isLoading = state.isLoading
-                )
-
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(Res.string.title_already_have_account),
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
-                    )
-                    TextButton(onClick = { navigateToLogin() }) {
-                        Text(
-                            text = stringResource(Res.string.button_sign_in),
-                            color = MaterialTheme.colors.primary,
-                            style = MaterialTheme.typography.button
-                        )
-                    }
-                }
+                LoginNavigation(navigateToLogin = navigateToLogin)
             }
+        }
+    }
+}
+
+@Composable
+private fun RegisterHeader() {
+    Icon(
+        painter = painterResource(Res.drawable.ic_app_logo),
+        tint = Color.Unspecified,
+        contentDescription = stringResource(Res.string.app_name),
+        modifier = Modifier.size(64.dp)
+    )
+
+    Text(
+        text = "Create Account",
+        style = MaterialTheme.typography.h4
+    )
+}
+
+@Composable
+private fun RegisterForm(
+    name: TextFieldState,
+    email: TextFieldState,
+    password: TextFieldState,
+    confirmPassword: TextFieldState,
+    isLoading: Boolean,
+    nameHasError: () -> Boolean,
+    emailHasError: () -> Boolean,
+    passwordHasError: () -> Boolean,
+    confirmPasswordHasError: () -> Boolean,
+    buttonEnabled: () -> Boolean,
+    onRegisterClick: () -> Unit
+) {
+    TrackItInputField(
+        state = name,
+        label = stringResource(Res.string.title_name),
+        enabled = !isLoading,
+        isError = nameHasError(),
+        lineLimits = TextFieldLineLimits.SingleLine,
+        errorMessage = stringResource(Res.string.title_name_error),
+    )
+
+    TrackItInputField(
+        state = email,
+        label = stringResource(Res.string.title_email),
+        enabled = !isLoading,
+        isError = emailHasError(),
+        lineLimits = TextFieldLineLimits.SingleLine,
+        errorMessage = stringResource(Res.string.title_email_error),
+    )
+
+    TrackItPasswordField(
+        state = password,
+        label = stringResource(Res.string.title_password),
+        enabled = !isLoading,
+        isError = passwordHasError(),
+        errorMessage = stringResource(Res.string.title_password_error),
+    )
+
+    TrackItPasswordField(
+        state = confirmPassword,
+        label = stringResource(Res.string.title_confirm_password),
+        enabled = !isLoading,
+        isError = confirmPasswordHasError(),
+        errorMessage = stringResource(Res.string.title_confirm_password_error),
+    )
+
+    TrackItButton(
+        label = stringResource(Res.string.title_register_button),
+        onClick = onRegisterClick,
+        modifier = Modifier.fillMaxWidth(),
+        enabled = buttonEnabled(),
+        isLoading = isLoading
+    )
+}
+
+@Composable
+private fun LoginNavigation(navigateToLogin: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(Res.string.title_already_have_account),
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+        )
+        TextButton(onClick = { navigateToLogin() }) {
+            Text(
+                text = stringResource(Res.string.button_sign_in),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.button
+            )
         }
     }
 }
 
 @Preview
 @Composable
-fun RegisterScreenPreview() {
+private fun RegisterScreenPreview() {
     TaskItTheme {
         RegisterScreen(
             state = RegisterState(),
-            email = "email",
-            password = "password",
-            confirmPassword = "password",
-            emailHasError = { false },
-            passwordHasError = { false },
-            confirmPasswordHasError = { false },
-            isFormValid = { true },
             navigateToLogin = {},
             onAction = {}
         )

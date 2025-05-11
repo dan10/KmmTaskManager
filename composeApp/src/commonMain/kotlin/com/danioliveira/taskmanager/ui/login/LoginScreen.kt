@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -73,7 +74,7 @@ fun LoginScreen(
     state: LoginState,
     email: String,
     emailHasError: Boolean,
-    password: String,
+    password: TextFieldState,
     passwordHasError: Boolean,
     isFormValid: Boolean,
     onAction: (LoginAction) -> Unit,
@@ -123,12 +124,10 @@ fun LoginScreen(
 
                 TrackItPasswordField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = password,
-                    onValueChange = { onAction(LoginAction.UpdatePassword(it)) },
+                    state = password,
                     label = stringResource(Res.string.title_password),
                     isError = passwordHasError,
                     errorMessage = stringResource(Res.string.title_password_error),
-                    singleLine = true,
                     enabled = !state.isLoading
                 )
 
@@ -180,7 +179,7 @@ fun LoginAccountLink(
 @Composable
 fun LoginScreenPreview() {
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val password = TextFieldState()
     TaskItTheme {
         LoginScreen(
             state = LoginState(),
@@ -192,7 +191,6 @@ fun LoginScreenPreview() {
             onAction = {
                 when (it) {
                     is LoginAction.UpdateEmail -> email = it.email
-                    is LoginAction.UpdatePassword -> password = it.password
                     is LoginAction.Login -> Unit
                 }
             },

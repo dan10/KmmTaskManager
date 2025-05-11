@@ -6,7 +6,6 @@ import com.danioliveira.taskmanager.api.response.AuthResponse
 import com.danioliveira.taskmanager.data.network.AuthApiService
 import com.danioliveira.taskmanager.data.storage.TokenStorage
 import com.danioliveira.taskmanager.domain.repository.AuthRepository
-import io.ktor.client.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -24,14 +23,8 @@ class AuthRepositoryImpl(
 
     override suspend fun login(loginRequest: LoginRequest): Result<AuthResponse> {
         return try {
-            val response = apiService.login(loginRequest)
+            val response = withContext(Dispatchers.IO) { apiService.login(loginRequest) }
             Result.success(response)
-        } catch (e: ClientRequestException) {
-            // Handle client errors (4xx)
-            Result.failure(Exception("Login failed: ${e.message}"))
-        } catch (e: ServerResponseException) {
-            // Handle server errors (5xx)
-            Result.failure(Exception("Server error: ${e.message}"))
         } catch (e: Exception) {
             // Handle other exceptions
             Result.failure(Exception("Unknown error: ${e.message}"))
@@ -42,15 +35,8 @@ class AuthRepositoryImpl(
         return try {
             val response = withContext(Dispatchers.IO) { apiService.register(registerRequest) }
             Result.success(response)
-        } catch (e: ClientRequestException) {
-            // Handle client errors (4xx)
-            Result.failure(Exception("Registration failed: ${e.message}"))
-        } catch (e: ServerResponseException) {
-            // Handle server errors (5xx)
-            Result.failure(Exception("Server error: ${e.message}"))
         } catch (e: Exception) {
-            // Handle other exceptions
-            Result.failure(Exception("Unknown error: ${e.message}"))
+            Result.failure(e)
         }
     }
 

@@ -4,9 +4,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedSecureTextField
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -68,37 +71,80 @@ fun TrackItInputField(
 }
 
 @Composable
-fun TrackItPasswordField(
-    value: String,
-    onValueChange: (String) -> Unit,
+fun TrackItInputField(
+    state: TextFieldState,
     label: String,
     isError: Boolean,
     errorMessage: String,
     enabled: Boolean,
     modifier: Modifier = Modifier,
-    singleLine: Boolean = true
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    TrackItInputField(
-        value = value,
-        onValueChange = onValueChange,
-        label = label,
-        isError = isError,
-        errorMessage = errorMessage,
-        enabled = enabled,
-        modifier = modifier,
-        singleLine = singleLine,
-        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        trailingIcon = {
-            PasswordIcon(
-                passwordVisible = passwordVisible,
-                onClick = {
-                    passwordVisible = !passwordVisible
-                }
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            state = state,
+            label = {
+                Text(
+                    text = label,
+                    color = MaterialTheme.colors.onSurface
+                )
+            },
+            lineLimits = lineLimits,
+            enabled = enabled,
+            isError = isError,
+            trailingIcon = trailingIcon
+        )
+        AnimatedVisibility(visible = isError) {
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = errorMessage,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
             )
         }
-    )
+    }
+}
+
+@Composable
+fun TrackItPasswordField(
+    state: TextFieldState,
+    label: String,
+    isError: Boolean,
+    errorMessage: String,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    Column(modifier = modifier) {
+        OutlinedSecureTextField(
+            state = state,
+            label = {
+                Text(
+                    text = label,
+                    color = MaterialTheme.colors.onSurface
+                )
+            },
+            enabled = enabled,
+            isError = isError,
+            textObfuscationMode = if (passwordVisible) TextObfuscationMode.Visible else TextObfuscationMode.RevealLastTyped,
+            trailingIcon = {
+                PasswordIcon(
+                    passwordVisible = passwordVisible,
+                    onClick = { passwordVisible = !passwordVisible }
+                )
+            }
+        )
+        AnimatedVisibility(visible = isError) {
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = errorMessage,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+            )
+        }
+    }
 }
 
 @Composable

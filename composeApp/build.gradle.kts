@@ -67,13 +67,14 @@ kotlin {
             implementation(libs.androidx.datastore)
             implementation(libs.androidx.datastore.preferences)
             implementation(libs.androidx.datastore.preferences.core)
-            implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
+            implementation(libs.material.icons.core)
         }
 
         all {
             languageSettings {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
                 optIn("kotlin.uuid.ExperimentalUuidApi")
+                optIn("kotlinx.coroutines.FlowPreview")
             }
         }
     }

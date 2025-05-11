@@ -15,6 +15,7 @@
     <string name="button_sign_up">Sign Up</string>
 
     <!-- LoginScreen and RegisterScreen strings -->
+
     <string name="title_email">Email</string>
     <string name="title_password">Password</string>
     <string name="title_login_button">Login</string>
@@ -22,6 +23,8 @@
     <string name="title_password_error">Password must be at least 8 characters</string>
 
     <!-- RegisterScreen strings -->
+    <string name="title_name">Name</string>
+    <string name="title_name_error">Name should not be empty</string>
     <string name="title_register_button">Register</string>
     <string name="title_confirm_password">Confirm Password</string>
     <string name="title_confirm_password_error">Passwords do not match</string>

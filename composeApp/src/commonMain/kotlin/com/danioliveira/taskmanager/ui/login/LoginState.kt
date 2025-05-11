@@ -7,6 +7,5 @@ data class LoginState(
 
 sealed interface LoginAction {
     data class UpdateEmail(val email: String) : LoginAction
-    data class UpdatePassword(val password: String) : LoginAction
     data object Login : LoginAction
 }
