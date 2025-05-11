@@ -80,7 +80,7 @@ private fun RegisterScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .padding(16.dp),
+                .padding(8.dp),
             elevation = 8.dp
         ) {
             Column(

@@ -119,6 +119,7 @@ fun TrackItPasswordField(
     var passwordVisible by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
         OutlinedSecureTextField(
+            modifier = Modifier.fillMaxWidth(),
             state = state,
             label = {
                 Text(
@@ -128,7 +129,8 @@ fun TrackItPasswordField(
             },
             enabled = enabled,
             isError = isError,
-            textObfuscationMode = if (passwordVisible) TextObfuscationMode.Visible else TextObfuscationMode.RevealLastTyped,
+            textObfuscationMode = if (passwordVisible) TextObfuscationMode.Visible
+            else TextObfuscationMode.RevealLastTyped,
             trailingIcon = {
                 PasswordIcon(
                     passwordVisible = passwordVisible,
