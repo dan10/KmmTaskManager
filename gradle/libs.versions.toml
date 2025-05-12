@@ -31,6 +31,7 @@ postgresql = "42.7.5"
 prometheus = "1.14.6"
 h2 = "2.3.232"
 graalvm = "0.10.1"
+testcontainers = "1.19.7"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -93,6 +94,12 @@ material-icons-core = { module = "org.jetbrains.compose.material:material-icons-
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+
+# TestContainers
+testcontainers-core = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
+testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgresql = { group = "org.testcontainers", name = "postgresql", version.ref = "testcontainers" }
+testcontainers-minio = { group = "org.testcontainers", name = "minio", version.ref = "testcontainers" }
 
 # Metrics and monitoring
 ktor-server-metrics-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }

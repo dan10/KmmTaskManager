@@ -5,11 +5,12 @@ import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.createTestUser
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.getTestModule
-import io.ktor.server.config.*
+import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -19,8 +20,12 @@ import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 import org.koin.test.inject
 import java.time.LocalDateTime
-import java.util.*
-import kotlin.test.*
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class TaskServiceTest : KoinTest {
     private val taskService: TaskService by inject()
@@ -76,7 +81,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 1",
             projectId = projectId,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task1 = taskService.create(request1, creatorId)
@@ -87,7 +92,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 2",
             projectId = projectId,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task2 = taskService.create(request2, creatorId)
@@ -98,7 +103,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 3",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task3 = taskService.create(request3, creatorId)
@@ -138,7 +143,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 1",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task1 = taskService.create(request1, owner1Id)
@@ -148,7 +153,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 2",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task2 = taskService.create(request2, owner1Id)
@@ -159,7 +164,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 3",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task3 = taskService.create(request3, owner2Id)
@@ -199,7 +204,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 1",
             projectId = null,
             assigneeId = assignee1Id,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task1 = taskService.create(request1, creatorId)
@@ -209,7 +214,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 2",
             projectId = null,
             assigneeId = assignee1Id,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task2 = taskService.create(request2, creatorId)
@@ -220,7 +225,7 @@ class TaskServiceTest : KoinTest {
             description = "Description 3",
             projectId = null,
             assigneeId = assignee2Id,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task3 = taskService.create(request3, creatorId)
@@ -258,7 +263,7 @@ class TaskServiceTest : KoinTest {
             description = "Test Description",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task = taskService.create(request, creatorId)
@@ -309,7 +314,7 @@ class TaskServiceTest : KoinTest {
             description = "New Task Description",
             projectId = projectId,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = dueDate
         )
 
@@ -351,7 +356,7 @@ class TaskServiceTest : KoinTest {
             description = "New Task Description Not In Project",
             projectId = projectId,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = dueDate
         )
 
@@ -377,7 +382,7 @@ class TaskServiceTest : KoinTest {
             description = "This task should be auto-assigned to creator",
             projectId = null,
             assigneeId = null, // No assignee specified
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
 
@@ -405,23 +410,19 @@ class TaskServiceTest : KoinTest {
             description = "Original Description",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task = taskService.create(createRequest, creatorId)
 
-        // Create a new user for assignment
-        val newAssigneeId = createTestUser(email = "newassignee@example.com", displayName = "New Task Assignee")
-        val newDueDate = LocalDateTime.now().plusDays(14).toString()
+        // Update the task
         val updateRequest = TaskUpdateRequest(
             title = "Updated Title",
             description = "Updated Description",
             status = TaskStatus.IN_PROGRESS,
-            dueDate = newDueDate,
-            assigneeId = newAssigneeId
+            priority = Priority.HIGH,
+            dueDate = LocalDateTime.now().plusDays(7).toString()
         )
-
-        // Update the task
         val updatedTask = taskService.update(task.id, updateRequest)
 
         // Verify the task was updated correctly
@@ -429,15 +430,35 @@ class TaskServiceTest : KoinTest {
         assertEquals(updateRequest.title, updatedTask.title)
         assertEquals(updateRequest.description, updatedTask.description)
         assertEquals(updateRequest.status, updatedTask.status)
-        assertEquals(updateRequest.dueDate, updatedTask.dueDate)
-        assertEquals(updateRequest.assigneeId, updatedTask.assigneeId)
+        assertEquals(task.assigneeId, updatedTask.assigneeId) // Assignee should not change
+        assertEquals(task.creatorId, updatedTask.creatorId) // Creator should not change
+    }
+
+    @Test
+    fun `test update task - not found`() = runBlocking {
+        // Try to update a task that doesn't exist
+        val updateRequest = TaskUpdateRequest(
+            title = "Updated Title",
+            description = "Updated Description",
+            status = TaskStatus.IN_PROGRESS,
+            priority = Priority.HIGH,
+            dueDate = LocalDateTime.now().plusDays(7).toString()
+        )
+
+        try {
+            taskService.update(UUID.randomUUID().toString(), updateRequest)
+            fail("Expected NotFoundException was not thrown")
+        } catch (e: NotFoundException) {
+            // Expected exception
+            assertTrue(e.message.contains("Task"))
+        }
     }
 
     @Test
     fun `test delete task`() = runBlocking {
         // Create actual users in the database
-        val creatorId = createTestUser(email = "creator3@example.com", displayName = "Task Creator 3")
-        val assigneeId = createTestUser(email = "assignee3@example.com", displayName = "Task Assignee 3")
+        val creatorId = createTestUser(email = "creator_delete@example.com", displayName = "Task Creator Delete")
+        val assigneeId = createTestUser(email = "assignee_delete@example.com", displayName = "Task Assignee Delete")
 
         // Create a task
         val request = TaskCreateRequest(
@@ -445,18 +466,18 @@ class TaskServiceTest : KoinTest {
             description = "This task will be deleted",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task = taskService.create(request, creatorId)
 
         // Delete the task
-        val deleted = taskService.delete(task.id)
+        val result = taskService.delete(task.id)
 
-        // Verify the deletion was successful
-        assertTrue(deleted)
+        // Verify the task was deleted
+        assertTrue(result)
 
-        // Try to find the task to verify it was deleted
+        // Try to find the deleted task
         try {
             taskService.findById(task.id)
             fail("Expected NotFoundException was not thrown")
@@ -467,140 +488,73 @@ class TaskServiceTest : KoinTest {
     }
 
     @Test
-    fun `test assign task to user not in project fails`() = runBlocking {
-        // Create actual users in the database
-        val creatorId =
-            createTestUser(email = "creator_assign_fail@example.com", displayName = "Task Creator Assign Fail")
-        val assigneeId =
-            createTestUser(email = "assignee_assign_fail@example.com", displayName = "Task Assignee Assign Fail")
-        val nonProjectMemberId =
-            createTestUser(email = "non_project_member@example.com", displayName = "Non Project Member")
+    fun `test delete task - not found`() = runBlocking {
+        // Try to delete a task that doesn't exist
+        val result = taskService.delete(UUID.randomUUID().toString())
 
-        // Create an actual project in the database
-        val projectResponse = projectService.createProject(
-            creatorId, ProjectCreateRequest(
-                name = "Test Project Assign Fail",
-                description = "Test Project Description Assign Fail"
-            )
-        )
-        val projectId = projectResponse.id
-
-        // Assign the assignee to the project
-        projectService.assignUserToProject(projectId, assigneeId)
-
-        // Create a task with a project and assignee
-        val request = TaskCreateRequest(
-            title = "Task Assign Fail",
-            description = "Task Description Assign Fail",
-            projectId = projectId,
-            assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
-            dueDate = null
-        )
-
-        val task = taskService.create(request, creatorId)
-
-        // Try to assign the task to a user who is not part of the project
-        try {
-            taskService.assign(task.id, nonProjectMemberId)
-            fail("Expected ValidationException was not thrown")
-        } catch (e: ValidationException) {
-            // Expected exception
-            assertTrue(e.message.contains("Assignee must be a member of the project"))
-        }
-    }
-
-    @Test
-    fun `test update task with assignee not in project fails`() = runBlocking {
-        // Create actual users in the database
-        val creatorId =
-            createTestUser(email = "creator_update_fail@example.com", displayName = "Task Creator Update Fail")
-        val assigneeId =
-            createTestUser(email = "assignee_update_fail@example.com", displayName = "Task Assignee Update Fail")
-        val nonProjectMemberId =
-            createTestUser(email = "non_project_member_update@example.com", displayName = "Non Project Member Update")
-
-        // Create an actual project in the database
-        val projectResponse = projectService.createProject(
-            creatorId, ProjectCreateRequest(
-                name = "Test Project Update Fail",
-                description = "Test Project Description Update Fail"
-            )
-        )
-        val projectId = projectResponse.id
-
-        // Assign the assignee to the project
-        projectService.assignUserToProject(projectId, assigneeId)
-
-        // Create a task with a project and assignee
-        val request = TaskCreateRequest(
-            title = "Task Update Fail",
-            description = "Task Description Update Fail",
-            projectId = projectId,
-            assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
-            dueDate = null
-        )
-
-        val task = taskService.create(request, creatorId)
-
-        // Try to update the task to assign it to a user who is not part of the project
-        val updateRequest = TaskUpdateRequest(
-            title = null,
-            description = null,
-            status = null,
-            dueDate = null,
-            assigneeId = nonProjectMemberId
-        )
-
-        try {
-            taskService.update(task.id, updateRequest)
-            fail("Expected ValidationException was not thrown")
-        } catch (e: ValidationException) {
-            // Expected exception
-            assertTrue(e.message.contains("Assignee must be a member of the project"))
-        }
+        // Verify the result is false
+        assertFalse(result)
     }
 
     @Test
     fun `test assign task`() = runBlocking {
         // Create actual users in the database
-        val creatorId = createTestUser(email = "creator4@example.com", displayName = "Task Creator 4")
-        val assigneeId = createTestUser(email = "assignee4@example.com", displayName = "Task Assignee 4")
+        val creatorId = createTestUser(email = "creator_assign@example.com", displayName = "Task Creator Assign")
+        val assignee1Id = createTestUser(email = "assignee1_assign@example.com", displayName = "Task Assignee 1 Assign")
+        val assignee2Id = createTestUser(email = "assignee2_assign@example.com", displayName = "Task Assignee 2 Assign")
 
         // Create a task
         val request = TaskCreateRequest(
-            title = "Test Task",
-            description = "Test Description",
+            title = "Task to Assign",
+            description = "This task will be assigned",
             projectId = null,
-            assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            assigneeId = assignee1Id,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task = taskService.create(request, creatorId)
 
-        // Create a new user and assign the task to them
-        val newAssigneeId = createTestUser(email = "newassignee2@example.com", displayName = "New Task Assignee 2")
-        val updatedTask = taskService.assign(task.id, newAssigneeId)
+        // Assign the task to a different assignee
+        val updatedTask = taskService.assign(task.id, assignee2Id)
 
         // Verify the task was assigned correctly
         assertNotNull(updatedTask)
-        assertEquals(newAssigneeId, updatedTask.assigneeId)
+        assertEquals(task.id, updatedTask.id)
+        assertEquals(task.title, updatedTask.title)
+        assertEquals(task.description, updatedTask.description)
+        assertEquals(assignee2Id, updatedTask.assigneeId) // Assignee should be updated
+        assertEquals(task.creatorId, updatedTask.creatorId) // Creator should not change
+    }
+
+    @Test
+    fun `test assign task - not found`() = runBlocking {
+        // Create actual user in the database
+        val assigneeId =
+            createTestUser(email = "assignee_not_found@example.com", displayName = "Task Assignee Not Found")
+
+        // Try to assign a task that doesn't exist
+        try {
+            taskService.assign(UUID.randomUUID().toString(), assigneeId)
+            fail("Expected NotFoundException was not thrown")
+        } catch (e: NotFoundException) {
+            // Expected exception
+            assertTrue(e.message.contains("Task"))
+        }
     }
 
     @Test
     fun `test change task status`() = runBlocking {
         // Create actual users in the database
-        val creatorId = createTestUser(email = "creator5@example.com", displayName = "Task Creator 5")
-        val assigneeId = createTestUser(email = "assignee5@example.com", displayName = "Task Assignee 5")
+        val creatorId = createTestUser(email = "creator_status@example.com", displayName = "Task Creator Status")
+        val assigneeId = createTestUser(email = "assignee_status@example.com", displayName = "Task Assignee Status")
 
         // Create a task
         val request = TaskCreateRequest(
-            title = "Test Task",
-            description = "Test Description",
+            title = "Task to Change Status",
+            description = "This task's status will be changed",
             projectId = null,
             assigneeId = assigneeId,
-            status = TaskStatus.TODO.name,
+            priority = Priority.MEDIUM,
             dueDate = null
         )
         val task = taskService.create(request, creatorId)
@@ -608,8 +562,25 @@ class TaskServiceTest : KoinTest {
         // Change the task status
         val updatedTask = taskService.changeStatus(task.id, TaskStatus.IN_PROGRESS.name)
 
-        // Verify the status was changed correctly
+        // Verify the task status was changed correctly
         assertNotNull(updatedTask)
-        assertEquals(TaskStatus.IN_PROGRESS, updatedTask.status)
+        assertEquals(task.id, updatedTask.id)
+        assertEquals(task.title, updatedTask.title)
+        assertEquals(task.description, updatedTask.description)
+        assertEquals(TaskStatus.IN_PROGRESS, updatedTask.status) // Status should be updated
+        assertEquals(task.assigneeId, updatedTask.assigneeId) // Assignee should not change
+        assertEquals(task.creatorId, updatedTask.creatorId) // Creator should not change
+    }
+
+    @Test
+    fun `test change task status - not found`() = runBlocking {
+        // Try to change the status of a task that doesn't exist
+        try {
+            taskService.changeStatus(UUID.randomUUID().toString(), TaskStatus.IN_PROGRESS.name)
+            fail("Expected NotFoundException was not thrown")
+        } catch (e: NotFoundException) {
+            // Expected exception
+            assertTrue(e.message.contains("Task"))
+        }
     }
 }

@@ -1,11 +1,14 @@
 package com.danioliveira.taskmanager.data.repository
 
+import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
+import com.danioliveira.taskmanager.data.entity.FileUploadDAOEntity
 import com.danioliveira.taskmanager.data.entity.ProjectDAOEntity
 import com.danioliveira.taskmanager.data.entity.TaskDAOEntity
 import com.danioliveira.taskmanager.data.entity.UserDAOEntity
+import com.danioliveira.taskmanager.data.tables.FileUploadsTable
 import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
@@ -19,7 +22,7 @@ import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.math.ceil
 
 internal class TaskRepositoryImpl : TaskRepository {
@@ -29,6 +32,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         title: String,
         description: String?,
         status: TaskStatus,
+        priority: Priority,
         dueDate: String?,
         assigneeId: String?
     ): TaskResponse? {
@@ -37,6 +41,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         entity.title = title
         entity.description = description
         entity.status = status
+        entity.priority = priority
         entity.dueDate = dueDate?.takeIf { it.isNotEmpty() }?.let { LocalDateTime.parse(it) }
         entity.assignee = assigneeId?.let { UUID.fromString(it) }?.let { UserDAOEntity.findById(it) }
         return entity.toResponse()
@@ -172,6 +177,48 @@ internal class TaskRepositoryImpl : TaskRepository {
             projectId = this.project?.id?.value?.toString(),
             assigneeId = this.assignee?.id?.value?.toString(),
             creatorId = this.creator.id.value.toString()
+        )
+    }
+
+    override suspend fun Transaction.getTaskFiles(taskId: String): List<FileResponse> {
+        val uuid = UUID.fromString(taskId)
+        val files = FileUploadDAOEntity.find { FileUploadsTable.task eq uuid }
+        return files.map { it.toFileResponse() }
+    }
+
+    override suspend fun Transaction.uploadTaskFile(
+        taskId: String,
+        fileName: String,
+        contentType: String,
+        uploaderId: String,
+        s3Url: String
+    ): FileResponse {
+        val taskUuid = UUID.fromString(taskId)
+        val uploaderUuid = UUID.fromString(uploaderId)
+
+        val task = TaskDAOEntity.findById(taskUuid) ?: throw IllegalArgumentException("Task not found")
+        val uploader = UserDAOEntity.findById(uploaderUuid) ?: throw IllegalArgumentException("Uploader not found")
+
+        val fileUpload = FileUploadDAOEntity.new(UUID.randomUUID()) {
+            this.filename = fileName
+            this.uploader = uploader
+            this.task = task
+            this.url = s3Url
+            this.uploadedAt = LocalDateTime.now()
+        }
+
+        return fileUpload.toFileResponse(contentType)
+    }
+
+    private fun FileUploadDAOEntity.toFileResponse(contentType: String? = null): FileResponse {
+        return FileResponse(
+            id = this.id.value.toString(),
+            name = this.filename,
+            size = "1 MB", // Placeholder, would need to calculate actual size
+            uploadedDate = this.uploadedAt.toString(),
+            taskId = this.task?.id?.value?.toString() ?: "",
+            url = this.url,
+            contentType = contentType ?: "application/octet-stream" // Use provided content type or default
         )
     }
 }

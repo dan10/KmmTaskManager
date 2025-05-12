@@ -27,10 +27,10 @@ import com.danioliveira.taskmanager.ui.login.LoginScreen
 import com.danioliveira.taskmanager.ui.project.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
-import com.danioliveira.taskmanager.ui.task.TaskCreatEditScreen
 import com.danioliveira.taskmanager.ui.task.comments.TasksCommentsScreen
+import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditScreen
 import com.danioliveira.taskmanager.ui.task.details.TasksDetailsScreen
-import com.danioliveira.taskmanager.ui.task.files.TasksFilesScreen
+import com.danioliveira.taskmanager.ui.task.files.TaskFilesScreen
 import com.danioliveira.taskmanager.ui.tasks.TasksScreen
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
@@ -174,30 +174,22 @@ fun TaskItNavHost(
             Text("Create Project Screen - Coming Soon")
         }
 
-        composable<Screen.CreateEditTask> { backStackEntry ->
-            val task = backStackEntry.toRoute<Screen.CreateEditTask>()
-            val taskId = task.taskId
-            TaskCreatEditScreen(
-                taskId = taskId,
-                isCreating = false,
+        composable<Screen.CreateEditTask> {
+            TaskCreateEditScreen(
                 onBack = { navController.popBackStack() },
-                onTaskUpdated = { navController.popBackStack() },
-                onTaskDeleted = { navController.popBackStack() }
             )
         }
 
         composable<Screen.TasksDetails> { backStackEntry ->
             TasksDetailsScreen(
                 onBack = { navController.popBackStack() },
-                onFilesClick = { id -> navController.navigate(Screen.TasksFiles(id)) },
-                onCommentsClick = { id -> navController.navigate(Screen.TasksComments(id)) }
+                onFilesClick = { id -> navController.navigate(Screen.TasksFiles(id)) }
             )
         }
 
         composable<Screen.TasksFiles> { backStackEntry ->
             val taskId = backStackEntry.toRoute<Screen.TasksFiles>().taskId
-            TasksFilesScreen(
-                taskId = taskId,
+            TaskFilesScreen(
                 onBack = { navController.popBackStack() }
             )
         }

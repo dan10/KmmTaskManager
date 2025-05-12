@@ -2,6 +2,7 @@ package com.danioliveira.taskmanager.domain.service
 
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
+import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
@@ -10,7 +11,9 @@ import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
-import java.util.*
+import com.danioliveira.taskmanager.utils.FileValidator
+import com.danioliveira.taskmanager.utils.S3ClientFactory
+import java.util.UUID
 
 internal class TaskService(
     private val repository: TaskRepository,
@@ -69,7 +72,7 @@ internal class TaskService(
                 projectId = projectUUID,
                 assigneeId = assigneeUUID,
                 creatorId = creatorUUID,
-                status = com.danioliveira.taskmanager.domain.TaskStatus.valueOf(request.status),
+                status = com.danioliveira.taskmanager.domain.TaskStatus.TODO, // Default status for new tasks
                 dueDate = request.dueDate?.let { java.time.LocalDateTime.parse(it) }
             )
         }
@@ -97,6 +100,7 @@ internal class TaskService(
                 title = request.title ?: current.title,
                 description = request.description ?: current.description,
                 status = request.status ?: current.status,
+                priority = request.priority ?: current.priority,
                 dueDate = request.dueDate ?: current.dueDate,
                 assigneeId = newAssigneeId ?: current.assigneeId
             )
@@ -129,6 +133,7 @@ internal class TaskService(
                 title = current.title,
                 description = current.description,
                 status = current.status,
+                priority = current.priority,
                 dueDate = current.dueDate,
                 assigneeId = assigneeId
             )
@@ -144,6 +149,7 @@ internal class TaskService(
                 title = current.title,
                 description = current.description,
                 status = com.danioliveira.taskmanager.domain.TaskStatus.valueOf(status),
+                priority = current.priority,
                 dueDate = current.dueDate,
                 assigneeId = current.assigneeId
             )
@@ -158,5 +164,55 @@ internal class TaskService(
      */
     suspend fun getUserTaskProgress(userId: String): TaskProgressResponse = dbQuery {
         with(repository) { getUserTaskProgress(userId) }
+    }
+
+    /**
+     * Get files associated with a task.
+     * @param taskId The ID of the task.
+     * @return List of files associated with the task.
+     */
+    suspend fun getTaskFiles(taskId: String): List<FileResponse> = dbQuery {
+        with(repository) { getTaskFiles(taskId) }
+    }
+
+    /**
+     * Upload a file for a task.
+     * @param taskId The ID of the task.
+     * @param fileName The name of the file.
+     * @param contentType The MIME type of the file.
+     * @param fileBytes The content of the file.
+     * @param uploaderId The ID of the user uploading the file.
+     * @return The uploaded file.
+     * @throws ValidationException If the file type is not allowed.
+     */
+    suspend fun uploadTaskFile(
+        taskId: String,
+        fileName: String,
+        contentType: String,
+        fileBytes: ByteArray,
+        uploaderId: String
+    ): FileResponse = dbQuery {
+        // Validate file type
+        if (!FileValidator.isValidMimeType(contentType)) {
+            throw ValidationException("File type not allowed. Allowed types: ${FileValidator.getAllowedMimeTypesAsString()}")
+        }
+
+        // Check if task exists
+        findById(taskId) // This will throw NotFoundException if task doesn't exist
+
+        // Upload file to MinIO
+        val s3Client = S3ClientFactory.createFromEnv()
+        val s3Url = s3Client.uploadFile(fileName, contentType, fileBytes)
+
+        // Save file metadata to database
+        with(repository) {
+            uploadTaskFile(
+                taskId = taskId,
+                fileName = fileName,
+                contentType = contentType,
+                uploaderId = uploaderId,
+                s3Url = s3Url
+            )
+        }
     }
 }

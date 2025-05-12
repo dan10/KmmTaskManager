@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager.api.request
 
+import com.danioliveira.taskmanager.domain.Priority
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,6 +12,6 @@ data class TaskCreateRequest(
     val description: String? = null,
     val projectId: String? = null,
     val assigneeId: String? = null,
-    val status: String = "TODO",
+    val priority: Priority,
     val dueDate: String? = null
 )

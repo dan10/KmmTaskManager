@@ -2,6 +2,7 @@ package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
@@ -11,8 +12,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDateTime
-import java.util.*
-import kotlin.test.*
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TaskRepositoryImplTest {
     private lateinit var taskRepository: TaskRepository
@@ -329,6 +334,7 @@ class TaskRepositoryImplTest {
                     "Updated Title",
                     "Updated Description",
                     TaskStatus.IN_PROGRESS,
+                    Priority.HIGH,
                     LocalDateTime.now().plusDays(14).toString(),
                     secondUserId.toString()
                 )
@@ -411,6 +417,7 @@ class TaskRepositoryImplTest {
                     "Updated Title",
                     "Updated Description",
                     TaskStatus.IN_PROGRESS,
+                    Priority.HIGH,
                     LocalDateTime.now().plusDays(14).toString(),
                     testUserId.toString()
                 )

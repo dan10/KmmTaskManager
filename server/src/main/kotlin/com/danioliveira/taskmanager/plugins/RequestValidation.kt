@@ -1,8 +1,19 @@
 package com.danioliveira.taskmanager.plugins
 
-import com.danioliveira.taskmanager.api.request.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.requestvalidation.*
+import com.danioliveira.taskmanager.api.request.GoogleLoginRequest
+import com.danioliveira.taskmanager.api.request.LoginRequest
+import com.danioliveira.taskmanager.api.request.PaginationRequest
+import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
+import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
+import com.danioliveira.taskmanager.api.request.RegisterRequest
+import com.danioliveira.taskmanager.api.request.TaskAssignRequest
+import com.danioliveira.taskmanager.api.request.TaskCreateRequest
+import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
+import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.requestvalidation.RequestValidation
+import io.ktor.server.plugins.requestvalidation.ValidationResult
 
 /**
  * Configures the RequestValidation plugin to validate request models.
@@ -95,10 +106,6 @@ fun Application.configureRequestValidation() {
             // If it's provided, it shouldn't be blank
             if (request.assigneeId?.isBlank() == true) {
                 errors["assigneeId"] = "Assignee ID cannot be empty if provided"
-            }
-
-            if (request.status.isBlank()) {
-                errors["status"] = "Status cannot be empty"
             }
 
             if (errors.isNotEmpty()) {

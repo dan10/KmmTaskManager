@@ -59,6 +59,14 @@
     <string name="task_resources">Recursos da Tarefa</string>
     <string name="task_view_files">Ver Arquivos</string>
     <string name="task_view_comments">Ver Comentários</string>
+    <string name="task_due_date">Vencimento:</string>
+    <string name="task_project">Projeto:</string>
+    <string name="task_assigned_to">Atribuído a:</string>
+    <string name="task_files">Arquivos</string>
+    <string name="task_add_files">Adicionar arquivos</string>
+    <string name="task_view_all">Ver tudo</string>
+    <string name="content_description_file">Arquivo</string>
+    <string name="content_description_more">Mais</string>
 
     <!-- TasksFilesScreen strings -->
     <string name="task_files_title">Arquivos da Tarefa</string>
@@ -92,11 +100,15 @@
 
     <!-- TaskScreen strings -->
     <string name="create_task">Criar Tarefa</string>
+    <string name="edit_task">Editar Tarefa</string>
     <string name="task_title_label">Título</string>
+    <string name="task_title_error">Título é obrigatório</string>
     <string name="task_description_label">Descrição</string>
     <string name="task_status_label">Status</string>
     <string name="task_priority_label">Prioridade</string>
-    <string name="task_due_date_label">Data de Vencimento (AAAA-MM-DD)</string>
+    <string name="task_due_date_label">Data de Vencimento (DD/MM/AAAA)</string>
+    <string name="task_due_date_error">Por favor, insira uma data válida no formato DD/MM/AAAA</string>
     <string name="task_create_button">Criar</string>
-    <string name="task_update_button">Atualizar</string>
+    <string name="task_update_button">Salvar Alterações</string>
+    <string name="task_cancel_button">Cancelar</string>
 </resources>

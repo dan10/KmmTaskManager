@@ -60,6 +60,14 @@
     <string name="task_resources">Task Resources</string>
     <string name="task_view_files">View Files</string>
     <string name="task_view_comments">View Comments</string>
+    <string name="task_due_date">Due:</string>
+    <string name="task_project">Project:</string>
+    <string name="task_assigned_to">Assigned to:</string>
+    <string name="task_files">Files</string>
+    <string name="task_add_files">Add files</string>
+    <string name="task_view_all">View all</string>
+    <string name="content_description_file">File</string>
+    <string name="content_description_more">More</string>
 
     <!-- TasksFilesScreen strings -->
     <string name="task_files_title">Task Files</string>
@@ -93,11 +101,15 @@
 
     <!-- TaskScreen strings -->
     <string name="create_task">Create Task</string>
+    <string name="edit_task">Edit Task</string>
     <string name="task_title_label">Title</string>
+    <string name="task_title_error">Title is required</string>
     <string name="task_description_label">Description</string>
     <string name="task_status_label">Status</string>
     <string name="task_priority_label">Priority</string>
-    <string name="task_due_date_label">Due Date (YYYY-MM-DD)</string>
+    <string name="task_due_date_label">Due Date (DD/MM/YYYY)</string>
+    <string name="task_due_date_error">Please enter a valid date in DD/MM/YYYY format</string>
     <string name="task_create_button">Create</string>
-    <string name="task_update_button">Update</string>
+    <string name="task_update_button">Save Changes</string>
+    <string name="task_cancel_button">Cancel</string>
 </resources>

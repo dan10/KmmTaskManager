@@ -14,11 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -27,31 +28,42 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.danioliveira.taskmanager.domain.File
 import com.danioliveira.taskmanager.domain.TaskPriority
+import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.content_description_back
+import kmmtaskmanager.composeapp.generated.resources.content_description_file
+import kmmtaskmanager.composeapp.generated.resources.content_description_more
+import kmmtaskmanager.composeapp.generated.resources.task_add_files
+import kmmtaskmanager.composeapp.generated.resources.task_assigned_to
+import kmmtaskmanager.composeapp.generated.resources.task_details_title
+import kmmtaskmanager.composeapp.generated.resources.task_due_date
+import kmmtaskmanager.composeapp.generated.resources.task_files
+import kmmtaskmanager.composeapp.generated.resources.task_project
+import kmmtaskmanager.composeapp.generated.resources.task_view_all
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.compose.viewmodel.koinNavViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun TasksDetailsScreen(
-    viewModel: TasksDetailsViewModel = koinNavViewModel(),
+    viewModel: TasksDetailsViewModel = koinViewModel(),
     onBack: () -> Unit,
-    onFilesClick: (String) -> Unit,
-    onCommentsClick: (String) -> Unit
+    onFilesClick: (String) -> Unit
 ) {
-    Surface(color = MaterialTheme.colors.background) {
+    viewModel.onBack = onBack
+    viewModel.onFilesClick = onFilesClick
+
+    Surface(color = Color(0XFFF1F5F9)) {
         TasksDetailsScreenContent(
             state = viewModel.state,
             onAction = viewModel::handleActions
@@ -65,68 +77,109 @@ private fun TasksDetailsScreenContent(
     onAction: (TasksDetailsAction) -> Unit
 ) {
     Scaffold(
+        backgroundColor = Color(0XFFF1F5F9),
         topBar = {
-            TopAppBar(
-                title = { Text("Task Details") },
-                navigationIcon = {
-                    IconButton(onClick = { onAction(TasksDetailsAction.NavigateBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More")
+            TaskDetailsTopBar(onAction)
+        }
+    ) { paddingValues ->
+        TaskDetailsContent(state, paddingValues, onAction)
+    }
+}
+
+@Composable
+private fun TaskDetailsTopBar(onAction: (TasksDetailsAction) -> Unit) {
+    TopAppBar(
+        title = { Text(stringResource(Res.string.task_details_title)) },
+        navigationIcon = {
+            IconButton(onClick = { onAction(TasksDetailsAction.NavigateBack) }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(Res.string.content_description_back)
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = stringResource(Res.string.content_description_more)
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun TaskDetailsContent(
+    state: TasksDetailsState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
+    onAction: (TasksDetailsAction) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(16.dp)
+    ) {
+        item {
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (state.errorMessage != null) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = state.errorMessage,
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.error
+                    )
+                }
+            } else if (state.task != null) {
+                TaskInfoCard(
+                    title = state.task.title,
+                    priority = state.task.priority.toTaskPriority(),
+                    description = state.task.description,
+                    dueDate = state.task.dueDate,
+                    project = state.task.projectName ?: "No Project",
+                    assignedTo = "Assigned User" // This would need to be fetched from the user repository
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No task details available",
+                        style = MaterialTheme.typography.body1
+                    )
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            FilesSection(
+                files = listOf(
+                    File("Q4_Presentation.pdf", "2.4 MB", "2024-11-20"),
+                    File("Metrics_Summary.xlsx", "1.1 MB", "2024-11-19"),
+                    File("Budget_2024.xlsx", "1.3 MB", "2024-11-18"),
+                    File("Client_Feedback.docx", "0.8 MB", "2024-11-17")
+                ),
+                onViewAll = {
+                    state.task?.id?.toString()?.let { taskId ->
+                        onAction(TasksDetailsAction.NavigateToFiles(taskId))
                     }
                 }
             )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            item {
-                TaskInfoCard(
-                    title = "Urgent Meeting",
-                    priority = TaskPriority.HIGH,
-                    description = "Prepare presentation for client meeting. Need to review all quarterly metrics and create executive summary.",
-                    dueDate = "2024-11-25",
-                    project = "Website Redesign",
-                    assignedTo = "John Doe"
-                )
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            item {
-                CommentsSection(
-                    comments = listOf(
-                        Comment("Sarah Smith", "2 hours ago", "I've shared the Q3 metrics in the drive"),
-                        Comment("Mike Johnson", "5 hours ago", "Let's review the deck tomorrow morning")
-                    ),
-                    onViewAll = {
-                        // Navigate to all comments
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                FilesSection(
-                    files = listOf(
-                        File("Q4_Presentation.pdf", "2.4 MB", "2024-11-20"),
-                        File("Metrics_Summary.xlsx", "1.1 MB", "2024-11-19")
-                    ),
-                    onViewAll = {
-                        // Navigate to all files
-                    }
-                )
-            }
         }
     }
 }
@@ -140,31 +193,34 @@ fun TaskInfoCard(
     project: String,
     assignedTo: String
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colors.surface)
-            .padding(16.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 2.dp
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.h6,
-                fontWeight = FontWeight.Bold
-            )
-            PriorityBadge(priority = priority)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.h6,
+                    fontWeight = FontWeight.Bold
+                )
+                PriorityBadge(priority = priority)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = description, style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(8.dp))
+            InfoRow(label = stringResource(Res.string.task_due_date), value = dueDate)
+            InfoRow(label = stringResource(Res.string.task_project), value = project)
+            InfoRow(label = stringResource(Res.string.task_assigned_to), value = assignedTo)
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = description, style = MaterialTheme.typography.body2)
-        Spacer(modifier = Modifier.height(8.dp))
-        InfoRow(label = "Due:", value = dueDate)
-        InfoRow(label = "Project:", value = project)
-        InfoRow(label = "Assigned to:", value = assignedTo)
     }
 }
 
@@ -193,94 +249,59 @@ fun InfoRow(label: String, value: String) {
     }
 }
 
-@Composable
-fun CommentsSection(
-    comments: List<Comment>,
-    onViewAll: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colors.surface)
-            .padding(16.dp)
-    ) {
-        SectionHeader(title = "Comments", onViewAll = onViewAll)
-        Spacer(modifier = Modifier.height(8.dp))
-        comments.forEach { comment ->
-            CommentItem(comment)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        AddComment()
-    }
-}
-
-@Composable
-fun CommentItem(comment: Comment) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color.Gray)
-        )
-        Spacer(modifier = Modifier.padding(4.dp))
-        Column {
-            Text(text = comment.userName, style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.padding(2.dp))
-            Text(text = comment.time, style = MaterialTheme.typography.caption)
-            Spacer(modifier = Modifier.padding(2.dp))
-            Text(text = comment.commentText, style = MaterialTheme.typography.body2)
-        }
-    }
-}
-
-@Composable
-fun AddComment() {
-    var commentText by remember { mutableStateOf("") }
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        OutlinedTextField(
-            value = commentText,
-            onValueChange = { commentText = it },
-            modifier = Modifier.weight(1f),
-            placeholder = { Text("Add a comment...") }
-        )
-        IconButton(onClick = { /*TODO: Handle send comment*/ }) {
-            Icon(imageVector = Icons.Filled.Send, contentDescription = "Send")
-        }
-    }
-}
 
 @Composable
 fun FilesSection(
     files: List<File>,
     onViewAll: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colors.surface)
-            .padding(16.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 2.dp
     ) {
-        SectionHeader(title = "Files", onViewAll = onViewAll)
-        Spacer(modifier = Modifier.height(8.dp))
-        files.forEach { file ->
-            FileItem(file)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Divider()
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Icon(imageVector = Icons.Filled.Add, contentDescription = "Add file", tint = MaterialTheme.colors.primary)
-            Spacer(modifier = Modifier.padding(2.dp))
-            Text(text = "Add files", style = MaterialTheme.typography.subtitle2, color = MaterialTheme.colors.primary)
+            SectionHeader(title = stringResource(Res.string.task_files), onViewAll = onViewAll)
+            Spacer(modifier = Modifier.height(8.dp))
+            if (files.isEmpty()) {
+                Text(
+                    text = "No files available",
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            } else {
+                files.take(3).forEach { file ->
+                    FileItem(file)
+                }
+                if (files.size > 3) {
+                    Text(
+                        text = "... and ${files.size - 3} more files",
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider()
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(Res.string.task_add_files),
+                    tint = MaterialTheme.colors.primary
+                )
+                Spacer(modifier = Modifier.padding(2.dp))
+                Text(
+                    text = stringResource(Res.string.task_add_files),
+                    style = MaterialTheme.typography.subtitle2,
+                    color = MaterialTheme.colors.primary
+                )
+            }
         }
     }
 }
@@ -295,7 +316,7 @@ fun FileItem(file: File) {
         Icon(
             modifier = Modifier.size(32.dp),
             imageVector = Icons.Filled.Add,
-            contentDescription = "File",
+            contentDescription = stringResource(Res.string.content_description_file),
         )
         Spacer(modifier = Modifier.padding(4.dp))
         Column {
@@ -316,15 +337,13 @@ fun SectionHeader(title: String, onViewAll: () -> Unit) {
         Text(text = title, style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
         Text(
             modifier = Modifier.clickable { onViewAll() },
-            text = "View all",
+            text = stringResource(Res.string.task_view_all),
             style = MaterialTheme.typography.caption,
             color = MaterialTheme.colors.primary
         )
     }
 }
 
-data class Comment(val userName: String, val time: String, val commentText: String)
-data class File(val name: String, val size: String, val uploadedDate: String)
 
 @Preview
 @Composable

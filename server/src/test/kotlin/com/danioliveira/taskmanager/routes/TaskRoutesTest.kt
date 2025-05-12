@@ -1,15 +1,30 @@
 package com.danioliveira.taskmanager.routes
 
-import com.danioliveira.taskmanager.*
-import com.danioliveira.taskmanager.api.request.*
+import com.danioliveira.taskmanager.TestDatabase
+import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
+import com.danioliveira.taskmanager.api.request.TaskAssignRequest
+import com.danioliveira.taskmanager.api.request.TaskCreateRequest
+import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
+import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.auth.JwtConfig
+import com.danioliveira.taskmanager.createTestUser
 import com.danioliveira.taskmanager.domain.AppConfig
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
+import com.danioliveira.taskmanager.generateTestToken
+import com.danioliveira.taskmanager.getTestModule
+import com.danioliveira.taskmanager.jsonBody
+import com.danioliveira.taskmanager.withAuth
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.testing.testApplication
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -78,7 +93,7 @@ class TaskRoutesTest : KoinTest {
                     description = taskDescription,
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -164,7 +179,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Task for the project",
                     projectId = projectId,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -180,7 +195,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Task without a project",
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -232,7 +247,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Task for User 1",
                     projectId = null,
                     assigneeId = user1Id,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -248,7 +263,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Task for User 2",
                     projectId = null,
                     assigneeId = user2Id,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -300,7 +315,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Task created by User 1",
                     projectId = null,
                     assigneeId = user1Id,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -315,7 +330,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Another task created by User 1",
                     projectId = null,
                     assigneeId = user1Id,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -331,7 +346,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Task created by User 2",
                     projectId = null,
                     assigneeId = user2Id,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -383,7 +398,7 @@ class TaskRoutesTest : KoinTest {
                     description = taskDescription,
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -425,7 +440,7 @@ class TaskRoutesTest : KoinTest {
                     description = "New Description",
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -461,7 +476,7 @@ class TaskRoutesTest : KoinTest {
                     description = taskDescription,
                     projectId = null,
                     assigneeId = "some-other-user-id", // This should be ignored and replaced with the current user ID
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -503,7 +518,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Test Description",
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -578,7 +593,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Original Description",
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -600,6 +615,7 @@ class TaskRoutesTest : KoinTest {
                     title = "Updated Title",
                     description = "Updated Description",
                     status = TaskStatus.IN_PROGRESS,
+                    priority = Priority.HIGH,
                     dueDate = "2023-12-31T23:59:59",
                     assigneeId = userId
                 )
@@ -641,7 +657,7 @@ class TaskRoutesTest : KoinTest {
                     description = "This task will be deleted",
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -699,7 +715,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Test Description",
                     projectId = null,
                     assigneeId = user1Id,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )
@@ -752,7 +768,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Test Description",
                     projectId = null,
                     assigneeId = userId,
-                    status = TaskStatus.TODO.name,
+                    priority = Priority.MEDIUM,
                     dueDate = null
                 )
             )

@@ -59,6 +59,11 @@ dependencies {
     testImplementation(libs.koin.test)
     // H2 Database for testing
     testImplementation(libs.h2)
+    // TestContainers for integration testing
+    testImplementation(libs.testcontainers.core)
+    testImplementation(libs.testcontainers.junit)
+    testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.testcontainers.minio)
 
     // Load testing with Gatling
     // Required for Java DSL

@@ -11,6 +11,5 @@ data class TasksDetailsState(
 sealed interface TasksDetailsAction {
     data object LoadTaskDetails : TasksDetailsAction
     data class NavigateToFiles(val taskId: String) : TasksDetailsAction
-    data class NavigateToComments(val taskId: String) : TasksDetailsAction
     data object NavigateBack : TasksDetailsAction
 }

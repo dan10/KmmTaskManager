@@ -6,13 +6,24 @@ import com.danioliveira.taskmanager.api.request.TaskAssignRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.service.TaskService
-import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
+import io.ktor.http.content.streamProvider
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
+import io.ktor.server.request.receiveMultipart
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
 
 fun Route.taskRoutes() {
@@ -45,7 +56,7 @@ fun Route.taskRoutes() {
                     description = request.description,
                     projectId = projectId,
                     assigneeId = request.assigneeId,
-                    status = request.status,
+                    priority = Priority.MEDIUM, // Default priority regardless of status
                     dueDate = request.dueDate
                 )
 
@@ -208,6 +219,64 @@ fun Route.taskRoutes() {
                     call.respond(updated)
                 } else {
                     call.respond(HttpStatusCode.NotFound)
+                }
+            }
+
+            // Get files associated with a task
+            get("/{id}/files") {
+                val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+                try {
+                    val files = service.getTaskFiles(id)
+                    call.respond(files)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.NotFound, "Task not found or error retrieving files: ${e.message}")
+                }
+            }
+
+            // Upload a file for a task
+            post("/{id}/files") {
+                val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest)
+                val principal = call.principal<JWTPrincipal>()
+                val userId = principal?.payload?.getClaim("userId")?.asString() ?: return@post call.respond(
+                    HttpStatusCode.Unauthorized
+                )
+
+                // Process multipart data
+                val multipart = call.receiveMultipart()
+                var fileName = ""
+                var contentType = ""
+                var fileBytes: ByteArray? = null
+
+                multipart.forEachPart { part ->
+                    when (part) {
+                        is PartData.FileItem -> {
+                            fileName = part.originalFileName ?: "unnamed-file"
+                            contentType = part.contentType?.toString() ?: "application/octet-stream"
+                            fileBytes = part.streamProvider().readBytes()
+                        }
+
+                        else -> {}
+                    }
+                    part.dispose()
+                }
+
+                if (fileBytes == null) {
+                    return@post call.respond(HttpStatusCode.BadRequest, "No file uploaded")
+                }
+
+                try {
+                    // Upload the file using the service
+                    val fileResponse = service.uploadTaskFile(
+                        taskId = id,
+                        fileName = fileName,
+                        contentType = contentType,
+                        fileBytes = fileBytes,
+                        uploaderId = userId
+                    )
+
+                    call.respond(HttpStatusCode.Created, fileResponse)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "Error uploading file: ${e.message}")
                 }
             }
         }

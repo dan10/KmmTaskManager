@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
+import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
@@ -138,6 +139,22 @@ class TaskRepositoryImpl(
         } catch (e: ClientRequestException) {
             // Handle client errors (4xx)
             Result.failure(Exception("Failed to delete task: ${e.message}"))
+        } catch (e: ServerResponseException) {
+            // Handle server errors (5xx)
+            Result.failure(Exception("Server error: ${e.message}"))
+        } catch (e: Exception) {
+            // Handle other exceptions
+            Result.failure(Exception("Unknown error: ${e.message}"))
+        }
+    }
+
+    override suspend fun getTaskFiles(taskId: String): Result<List<FileResponse>> {
+        return try {
+            val files = apiService.getTaskFiles(taskId)
+            Result.success(files)
+        } catch (e: ClientRequestException) {
+            // Handle client errors (4xx)
+            Result.failure(Exception("Failed to fetch task files: ${e.message}"))
         } catch (e: ServerResponseException) {
             // Handle server errors (5xx)
             Result.failure(Exception("Server error: ${e.message}"))

@@ -2,18 +2,23 @@ package com.danioliveira.taskmanager.data.network
 
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
+import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 
@@ -115,5 +120,45 @@ class TaskApiService(
     suspend fun deleteTask(taskId: String): Boolean {
         val response = client.delete("api/tasks/$taskId")
         return response.status == HttpStatusCode.NoContent
+    }
+
+    /**
+     * Fetches files associated with a task.
+     *
+     * @param taskId The ID of the task
+     * @return List of FileResponse containing the file details
+     */
+    suspend fun getTaskFiles(taskId: String): List<FileResponse> {
+        return client.get("api/tasks/$taskId/files").body()
+    }
+
+    /**
+     * Uploads a file for a task.
+     *
+     * @param taskId The ID of the task
+     * @param fileName The name of the file
+     * @param fileContent The content of the file as ByteArray
+     * @param contentType The MIME type of the file (e.g., "image/jpeg", "application/pdf")
+     * @return FileResponse containing the uploaded file details
+     */
+    suspend fun uploadTaskFile(
+        taskId: String,
+        fileName: String,
+        fileContent: ByteArray,
+        contentType: String
+    ): FileResponse {
+        return client.post("api/tasks/$taskId/files") {
+            contentType(ContentType.MultiPart.FormData)
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("file", fileContent, Headers.build {
+                            append(HttpHeaders.ContentType, contentType)
+                            append(HttpHeaders.ContentDisposition, "filename=$fileName")
+                        })
+                    }
+                )
+            )
+        }.body()
     }
 }
