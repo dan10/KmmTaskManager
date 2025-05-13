@@ -15,12 +15,15 @@ import com.danioliveira.taskmanager.domain.repository.AuthRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.usecase.login.LoginUseCase
+import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectDetailsUseCase
+import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectTasksUseCase
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectsUseCase
 import com.danioliveira.taskmanager.domain.usecase.register.RegisterUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.CreateEditTaskUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
 import com.danioliveira.taskmanager.ui.login.LoginViewModel
+import com.danioliveira.taskmanager.ui.project.ProjectDetailsViewModel
 import com.danioliveira.taskmanager.ui.projects.ProjectsViewModel
 import com.danioliveira.taskmanager.ui.register.RegisterViewModel
 import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditViewModel
@@ -60,6 +63,8 @@ val appModule = module {
     factoryOf(::GetTasksUseCase)
     factoryOf(::GetTaskProgressUseCase)
     factoryOf(::GetProjectsUseCase)
+    factoryOf(::GetProjectDetailsUseCase)
+    factoryOf(::GetProjectTasksUseCase)
     factoryOf(::CreateEditTaskUseCase)
 
     // ViewModels
@@ -67,5 +72,6 @@ val appModule = module {
     viewModelOf(::RegisterViewModel)
     viewModelOf(::TasksViewModel)
     viewModelOf(::ProjectsViewModel)
+    viewModelOf(::ProjectDetailsViewModel)
     viewModelOf(::TaskCreateEditViewModel)
 }

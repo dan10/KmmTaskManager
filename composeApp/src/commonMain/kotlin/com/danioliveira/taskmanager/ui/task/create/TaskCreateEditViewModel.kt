@@ -19,11 +19,6 @@ class TaskCreateEditViewModel(
     private val createEditTaskUseCase: CreateEditTaskUseCase
 ) : ViewModel() {
 
-    init {
-        val taskId = savedStateHandle.toRoute<Screen.CreateEditTask>().taskId
-        initialize(taskId)
-    }
-
     // Navigation callbacks to be set from outside
     var onTaskCreated: () -> Unit = {}
     var onTaskUpdated: () -> Unit = {}
@@ -31,6 +26,11 @@ class TaskCreateEditViewModel(
 
     private val _uiState = MutableStateFlow(TaskCreateEditState())
     val uiState: StateFlow<TaskCreateEditState> = _uiState.asStateFlow()
+
+    init {
+        val taskId = savedStateHandle.toRoute<Screen.CreateEditTask>().taskId
+        initialize(taskId)
+    }
 
     /**
      * Initializes the ViewModel with an existing task if editing.

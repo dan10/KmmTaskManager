@@ -10,6 +10,7 @@ import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.network.TaskApiService
+import com.danioliveira.taskmanager.data.paging.ProjectTaskPagingSource
 import com.danioliveira.taskmanager.data.paging.TaskPagingSource
 import com.danioliveira.taskmanager.domain.Task
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
@@ -33,6 +34,16 @@ class TaskRepositoryImpl(
                 enablePlaceholders = false
             ),
             pagingSourceFactory = { TaskPagingSource(apiService, query) }
+        ).flow
+    }
+
+    override fun getProjectTasksStream(projectId: String, pageSize: Int): Flow<PagingData<Task>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { ProjectTaskPagingSource(apiService, projectId) }
         ).flow
     }
 
@@ -155,6 +166,26 @@ class TaskRepositoryImpl(
         } catch (e: ClientRequestException) {
             // Handle client errors (4xx)
             Result.failure(Exception("Failed to fetch task files: ${e.message}"))
+        } catch (e: ServerResponseException) {
+            // Handle server errors (5xx)
+            Result.failure(Exception("Server error: ${e.message}"))
+        } catch (e: Exception) {
+            // Handle other exceptions
+            Result.failure(Exception("Unknown error: ${e.message}"))
+        }
+    }
+
+    override suspend fun getTasksByProjectId(
+        projectId: String,
+        page: Int,
+        size: Int
+    ): Result<PaginatedResponse<TaskResponse>> {
+        return try {
+            val response = apiService.getTasksByProjectId(projectId, page, size)
+            Result.success(response)
+        } catch (e: ClientRequestException) {
+            // Handle client errors (4xx)
+            Result.failure(Exception("Failed to fetch tasks for project: ${e.message}"))
         } catch (e: ServerResponseException) {
             // Handle server errors (5xx)
             Result.failure(Exception("Server error: ${e.message}"))

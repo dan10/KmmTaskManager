@@ -18,9 +18,19 @@ interface TaskRepository {
      * Gets paginated tasks for the current user using Paging3.
      *
      * @param pageSize The page size
+     * @param query Optional query to filter tasks by title
      * @return Flow of PagingData containing tasks
      */
     fun getTasksStream(pageSize: Int, query: String?): Flow<PagingData<Task>>
+
+    /**
+     * Gets paginated tasks for a specific project using Paging3.
+     *
+     * @param projectId The ID of the project
+     * @param pageSize The page size
+     * @return Flow of PagingData containing tasks for the project
+     */
+    fun getProjectTasksStream(projectId: String, pageSize: Int): Flow<PagingData<Task>>
 
     /**
      * Gets paginated tasks for the current user.
@@ -31,6 +41,16 @@ interface TaskRepository {
      * @return Result containing paginated tasks with task progress information
      */
     suspend fun getTasks(page: Int, size: Int, query: String? = null): Result<PaginatedResponse<TaskResponse>>
+
+    /**
+     * Gets paginated tasks for a specific project.
+     *
+     * @param projectId The ID of the project
+     * @param page The page number (0-based)
+     * @param size The page size
+     * @return Result containing paginated tasks for the project
+     */
+    suspend fun getTasksByProjectId(projectId: String, page: Int, size: Int): Result<PaginatedResponse<TaskResponse>>
 
     /**
      * Gets a specific task by ID.

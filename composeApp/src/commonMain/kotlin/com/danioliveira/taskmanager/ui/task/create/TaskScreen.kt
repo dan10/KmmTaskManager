@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,11 +64,9 @@ fun TaskCreateEditScreen(
     viewModel: TaskCreateEditViewModel = koinViewModel()
 ) {
     // Set navigation callbacks
-    LaunchedEffect(viewModel) {
         viewModel.onTaskCreated = onBack
         viewModel.onTaskUpdated = onBack
         viewModel.onTaskDeleted = onBack
-    }
 
     // Collect UI state
     val state by viewModel.uiState.collectAsState()

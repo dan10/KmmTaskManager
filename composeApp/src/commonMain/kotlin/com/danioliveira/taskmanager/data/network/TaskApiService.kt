@@ -133,6 +133,21 @@ class TaskApiService(
     }
 
     /**
+     * Fetches paginated tasks for a specific project.
+     *
+     * @param projectId The ID of the project
+     * @param page The page number (0-based)
+     * @param size The page size
+     * @return PaginatedResponse containing the tasks for the project
+     */
+    suspend fun getTasksByProjectId(projectId: String, page: Int, size: Int): PaginatedResponse<TaskResponse> {
+        return client.get("api/tasks/projects/$projectId") {
+            parameter("page", page)
+            parameter("size", size)
+        }.body()
+    }
+
+    /**
      * Uploads a file for a task.
      *
      * @param taskId The ID of the task

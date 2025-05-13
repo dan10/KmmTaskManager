@@ -2,6 +2,8 @@ package com.danioliveira.taskmanager
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -27,8 +29,28 @@ class TasksItAppState(
     private val coroutineScope: CoroutineScope,
 ) {
 
+    private val previousDestination = mutableStateOf<NavDestination?>(null)
+
+    init {
+        coroutineScope.launch {
+            authManager.checkAuthState()
+            handleAuthNavigation()
+        }
+    }
+
     val currentDestination: NavDestination?
-        get() = navController.currentDestination
+        @Composable get() {
+            // Collect the currentBackStackEntryFlow as a state
+            val currentEntry = navController.currentBackStackEntryFlow
+                .collectAsState(initial = null)
+
+            // Fallback to previousDestination if currentEntry is null
+            return currentEntry.value?.destination.also { destination ->
+                if (destination != null) {
+                    previousDestination.value = destination
+                }
+            } ?: previousDestination.value
+        }
 
     val isAuthenticated = authManager.isAuthenticated.stateIn(
         started = SharingStarted.Eagerly,
@@ -39,14 +61,15 @@ class TasksItAppState(
     /**
      * Checks if the current screen is a login or register screen.
      */
-    fun isLoginOrRegisterScreen(): Boolean {
-        return currentDestination?.hasRoute(Screen.Login::class) == true ||
-                currentDestination?.hasRoute(Screen.Register::class) == true
+    fun isLoginOrRegisterScreen(currentDestination: NavDestination): Boolean {
+        return currentDestination.hasRoute(Screen.Login::class) ||
+                currentDestination.hasRoute(Screen.Register::class)
     }
 
     /**
      * Checks if the bottom bar should be shown for the current screen.
      */
+    @Composable
     fun shouldShowBottomBar(): Boolean {
         return currentDestination?.hasRoute(Screen.Tasks::class) == true ||
                 currentDestination?.hasRoute(Screen.Projects::class) == true ||
@@ -56,6 +79,7 @@ class TasksItAppState(
     /**
      * Handles navigation based on authentication state.
      */
+
     fun handleAuthNavigation() {
         coroutineScope.launch {
             if (isAuthenticated.value) {
@@ -68,7 +92,9 @@ class TasksItAppState(
             } else {
                 // If not authenticated, navigate to login
                 // Check if current route is not login or register
-                if (currentDestination?.route != null && !isLoginOrRegisterScreen()) {
+                if (navController.currentDestination?.route != null &&
+                    !isLoginOrRegisterScreen(navController.currentDestination!!)
+                ) {
                     navController.navigate(Screen.Login) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             inclusive = true
@@ -102,7 +128,7 @@ fun rememberTasksItAppState(
     authManager: AuthManager,
     coroutineScope: CoroutineScope
 ): TasksItAppState {
-    return remember(navController, authManager, coroutineScope) {
+    return remember(navController, authManager, authManager.isAuthenticated, coroutineScope) {
         TasksItAppState(
             navController = navController,
             authManager = authManager,

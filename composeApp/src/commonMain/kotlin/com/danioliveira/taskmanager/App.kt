@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -9,7 +10,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -50,12 +50,6 @@ fun TaskItApp() {
             coroutineScope = rememberCoroutineScope()
         )
 
-
-        // Listen for authentication state changes
-        LaunchedEffect(appState) {
-            appState.handleAuthNavigation()
-        }
-
         Scaffold(
             modifier = Modifier,
             bottomBar = {
@@ -82,7 +76,7 @@ fun TaskItApp() {
 fun TaskItBottomBar(
     appState: TasksItAppState
 ) {
-    if (appState.shouldShowBottomBar()) {
+    AnimatedVisibility(visible = appState.shouldShowBottomBar()) {
         BottomNavigation(modifier = Modifier.navigationBarsPadding()) {
             topLevelRoutes.forEach { topLevelRoute ->
                 BottomNavigationItem(
@@ -188,7 +182,6 @@ fun TaskItNavHost(
         }
 
         composable<Screen.TasksFiles> { backStackEntry ->
-            val taskId = backStackEntry.toRoute<Screen.TasksFiles>().taskId
             TaskFilesScreen(
                 onBack = { navController.popBackStack() }
             )
@@ -203,9 +196,7 @@ fun TaskItNavHost(
         }
 
         composable<Screen.ProjectDetails> { backStackEntry ->
-            val projectId = backStackEntry.toRoute<Screen.ProjectDetails>().projectId
             ProjectDetailsScreen(
-                projectId = projectId,
                 onBack = { navController.popBackStack() }
             )
         }
