@@ -50,6 +50,7 @@ import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.empty_task_list
 import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -334,7 +335,7 @@ fun TasksScreenPreview() {
                 1 -> Priority.MEDIUM
                 else -> Priority.LOW
             },
-            dueDate = "2023-12-31"
+            dueDate = LocalDateTime.parse("2023-12-31T00:00:00")
         )
     }
     // create pagingData from a list of fake data
@@ -375,7 +376,7 @@ fun EmptyTasksScreenPreview() {
             projectName = "Preview Project",
             status = TaskStatus.TODO,
             priority = Priority.MEDIUM,
-            dueDate = "2023-12-31"
+            dueDate = LocalDateTime.parse("2023-12-31T00:00:00")
         )
     }
     // create pagingData from a list of fake data

@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager.domain
 
+import kotlinx.datetime.LocalDateTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -11,5 +12,5 @@ data class Task(
     val projectName: String?,
     val status: TaskStatus,
     val priority: Priority,
-    val dueDate: String
+    val dueDate: LocalDateTime?
 )

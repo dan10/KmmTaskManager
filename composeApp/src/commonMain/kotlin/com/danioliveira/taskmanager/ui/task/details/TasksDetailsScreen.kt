@@ -50,6 +50,7 @@ import kmmtaskmanager.composeapp.generated.resources.task_due_date
 import kmmtaskmanager.composeapp.generated.resources.task_files
 import kmmtaskmanager.composeapp.generated.resources.task_project
 import kmmtaskmanager.composeapp.generated.resources.task_view_all
+import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -189,7 +190,7 @@ fun TaskInfoCard(
     title: String,
     priority: TaskPriority,
     description: String,
-    dueDate: String,
+    dueDate: LocalDateTime?,
     project: String,
     assignedTo: String
 ) {
@@ -217,7 +218,7 @@ fun TaskInfoCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = description, style = MaterialTheme.typography.body2)
             Spacer(modifier = Modifier.height(8.dp))
-            InfoRow(label = stringResource(Res.string.task_due_date), value = dueDate)
+            InfoRow(label = stringResource(Res.string.task_due_date), value = dueDate?.toString() ?: "No due date")
             InfoRow(label = stringResource(Res.string.task_project), value = project)
             InfoRow(label = stringResource(Res.string.task_assigned_to), value = assignedTo)
         }

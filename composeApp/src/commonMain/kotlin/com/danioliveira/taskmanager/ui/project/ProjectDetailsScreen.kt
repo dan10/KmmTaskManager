@@ -41,6 +41,8 @@ import com.danioliveira.taskmanager.paging.compose.itemKey
 import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.uuid.ExperimentalUuidApi
@@ -357,7 +359,7 @@ private fun ProjectDetailsScreenPreview() {
                 1 -> Priority.MEDIUM
                 else -> Priority.LOW
             },
-            dueDate = "2024-12-${index + 10}",
+            dueDate = "2024-12-${index + 10}T00:00:00".toLocalDateTime(),
             projectName = "Website Redesign"
         )
     }
@@ -406,7 +408,7 @@ private fun ProjectDetailsContentPreview() {
                 1 -> Priority.MEDIUM
                 else -> Priority.LOW
             },
-            dueDate = "2024-12-${index + 10}",
+            dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
             projectName = "Website Redesign"
         )
     }
@@ -445,7 +447,7 @@ private fun ProjectTasksListPreview() {
                 1 -> Priority.MEDIUM
                 else -> Priority.LOW
             },
-            dueDate = "2024-12-${index + 10}",
+            dueDate = "2024-12-${index + 10}T00:00:00".toLocalDateTime(),
             projectName = "Website Redesign"
         )
     }

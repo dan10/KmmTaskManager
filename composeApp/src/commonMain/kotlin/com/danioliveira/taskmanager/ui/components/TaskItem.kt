@@ -1,8 +1,17 @@
 package com.danioliveira.taskmanager.ui.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Card
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,6 +22,7 @@ import com.danioliveira.taskmanager.domain.Task
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -84,7 +94,7 @@ fun TaskItem(
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Due: ${task.dueDate}",
+                    text = "Due: ${task.dueDate?.toString() ?: "No due date"}",
                     style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.primary
                 )
@@ -129,7 +139,7 @@ fun TaskItemPreview() {
                     description = "Prepare presentation for client meeting",
                     status = TaskStatus.TODO,
                     priority = Priority.HIGH,
-                    dueDate = "2024-11-25",
+                    dueDate = "2024-11-25T00:00:00".toLocalDateTime(),
                     projectName = "Website Redesign"
                 ),
                 onClick = {},
@@ -143,7 +153,7 @@ fun TaskItemPreview() {
                     description = "Review pull requests for feature branch",
                     status = TaskStatus.IN_PROGRESS,
                     priority = Priority.MEDIUM,
-                    dueDate = "2024-11-26",
+                    dueDate = "2024-11-26T00:00:00".toLocalDateTime(),
                     projectName = "Website Redesign"
                 ),
                 onClick = {},
@@ -157,7 +167,7 @@ fun TaskItemPreview() {
                     description = "Update project wiki with new features",
                     status = TaskStatus.DONE,
                     priority = Priority.LOW,
-                    dueDate = "2024-11-30",
+                    dueDate = "2024-11-30T00:00:00".toLocalDateTime(),
                     projectName = null
                 ),
                 onClick = {},

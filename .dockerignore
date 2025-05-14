@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+
+# IDE and editor files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.xcworkspace
+xcuserdata/
+
+# Build outputs from all modules
+build/
+*/build/
+out/
+
+# Gradle files
+.gradle/
+gradle-user-home/
+captures/
+# The wrapper jar is downloaded by the gradlew script, no need to include it in the context
+# gradle/wrapper/gradle-wrapper.jar
+# Keep the properties file to ensure the correct Gradle version is used by the wrapper
+!gradle/wrapper/gradle-wrapper.properties
+
+# Local properties files
+local.properties
+*.local
+
+# Log files
+*.log
+logs/
+
+# Test reports and results
+*/build/reports/
+*/build/test-results/
+
+# macOS specific
+.DS_Store
+._*
+
+# Temporary files
+*~
+*.swp
+*.swo
+
+# Documentation and utility scripts not needed in the image
+METRICS_AND_LOAD_TESTING.md
+setup-grafana-dashboard.sh
+prometheus.yml
+# Grafana directory - assuming it's for local dev/testing, not part of the app image
+grafana/
+
+# Specific XCode build data if not caught by */build/
+iosApp/iosApp.xcodeproj/project.xcworkspace/
+iosApp/iosApp.xcodeproj/xcuserdata/
