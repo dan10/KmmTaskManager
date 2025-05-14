@@ -9,13 +9,15 @@ import com.danioliveira.taskmanager.data.tables.ProjectsTable
 import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.SizedIterable
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.math.ceil
 
@@ -35,7 +37,7 @@ class ProjectRepositoryImpl : ProjectRepository {
             this.name = name
             this.description = description
             this.owner = owner.id
-            this.createdAt = LocalDateTime.now()
+            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
         return entity.toResponse(getTaskCountsForProject(entity.id.value))
     }

@@ -2,12 +2,18 @@ package com.danioliveira.taskmanager
 
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.data.entity.UserDAOEntity
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.header
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 
 /**
@@ -62,7 +68,7 @@ fun createTestUser(
             this.passwordHash = passwordHash
             this.displayName = displayName
             this.googleId = googleId
-            this.createdAt = LocalDateTime.now()
+            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
         user.id.value.toString()
     }
@@ -91,7 +97,7 @@ fun createTestUserWithId(
             this.passwordHash = passwordHash
             this.displayName = displayName
             this.googleId = googleId
-            this.createdAt = LocalDateTime.now()
+            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
         user.id.value.toString()
     }

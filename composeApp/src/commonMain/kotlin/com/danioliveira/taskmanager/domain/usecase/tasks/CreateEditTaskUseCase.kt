@@ -6,6 +6,7 @@ import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
+import kotlinx.datetime.LocalDateTime
 
 /**
  * Use case for creating and editing tasks.
@@ -27,7 +28,7 @@ class CreateEditTaskUseCase(private val taskRepository: TaskRepository) {
         title: String,
         description: String?,
         priority: Priority,
-        dueDate: String?
+        dueDate: LocalDateTime?
     ): Result<TaskResponse> {
         val request = TaskCreateRequest(
             title = title,
@@ -55,7 +56,7 @@ class CreateEditTaskUseCase(private val taskRepository: TaskRepository) {
         title: String,
         description: String?,
         priority: Priority,
-        dueDate: String?,
+        dueDate: LocalDateTime?,
         status: TaskStatus
     ): Result<TaskResponse> {
         val request = TaskUpdateRequest(

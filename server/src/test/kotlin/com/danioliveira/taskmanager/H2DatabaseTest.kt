@@ -3,6 +3,9 @@ package com.danioliveira.taskmanager
 import com.danioliveira.taskmanager.data.tables.UsersTable
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -57,7 +60,7 @@ class H2DatabaseTest {
                 email = "test@example.com"
                 passwordHash = "hashed-password"
                 displayName = "Test User"
-                createdAt = java.time.LocalDateTime.now()
+                createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             }
             userEntity.id.value.toString()
         }

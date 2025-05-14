@@ -3,7 +3,7 @@ package com.danioliveira.taskmanager.data.tables
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.javatime.datetime
+import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 
 object TasksTable : UUIDTable() {
     val title = varchar("title", 255)

@@ -5,9 +5,11 @@ import com.danioliveira.taskmanager.data.tables.UsersTable
 import com.danioliveira.taskmanager.domain.User
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.Transaction
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class UserRepositoryImpl : UserRepository {
 
@@ -28,7 +30,7 @@ internal class UserRepositoryImpl : UserRepository {
             this.passwordHash = passwordHash
             this.displayName = displayName
             this.googleId = googleId
-            this.createdAt = LocalDateTime.now()
+            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
         return entity.toDomain()
     }

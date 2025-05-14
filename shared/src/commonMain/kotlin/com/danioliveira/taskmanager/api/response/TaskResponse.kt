@@ -2,6 +2,7 @@ package com.danioliveira.taskmanager.api.response
 
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,7 +15,7 @@ data class TaskResponse(
     val description: String,
     val status: TaskStatus,
     val priority: Priority,
-    val dueDate: String,
+    val dueDate: LocalDateTime?,
     val projectId: String?,
     val assigneeId: String?,
     val creatorId: String

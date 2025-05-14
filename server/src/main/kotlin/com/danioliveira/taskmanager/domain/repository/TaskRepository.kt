@@ -4,7 +4,9 @@ import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
+import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.sql.Transaction
 
 internal interface TaskRepository {
@@ -39,7 +41,7 @@ internal interface TaskRepository {
         assigneeId: java.util.UUID?,
         creatorId: java.util.UUID,
         status: TaskStatus,
-        dueDate: java.time.LocalDateTime?
+        dueDate: LocalDateTime?
     ): TaskResponse
 
     suspend fun Transaction.update(
@@ -47,8 +49,8 @@ internal interface TaskRepository {
         title: String,
         description: String?,
         status: TaskStatus,
-        priority: com.danioliveira.taskmanager.domain.Priority,
-        dueDate: String?,
+        priority: Priority,
+        dueDate: LocalDateTime?,
         assigneeId: String?
     ): TaskResponse?
 

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 
 class TaskCreateEditViewModel(
     savedStateHandle: SavedStateHandle,
@@ -65,7 +66,7 @@ class TaskCreateEditViewModel(
                             title = TextFieldState(task.title),
                             description = TextFieldState(task.description),
                             priority = task.priority,
-                            dueDate = TextFieldState(task.dueDate),
+                            dueDate = task.dueDate,
                             status = task.status,
                             errorMessage = null
                         )
@@ -95,7 +96,7 @@ class TaskCreateEditViewModel(
                     title = title.text.toString(),
                     description = description.text.toString().takeIf { it.isNotEmpty() },
                     priority = priority,
-                    dueDate = dueDate.text.toString().takeIf { it.isNotEmpty() }
+                    dueDate = dueDate
                 )
             }
 
@@ -131,7 +132,7 @@ class TaskCreateEditViewModel(
                     title = title.text.toString(),
                     description = description.text.toString().takeIf { it.isNotEmpty() },
                     priority = priority,
-                    dueDate = dueDate.text.toString().takeIf { it.isNotEmpty() },
+                    dueDate = dueDate,
                     status = status
                 )
             }
@@ -201,6 +202,48 @@ class TaskCreateEditViewModel(
             is TaskCreateEditAction.UpdateTask -> updateTask()
             is TaskCreateEditAction.DeleteTask -> deleteTask()
             is TaskCreateEditAction.SetPriority -> setPriority(action.priority)
+            is TaskCreateEditAction.ShowDatePicker -> showDatePicker()
+            is TaskCreateEditAction.HideDatePicker -> hideDatePicker()
+            is TaskCreateEditAction.SetDate -> setDate(action.date)
         }
+    }
+
+    /**
+     * Shows the date picker.
+     */
+    private fun showDatePicker() {
+        _uiState.update { it.copy(showDatePicker = true) }
+    }
+
+    /**
+     * Hides the date picker.
+     */
+    private fun hideDatePicker() {
+        _uiState.update { it.copy(showDatePicker = false) }
+    }
+
+    /**
+     * Sets the selected date.
+     *
+     * @param date The selected date
+     */
+    private fun setDate(date: LocalDateTime) {
+        _uiState.update {
+            it.copy(
+                dueDate = date
+            )
+        }
+    }
+
+    /**
+     * Formats a LocalDateTime to a string in the format DD/MM/YYYY.
+     *
+     * @param date The date to format
+     * @return The formatted date string
+     */
+    private fun formatDate(date: LocalDateTime): String {
+        return "${date.dayOfMonth.toString().padStart(2, '0')}/${
+            date.monthNumber.toString().padStart(2, '0')
+        }/${date.year}"
     }
 }

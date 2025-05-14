@@ -12,6 +12,9 @@ import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.getTestModule
 import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -19,7 +22,6 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -308,7 +310,7 @@ class TaskServiceTest : KoinTest {
         // Assign the assignee to the project
         projectService.assignUserToProject(projectId, assigneeId)
 
-        val dueDate = LocalDateTime.now().plusDays(7).toString()
+        val dueDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val request = TaskCreateRequest(
             title = "New Task",
             description = "New Task Description",
@@ -350,7 +352,7 @@ class TaskServiceTest : KoinTest {
 
         // Note: We deliberately do NOT assign the assignee to the project
 
-        val dueDate = LocalDateTime.now().plusDays(7).toString()
+        val dueDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val request = TaskCreateRequest(
             title = "New Task Not In Project",
             description = "New Task Description Not In Project",
@@ -421,7 +423,7 @@ class TaskServiceTest : KoinTest {
             description = "Updated Description",
             status = TaskStatus.IN_PROGRESS,
             priority = Priority.HIGH,
-            dueDate = LocalDateTime.now().plusDays(7).toString()
+            dueDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
         val updatedTask = taskService.update(task.id, updateRequest)
 
@@ -442,7 +444,7 @@ class TaskServiceTest : KoinTest {
             description = "Updated Description",
             status = TaskStatus.IN_PROGRESS,
             priority = Priority.HIGH,
-            dueDate = LocalDateTime.now().plusDays(7).toString()
+            dueDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
 
         try {

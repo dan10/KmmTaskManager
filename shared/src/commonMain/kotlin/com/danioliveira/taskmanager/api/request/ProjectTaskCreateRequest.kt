@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager.api.request
 
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,5 +13,5 @@ data class ProjectTaskCreateRequest(
     val description: String? = null,
     val assigneeId: String? = null,
     val status: String = "TODO",
-    val dueDate: String? = null
+    val dueDate: LocalDateTime? = null
 )

@@ -25,6 +25,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.testing.testApplication
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -84,7 +85,7 @@ class TaskRoutesTest : KoinTest {
         val taskDescription = "Test Description"
 
         // Create a task using the API
-        val createResponse = client.post("/tasks") {
+        val createResponse = client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -103,7 +104,7 @@ class TaskRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.OK, createResponse.status)
 
         // Get tasks
-        val response = client.get("/tasks") {
+        val response = client.get("/api/tasks") {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -129,7 +130,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Get tasks without authentication
-        val response = client.get("/tasks")
+        val response = client.get("/api/tasks")
 
         // Verify the response is unauthorized
         assertEquals(HttpStatusCode.Unauthorized, response.status)
@@ -149,7 +150,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a project
-        val projectResponse = client.post("/projects") {
+        val projectResponse = client.post("/api/projects") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(ProjectCreateRequest("Test Project", "Test Description"))
@@ -163,14 +164,14 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(projectId)
 
         // Assign the user to the project (needed for the assignee validation)
-        client.post("/projects/$projectId/assign") {
+        client.post("/api/projects/$projectId/assign") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(mapOf("userId" to userId))
         }
 
         // Create a task for the project
-        client.post("/tasks") {
+        client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -186,7 +187,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Create a task without a project
-        client.post("/tasks") {
+        client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -202,7 +203,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Get tasks for the project
-        val response = client.get("/tasks?projectId=$projectId") {
+        val response = client.get("/api/tasks?projectId=$projectId") {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -238,7 +239,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task assigned to user1
-        client.post("/tasks") {
+        client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -254,7 +255,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Create a task assigned to user2
-        client.post("/tasks") {
+        client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -270,7 +271,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Get tasks assigned to user1
-        val response = client.get("/tasks?assigneeId=$user1Id") {
+        val response = client.get("/api/tasks?assigneeId=$user1Id") {
             withAuth(generateTestToken(user1Id, "user1@example.com"))
         }
 
@@ -306,7 +307,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create tasks created by user1
-        client.post("/tasks") {
+        client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -321,7 +322,7 @@ class TaskRoutesTest : KoinTest {
             )
         }
 
-        client.post("/tasks") {
+        client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -337,7 +338,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Create a task created by user2
-        client.post("/tasks") {
+        client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user2Id, "user2@example.com"))
             jsonBody(
@@ -353,7 +354,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Get tasks created by user1
-        val response = client.get("/tasks/user") {
+        val response = client.get("/api/tasks/user") {
             withAuth(generateTestToken(user1Id, "user1@example.com"))
         }
 
@@ -389,7 +390,7 @@ class TaskRoutesTest : KoinTest {
         val taskTitle = "New Task"
         val taskDescription = "New Description"
 
-        val response = client.post("/tasks") {
+        val response = client.post("api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -432,7 +433,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Try to create a task without authentication
-        val response = client.post("/tasks") {
+        val response = client.post("/api/tasks") {
             contentType(ContentType.Application.Json)
             jsonBody(
                 TaskCreateRequest(
@@ -467,7 +468,7 @@ class TaskRoutesTest : KoinTest {
         val taskTitle = "User Task"
         val taskDescription = "Task for the current user"
 
-        val response = client.post("/tasks/user") {
+        val response = client.post("/api/tasks/user") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -509,7 +510,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("/tasks") {
+        val createResponse = client.post("api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -532,7 +533,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Get the task by ID
-        val response = client.get("/tasks/$taskId") {
+        val response = client.get("/api/tasks/$taskId") {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -562,7 +563,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Get a non-existent task
-        val response = client.get("/tasks/00000000-0000-0000-0000-000000000000") {
+        val response = client.get("/api/tasks/00000000-0000-0000-0000-000000000000") {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -584,7 +585,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("/tasks") {
+        val createResponse = client.post("api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -607,7 +608,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Update the task
-        val response = client.put("/tasks/$taskId") {
+        val response = client.put("/api/tasks/$taskId") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -616,7 +617,7 @@ class TaskRoutesTest : KoinTest {
                     description = "Updated Description",
                     status = TaskStatus.IN_PROGRESS,
                     priority = Priority.HIGH,
-                    dueDate = "2023-12-31T23:59:59",
+                    dueDate = LocalDateTime.parse("2023-12-31T23:59:59"),
                     assigneeId = userId
                 )
             )
@@ -648,7 +649,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("/tasks") {
+        val createResponse = client.post("api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -671,7 +672,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Delete the task
-        val response = client.delete("/tasks/$taskId") {
+        val response = client.delete("/api/tasks/$taskId") {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -679,7 +680,7 @@ class TaskRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.NoContent, response.status)
 
         // Try to get the deleted task
-        val getResponse = client.get("/tasks/$taskId") {
+        val getResponse = client.get("/api/tasks/$taskId") {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -706,7 +707,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task assigned to user1
-        val createResponse = client.post("/tasks") {
+        val createResponse = client.post("api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -729,7 +730,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Assign the task to user2
-        val response = client.post("/tasks/$taskId/assign") {
+        val response = client.post("/api/tasks/$taskId/assign") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(TaskAssignRequest(user2Id))
@@ -759,7 +760,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("/tasks") {
+        val createResponse = client.post("api/tasks") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -782,7 +783,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Change the task status
-        val response = client.post("/tasks/$taskId/status") {
+        val response = client.post("/api/tasks/$taskId/status") {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(TaskStatusChangeRequest(TaskStatus.DONE.name))

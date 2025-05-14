@@ -32,7 +32,7 @@ dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
-    implementation(libs.exposed.java.time)
+    implementation(libs.exposed.kotlin.datetime)
     // PostgreSQL Driver
     implementation(libs.postgresql)
     // HikariCP for connection pooling

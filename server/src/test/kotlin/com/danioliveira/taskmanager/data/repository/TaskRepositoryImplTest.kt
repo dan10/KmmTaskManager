@@ -8,10 +8,12 @@ import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -63,7 +65,7 @@ class TaskRepositoryImplTest {
         val title = "Test Task"
         val description = "This is a test task"
         val status = TaskStatus.TODO
-        val dueDate = LocalDateTime.now().plusDays(7)
+        val dueDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
         val task = dbQuery {
             with(taskRepository) {
@@ -335,7 +337,7 @@ class TaskRepositoryImplTest {
                     "Updated Description",
                     TaskStatus.IN_PROGRESS,
                     Priority.HIGH,
-                    LocalDateTime.now().plusDays(14).toString(),
+                    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     secondUserId.toString()
                 )
             }
@@ -418,7 +420,7 @@ class TaskRepositoryImplTest {
                     "Updated Description",
                     TaskStatus.IN_PROGRESS,
                     Priority.HIGH,
-                    LocalDateTime.now().plusDays(14).toString(),
+                    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     testUserId.toString()
                 )
             }
@@ -439,5 +441,190 @@ class TaskRepositoryImplTest {
 
         // Verify the deletion failed
         assertFalse(deleted)
+    }
+
+    @Test
+    fun `test find tasks by assignee id with query filter`() = runBlocking {
+        // Create a second user
+        val secondUser = dbQuery {
+            with(userRepository) {
+                create("second@example.com", "password", "Second User", null)
+            }
+        }
+        val secondUserId = UUID.fromString(secondUser.id)
+
+        // Create tasks with different titles
+        val task1 = dbQuery {
+            with(taskRepository) {
+                create(
+                    "Important Task",
+                    "Description 1",
+                    testProjectId,
+                    secondUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    null
+                )
+            }
+        }
+
+        val task2 = dbQuery {
+            with(taskRepository) {
+                create("Regular Task", "Description 2", testProjectId, secondUserId, testUserId, TaskStatus.TODO, null)
+            }
+        }
+
+        val task3 = dbQuery {
+            with(taskRepository) {
+                create(
+                    "Another Important Task",
+                    "Description 3",
+                    testProjectId,
+                    secondUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    null
+                )
+            }
+        }
+
+        // Find tasks by assignee ID with query filter "Important"
+        val filteredTasks = dbQuery {
+            with(taskRepository) {
+                findAllByAssigneeId(secondUserId.toString(), 0, 10, "Important")
+            }
+        }
+
+        // Verify the correct tasks were found
+        assertEquals(2, filteredTasks.total)
+        assertEquals(2, filteredTasks.items.size)
+        assertTrue(filteredTasks.items.any { it.id == task1.id })
+        assertTrue(filteredTasks.items.any { it.id == task3.id })
+        assertFalse(filteredTasks.items.any { it.id == task2.id })
+    }
+
+    @Test
+    fun `test get user task progress`() = runBlocking {
+        // Create a second user
+        val secondUser = dbQuery {
+            with(userRepository) {
+                create("second@example.com", "password", "Second User", null)
+            }
+        }
+        val secondUserId = UUID.fromString(secondUser.id)
+
+        // Create tasks with different statuses
+        // 2 TODO tasks
+        repeat(2) {
+            dbQuery {
+                with(taskRepository) {
+                    create(
+                        "TODO Task $it",
+                        "Description for TODO task $it",
+                        testProjectId,
+                        secondUserId,
+                        testUserId,
+                        TaskStatus.TODO,
+                        null
+                    )
+                }
+            }
+        }
+
+        // 3 DONE tasks
+        repeat(3) {
+            dbQuery {
+                with(taskRepository) {
+                    create(
+                        "Done Task $it",
+                        "Description for done task $it",
+                        testProjectId,
+                        secondUserId,
+                        testUserId,
+                        TaskStatus.DONE,
+                        null
+                    )
+                }
+            }
+        }
+
+        // Get task progress for the second user
+        val progress = dbQuery {
+            with(taskRepository) {
+                getUserTaskProgress(secondUserId.toString())
+            }
+        }
+
+        // Verify the task progress
+        assertEquals(5, progress.totalTasks)
+        assertEquals(3, progress.completedTasks)
+    }
+
+    @Test
+    fun `test upload and get task files`() = runBlocking {
+        // Create a task
+        val task = dbQuery {
+            with(taskRepository) {
+                create(
+                    "Task with Files",
+                    "This task will have files",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    null
+                )
+            }
+        }
+
+        // Upload files for the task
+        val file1 = dbQuery {
+            with(taskRepository) {
+                uploadTaskFile(
+                    task.id,
+                    "document.pdf",
+                    "application/pdf",
+                    testUserId.toString(),
+                    "https://example.com/files/document.pdf"
+                )
+            }
+        }
+
+        val file2 = dbQuery {
+            with(taskRepository) {
+                uploadTaskFile(
+                    task.id,
+                    "image.jpg",
+                    "image/jpeg",
+                    testUserId.toString(),
+                    "https://example.com/files/image.jpg"
+                )
+            }
+        }
+
+        // Get files for the task
+        val files = dbQuery {
+            with(taskRepository) {
+                getTaskFiles(task.id)
+            }
+        }
+
+        // Verify the files were uploaded and retrieved correctly
+        assertEquals(2, files.size)
+        assertTrue(files.any { it.id == file1.id })
+        assertTrue(files.any { it.id == file2.id })
+
+        // Verify file details
+        val retrievedFile1 = files.find { it.id == file1.id }
+        assertNotNull(retrievedFile1)
+        assertEquals("document.pdf", retrievedFile1.name)
+        assertEquals("https://example.com/files/document.pdf", retrievedFile1.url)
+        assertEquals(task.id, retrievedFile1.taskId)
+
+        val retrievedFile2 = files.find { it.id == file2.id }
+        assertNotNull(retrievedFile2)
+        assertEquals("image.jpg", retrievedFile2.name)
+        assertEquals("https://example.com/files/image.jpg", retrievedFile2.url)
+        assertEquals(task.id, retrievedFile2.taskId)
     }
 }

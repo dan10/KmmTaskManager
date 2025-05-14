@@ -73,7 +73,7 @@ internal class TaskService(
                 assigneeId = assigneeUUID,
                 creatorId = creatorUUID,
                 status = com.danioliveira.taskmanager.domain.TaskStatus.TODO, // Default status for new tasks
-                dueDate = request.dueDate?.let { java.time.LocalDateTime.parse(it) }
+                dueDate = request.dueDate
             )
         }
     }

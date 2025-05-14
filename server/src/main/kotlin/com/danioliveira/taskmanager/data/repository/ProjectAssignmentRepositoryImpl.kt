@@ -6,10 +6,12 @@ import com.danioliveira.taskmanager.data.entity.UserDAOEntity
 import com.danioliveira.taskmanager.data.tables.ProjectAssignmentsTable
 import com.danioliveira.taskmanager.domain.ProjectAssignment
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
 
@@ -29,7 +31,7 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
 
         // Create new assignment
         val assignmentId = UUID.randomUUID()
-        val now = LocalDateTime.now()
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
         val assignment = ProjectAssignmentDAOEntity.new(assignmentId) {
             this.project = project

@@ -5,15 +5,22 @@ import com.danioliveira.taskmanager.api.request.GoogleLoginRequest
 import com.danioliveira.taskmanager.api.request.LoginRequest
 import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.auth.TestGoogleTokenVerifier
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.testing.testApplication
 import kotlinx.serialization.json.Json
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class AuthRoutesTest : KoinTest {
 
@@ -44,7 +51,7 @@ class AuthRoutesTest : KoinTest {
             displayName = "New User"
         )
 
-        val response = client.post("/auth/register") {
+        val response = client.post("api/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(registerRequest))
         }
@@ -69,7 +76,7 @@ class AuthRoutesTest : KoinTest {
             displayName = "Existing User"
         )
 
-        val firstResponse = client.post("/auth/register") {
+        val firstResponse = client.post("api/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(firstRegisterRequest))
         }
@@ -84,7 +91,7 @@ class AuthRoutesTest : KoinTest {
             displayName = "Another User"
         )
 
-        val secondResponse = client.post("/auth/register") {
+        val secondResponse = client.post("api/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(secondRegisterRequest))
         }
@@ -112,7 +119,7 @@ class AuthRoutesTest : KoinTest {
             displayName = "Login Test User"
         )
 
-        val registerResponse = client.post("/auth/register") {
+        val registerResponse = client.post("api/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(registerRequest))
         }
@@ -126,7 +133,7 @@ class AuthRoutesTest : KoinTest {
             password = "password123"
         )
 
-        val loginResponse = client.post("/auth/login") {
+        val loginResponse = client.post("api/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(loginRequest))
         }
@@ -154,7 +161,7 @@ class AuthRoutesTest : KoinTest {
             displayName = "Invalid Login Test User"
         )
 
-        val registerResponse = client.post("/auth/register") {
+        val registerResponse = client.post("api/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(registerRequest))
         }
@@ -168,7 +175,7 @@ class AuthRoutesTest : KoinTest {
             password = "wrongpassword"
         )
 
-        val loginResponse = client.post("/auth/login") {
+        val loginResponse = client.post("api/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(loginRequest))
         }
@@ -197,7 +204,7 @@ class AuthRoutesTest : KoinTest {
 
         // This should throw a RequestValidationException which is converted to a ValidationException
         // The StatusPages plugin should handle this and return a 400 Bad Request
-        val response = client.post("/auth/register") {
+        val response = client.post("api/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(registerRequest))
         }
@@ -222,7 +229,7 @@ class AuthRoutesTest : KoinTest {
             idToken = "invalid-token"  // Invalid token
         )
 
-        val response = client.post("/auth/google") {
+        val response = client.post("api/auth/google") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(googleLoginRequest))
         }
@@ -256,7 +263,7 @@ class AuthRoutesTest : KoinTest {
             )
 
             // Make the request
-            val response = client.post("/auth/google") {
+            val response = client.post("api/auth/google") {
                 contentType(ContentType.Application.Json)
                 setBody(Json.encodeToString(googleLoginRequest))
             }

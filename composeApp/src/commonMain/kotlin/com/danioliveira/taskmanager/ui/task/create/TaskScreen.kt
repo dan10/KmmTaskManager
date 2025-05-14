@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.ui.components.DatePickerFieldToModal
 import com.danioliveira.taskmanager.ui.components.TrackItInputField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -46,15 +48,19 @@ import kmmtaskmanager.composeapp.generated.resources.edit_task
 import kmmtaskmanager.composeapp.generated.resources.task_cancel_button
 import kmmtaskmanager.composeapp.generated.resources.task_create_button
 import kmmtaskmanager.composeapp.generated.resources.task_description_label
-import kmmtaskmanager.composeapp.generated.resources.task_due_date_error
 import kmmtaskmanager.composeapp.generated.resources.task_due_date_label
 import kmmtaskmanager.composeapp.generated.resources.task_priority_label
 import kmmtaskmanager.composeapp.generated.resources.task_title_error
 import kmmtaskmanager.composeapp.generated.resources.task_title_label
 import kmmtaskmanager.composeapp.generated.resources.task_update_button
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.days
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class)
@@ -94,6 +100,7 @@ private fun TaskCreateEditScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .navigationBarsPadding()
                 .padding(16.dp)
         ) {
             // Error message
@@ -104,7 +111,8 @@ private fun TaskCreateEditScreen(
                 state = state,
                 priorityDropdownExpanded = priorityDropdownExpanded,
                 onPriorityDropdownExpandedChange = { priorityDropdownExpanded = it },
-                onPrioritySelected = { actions(TaskCreateEditAction.SetPriority(it)) }
+                onPrioritySelected = { actions(TaskCreateEditAction.SetPriority(it)) },
+                onDateSelected = { actions(TaskCreateEditAction.SetDate(it)) }
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -179,7 +187,8 @@ private fun TaskFormFields(
     state: TaskCreateEditState,
     priorityDropdownExpanded: Boolean,
     onPriorityDropdownExpandedChange: (Boolean) -> Unit,
-    onPrioritySelected: (Priority) -> Unit
+    onPrioritySelected: (Priority) -> Unit,
+    onDateSelected: (LocalDateTime) -> Unit
 ) {
     // Title field
     TrackItInputField(
@@ -222,13 +231,12 @@ private fun TaskFormFields(
     Spacer(modifier = Modifier.height(16.dp))
 
     // Due date field
-    TrackItInputField(
-        state = state.dueDate,
+    DatePickerFieldToModal(
         label = stringResource(Res.string.task_due_date_label),
-        isError = state.dueDateHasError,
-        errorMessage = stringResource(Res.string.task_due_date_error),
-        enabled = !state.isLoading,
-        lineLimits = TextFieldLineLimits.SingleLine
+        placeholder = "DD/MM/YYYY",
+        selectedDate = state.dueDate,
+        onDateSelected = onDateSelected,
+        modifier = Modifier.fillMaxWidth()
     )
 }
 
@@ -319,7 +327,7 @@ fun TaskScreenPreview() {
                 title = TextFieldState("Title"),
                 description = TextFieldState("Description"),
                 priority = Priority.LOW,
-                dueDate = TextFieldState("2021-01-01"),
+                dueDate = Clock.System.now().plus(1.days).toLocalDateTime(TimeZone.currentSystemDefault()),
                 isLoading = false
             ),
             onBack = {},

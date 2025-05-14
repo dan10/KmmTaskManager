@@ -13,6 +13,10 @@ import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SizedIterable
 import org.jetbrains.exposed.sql.SortOrder
@@ -21,7 +25,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.math.ceil
 
@@ -33,7 +36,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         description: String?,
         status: TaskStatus,
         priority: Priority,
-        dueDate: String?,
+        dueDate: LocalDateTime?,
         assigneeId: String?
     ): TaskResponse? {
         val uuid = UUID.fromString(id)
@@ -42,7 +45,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         entity.description = description
         entity.status = status
         entity.priority = priority
-        entity.dueDate = dueDate?.takeIf { it.isNotEmpty() }?.let { LocalDateTime.parse(it) }
+        entity.dueDate = dueDate
         entity.assignee = assigneeId?.let { UUID.fromString(it) }?.let { UserDAOEntity.findById(it) }
         return entity.toResponse()
     }
@@ -161,7 +164,7 @@ internal class TaskRepositoryImpl : TaskRepository {
             this.status = status
             this.priority = Priority.MEDIUM // Default priority
             this.dueDate = dueDate
-            this.createdAt = LocalDateTime.now()
+            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
         return entity.toResponse()
     }
@@ -173,7 +176,7 @@ internal class TaskRepositoryImpl : TaskRepository {
             description = this.description.orEmpty(),
             status = this.status,
             priority = this.priority,
-            dueDate = this.dueDate?.toString() ?: "",
+            dueDate = this.dueDate,
             projectId = this.project?.id?.value?.toString(),
             assigneeId = this.assignee?.id?.value?.toString(),
             creatorId = this.creator.id.value.toString()
@@ -204,7 +207,7 @@ internal class TaskRepositoryImpl : TaskRepository {
             this.uploader = uploader
             this.task = task
             this.url = s3Url
-            this.uploadedAt = LocalDateTime.now()
+            this.uploadedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
 
         return fileUpload.toFileResponse(contentType)

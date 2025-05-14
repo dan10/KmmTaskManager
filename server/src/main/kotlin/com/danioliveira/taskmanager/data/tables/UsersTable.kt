@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.data.tables
 
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.javatime.datetime
+import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 
 object UsersTable : UUIDTable() {
     val email = varchar("email", 255).uniqueIndex()
