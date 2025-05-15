@@ -122,6 +122,8 @@ private fun TasksScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             LazyColumn {
                 items(

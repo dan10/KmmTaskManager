@@ -20,6 +20,7 @@ import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectTasksUseCa
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectsUseCase
 import com.danioliveira.taskmanager.domain.usecase.register.RegisterUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.CreateEditTaskUseCase
+import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskDetailsUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
 import com.danioliveira.taskmanager.ui.login.LoginViewModel
@@ -27,6 +28,7 @@ import com.danioliveira.taskmanager.ui.project.ProjectDetailsViewModel
 import com.danioliveira.taskmanager.ui.projects.ProjectsViewModel
 import com.danioliveira.taskmanager.ui.register.RegisterViewModel
 import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditViewModel
+import com.danioliveira.taskmanager.ui.task.details.TasksDetailsViewModel
 import com.danioliveira.taskmanager.ui.tasks.TasksViewModel
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
@@ -66,6 +68,7 @@ val appModule = module {
     factoryOf(::GetProjectDetailsUseCase)
     factoryOf(::GetProjectTasksUseCase)
     factoryOf(::CreateEditTaskUseCase)
+    factoryOf(::GetTaskDetailsUseCase)
 
     // ViewModels
     viewModelOf(::LoginViewModel)
@@ -74,4 +77,5 @@ val appModule = module {
     viewModelOf(::ProjectsViewModel)
     viewModelOf(::ProjectDetailsViewModel)
     viewModelOf(::TaskCreateEditViewModel)
+    viewModelOf(::TasksDetailsViewModel)
 }

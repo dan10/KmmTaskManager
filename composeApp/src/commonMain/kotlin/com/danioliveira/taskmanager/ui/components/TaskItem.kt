@@ -22,7 +22,7 @@ import com.danioliveira.taskmanager.domain.Task
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -139,7 +139,7 @@ fun TaskItemPreview() {
                     description = "Prepare presentation for client meeting",
                     status = TaskStatus.TODO,
                     priority = Priority.HIGH,
-                    dueDate = "2024-11-25T00:00:00".toLocalDateTime(),
+                    dueDate = LocalDateTime.parse("2024-11-25T00:00:00"),
                     projectName = "Website Redesign"
                 ),
                 onClick = {},
@@ -153,7 +153,7 @@ fun TaskItemPreview() {
                     description = "Review pull requests for feature branch",
                     status = TaskStatus.IN_PROGRESS,
                     priority = Priority.MEDIUM,
-                    dueDate = "2024-11-26T00:00:00".toLocalDateTime(),
+                    dueDate = LocalDateTime.parse("2024-11-26T00:00:00"),
                     projectName = "Website Redesign"
                 ),
                 onClick = {},
@@ -167,7 +167,7 @@ fun TaskItemPreview() {
                     description = "Update project wiki with new features",
                     status = TaskStatus.DONE,
                     priority = Priority.LOW,
-                    dueDate = "2024-11-30T00:00:00".toLocalDateTime(),
+                    dueDate = LocalDateTime.parse("2024-11-30T00:00:00"),
                     projectName = null
                 ),
                 onClick = {},
