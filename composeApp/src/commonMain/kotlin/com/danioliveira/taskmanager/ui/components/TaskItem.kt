@@ -22,7 +22,12 @@ import com.danioliveira.taskmanager.domain.Task
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import com.danioliveira.taskmanager.util.DateFormatter
+import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.task_due_date
+import kmmtaskmanager.composeapp.generated.resources.task_project
 import kotlinx.datetime.LocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -93,15 +98,18 @@ fun TaskItem(
                     style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
-                Text(
-                    text = "Due: ${task.dueDate?.toString() ?: "No due date"}",
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.primary
-                )
+
+                task.dueDate?.let {
+                    Text(
+                        text = "${stringResource(Res.string.task_due_date)} ${DateFormatter.formatDate(it)}",
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.primary
+                    )
+                }
 
                 task.projectName?.let {
                     Text(
-                        text = "Project: $it",
+                        text = "${stringResource(Res.string.task_project)} $it",
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.primary
                     )

@@ -47,12 +47,21 @@ import com.danioliveira.taskmanager.paging.compose.itemKey
 import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.content_description_search
 import kmmtaskmanager.composeapp.generated.resources.empty_task_list
 import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
+import kmmtaskmanager.composeapp.generated.resources.tasks_empty_subtitle
+import kmmtaskmanager.composeapp.generated.resources.tasks_empty_title
+import kmmtaskmanager.composeapp.generated.resources.tasks_progress_completed
+import kmmtaskmanager.composeapp.generated.resources.tasks_progress_percentage
+import kmmtaskmanager.composeapp.generated.resources.tasks_progress_title
+import kmmtaskmanager.composeapp.generated.resources.tasks_search_placeholder
+import kmmtaskmanager.composeapp.generated.resources.tasks_title
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.uuid.ExperimentalUuidApi
@@ -173,7 +182,7 @@ private fun TasksTopBar(
             .padding(16.dp)
     ) {
         Text(
-            text = "My Tasks",
+            text = stringResource(Res.string.tasks_title),
             style = MaterialTheme.typography.h5,
             fontWeight = FontWeight.Bold
         )
@@ -186,8 +195,13 @@ private fun TasksTopBar(
             singleLine = true,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
-            placeholder = { Text("Search tasks...") },
+            leadingIcon = {
+                Icon(
+                    Icons.Filled.Search,
+                    contentDescription = stringResource(Res.string.content_description_search)
+                )
+            },
+            placeholder = { Text(stringResource(Res.string.tasks_search_placeholder)) },
             colors = TextFieldDefaults.outlinedTextFieldColors(backgroundColor = MaterialTheme.colors.surface)
         )
     }
@@ -212,13 +226,13 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Your Progress",
+                    text = stringResource(Res.string.tasks_progress_title),
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = "${(progress * 100).toInt()}%",
+                    text = stringResource(Res.string.tasks_progress_percentage, (progress * 100).toInt()),
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold
                 )
@@ -230,7 +244,7 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
                 strokeCap = StrokeCap.Round
             )
             Text(
-                text = "$completedTasks of $totalTasks tasks completed",
+                text = stringResource(Res.string.tasks_progress_completed, completedTasks, totalTasks),
                 style = MaterialTheme.typography.caption
             )
         }
@@ -257,7 +271,7 @@ fun EmptyTasksList() {
 
         // Title
         Text(
-            text = "Ready to Get Started?",
+            text = stringResource(Res.string.tasks_empty_title),
             style = MaterialTheme.typography.h6,
             color = MaterialTheme.colors.onSurface,
             textAlign = TextAlign.Center,
@@ -266,7 +280,7 @@ fun EmptyTasksList() {
 
         // Message
         Text(
-            text = "Here are some ideas to help you begin:",
+            text = stringResource(Res.string.tasks_empty_subtitle),
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
             textAlign = TextAlign.Center

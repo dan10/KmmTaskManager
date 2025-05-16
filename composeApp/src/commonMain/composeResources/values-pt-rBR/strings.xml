@@ -47,8 +47,8 @@
     <string name="tasks_title">Minhas Tarefas</string>
     <string name="tasks_search_placeholder">Pesquisar tarefas...</string>
     <string name="tasks_progress_title">Seu Progresso</string>
-    <string name="tasks_progress_percentage">%d%%</string>
-    <string name="tasks_progress_completed">%d de %d tarefas concluídas</string>
+    <string name="tasks_progress_percentage">%1$d%</string>
+    <string name="tasks_progress_completed">%1$d de %2$d tarefas concluídas</string>
     <string name="tasks_empty_title">Pronto para Começar?</string>
     <string name="tasks_empty_subtitle">Aqui estão algumas ideias para ajudá-lo a começar:</string>
 
@@ -60,7 +60,9 @@
     <string name="task_view_files">Ver Arquivos</string>
     <string name="task_view_comments">Ver Comentários</string>
     <string name="task_due_date">Vencimento:</string>
+    <string name="task_no_due_date">Sem data de vencimento</string>
     <string name="task_project">Projeto:</string>
+    <string name="date_format_pattern">dd/MM/yyyy</string>
     <string name="task_assigned_to">Atribuído a:</string>
     <string name="task_files">Arquivos</string>
     <string name="task_add_files">Adicionar arquivos</string>
