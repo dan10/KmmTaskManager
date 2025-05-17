@@ -3,8 +3,10 @@ package com.danioliveira.taskmanager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -15,6 +17,7 @@ import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.TopLevelRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -31,10 +34,22 @@ class TasksItAppState(
 
     private val previousDestination = mutableStateOf<NavDestination?>(null)
 
+    var showBottomBar by mutableStateOf(false)
+        private set
+
+
     init {
         coroutineScope.launch {
             authManager.checkAuthState()
             handleAuthNavigation()
+        }
+
+        coroutineScope.launch {
+            navController.currentBackStackEntryFlow.collectLatest { currentEntry ->
+                currentEntry.destination.also { destination ->
+                    showBottomBar = shouldShowBottomBar2(destination)
+                }
+            }
         }
     }
 
@@ -74,6 +89,12 @@ class TasksItAppState(
         return currentDestination?.hasRoute(Screen.Tasks::class) == true ||
                 currentDestination?.hasRoute(Screen.Projects::class) == true ||
                 currentDestination?.hasRoute(Screen.Profile::class) == true
+    }
+
+    private fun shouldShowBottomBar2(currentDestination: NavDestination): Boolean {
+        return currentDestination.hasRoute(Screen.Tasks::class) ||
+                currentDestination.hasRoute(Screen.Projects::class) ||
+                currentDestination.hasRoute(Screen.Profile::class)
     }
 
     /**

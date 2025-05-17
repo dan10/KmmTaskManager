@@ -1,6 +1,10 @@
 package com.danioliveira.taskmanager
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -10,6 +14,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -76,7 +83,17 @@ fun TaskItApp() {
 fun TaskItBottomBar(
     appState: TasksItAppState
 ) {
-    AnimatedVisibility(visible = appState.shouldShowBottomBar()) {
+    val showBottomBar by remember {
+        derivedStateOf {
+            appState.showBottomBar
+        }
+    }
+
+    AnimatedVisibility(
+        visible = showBottomBar,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()
+    ) {
         BottomNavigation(modifier = Modifier.navigationBarsPadding()) {
             topLevelRoutes.forEach { topLevelRoute ->
                 BottomNavigationItem(
