@@ -41,7 +41,7 @@ import org.koin.dsl.module
  */
 val appModule = module {
 
-    single { KtorClient(get()).generateClient() }
+    single { KtorClient(get(), get()).generateClient() }
     // Network
     singleOf(::AuthApiService)
     singleOf(::TaskApiService)

@@ -8,6 +8,7 @@ import com.danioliveira.taskmanager.data.network.exceptions.NotFoundException
 import com.danioliveira.taskmanager.data.network.exceptions.ServerErrorException
 import com.danioliveira.taskmanager.data.network.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.data.storage.TokenStorage
+import com.danioliveira.taskmanager.domain.manager.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
@@ -44,10 +45,16 @@ expect fun getBaseUrl(): String
 /**
  * Ktor HTTP client for making API requests.
  */
-class KtorClient(private val tokenStorage: TokenStorage) {
+class KtorClient(
+    private val tokenStorage: TokenStorage,
+    private val authManager: AuthManager
+) {
 
     // Create a Kermit logger instance
     private val logger = Logger.withTag("KtorClient")
+
+    // Counter for consecutive 401 errors
+    private var consecutive401Count = 0
 
     // Create a JSON instance with lenient configuration
     val json = Json {
@@ -160,7 +167,10 @@ class KtorClient(private val tokenStorage: TokenStorage) {
             401 -> {
                 logger.w { "Unauthorized: $errorMessage" }
                 // Handle token expiration or invalid token by clearing it from storage
-                runBlocking { tokenStorage.clearToken() }
+                runBlocking {
+                    tokenStorage.clearToken()
+                    authManager.logout()
+                }
                 throw UnauthorizedException(exceptionResponse, errorMessage, errorBody)
             }
 
