@@ -15,6 +15,7 @@ import com.danioliveira.taskmanager.domain.repository.AuthRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.usecase.login.LoginUseCase
+import com.danioliveira.taskmanager.domain.usecase.projects.CreateEditProjectUseCase
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectDetailsUseCase
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectTasksUseCase
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectsUseCase
@@ -24,7 +25,8 @@ import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskDetailsUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
 import com.danioliveira.taskmanager.ui.login.LoginViewModel
-import com.danioliveira.taskmanager.ui.project.ProjectDetailsViewModel
+import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectViewModel
+import com.danioliveira.taskmanager.ui.project.details.ProjectDetailsViewModel
 import com.danioliveira.taskmanager.ui.projects.ProjectsViewModel
 import com.danioliveira.taskmanager.ui.register.RegisterViewModel
 import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditViewModel
@@ -40,6 +42,8 @@ import org.koin.dsl.module
  * Koin module for the application.
  */
 val appModule = module {
+
+    singleOf(::AuthManager)
 
     single { KtorClient(get(), get()).generateClient() }
     // Network
@@ -57,7 +61,7 @@ val appModule = module {
     singleOf(::ProjectRepositoryImpl) { bind<ProjectRepository>() }
 
     // Managers
-    singleOf(::AuthManager)
+
 
     // Use Cases
     factoryOf(::LoginUseCase)
@@ -69,6 +73,7 @@ val appModule = module {
     factoryOf(::GetProjectTasksUseCase)
     factoryOf(::CreateEditTaskUseCase)
     factoryOf(::GetTaskDetailsUseCase)
+    factoryOf(::CreateEditProjectUseCase)
 
     // ViewModels
     viewModelOf(::LoginViewModel)
@@ -76,6 +81,7 @@ val appModule = module {
     viewModelOf(::TasksViewModel)
     viewModelOf(::ProjectsViewModel)
     viewModelOf(::ProjectDetailsViewModel)
+    viewModelOf(::CreateEditProjectViewModel)
     viewModelOf(::TaskCreateEditViewModel)
     viewModelOf(::TasksDetailsViewModel)
 }

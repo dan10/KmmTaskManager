@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.ui.project
+package com.danioliveira.taskmanager.ui.project.details
 
 import com.danioliveira.taskmanager.domain.Project
 

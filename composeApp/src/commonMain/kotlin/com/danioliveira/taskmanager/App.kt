@@ -31,7 +31,8 @@ import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
 import com.danioliveira.taskmanager.ui.login.LoginScreen
-import com.danioliveira.taskmanager.ui.project.ProjectDetailsScreen
+import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectScreen
+import com.danioliveira.taskmanager.ui.project.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
 import com.danioliveira.taskmanager.ui.task.comments.TasksCommentsScreen
@@ -181,8 +182,11 @@ fun TaskItNavHost(
             Text("Profile Screen - Coming Soon")
         }
 
-        composable<Screen.CreateEditProject> {
-            Text("Create Project Screen - Coming Soon")
+        composable<Screen.CreateEditProject> { backStackEntry ->
+            val projectId = backStackEntry.toRoute<Screen.CreateEditProject>().projectId
+            CreateEditProjectScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable<Screen.CreateEditTask> {

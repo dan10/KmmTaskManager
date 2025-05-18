@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.domain.manager
 
-import com.danioliveira.taskmanager.domain.repository.AuthRepository
+import com.danioliveira.taskmanager.data.storage.TokenStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * Responsible for checking if a user is logged in and managing authentication state.
  */
 class AuthManager(
-    private val authRepository: AuthRepository
+    private val tokenStorage: TokenStorage
 ) {
     // Authentication state
     private val _isAuthenticated = MutableStateFlow(false)
@@ -23,7 +23,7 @@ class AuthManager(
      * @return True if the user is authenticated, false otherwise
      */
     suspend fun checkAuthState(): Boolean {
-        val isAuthenticated = authRepository.isAuthenticated()
+        val isAuthenticated = tokenStorage.getToken() != null
         _isAuthenticated.value = isAuthenticated
         return isAuthenticated
     }
@@ -32,7 +32,7 @@ class AuthManager(
      * Logs out the user by clearing the token and updating the authentication state.
      */
     suspend fun logout() {
-        authRepository.clearToken()
+        tokenStorage.clearToken()
         _isAuthenticated.value = false
     }
 }

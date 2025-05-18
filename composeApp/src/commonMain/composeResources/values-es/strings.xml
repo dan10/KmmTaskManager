@@ -113,4 +113,18 @@
     <string name="task_create_button">Crear</string>
     <string name="task_update_button">Guardar Cambios</string>
     <string name="task_cancel_button">Cancelar</string>
+
+    <!-- CreateEditProjectScreen strings -->
+    <string name="create_project">Crear Proyecto</string>
+    <string name="edit_project">Editar Proyecto</string>
+    <string name="project_name_label">Nombre del Proyecto</string>
+    <string name="project_name_error">El nombre del proyecto no puede estar vacío</string>
+    <string name="project_description_label">Descripción (opcional)</string>
+    <string name="project_cancel_button">Cancelar</string>
+    <string name="project_create_button">Crear</string>
+    <string name="project_update_button">Actualizar</string>
+    <string name="project_load_error">Error al cargar proyecto: %s</string>
+    <string name="project_create_error">Error al crear proyecto: %s</string>
+    <string name="project_update_error">Error al actualizar proyecto: %s</string>
+    <string name="project_update_failed">Error al actualizar proyecto</string>
 </resources>

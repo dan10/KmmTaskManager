@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.ui.project
+package com.danioliveira.taskmanager.ui.project.details
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

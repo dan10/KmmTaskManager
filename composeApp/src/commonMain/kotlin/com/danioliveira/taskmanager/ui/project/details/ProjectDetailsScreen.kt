@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.ui.project
+package com.danioliveira.taskmanager.ui.project.details
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
