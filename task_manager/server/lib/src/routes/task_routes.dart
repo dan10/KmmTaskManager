@@ -1,69 +1,119 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:shared/src/models/task.dart' as shared;
-import '../services/task_service.dart';
 import '../middleware/auth_middleware.dart';
+import '../services/task_service.dart';
+import 'package:shared/src/models/task.dart';
 
 class TaskRoutes {
   final TaskService _service;
+  final AuthMiddleware _authMiddleware;
 
-  TaskRoutes(this._service);
+  TaskRoutes(this._service, this._authMiddleware);
 
   Router get router {
     final router = Router();
 
-    // GET /tasks - Get all tasks
-    router.get('/tasks', (Request request) async {
-      final tasks = await _service.getAllTasks();
-      return Response.ok(
-        jsonEncode(tasks.map((t) => t.toJson()).toList()),
-        headers: {'content-type': 'application/json'},
-      );
-    });
+    router.get('/tasks', _authMiddleware.middleware(_getAllTasks));
+    router.get('/tasks/<id>', _authMiddleware.middleware(_getTaskById));
+    router.post('/tasks', _authMiddleware.middleware(_createTask));
+    router.put('/tasks/<id>', _authMiddleware.middleware(_updateTask));
+    router.delete('/tasks/<id>', _authMiddleware.middleware(_deleteTask));
 
-    // GET /tasks/<id> - Get a task by ID
-    router.get('/tasks/<id>', (Request request, String id) async {
-      final task = await _service.getTaskById(id);
+    return router;
+  }
+
+  Future<Response> _getAllTasks(Request request) async {
+    try {
+      final userId = request.context['userId'] as String;
+      final tasks = await _service.getAllTasks(userId);
+      return Response.ok(jsonEncode(tasks.map((t) => t.toJson()).toList()));
+    } catch (e) {
+      return Response.internalServerError(body: e.toString());
+    }
+  }
+
+  Future<Response> _getTaskById(Request request) async {
+    try {
+      final id = request.params['id']!;
+      final userId = request.context['userId'] as String;
+      final task = await _service.getTaskById(id, userId);
       if (task == null) {
         return Response.notFound('Task not found');
       }
-      return Response.ok(
-        jsonEncode(task.toJson()),
-        headers: {'content-type': 'application/json'},
-      );
-    });
+      return Response.ok(jsonEncode(task.toJson()));
+    } catch (e) {
+      return Response.internalServerError(body: e.toString());
+    }
+  }
 
-    // POST /tasks - Create a new task
-    router.post('/tasks', (Request request) async {
+  Future<Response> _createTask(Request request) async {
+    try {
       final body = await request.readAsString();
-      final data = jsonDecode(body) as Map<String, dynamic>;
-      final task = shared.Task.fromJson(data);
+      final taskData = jsonDecode(body) as Map<String, dynamic>;
+      final userId = request.context['userId'] as String;
+      final task = Task(
+        id: taskData['id'] as String,
+        title: taskData['title'] as String,
+        description: taskData['description'] as String,
+        status: TaskStatus.values.firstWhere(
+          (e) => e.toString() == taskData['status'] as String,
+        ),
+        priority: Priority.values.firstWhere(
+          (e) => e.toString() == taskData['priority'] as String,
+        ),
+        dueDate: taskData['dueDate'] != null
+            ? DateTime.parse(taskData['dueDate'] as String)
+            : null,
+        projectId: taskData['projectId'] as String?,
+        assigneeId: taskData['assigneeId'] as String?,
+        creatorId: userId,
+      );
       final createdTask = await _service.createTask(task);
-      return Response.ok(
-        jsonEncode(createdTask.toJson()),
-        headers: {'content-type': 'application/json'},
-      );
-    });
+      return Response.ok(jsonEncode(createdTask.toJson()));
+    } catch (e) {
+      return Response.internalServerError(body: e.toString());
+    }
+  }
 
-    // PUT /tasks/<id> - Update a task
-    router.put('/tasks/<id>', (Request request, String id) async {
+  Future<Response> _updateTask(Request request) async {
+    try {
+      final id = request.params['id']!;
+      final userId = request.context['userId'] as String;
       final body = await request.readAsString();
-      final data = jsonDecode(body) as Map<String, dynamic>;
-      final task = shared.Task.fromJson(data);
-      final updatedTask = await _service.updateTask(task);
-      return Response.ok(
-        jsonEncode(updatedTask.toJson()),
-        headers: {'content-type': 'application/json'},
+      final taskData = jsonDecode(body) as Map<String, dynamic>;
+      final task = Task(
+        id: id,
+        title: taskData['title'] as String,
+        description: taskData['description'] as String,
+        status: TaskStatus.values.firstWhere(
+          (e) => e.toString() == taskData['status'] as String,
+        ),
+        priority: Priority.values.firstWhere(
+          (e) => e.toString() == taskData['priority'] as String,
+        ),
+        dueDate: taskData['dueDate'] != null
+            ? DateTime.parse(taskData['dueDate'] as String)
+            : null,
+        projectId: taskData['projectId'] as String?,
+        assigneeId: taskData['assigneeId'] as String?,
+        creatorId: userId,
       );
-    });
+      final updatedTask = await _service.updateTask(id, task, userId);
+      return Response.ok(jsonEncode(updatedTask.toJson()));
+    } catch (e) {
+      return Response.internalServerError(body: e.toString());
+    }
+  }
 
-    // DELETE /tasks/<id> - Delete a task
-    router.delete('/tasks/<id>', (Request request, String id) async {
-      await _service.deleteTask(id);
+  Future<Response> _deleteTask(Request request) async {
+    try {
+      final id = request.params['id']!;
+      final userId = request.context['userId'] as String;
+      await _service.deleteTask(id, userId);
       return Response.ok('Task deleted');
-    });
-
-    return router;
+    } catch (e) {
+      return Response.internalServerError(body: e.toString());
+    }
   }
 }

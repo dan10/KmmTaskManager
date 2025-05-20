@@ -2,11 +2,12 @@ import 'package:shared/src/models/project.dart' as shared;
 import '../repositories/project_repository.dart';
 
 abstract class ProjectService {
+  Future<List<shared.Project>> getAllProjects(String userId);
+  Future<shared.Project?> getProjectById(String id, String userId);
   Future<shared.Project> createProject(shared.Project project);
-  Future<shared.Project?> getProjectById(String id);
-  Future<List<shared.Project>> getAllProjects();
-  Future<shared.Project> updateProject(shared.Project project);
-  Future<void> deleteProject(String id);
+  Future<shared.Project> updateProject(
+      String id, shared.Project project, String userId);
+  Future<void> deleteProject(String id, String userId);
 }
 
 class ProjectServiceImpl implements ProjectService {
@@ -15,27 +16,40 @@ class ProjectServiceImpl implements ProjectService {
   ProjectServiceImpl(this._repository);
 
   @override
+  Future<List<shared.Project>> getAllProjects(String userId) async {
+    return _repository.findAllByUserId(userId);
+  }
+
+  @override
+  Future<shared.Project?> getProjectById(String id, String userId) async {
+    final project = await _repository.findById(id);
+    if (project == null || project.userId != userId) {
+      return null;
+    }
+    return project;
+  }
+
+  @override
   Future<shared.Project> createProject(shared.Project project) async {
-    return await _repository.create(project);
+    return _repository.create(project);
   }
 
   @override
-  Future<shared.Project?> getProjectById(String id) async {
-    return await _repository.findById(id);
+  Future<shared.Project> updateProject(
+      String id, shared.Project project, String userId) async {
+    final existingProject = await _repository.findById(id);
+    if (existingProject == null || existingProject.userId != userId) {
+      throw Exception('Project not found or unauthorized');
+    }
+    return _repository.update(project);
   }
 
   @override
-  Future<List<shared.Project>> getAllProjects() async {
-    return await _repository.findAll();
-  }
-
-  @override
-  Future<shared.Project> updateProject(shared.Project project) async {
-    return await _repository.update(project);
-  }
-
-  @override
-  Future<void> deleteProject(String id) async {
+  Future<void> deleteProject(String id, String userId) async {
+    final project = await _repository.findById(id);
+    if (project == null || project.userId != userId) {
+      throw Exception('Project not found or unauthorized');
+    }
     await _repository.delete(id);
   }
 }

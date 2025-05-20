@@ -14,15 +14,15 @@ class Database {
 
   Future<void> connect() async {
     await _connection.open();
-    await _createTables();
+    await createTables(_connection);
   }
 
   Future<void> disconnect() async {
     await _connection.close();
   }
 
-  Future<void> _createTables() async {
-    await _connection.execute('''
+  static Future<void> createTables(PostgreSQLConnection connection) async {
+    await connection.execute('''
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -34,12 +34,12 @@ class Database {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
-        creator_id TEXT NOT NULL REFERENCES users(id)
+        creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS project_members (
-        project_id TEXT REFERENCES projects(id),
-        user_id TEXT REFERENCES users(id),
+        project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         PRIMARY KEY (project_id, user_id)
       );
 
@@ -47,12 +47,11 @@ class Database {
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         description TEXT NOT NULL,
-        is_completed BOOLEAN NOT NULL DEFAULT FALSE,
-        creator_id TEXT NOT NULL REFERENCES users(id),
-        project_id TEXT REFERENCES projects(id),
-        assignee_id TEXT REFERENCES users(id),
-        priority INTEGER NOT NULL DEFAULT 0,
-        due_date TIMESTAMP
+        status TEXT NOT NULL,
+        priority TEXT NOT NULL,
+        project_id TEXT REFERENCES projects(id) ON DELETE SET NULL,
+        assignee_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE
       );
     ''');
   }
@@ -80,5 +79,12 @@ class Database {
       query,
       substitutionValues: parameters,
     );
+  }
+
+  static Future<void> dropTables(PostgreSQLConnection connection) async {
+    await connection.execute('DROP TABLE IF EXISTS tasks');
+    await connection.execute('DROP TABLE IF EXISTS project_members');
+    await connection.execute('DROP TABLE IF EXISTS projects');
+    await connection.execute('DROP TABLE IF EXISTS users');
   }
 }

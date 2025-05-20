@@ -1,30 +1,38 @@
 import 'package:shelf/shelf.dart';
 import '../services/jwt_service.dart';
 
-Middleware authMiddleware() {
-  return (Handler innerHandler) {
-    return (Request request) async {
-      final authHeader = request.headers['authorization'];
-      if (authHeader == null || !authHeader.startsWith('Bearer ')) {
-        return Response.unauthorized('Missing or invalid authorization header');
-      }
+class AuthMiddleware {
+  final JwtService _jwtService;
 
-      final token = authHeader.substring(7);
-      final jwtService = JwtService();
-      final payload = jwtService.validateToken(token);
+  AuthMiddleware(this._jwtService);
 
-      if (payload == null) {
-        return Response.unauthorized('Invalid or expired token');
-      }
+  Middleware get middleware => (Handler innerHandler) {
+        return (Request request) async {
+          // Skip auth for login and register endpoints
+          if (request.url.path == 'auth/login' ||
+              request.url.path == 'auth/register') {
+            return innerHandler(request);
+          }
 
-      // Add user info to request context
-      final updatedRequest = request.change(context: {
-        'userId': payload['sub'],
-        'userName': payload['name'],
-        'userEmail': payload['email'],
-      });
+          final authHeader = request.headers['authorization'];
+          if (authHeader == null || !authHeader.startsWith('Bearer ')) {
+            return Response.unauthorized(
+                'Missing or invalid authorization header');
+          }
 
-      return innerHandler(updatedRequest);
-    };
-  };
+          final token = authHeader.substring(7);
+          final payload = _jwtService.validateToken(token);
+          if (payload == null) {
+            return Response.unauthorized('Invalid or expired token');
+          }
+
+          // Add user context to the request
+          final modifiedRequest = request.change(context: {
+            'userId': payload['sub'],
+            'userEmail': payload['email'],
+          });
+
+          return innerHandler(modifiedRequest);
+        };
+      };
 }

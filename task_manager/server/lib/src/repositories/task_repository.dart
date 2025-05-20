@@ -1,154 +1,129 @@
-import '../data/database.dart';
-import '../models/models.dart';
+import 'package:postgres/postgres.dart';
 import 'package:shared/src/models/task.dart' as shared;
+import 'package:shared/src/models/user.dart' as shared;
 
-abstract class TaskRepository {
-  Future<shared.Task> create(shared.Task task);
-  Future<shared.Task?> findById(String id);
-  Future<List<shared.Task>> findAll();
-  Future<shared.Task> update(shared.Task task);
-  Future<void> delete(String id);
-}
+class TaskRepository {
+  final PostgreSQLConnection _db;
 
-class TaskRepositoryImpl implements TaskRepository {
-  final Database _db;
+  TaskRepository(this._db);
 
-  TaskRepositoryImpl(this._db);
-
-  Future<List<shared.Task>> findByUserId(String userId) async {
-    final results = await _db.query(
+  Future<shared.Task> createTask(shared.Task task) async {
+    final result = await _db.query(
       '''
-      SELECT * FROM tasks WHERE creator_id = @userId
+      INSERT INTO tasks (id, title, description, status, priority, project_id, assignee_id, creator_id)
+      VALUES (@id, @title, @description, @status, @priority, @projectId, @assigneeId, @creatorId)
+      RETURNING *
       ''',
-      parameters: {'userId': userId},
-    );
-
-    return results
-        .map((row) => shared.Task(
-              id: row['id'] as String,
-              title: row['title'] as String,
-              description: row['description'] as String,
-              status: shared.TaskStatus.values.firstWhere(
-                (e) => e.toString() == row['status'] as String,
-              ),
-              priority: shared.Priority.values.firstWhere(
-                (e) => e.toString() == row['priority'] as String,
-              ),
-              dueDate: row['due_date'] != null
-                  ? DateTime.parse(row['due_date'] as String)
-                  : null,
-              projectId: row['project_id'] as String?,
-              assigneeId: row['assignee_id'] as String?,
-              creatorId: row['creator_id'] as String,
-            ))
-        .toList();
-  }
-
-  @override
-  Future<shared.Task?> findById(String taskId) async {
-    final results = await _db.query(
-      'SELECT * FROM tasks WHERE id = @taskId',
-      parameters: {'taskId': taskId},
-    );
-
-    if (results.isEmpty) {
-      return null;
-    }
-
-    final row = results.first;
-    return shared.Task(
-      id: row['id'] as String,
-      title: row['title'] as String,
-      description: row['description'] as String,
-      status: shared.TaskStatus.values.firstWhere(
-        (e) => e.toString() == row['status'] as String,
-      ),
-      priority: shared.Priority.values.firstWhere(
-        (e) => e.toString() == row['priority'] as String,
-      ),
-      dueDate: row['due_date'] != null
-          ? DateTime.parse(row['due_date'] as String)
-          : null,
-      projectId: row['project_id'] as String?,
-      assigneeId: row['assignee_id'] as String?,
-      creatorId: row['creator_id'] as String,
-    );
-  }
-
-  @override
-  Future<shared.Task> create(shared.Task task) async {
-    await _db.execute(
-      '''
-      INSERT INTO tasks (id, title, description, status, priority, due_date, project_id, assignee_id, creator_id)
-      VALUES (@id, @title, @description, @status, @priority, @dueDate, @projectId, @assigneeId, @creatorId)
-      ''',
-      parameters: {
+      substitutionValues: {
         'id': task.id,
         'title': task.title,
         'description': task.description,
         'status': task.status.toString(),
         'priority': task.priority.toString(),
-        'dueDate': task.dueDate?.toIso8601String(),
         'projectId': task.projectId,
         'assigneeId': task.assigneeId,
         'creatorId': task.creatorId,
       },
     );
-    return task;
+
+    return _mapTaskFromRow(result.first);
   }
 
-  @override
-  Future<List<shared.Task>> findAll() async {
-    final results = await _db.query('SELECT * FROM tasks');
-    return results
-        .map((row) => shared.Task(
-              id: row['id'] as String,
-              title: row['title'] as String,
-              description: row['description'] as String,
-              status: shared.TaskStatus.values.firstWhere(
-                (e) => e.toString() == row['status'] as String,
-              ),
-              priority: shared.Priority.values.firstWhere(
-                (e) => e.toString() == row['priority'] as String,
-              ),
-              dueDate: row['due_date'] != null
-                  ? DateTime.parse(row['due_date'] as String)
-                  : null,
-              projectId: row['project_id'] as String?,
-              assigneeId: row['assignee_id'] as String?,
-              creatorId: row['creator_id'] as String,
-            ))
-        .toList();
+  Future<shared.Task?> findTaskById(String id) async {
+    final result = await _db.query(
+      'SELECT * FROM tasks WHERE id = @id',
+      substitutionValues: {'id': id},
+    );
+
+    if (result.isEmpty) return null;
+    return _mapTaskFromRow(result.first);
   }
 
-  @override
-  Future<shared.Task> update(shared.Task task) async {
+  Future<List<shared.Task>> findAllTasks() async {
+    final result = await _db.query('SELECT * FROM tasks');
+    return result.map(_mapTaskFromRow).toList();
+  }
+
+  Future<List<shared.Task>> findTasksByProjectId(String projectId) async {
+    final result = await _db.query(
+      'SELECT * FROM tasks WHERE project_id = @projectId',
+      substitutionValues: {'projectId': projectId},
+    );
+
+    return result.map(_mapTaskFromRow).toList();
+  }
+
+  Future<List<shared.Task>> findTasksByAssigneeId(String assigneeId) async {
+    final result = await _db.query(
+      'SELECT * FROM tasks WHERE assignee_id = @assigneeId',
+      substitutionValues: {'assigneeId': assigneeId},
+    );
+
+    return result.map(_mapTaskFromRow).toList();
+  }
+
+  Future<List<shared.Task>> findTasksByCreatorId(String creatorId) async {
+    final result = await _db.query(
+      'SELECT * FROM tasks WHERE creator_id = @creatorId',
+      substitutionValues: {'creatorId': creatorId},
+    );
+
+    return result.map(_mapTaskFromRow).toList();
+  }
+
+  Future<List<shared.Task>> findAllByUserId(String userId) async {
+    final result = await _db.query(
+      'SELECT * FROM tasks WHERE creator_id = @userId OR assignee_id = @userId',
+      substitutionValues: {'userId': userId},
+    );
+    return result.map(_mapTaskFromRow).toList();
+  }
+
+  Future<void> updateTask(shared.Task task) async {
     await _db.execute(
       '''
       UPDATE tasks
-      SET title = @title, description = @description, status = @status, priority = @priority, due_date = @dueDate, project_id = @projectId, assignee_id = @assigneeId, creator_id = @creatorId
+      SET title = @title,
+          description = @description,
+          status = @status,
+          priority = @priority,
+          project_id = @projectId,
+          assignee_id = @assigneeId
       WHERE id = @id
       ''',
-      parameters: {
+      substitutionValues: {
         'id': task.id,
         'title': task.title,
         'description': task.description,
         'status': task.status.toString(),
         'priority': task.priority.toString(),
-        'dueDate': task.dueDate?.toIso8601String(),
         'projectId': task.projectId,
         'assigneeId': task.assigneeId,
-        'creatorId': task.creatorId,
       },
     );
-    return task;
   }
 
-  @override
-  Future<void> delete(String id) async {
+  Future<void> deleteTask(String id) async {
     await _db.execute(
       'DELETE FROM tasks WHERE id = @id',
-      parameters: {'id': id},
+      substitutionValues: {'id': id},
+    );
+  }
+
+  shared.Task _mapTaskFromRow(List<dynamic> row) {
+    return shared.Task(
+      id: row[0] as String,
+      title: row[1] as String,
+      description: (row[2] as String?) ?? '',
+      status: shared.TaskStatus.values.firstWhere(
+        (e) => e.toString() == row[3] as String,
+      ),
+      priority: shared.Priority.values.firstWhere(
+        (e) => e.toString() == row[4] as String,
+      ),
+      projectId: row[5] as String?,
+      assigneeId: row[6] as String?,
+      creatorId: row[7] as String,
     );
   }
 }
