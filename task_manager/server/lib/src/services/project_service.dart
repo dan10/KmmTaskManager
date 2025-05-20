@@ -23,7 +23,7 @@ class ProjectServiceImpl implements ProjectService {
   @override
   Future<shared.Project?> getProjectById(String id, String userId) async {
     final project = await _repository.findById(id);
-    if (project == null || project.userId != userId) {
+    if (project == null || project.creatorId != userId) {
       return null;
     }
     return project;
@@ -38,7 +38,7 @@ class ProjectServiceImpl implements ProjectService {
   Future<shared.Project> updateProject(
       String id, shared.Project project, String userId) async {
     final existingProject = await _repository.findById(id);
-    if (existingProject == null || existingProject.userId != userId) {
+    if (existingProject == null || existingProject.creatorId != userId) {
       throw Exception('Project not found or unauthorized');
     }
     return _repository.update(project);
@@ -47,7 +47,7 @@ class ProjectServiceImpl implements ProjectService {
   @override
   Future<void> deleteProject(String id, String userId) async {
     final project = await _repository.findById(id);
-    if (project == null || project.userId != userId) {
+    if (project == null || project.creatorId != userId) {
       throw Exception('Project not found or unauthorized');
     }
     await _repository.delete(id);

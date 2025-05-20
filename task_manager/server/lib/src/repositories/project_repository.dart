@@ -6,7 +6,38 @@ class ProjectRepository {
 
   ProjectRepository(this._db);
 
-  Future<shared.Project> createProject(shared.Project project) async {
+  Future<List<shared.Project>> findAllByUserId(String userId) async {
+    final result = await _db.query(
+      '''
+      SELECT p.* FROM projects p
+      LEFT JOIN project_members pm ON p.id = pm.project_id
+      WHERE p.creator_id = @userId OR pm.user_id = @userId
+      ''',
+      substitutionValues: {'userId': userId},
+    );
+
+    final projects = result.map(_mapProjectFromRow).toList();
+    for (var i = 0; i < projects.length; i++) {
+      final members = await _getProjectMembers(projects[i].id);
+      projects[i] = projects[i].copyWith(memberIds: members);
+    }
+    return projects;
+  }
+
+  Future<shared.Project?> findById(String id) async {
+    final result = await _db.query(
+      'SELECT * FROM projects WHERE id = @id',
+      substitutionValues: {'id': id},
+    );
+
+    if (result.isEmpty) return null;
+
+    final project = _mapProjectFromRow(result.first);
+    final members = await _getProjectMembers(id);
+    return project.copyWith(memberIds: members);
+  }
+
+  Future<shared.Project> create(shared.Project project) async {
     final result = await _db.query(
       '''
       INSERT INTO projects (id, name, description, creator_id)
@@ -40,52 +71,7 @@ class ProjectRepository {
     return createdProject.copyWith(memberIds: members);
   }
 
-  Future<shared.Project?> findProjectById(String id) async {
-    final result = await _db.query(
-      'SELECT * FROM projects WHERE id = @id',
-      substitutionValues: {'id': id},
-    );
-
-    if (result.isEmpty) return null;
-
-    final project = _mapProjectFromRow(result.first);
-    final members = await _getProjectMembers(id);
-    return project.copyWith(memberIds: members);
-  }
-
-  Future<List<shared.Project>> findProjectsByCreatorId(String creatorId) async {
-    final result = await _db.query(
-      'SELECT * FROM projects WHERE creator_id = @creatorId',
-      substitutionValues: {'creatorId': creatorId},
-    );
-
-    final projects = result.map(_mapProjectFromRow).toList();
-    for (var i = 0; i < projects.length; i++) {
-      final members = await _getProjectMembers(projects[i].id);
-      projects[i] = projects[i].copyWith(memberIds: members);
-    }
-    return projects;
-  }
-
-  Future<List<shared.Project>> findProjectsByMemberId(String memberId) async {
-    final result = await _db.query(
-      '''
-      SELECT p.* FROM projects p
-      JOIN project_members pm ON p.id = pm.project_id
-      WHERE pm.user_id = @memberId
-      ''',
-      substitutionValues: {'memberId': memberId},
-    );
-
-    final projects = result.map(_mapProjectFromRow).toList();
-    for (var i = 0; i < projects.length; i++) {
-      final members = await _getProjectMembers(projects[i].id);
-      projects[i] = projects[i].copyWith(memberIds: members);
-    }
-    return projects;
-  }
-
-  Future<void> updateProject(shared.Project project) async {
+  Future<shared.Project> update(shared.Project project) async {
     await _db.execute(
       '''
       UPDATE projects
@@ -118,9 +104,15 @@ class ProjectRepository {
         },
       );
     }
+
+    final updatedProject = await findById(project.id);
+    if (updatedProject == null) {
+      throw Exception('Project not found after update');
+    }
+    return updatedProject;
   }
 
-  Future<void> deleteProject(String id) async {
+  Future<void> delete(String id) async {
     await _db.execute(
       'DELETE FROM project_members WHERE project_id = @id',
       substitutionValues: {'id': id},

@@ -51,7 +51,8 @@ class Database {
         priority TEXT NOT NULL,
         project_id TEXT REFERENCES projects(id) ON DELETE SET NULL,
         assignee_id TEXT REFERENCES users(id) ON DELETE SET NULL,
-        creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE
+        creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        due_date TIMESTAMP
       );
     ''');
   }

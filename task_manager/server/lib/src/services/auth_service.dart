@@ -1,5 +1,3 @@
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
 import 'package:shared/src/models/user.dart';
 import '../repositories/auth_repository.dart';
 import '../services/jwt_service.dart';
@@ -19,7 +17,7 @@ class AuthServiceImpl implements AuthService {
   @override
   Future<User> register(String name, String email, String password) async {
     // Check if user already exists
-    final existingUser = await _authRepository.findByEmail(email);
+    final existingUser = await _authRepository.findUserByEmail(email);
     if (existingUser != null) {
       throw Exception('User already exists');
     }
@@ -32,13 +30,13 @@ class AuthServiceImpl implements AuthService {
       passwordHash: _hashPassword(password),
     );
 
-    return _authRepository.create(user);
+    return _authRepository.createUser(user);
   }
 
   @override
   Future<User> login(String email, String password) async {
     // Find user
-    final user = await _authRepository.findByEmail(email);
+    final user = await _authRepository.findUserByEmail(email);
     if (user == null) {
       throw Exception('User not found');
     }
@@ -53,7 +51,7 @@ class AuthServiceImpl implements AuthService {
 
   @override
   Future<User?> getCurrentUser(String id) async {
-    return _authRepository.findById(id);
+    return _authRepository.findUserById(id);
   }
 
   String _hashPassword(String password) {

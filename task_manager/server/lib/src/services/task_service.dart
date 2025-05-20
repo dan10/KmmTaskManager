@@ -22,7 +22,8 @@ class TaskServiceImpl implements TaskService {
   @override
   Future<shared.Task?> getTaskById(String id, String userId) async {
     final task = await _repository.findById(id);
-    if (task == null || task.userId != userId) {
+    if (task == null ||
+        (task.creatorId != userId && task.assigneeId != userId)) {
       return null;
     }
     return task;
@@ -37,7 +38,9 @@ class TaskServiceImpl implements TaskService {
   Future<shared.Task> updateTask(
       String id, shared.Task task, String userId) async {
     final existingTask = await _repository.findById(id);
-    if (existingTask == null || existingTask.userId != userId) {
+    if (existingTask == null ||
+        (existingTask.creatorId != userId &&
+            existingTask.assigneeId != userId)) {
       throw Exception('Task not found or unauthorized');
     }
     return _repository.update(task);
@@ -46,7 +49,8 @@ class TaskServiceImpl implements TaskService {
   @override
   Future<void> deleteTask(String id, String userId) async {
     final task = await _repository.findById(id);
-    if (task == null || task.userId != userId) {
+    if (task == null ||
+        (task.creatorId != userId && task.assigneeId != userId)) {
       throw Exception('Task not found or unauthorized');
     }
     await _repository.delete(id);
