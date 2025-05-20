@@ -1,0 +1,45 @@
+import 'package:provider/provider.dart';
+import 'data/database.dart';
+import 'repositories/auth_repository.dart';
+import 'repositories/task_repository.dart';
+import 'repositories/project_repository.dart';
+import 'services/auth_service.dart';
+import 'services/task_service.dart';
+import 'services/project_service.dart';
+import 'services/jwt_service.dart';
+
+class Providers {
+  static List<Provider> get providers => [
+        Provider<Database>(
+          create: (_) => Database(),
+        ),
+        Provider<JwtService>(
+          create: (_) => JwtService(),
+        ),
+        Provider<AuthRepository>(
+          create: (context) => AuthRepository(context.read<Database>()),
+        ),
+        Provider<TaskRepository>(
+          create: (context) => TaskRepository(context.read<Database>()),
+        ),
+        Provider<ProjectRepository>(
+          create: (context) => ProjectRepository(context.read<Database>()),
+        ),
+        Provider<AuthService>(
+          create: (context) => AuthService(
+            context.read<AuthRepository>(),
+            context.read<JwtService>(),
+          ),
+        ),
+        Provider<TaskService>(
+          create: (context) => TaskService(
+            context.read<TaskRepository>(),
+          ),
+        ),
+        Provider<ProjectService>(
+          create: (context) => ProjectService(
+            context.read<ProjectRepository>(),
+          ),
+        ),
+      ];
+}
