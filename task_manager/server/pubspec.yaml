@@ -14,7 +14,9 @@ dependencies:
     path: ../shared
   postgres: ^2.6.3
   crypto: ^3.0.3
+  dart_jsonwebtoken: ^2.12.0
   dotenv: ^4.2.0
+  http: ^1.1.0 # Add http package
   shelf_test_handler: ^2.0.2
   testainers: ^0.2.0
   uuid: ^4.5.1

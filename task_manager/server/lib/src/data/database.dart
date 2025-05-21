@@ -1,15 +1,17 @@
 import 'package:postgres/postgres.dart';
+import '../config/app_config.dart';
 
 class Database {
+  final AppConfig _appConfig;
   final PostgreSQLConnection _connection;
 
-  Database()
+  Database(this._appConfig)
       : _connection = PostgreSQLConnection(
-          'localhost',
-          5432,
-          'task_manager',
-          username: 'postgres',
-          password: 'postgres',
+          _appConfig.dbHost,
+          _appConfig.dbPort,
+          _appConfig.dbName,
+          username: _appConfig.dbUsername,
+          password: _appConfig.dbPassword,
         );
 
   Future<void> connect() async {

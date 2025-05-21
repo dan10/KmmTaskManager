@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'config/app_config.dart'; // Import AppConfig
 import 'data/database.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/task_repository.dart';
@@ -10,11 +11,14 @@ import 'services/jwt_service.dart';
 
 class Providers {
   static List<Provider> get providers => [
+        Provider<AppConfig>( // Add AppConfig provider
+          create: (_) => AppConfig(),
+        ),
         Provider<Database>(
-          create: (_) => Database(),
+          create: (context) => Database(context.read<AppConfig>()), // Pass AppConfig
         ),
         Provider<JwtService>(
-          create: (_) => JwtService(),
+          create: (context) => JwtService(context.read<AppConfig>()), // Pass AppConfig
         ),
         Provider<AuthRepository>(
           create: (context) => AuthRepository(context.read<Database>()),
