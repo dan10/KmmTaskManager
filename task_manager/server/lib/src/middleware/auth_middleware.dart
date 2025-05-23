@@ -6,33 +6,38 @@ class AuthMiddleware {
 
   AuthMiddleware(this._jwtService);
 
-  Middleware get middleware => (Handler innerHandler) {
-        return (Request request) async {
-          // Skip auth for login and register endpoints
-          if (request.url.path == 'auth/login' ||
-              request.url.path == 'auth/register') {
-            return innerHandler(request);
-          }
+  Middleware middleware() {
+    return (Handler handler) {
+      return (Request request) async {
+        final authHeader = request.headers['Authorization'];
+        if (authHeader == null || !authHeader.startsWith('Bearer ')) {
+          return Response.unauthorized('Missing or invalid authorization header');
+        }
 
-          final authHeader = request.headers['authorization'];
-          if (authHeader == null || !authHeader.startsWith('Bearer ')) {
-            return Response.unauthorized(
-                'Missing or invalid authorization header');
-          }
-
-          final token = authHeader.substring(7);
+        final token = authHeader.substring(7);
+        try {
           final payload = _jwtService.validateToken(token);
           if (payload == null) {
-            return Response.unauthorized('Invalid or expired token');
+            return Response.unauthorized('Invalid token');
           }
 
-          // Add user context to the request
+          final userId = payload['sub'] as String?;
+          if (userId == null) {
+            return Response.unauthorized('Invalid token: missing user ID');
+          }
+
+          // Add user info to the request context and pass to next handler
           final modifiedRequest = request.change(context: {
-            'userId': payload['sub'],
-            'userEmail': payload['email'],
+            ...request.context,
+            'user': payload,
+            'userId': userId,
           });
 
-          return innerHandler(modifiedRequest);
-        };
+          return await handler(modifiedRequest);
+        } catch (e) {
+          return Response.unauthorized('Invalid token');
+        }
       };
+    };
+  }
 }

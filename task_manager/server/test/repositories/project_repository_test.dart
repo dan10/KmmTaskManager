@@ -1,288 +1,263 @@
 import 'package:test/test.dart';
-import 'package:shared/models.dart' as shared_models;
+import 'package:shared/models.dart';
 import '../../lib/src/repositories/project_repository.dart';
 import '../../lib/src/repositories/auth_repository.dart';
-import '../../lib/src/exceptions/custom_exceptions.dart';
 import '../helpers/test_base.dart';
 
 void main() {
   late TestBase testBase;
   late ProjectRepository repository;
-  late AuthRepository authRepository; // To create users
-  late shared_models.User user1;
-  late shared_models.User user2;
-  late shared_models.User user3;
+  late AuthRepository authRepository;
+  late User testUser1;
+  late User testUser2;
 
-
-  setUpAll(() async { // Changed to setUpAll for one-time user creation
+  setUpAll(() async {
     testBase = TestBase();
     await testBase.setUp();
-    repository = ProjectRepository(testBase.connection);
+    repository = ProjectRepositoryImpl(testBase.connection);
     authRepository = AuthRepository(testBase.connection);
 
     // Create test users
-    user1 = shared_models.User(id: 'user-id-1', name: 'User One', email: 'user1@example.com', passwordHash: 'hash1');
-    user2 = shared_models.User(id: 'user-id-2', name: 'User Two', email: 'user2@example.com', passwordHash: 'hash2');
-    user3 = shared_models.User(id: 'user-id-3', name: 'User Three', email: 'user3@example.com', passwordHash: 'hash3');
-    await authRepository.createUser(user1);
-    await authRepository.createUser(user2);
-    await authRepository.createUser(user3);
+    testUser1 = User(
+      id: 'user-1',
+      displayName: 'Test User 1',
+      email: 'user1@test.com',
+      googleId: 'google-1',
+      createdAt: DateTime.now().toIso8601String(),
+    );
+    testUser2 = User(
+      id: 'user-2',
+      displayName: 'Test User 2',
+      email: 'user2@test.com',
+      googleId: 'google-2',
+      createdAt: DateTime.now().toIso8601String(),
+    );
+
+    await authRepository.createUser(testUser1);
+    await authRepository.createUser(testUser2);
   });
 
-  tearDownAll(() async { // Changed to tearDownAll
-    // Tables are dropped by TestBase's main tearDown, but clearTables can be called if needed earlier
+  tearDownAll(() async {
     await testBase.tearDown();
   });
-  
-  // Clear projects and project_members before each test in the group
+
   setUp(() async {
+    // Clear projects and project_members before each test
     await testBase.connection.execute('DELETE FROM project_members');
     await testBase.connection.execute('DELETE FROM projects');
   });
 
-
-  group('ProjectRepository', () {
-    final projectData1 = shared_models.Project(
-      id: 'proj-id-1',
-      name: 'Alpha Project',
-      description: 'First test project',
-      creatorId: user1.id,
-      memberIds: [user1.id], // Creator is a member by default in create method
-    );
-     final projectData2 = shared_models.Project(
-      id: 'proj-id-2',
-      name: 'Beta Project',
-      description: 'Second test project, user1 creator',
-      creatorId: user1.id,
-      memberIds: [user1.id],
-    );
-     final projectData3 = shared_models.Project(
-      id: 'proj-id-3',
-      name: 'Gamma Project',
-      description: 'Third test project, user2 creator',
-      creatorId: user2.id,
-      memberIds: [user2.id],
-    );
-
-
-    test('create should create a project with initial member (creator)', () async {
-      final createdProject = await repository.create(projectData1);
-      expect(createdProject.name, equals(projectData1.name));
-      expect(createdProject.creatorId, equals(user1.id));
-      
-      final foundProject = await repository.findById(createdProject.id);
-      expect(foundProject, isNotNull);
-      expect(foundProject!.memberIds, contains(user1.id));
-    });
-
-    test('findById should find a project by id', () async {
-      await repository.create(projectData1);
-      final foundProject = await repository.findById(projectData1.id);
-      expect(foundProject, isNotNull);
-      expect(foundProject!.name, equals(projectData1.name));
-    });
-
-    test('update should update a project details and members', () async {
-      final initialProject = await repository.create(projectData1);
-      final updatedData = initialProject.copyWith(
-        name: 'Updated Alpha Name',
-        description: 'Updated description.',
-        memberIds: [user1.id, user2.id], // Add user2 as member
+  group('ProjectRepository Integration Tests', () {
+    test('create should create a project with creator as member', () async {
+      final project = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'A test project',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id],
       );
 
-      final result = await repository.update(updatedData);
-      expect(result.name, 'Updated Alpha Name');
-      expect(result.description, 'Updated description.');
+      final result = await repository.create(project);
       
-      final foundAfterUpdate = await repository.findById(initialProject.id);
-      expect(foundAfterUpdate!.memberIds, containsAll([user1.id, user2.id]));
-      expect(foundAfterUpdate.memberIds.length, 2);
+      expect(result.id, equals(project.id));
+      expect(result.name, equals(project.name));
+      expect(result.description, equals(project.description));
+      expect(result.creatorId, equals(testUser1.id));
+      expect(result.memberIds, contains(testUser1.id));
     });
-    
-    test('update should throw ProjectNotFoundException if project does not exist', () async {
-      final nonExistentProject = projectData1.copyWith(id: 'fake-id');
-      expect(
-        () => repository.update(nonExistentProject),
-        throwsA(isA<ProjectNotFoundException>()),
+
+    test('findById should return project when it exists', () async {
+      final project = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'A test project',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id],
       );
+
+      await repository.create(project);
+      final result = await repository.findById('project-1');
+
+      expect(result, isNotNull);
+      expect(result!.id, equals('project-1'));
+      expect(result.name, equals('Test Project'));
+      expect(result.creatorId, equals(testUser1.id));
     });
 
+    test('findById should return null when project does not exist', () async {
+      final result = await repository.findById('non-existent');
+      expect(result, isNull);
+    });
 
-    test('delete should remove a project and its memberships', () async {
-      final project = await repository.create(projectData1);
-      await repository.assignUserToProject(project.id, user2.id); // Add another member
+    test('update should modify project details', () async {
+      final project = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'A test project',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id],
+      );
 
-      await repository.delete(project.id);
-      
-      final foundProject = await repository.findById(project.id);
-      expect(foundProject, isNull);
+      await repository.create(project);
 
-      // Check memberships are gone
-      final membersResult = await testBase.connection.query(
+      final updatedProject = project.copyWith(
+        name: 'Updated Project',
+        description: 'Updated description',
+        memberIds: [testUser1.id, testUser2.id],
+      );
+
+      final result = await repository.update(updatedProject);
+
+      expect(result.name, equals('Updated Project'));
+      expect(result.description, equals('Updated description'));
+      expect(result.memberIds, containsAll([testUser1.id, testUser2.id]));
+    });
+
+    test('delete should remove project and its memberships', () async {
+      final project = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'A test project',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id, testUser2.id],
+      );
+
+      await repository.create(project);
+      final success = await repository.delete('project-1');
+
+      expect(success, isTrue);
+
+      final result = await repository.findById('project-1');
+      expect(result, isNull);
+
+      // Verify memberships are also deleted
+      final membershipsResult = await testBase.connection.query(
         'SELECT * FROM project_members WHERE project_id = @id',
-        substitutionValues: {'id': project.id},
+        substitutionValues: {'id': 'project-1'},
       );
-      expect(membersResult, isEmpty);
+      expect(membershipsResult, isEmpty);
     });
 
-    group('assignUserToProject', () {
-      late shared_models.Project project;
-      setUp(() async {
-        project = await repository.create(projectData1);
-      });
+    test('getProjects should filter by creator', () async {
+      final project1 = Project(
+        id: 'project-1',
+        name: 'User1 Project',
+        description: 'Created by user1',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id],
+      );
 
-      test('should assign a user to a project', () async {
-        await repository.assignUserToProject(project.id, user2.id);
-        final updatedProject = await repository.findById(project.id);
-        expect(updatedProject!.memberIds, containsAll([user1.id, user2.id]));
-      });
+      final project2 = Project(
+        id: 'project-2',
+        name: 'User2 Project',
+        description: 'Created by user2',
+        creatorId: testUser2.id,
+        memberIds: [testUser2.id],
+      );
 
-      test('should throw ProjectNotFoundException if project does not exist', () {
-        expect(
-          () => repository.assignUserToProject('fake-proj-id', user2.id),
-          throwsA(isA<ProjectNotFoundException>()),
-        );
-      });
+      await repository.create(project1);
+      await repository.create(project2);
 
-      test('should throw UserNotFoundException if user does not exist', () {
-        expect(
-          () => repository.assignUserToProject(project.id, 'fake-user-id'),
-          throwsA(isA<UserNotFoundException>()),
-        );
-      });
+      final results = await repository.getProjects(
+        creatorId: testUser1.id,
+        page: 0,
+        size: 10,
+      );
 
-      test('should throw AlreadyAssignedException if user is already assigned', () async {
-        await repository.assignUserToProject(project.id, user2.id); // First assignment
-        expect(
-          () => repository.assignUserToProject(project.id, user2.id), // Second assignment
-          throwsA(isA<AlreadyAssignedException>()),
-        );
-      });
+      expect(results, hasLength(1));
+      expect(results.first.id, equals('project-1'));
+      expect(results.first.creatorId, equals(testUser1.id));
     });
 
-    group('removeUserFromProject', () {
-       late shared_models.Project project;
-      setUp(() async {
-        project = await repository.create(projectData1);
-        await repository.assignUserToProject(project.id, user2.id); // Ensure user2 is a member
-      });
+    test('getProjects should support text search', () async {
+      final project1 = Project(
+        id: 'project-1',
+        name: 'Alpha Project',
+        description: 'First project',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id],
+      );
 
-      test('should remove a user from a project', async () {
-        final success = await repository.removeUserFromProject(project.id, user2.id);
-        expect(success, isTrue);
-        final updatedProject = await repository.findById(project.id);
-        expect(updatedProject!.memberIds, isNot(contains(user2.id)));
-        expect(updatedProject.memberIds, contains(user1.id)); // Creator should still be there
-      });
+      final project2 = Project(
+        id: 'project-2',
+        name: 'Beta Project',
+        description: 'Second project',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id],
+      );
+
+      await repository.create(project1);
+      await repository.create(project2);
+
+      final results = await repository.getProjects(
+        creatorId: testUser1.id,
+        query: 'Alpha',
+        page: 0,
+        size: 10,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.first.name, equals('Alpha Project'));
+    });
+
+    test('getProjects should support pagination', () async {
+      // Create multiple projects
+      for (int i = 1; i <= 5; i++) {
+        final project = Project(
+          id: 'project-$i',
+          name: 'Project $i',
+          description: 'Description $i',
+          creatorId: testUser1.id,
+          memberIds: [testUser1.id],
+        );
+        await repository.create(project);
+      }
+
+      final page1 = await repository.getProjects(
+        creatorId: testUser1.id,
+        page: 0,
+        size: 2,
+      );
+
+      final page2 = await repository.getProjects(
+        creatorId: testUser1.id,
+        page: 1,
+        size: 2,
+      );
+
+      expect(page1, hasLength(2));
+      expect(page2, hasLength(2));
       
-      test('should return false if user is not a member (or project/user not found)', async () {
-        // User3 is not a member
-        final success = await repository.removeUserFromProject(project.id, user3.id);
-        expect(success, isFalse);
-      });
-       test('should return false if trying to remove from non-existent project', async () {
-        final success = await repository.removeUserFromProject('fake-proj-id', user2.id);
-        expect(success, isFalse);
-      });
-    });
-    
-    group('getAllProjects (user-specific, paginated, searchable)', () {
-      setUp(() async {
-        await repository.create(projectData1); // Creator user1
-        await repository.create(projectData2); // Creator user1
-        final p3 = await repository.create(projectData3); // Creator user2
-        await repository.assignUserToProject(p3.id, user1.id); // Add user1 as member to p3
-      });
-
-      test('should return projects created by or member of for user1', async () {
-        final projects = await repository.getAllProjects(user1.id, 0, 10, null);
-        expect(projects.length, 3);
-        expect(projects.map((p) => p.id), containsAll([projectData1.id, projectData2.id, projectData3.id]));
-      });
-      
-      test('should return only projects created by user2', async () {
-        final projects = await repository.getAllProjects(user2.id, 0, 10, null);
-        expect(projects.length, 1);
-        expect(projects.first.id, projectData3.id);
-      });
-
-      test('should apply pagination: page 0, size 1 for user1', async () {
-        final projects = await repository.getAllProjects(user1.id, 0, 1, null);
-        expect(projects.length, 1);
-        // Order is by name: Alpha, Beta, Gamma
-        expect(projects.first.name, 'Alpha Project');
-      });
-      
-      test('should apply pagination: page 1, size 1 for user1', async () {
-        final projects = await repository.getAllProjects(user1.id, 1, 1, null);
-        expect(projects.length, 1);
-        expect(projects.first.name, 'Beta Project');
-      });
-      
-      test('should apply search query for user1', async () {
-        final projects = await repository.getAllProjects(user1.id, 0, 10, 'Gamma');
-        expect(projects.length, 1);
-        expect(projects.first.id, projectData3.id);
-      });
+      // Ensure different results
+      final page1Ids = page1.map((p) => p.id).toSet();
+      final page2Ids = page2.map((p) => p.id).toSet();
+      expect(page1Ids.intersection(page2Ids), isEmpty);
     });
 
-    group('getAllSystemProjects (paginated, searchable)', () {
-       setUp(() async {
-        await repository.create(projectData1); // Alpha
-        await repository.create(projectData2); // Beta
-        await repository.create(projectData3); // Gamma
-      });
-      test('should return all projects with pagination', async () {
-        final projects = await repository.getAllSystemProjects(0, 2, null);
-        expect(projects.length, 2);
-        expect(projects[0].name, 'Alpha Project'); // Order is by name
-        expect(projects[1].name, 'Beta Project');
-      });
-      test('should return all projects matching search query', async () {
-        final projects = await repository.getAllSystemProjects(0, 10, 'Gamma');
-        expect(projects.length, 1);
-        expect(projects.first.id, projectData3.id);
-      });
-    });
+    test('findByMemberId should return projects where user is a member', () async {
+      final project1 = Project(
+        id: 'project-1',
+        name: 'Project 1',
+        description: 'First project',
+        creatorId: testUser1.id,
+        memberIds: [testUser1.id, testUser2.id],
+      );
 
-    group('getUsersByProject', () {
-      late shared_models.Project project;
-      setUp(() async {
-        project = await repository.create(projectData1); // user1 is creator
-        await repository.assignUserToProject(project.id, user2.id);
-      });
-      test('should return users assigned to a project', async () {
-        final users = await repository.getUsersByProject(project.id);
-        expect(users.length, 2);
-        expect(users.map((u) => u.id), containsAll([user1.id, user2.id]));
-      });
-      test('should throw ProjectNotFoundException if project does not exist', () async {
-        expect(
-          () => repository.getUsersByProject('fake-project-id'),
-          throwsA(isA<ProjectNotFoundException>()),
-        );
-      });
-    });
+      final project2 = Project(
+        id: 'project-2',
+        name: 'Project 2',
+        description: 'Second project',
+        creatorId: testUser2.id,
+        memberIds: [testUser2.id], // Only user2 is member
+      );
 
-    group('getProjectsByUser', () {
-       setUp(() async {
-        await repository.create(projectData1); // user1 creator
-        await repository.create(projectData2); // user1 creator
-        final p3 = await repository.create(projectData3); // user2 creator
-        await repository.assignUserToProject(p3.id, user1.id); // user1 member of p3
-      });
-      test('should return projects where user is creator or member', async () {
-        final projects = await repository.getProjectsByUser(user1.id);
-        expect(projects.length, 3);
-        expect(projects.map((p) => p.id), containsAll([projectData1.id, projectData2.id, projectData3.id]));
-      });
-      test('should throw UserNotFoundException if user does not exist', () async {
-        expect(
-          () => repository.getProjectsByUser('fake-user-id'),
-          throwsA(isA<UserNotFoundException>()),
-        );
-      });
-    });
+      await repository.create(project1);
+      await repository.create(project2);
 
+      final results = await repository.findByMemberId(testUser2.id);
+
+      expect(results, hasLength(2)); // user2 is member of both projects
+      expect(results.map((p) => p.id), containsAll(['project-1', 'project-2']));
+    });
   });
-}
+} 

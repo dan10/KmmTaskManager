@@ -1,17 +1,18 @@
-import '../../lib/src/models/models.dart';
+import 'package:shared/models.dart';
 
 class TestData {
   static User createTestUser({
     String? id,
-    String? name,
+    String? displayName,
     String? email,
-    String? passwordHash,
+    String? googleId,
   }) {
     return User(
       id: id ?? 'test-user-id',
-      name: name ?? 'Test User',
+      displayName: displayName ?? 'Test User',
       email: email ?? 'test@example.com',
-      passwordHash: passwordHash ?? 'hashed-password',
+      googleId: googleId ?? 'google-123',
+      createdAt: DateTime.now().toIso8601String(),
     );
   }
 
@@ -30,8 +31,8 @@ class TestData {
       id: id ?? 'test-task-id',
       title: title ?? 'Test Task',
       description: description ?? 'Test Description',
-      status: status ?? TaskStatus.TODO,
-      priority: priority ?? Priority.MEDIUM,
+      status: status ?? TaskStatus.todo,
+      priority: priority ?? Priority.medium,
       creatorId: creatorId ?? 'test-user-id',
       projectId: projectId,
       assigneeId: assigneeId,

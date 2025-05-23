@@ -1,7 +1,7 @@
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:shared/src/models/user.dart';
 import '../config/app_config.dart';
-import '../exceptions/custom_exceptions.dart'; // For AuthenticationException
+
 
 
 class JwtService {
@@ -21,7 +21,7 @@ class JwtService {
   String generateToken(User user) {
     final payload = {
       'sub': user.id,
-      'name': user.name,
+      'name': user.displayName,
       'email': user.email,
       'iat': DateTime.now().millisecondsSinceEpoch ~/ 1000,
       // 'exp' is automatically set by dart_jsonwebtoken if expiresIn is provided

@@ -7,8 +7,10 @@ part 'user.g.dart';
 abstract class User with _$User {
   const factory User({
     required String id,
-    required String name,
     required String email,
+    required String displayName,
+    String? googleId,
+    required String createdAt,
     @JsonKey(includeFromJson: false, includeToJson: false) String? passwordHash,
   }) = _User;
 

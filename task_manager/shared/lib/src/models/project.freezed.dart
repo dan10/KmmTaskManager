@@ -17,8 +17,11 @@ T _$identity<T>(T value) => value;
 mixin _$Project {
   String get id;
   String get name;
-  String get description;
-  String get creatorId;
+  int get completed;
+  int get inProgress;
+  int get total;
+  String? get description; // Additional fields for server-side operations
+  String? get creatorId;
   List<String> get memberIds;
 
   /// Create a copy of Project
@@ -38,6 +41,11 @@ mixin _$Project {
             other is Project &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
+            (identical(other.completed, completed) ||
+                other.completed == completed) &&
+            (identical(other.inProgress, inProgress) ||
+                other.inProgress == inProgress) &&
+            (identical(other.total, total) || other.total == total) &&
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.creatorId, creatorId) ||
@@ -47,12 +55,20 @@ mixin _$Project {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, description, creatorId,
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      name,
+      completed,
+      inProgress,
+      total,
+      description,
+      creatorId,
       const DeepCollectionEquality().hash(memberIds));
 
   @override
   String toString() {
-    return 'Project(id: $id, name: $name, description: $description, creatorId: $creatorId, memberIds: $memberIds)';
+    return 'Project(id: $id, name: $name, completed: $completed, inProgress: $inProgress, total: $total, description: $description, creatorId: $creatorId, memberIds: $memberIds)';
   }
 }
 
@@ -64,8 +80,11 @@ abstract mixin class $ProjectCopyWith<$Res> {
   $Res call(
       {String id,
       String name,
-      String description,
-      String creatorId,
+      int completed,
+      int inProgress,
+      int total,
+      String? description,
+      String? creatorId,
       List<String> memberIds});
 }
 
@@ -83,8 +102,11 @@ class _$ProjectCopyWithImpl<$Res> implements $ProjectCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? description = null,
-    Object? creatorId = null,
+    Object? completed = null,
+    Object? inProgress = null,
+    Object? total = null,
+    Object? description = freezed,
+    Object? creatorId = freezed,
     Object? memberIds = null,
   }) {
     return _then(_self.copyWith(
@@ -96,14 +118,26 @@ class _$ProjectCopyWithImpl<$Res> implements $ProjectCopyWith<$Res> {
           ? _self.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
+      completed: null == completed
+          ? _self.completed
+          : completed // ignore: cast_nullable_to_non_nullable
+              as int,
+      inProgress: null == inProgress
+          ? _self.inProgress
+          : inProgress // ignore: cast_nullable_to_non_nullable
+              as int,
+      total: null == total
+          ? _self.total
+          : total // ignore: cast_nullable_to_non_nullable
+              as int,
+      description: freezed == description
           ? _self.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      creatorId: null == creatorId
+              as String?,
+      creatorId: freezed == creatorId
           ? _self.creatorId
           : creatorId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       memberIds: null == memberIds
           ? _self.memberIds
           : memberIds // ignore: cast_nullable_to_non_nullable
@@ -118,8 +152,11 @@ class _Project implements Project {
   const _Project(
       {required this.id,
       required this.name,
-      required this.description,
-      required this.creatorId,
+      this.completed = 0,
+      this.inProgress = 0,
+      this.total = 0,
+      this.description,
+      this.creatorId,
       final List<String> memberIds = const []})
       : _memberIds = memberIds;
   factory _Project.fromJson(Map<String, dynamic> json) =>
@@ -130,9 +167,19 @@ class _Project implements Project {
   @override
   final String name;
   @override
-  final String description;
+  @JsonKey()
+  final int completed;
   @override
-  final String creatorId;
+  @JsonKey()
+  final int inProgress;
+  @override
+  @JsonKey()
+  final int total;
+  @override
+  final String? description;
+// Additional fields for server-side operations
+  @override
+  final String? creatorId;
   final List<String> _memberIds;
   @override
   @JsonKey()
@@ -164,6 +211,11 @@ class _Project implements Project {
             other is _Project &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
+            (identical(other.completed, completed) ||
+                other.completed == completed) &&
+            (identical(other.inProgress, inProgress) ||
+                other.inProgress == inProgress) &&
+            (identical(other.total, total) || other.total == total) &&
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.creatorId, creatorId) ||
@@ -174,12 +226,20 @@ class _Project implements Project {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, description, creatorId,
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      name,
+      completed,
+      inProgress,
+      total,
+      description,
+      creatorId,
       const DeepCollectionEquality().hash(_memberIds));
 
   @override
   String toString() {
-    return 'Project(id: $id, name: $name, description: $description, creatorId: $creatorId, memberIds: $memberIds)';
+    return 'Project(id: $id, name: $name, completed: $completed, inProgress: $inProgress, total: $total, description: $description, creatorId: $creatorId, memberIds: $memberIds)';
   }
 }
 
@@ -192,8 +252,11 @@ abstract mixin class _$ProjectCopyWith<$Res> implements $ProjectCopyWith<$Res> {
   $Res call(
       {String id,
       String name,
-      String description,
-      String creatorId,
+      int completed,
+      int inProgress,
+      int total,
+      String? description,
+      String? creatorId,
       List<String> memberIds});
 }
 
@@ -211,8 +274,11 @@ class __$ProjectCopyWithImpl<$Res> implements _$ProjectCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? description = null,
-    Object? creatorId = null,
+    Object? completed = null,
+    Object? inProgress = null,
+    Object? total = null,
+    Object? description = freezed,
+    Object? creatorId = freezed,
     Object? memberIds = null,
   }) {
     return _then(_Project(
@@ -224,14 +290,26 @@ class __$ProjectCopyWithImpl<$Res> implements _$ProjectCopyWith<$Res> {
           ? _self.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
+      completed: null == completed
+          ? _self.completed
+          : completed // ignore: cast_nullable_to_non_nullable
+              as int,
+      inProgress: null == inProgress
+          ? _self.inProgress
+          : inProgress // ignore: cast_nullable_to_non_nullable
+              as int,
+      total: null == total
+          ? _self.total
+          : total // ignore: cast_nullable_to_non_nullable
+              as int,
+      description: freezed == description
           ? _self.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      creatorId: null == creatorId
+              as String?,
+      creatorId: freezed == creatorId
           ? _self.creatorId
           : creatorId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       memberIds: null == memberIds
           ? _self._memberIds
           : memberIds // ignore: cast_nullable_to_non_nullable

@@ -1,5 +1,5 @@
 import 'package:postgres/postgres.dart';
-import 'package:shared/src/models/user.dart' as shared;
+import 'package:shared/models.dart' as shared;
 
 class AuthRepository {
   final PostgreSQLConnection _db;
@@ -9,15 +9,17 @@ class AuthRepository {
   Future<shared.User> createUser(shared.User user) async {
     final result = await _db.query(
       '''
-      INSERT INTO users (id, name, email, password_hash)
-      VALUES (@id, @name, @email, @passwordHash)
+      INSERT INTO users (id, display_name, email, password_hash, google_id, created_at)
+      VALUES (@id, @displayName, @email, @passwordHash, @googleId, @createdAt)
       RETURNING *
       ''',
       substitutionValues: {
         'id': user.id,
-        'name': user.name,
+        'displayName': user.displayName,
         'email': user.email,
         'passwordHash': user.passwordHash,
+        'googleId': user.googleId,
+        'createdAt': user.createdAt,
       },
     );
 
@@ -48,16 +50,18 @@ class AuthRepository {
     await _db.execute(
       '''
       UPDATE users
-      SET name = @name,
+      SET display_name = @displayName,
           email = @email,
-          password_hash = @passwordHash
+          password_hash = @passwordHash,
+          google_id = @googleId
       WHERE id = @id
       ''',
       substitutionValues: {
         'id': user.id,
-        'name': user.name,
+        'displayName': user.displayName,
         'email': user.email,
         'passwordHash': user.passwordHash,
+        'googleId': user.googleId,
       },
     );
   }
@@ -72,9 +76,11 @@ class AuthRepository {
   shared.User _mapUserFromRow(List<dynamic> row) {
     return shared.User(
       id: row[0] as String,
-      name: row[1] as String,
+      displayName: row[1] as String,
       email: row[2] as String,
-      passwordHash: row[3] as String,
+      passwordHash: row[3] as String?,
+      googleId: row[4] as String?,
+      createdAt: row[5] as String,
     );
   }
 }

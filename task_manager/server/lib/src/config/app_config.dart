@@ -1,4 +1,5 @@
-import 'package:dotenv/dotenv.dart' show load, env;
+import 'package:dotenv/dotenv.dart';
+import 'dart:io';
 
 class AppConfig {
   late final int port;
@@ -15,13 +16,14 @@ class AppConfig {
   late final String dbPassword;
 
   AppConfig() {
-    load();
+    final env = DotEnv();
+    env.load(); // Load .env file if it exists
 
-    port = int.tryParse(env['PORT'] ?? '8080') ?? 8080;
-    host = env['HOST'] ?? '0.0.0.0';
-    _databaseUrl = env['DATABASE_URL'] ?? '';
-    _jwtSecret = env['JWT_SECRET'] ?? '';
-    logLevel = env['LOG_LEVEL'] ?? 'INFO';
+    port = int.tryParse(Platform.environment['PORT'] ?? env['PORT'] ?? '8080') ?? 8080;
+    host = Platform.environment['HOST'] ?? env['HOST'] ?? '0.0.0.0';
+    _databaseUrl = Platform.environment['DATABASE_URL'] ?? env['DATABASE_URL'] ?? '';
+    _jwtSecret = Platform.environment['JWT_SECRET'] ?? env['JWT_SECRET'] ?? '';
+    logLevel = Platform.environment['LOG_LEVEL'] ?? env['LOG_LEVEL'] ?? 'INFO';
 
     _parseDatabaseUrl();
   }

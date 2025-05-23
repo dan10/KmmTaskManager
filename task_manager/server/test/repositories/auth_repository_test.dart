@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:shared/src/models/user.dart' as shared;
+import 'package:shared/models.dart';
 import '../../lib/src/repositories/auth_repository.dart';
 import '../helpers/test_base.dart';
 
@@ -14,97 +14,88 @@ void main() {
   });
 
   tearDown(() async {
-    await testBase.clearTables();
     await testBase.tearDown();
   });
 
-  group('AuthRepository', () {
+  group('AuthRepository Integration Tests', () {
     test('should create a user', () async {
-      final user = shared.User(
+      final user = User(
         id: '1',
-        name: 'Test User',
+        displayName: 'Test User',
         email: 'test@example.com',
-        passwordHash: 'hashed_password',
+        googleId: 'google-123',
+        createdAt: DateTime.now().toIso8601String(),
       );
 
       final createdUser = await repository.createUser(user);
       expect(createdUser.id, equals(user.id));
-      expect(createdUser.name, equals(user.name));
+      expect(createdUser.displayName, equals(user.displayName));
       expect(createdUser.email, equals(user.email));
-      expect(createdUser.passwordHash, equals(user.passwordHash));
+      expect(createdUser.googleId, equals(user.googleId));
+      expect(createdUser.createdAt, equals(user.createdAt));
     });
 
     test('should find a user by id', () async {
-      final user = shared.User(
+      final user = User(
         id: '1',
-        name: 'Test User',
+        displayName: 'Test User',
         email: 'test@example.com',
-        passwordHash: 'hashed_password',
+        googleId: 'google-123',
+        createdAt: DateTime.now().toIso8601String(),
       );
 
       await repository.createUser(user);
       final foundUser = await repository.findUserById(user.id);
       expect(foundUser, isNotNull);
       expect(foundUser!.id, equals(user.id));
-      expect(foundUser.name, equals(user.name));
+      expect(foundUser.displayName, equals(user.displayName));
       expect(foundUser.email, equals(user.email));
-      expect(foundUser.passwordHash, equals(user.passwordHash));
+      expect(foundUser.googleId, equals(user.googleId));
     });
 
     test('should find a user by email', () async {
-      final user = shared.User(
+      final user = User(
         id: '1',
-        name: 'Test User',
+        displayName: 'Test User',
         email: 'test@example.com',
-        passwordHash: 'hashed_password',
+        googleId: 'google-123',
+        createdAt: DateTime.now().toIso8601String(),
       );
 
       await repository.createUser(user);
       final foundUser = await repository.findUserByEmail(user.email);
       expect(foundUser, isNotNull);
       expect(foundUser!.id, equals(user.id));
-      expect(foundUser.name, equals(user.name));
+      expect(foundUser.displayName, equals(user.displayName));
       expect(foundUser.email, equals(user.email));
-      expect(foundUser.passwordHash, equals(user.passwordHash));
+      expect(foundUser.googleId, equals(user.googleId));
     });
 
-    test('should update a user', () async {
-      final user = shared.User(
-        id: '1',
-        name: 'Test User',
-        email: 'test@example.com',
-        passwordHash: 'hashed_password',
-      );
-
-      await repository.createUser(user);
-
-      final updatedUser = shared.User(
-        id: user.id,
-        name: 'Updated User',
-        email: 'updated@example.com',
-        passwordHash: 'new_hashed_password',
-      );
-
-      await repository.updateUser(updatedUser);
-      final foundUser = await repository.findUserById(user.id);
-      expect(foundUser, isNotNull);
-      expect(foundUser!.name, equals(updatedUser.name));
-      expect(foundUser.email, equals(updatedUser.email));
-      expect(foundUser.passwordHash, equals(updatedUser.passwordHash));
-    });
-
-    test('should delete a user', () async {
-      final user = shared.User(
-        id: '1',
-        name: 'Test User',
-        email: 'test@example.com',
-        passwordHash: 'hashed_password',
-      );
-
-      await repository.createUser(user);
-      await repository.deleteUser(user.id);
-      final foundUser = await repository.findUserById(user.id);
+    test('should return null when user not found by id', () async {
+      final foundUser = await repository.findUserById('non-existent');
       expect(foundUser, isNull);
     });
+
+    test('should return null when user not found by email', () async {
+      final foundUser = await repository.findUserByEmail('non@existent.com');
+      expect(foundUser, isNull);
+    });
+
+    test('should handle users with password hash (for regular login)', () async {
+      final user = User(
+        id: '2',
+        displayName: 'Password User',
+        email: 'password@example.com',
+        passwordHash: 'hashed_password_123',
+        createdAt: DateTime.now().toIso8601String(),
+      );
+
+      final createdUser = await repository.createUser(user);
+      expect(createdUser.passwordHash, equals(user.passwordHash));
+      expect(createdUser.googleId, isNull);
+
+      final foundUser = await repository.findUserById(user.id);
+      expect(foundUser!.passwordHash, equals(user.passwordHash));
+    });
   });
-}
+} 

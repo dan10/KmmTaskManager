@@ -18,6 +18,7 @@ mixin _$Task {
   String get id;
   String get title;
   String get description;
+  @TaskStatusConverter()
   TaskStatus get status;
   Priority get priority;
   DateTime? get dueDate;
@@ -76,7 +77,7 @@ abstract mixin class $TaskCopyWith<$Res> {
       {String id,
       String title,
       String description,
-      TaskStatus status,
+      @TaskStatusConverter() TaskStatus status,
       Priority priority,
       DateTime? dueDate,
       String? projectId,
@@ -148,13 +149,14 @@ class _$TaskCopyWithImpl<$Res> implements $TaskCopyWith<$Res> {
 }
 
 /// @nodoc
+
 @JsonSerializable()
 class _Task implements Task {
   const _Task(
       {required this.id,
       required this.title,
       required this.description,
-      required this.status,
+      @TaskStatusConverter() required this.status,
       required this.priority,
       this.dueDate,
       this.projectId,
@@ -169,6 +171,7 @@ class _Task implements Task {
   @override
   final String description;
   @override
+  @TaskStatusConverter()
   final TaskStatus status;
   @override
   final Priority priority;
@@ -238,7 +241,7 @@ abstract mixin class _$TaskCopyWith<$Res> implements $TaskCopyWith<$Res> {
       {String id,
       String title,
       String description,
-      TaskStatus status,
+      @TaskStatusConverter() TaskStatus status,
       Priority priority,
       DateTime? dueDate,
       String? projectId,

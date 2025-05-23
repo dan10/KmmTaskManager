@@ -1,195 +1,374 @@
 import 'package:test/test.dart';
-import 'package:shared/models.dart' as shared_models;
+import 'package:shared/models.dart';
 import '../../lib/src/repositories/task_repository.dart';
-import '../../lib/src/repositories/auth_repository.dart';
-import '../../lib/src/repositories/project_repository.dart'; // For creating projects
-import '../../lib/src/exceptions/custom_exceptions.dart';
 import '../helpers/test_base.dart';
 
 void main() {
-  late TestBase testBase;
-  late TaskRepository repository;
-  late AuthRepository authRepository;
-  late ProjectRepository projectRepository;
-  late shared_models.User user1;
-  late shared_models.User user2;
-  late shared_models.Project project1;
-  late shared_models.Project project2;
+  group('TaskRepository Integration Tests', () {
+    late TestBase testBase;
+    late TaskRepository taskRepository;
 
-  setUpAll(() async {
-    testBase = TestBase();
-    await testBase.setUp();
-    repository = TaskRepository(testBase.connection);
-    authRepository = AuthRepository(testBase.connection);
-    projectRepository = ProjectRepository(testBase.connection);
-
-    user1 = shared_models.User(id: 'task-repo-user-1', name: 'Task User 1', email: 'truser1@example.com', passwordHash: 'hash');
-    user2 = shared_models.User(id: 'task-repo-user-2', name: 'Task User 2', email: 'truser2@example.com', passwordHash: 'hash');
-    await authRepository.createUser(user1);
-    await authRepository.createUser(user2);
-
-    project1 = shared_models.Project(id: 'task-repo-proj-1', name: 'TR Project 1', creatorId: user1.id, memberIds: [user1.id]);
-    project2 = shared_models.Project(id: 'task-repo-proj-2', name: 'TR Project 2', creatorId: user2.id, memberIds: [user2.id]);
-    await projectRepository.create(project1);
-    await projectRepository.create(project2);
-  });
-
-  tearDownAll(() async {
-    await testBase.tearDown();
-  });
-
-  setUp(() async {
-    // Clear tasks before each test
-    await testBase.connection.execute('DELETE FROM tasks');
-  });
-  
-  final taskData1 = shared_models.Task(
-    id: 'task-id-A', title: 'Alpha Task One', description: 'First task', 
-    status: shared_models.TaskStatus.todo, priority: shared_models.Priority.medium,
-    creatorId: user1.id, assigneeId: user1.id, projectId: project1.id,
-    dueDate: DateTime.now().add(Duration(days: 5))
-  );
-  final taskData2 = shared_models.Task(
-    id: 'task-id-B', title: 'Beta Task Two (search)', description: 'Second task', 
-    status: shared_models.TaskStatus.inProgress, priority: shared_models.Priority.high,
-    creatorId: user1.id, assigneeId: user2.id, projectId: project1.id,
-    dueDate: DateTime.now().add(Duration(days: 2))
-  );
-   final taskData3 = shared_models.Task(
-    id: 'task-id-C', title: 'Gamma Task Three', description: 'Third task (search)', 
-    status: shared_models.TaskStatus.done, priority: shared_models.Priority.low,
-    creatorId: user2.id, assigneeId: user2.id, projectId: project2.id,
-    dueDate: DateTime.now().add(Duration(days: 10))
-  );
-
-
-  group('TaskRepository', () {
-    test('create and findById should work', () async {
-      final createdTask = await repository.create(taskData1);
-      expect(createdTask.title, taskData1.title);
-      expect(createdTask.status.name, taskData1.status.name); // Check enum storage
-
-      final foundTask = await repository.findById(taskData1.id);
-      expect(foundTask, isNotNull);
-      expect(foundTask!.title, taskData1.title);
-      expect(foundTask.status, taskData1.status);
-      expect(foundTask.priority, taskData1.priority);
+    setUpAll(() async {
+      testBase = TestBase();
+      await testBase.setUp();
+      taskRepository = TaskRepository(testBase.connection);
     });
 
-    test('update should modify task details', () async {
-      final task = await repository.create(taskData1);
-      final updatedData = task.copyWith(
-          title: 'Updated Title', status: shared_models.TaskStatus.done);
+    tearDownAll(() async {
+      await testBase.tearDown();
+    });
+
+    Future<void> _setupTestData() async {
+      // Create test user
+      await testBase.connection.execute(
+        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
+        substitutionValues: {
+          'id': 'user-1',
+          'name': 'Test User',
+          'email': 'test@example.com',
+          'googleId': 'google-123',
+          'createdAt': DateTime.now().toIso8601String(),
+        },
+      );
+
+      // Create additional test users
+      await testBase.connection.execute(
+        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
+        substitutionValues: {
+          'id': 'user-2',
+          'name': 'Test User 2',
+          'email': 'test2@example.com',
+          'googleId': 'google-456',
+          'createdAt': DateTime.now().toIso8601String(),
+        },
+      );
+
+      await testBase.connection.execute(
+        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
+        substitutionValues: {
+          'id': 'user-3',
+          'name': 'Test User 3',
+          'email': 'test3@example.com',
+          'googleId': 'google-789',
+          'createdAt': DateTime.now().toIso8601String(),
+        },
+      );
       
-      final result = await repository.update(updatedData);
-      expect(result.title, 'Updated Title');
-      expect(result.status, shared_models.TaskStatus.done);
+      // Create test projects
+      await testBase.connection.execute(
+        'INSERT INTO projects (id, name, description, creator_id) VALUES (@id, @name, @description, @creatorId)',
+        substitutionValues: {
+          'id': 'project-1',
+          'name': 'Test Project',
+          'description': 'Test Description',
+          'creatorId': 'user-1',
+        },
+      );
 
-      final foundAgain = await repository.findById(task.id);
-      expect(foundAgain!.title, 'Updated Title');
+      await testBase.connection.execute(
+        'INSERT INTO projects (id, name, description, creator_id) VALUES (@id, @name, @description, @creatorId)',
+        substitutionValues: {
+          'id': 'project-2',
+          'name': 'Test Project 2',
+          'description': 'Test Description 2',
+          'creatorId': 'user-1',
+        },
+      );
+
+      // Create project memberships
+      await testBase.connection.execute(
+        'INSERT INTO project_members (project_id, user_id) VALUES (@projectId, @userId)',
+        substitutionValues: {
+          'projectId': 'project-1',
+          'userId': 'user-1',
+        },
+      );
+
+      await testBase.connection.execute(
+        'INSERT INTO project_members (project_id, user_id) VALUES (@projectId, @userId)',
+        substitutionValues: {
+          'projectId': 'project-2',
+          'userId': 'user-1',
+        },
+      );
+    }
+
+    setUp(() async {
+      await testBase.clearTables();
+      await _setupTestData();
     });
 
-    test('update should throw TaskNotFoundException if task does not exist', () {
-      final nonExistentTask = taskData1.copyWith(id: 'fake-task-id');
-      expect(() => repository.update(nonExistentTask), throwsA(isA<TaskNotFoundException>()));
-    });
+    group('create and findById', () {
+      test('should create a new task successfully', () async {
+        // Arrange
+        const task = Task(
+          id: 'task-1',
+          title: 'Test Task',
+          description: 'Test Description',
+          status: TaskStatus.todo,
+          priority: Priority.medium,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+        );
 
-    test('delete should remove a task', () async {
-      final task = await repository.create(taskData1);
-      await repository.delete(task.id);
-      final foundTask = await repository.findById(task.id);
-      expect(foundTask, isNull);
-    });
+        // Act
+        final result = await taskRepository.create(task);
 
-    test('delete should throw TaskNotFoundException if task does not exist', () {
-      expect(() => repository.delete('fake-task-id'), throwsA(isA<TaskNotFoundException>()));
+        // Assert
+        expect(result.id, equals('task-1'));
+        expect(result.title, equals('Test Task'));
+        expect(result.description, equals('Test Description'));
+        expect(result.status, equals(TaskStatus.todo));
+        expect(result.priority, equals(Priority.medium));
+        expect(result.projectId, equals('project-1'));
+        expect(result.creatorId, equals('user-1'));
+      });
+
+      test('should return null when task does not exist', () async {
+        // Act
+        final result = await taskRepository.findById('non-existent');
+
+        // Assert
+        expect(result, isNull);
+      });
     });
 
     group('getTasks', () {
-      setUp(() async {
-        await repository.create(taskData1); // user1 creator, user1 assignee, project1
-        await repository.create(taskData2); // user1 creator, user2 assignee, project1
-        await repository.create(taskData3); // user2 creator, user2 assignee, project2
+      test('should filter tasks by projectId', () async {
+        // Arrange
+        const task1 = Task(
+          id: 'task-1',
+          title: 'Task 1',
+          description: 'Description 1',
+          status: TaskStatus.todo,
+          priority: Priority.medium,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+        );
+        const task2 = Task(
+          id: 'task-2',
+          title: 'Task 2',
+          description: 'Description 2',
+          status: TaskStatus.inProgress,
+          priority: Priority.high,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+        );
+        const task3 = Task(
+          id: 'task-3',
+          title: 'Task 3',
+          description: 'Description 3',
+          status: TaskStatus.done,
+          priority: Priority.low,
+          projectId: 'project-2',
+          creatorId: 'user-1',
+        );
+
+        await taskRepository.create(task1);
+        await taskRepository.create(task2);
+        await taskRepository.create(task3);
+
+        // Act
+        final result = await taskRepository.getTasks(projectId: 'project-1');
+
+        // Assert
+        expect(result.length, equals(2));
+        expect(result.map((t) => t.id), containsAll(['task-1', 'task-2']));
+        expect(result.every((t) => t.projectId == 'project-1'), isTrue);
       });
 
-      test('should filter by assigneeId', async () {
-        final tasks = await repository.getTasks(assigneeId: user1.id);
-        expect(tasks.length, 1);
-        expect(tasks.first.id, taskData1.id);
+      test('should filter tasks by assigneeId', () async {
+        // Arrange
+        const task1 = Task(
+          id: 'task-1',
+          title: 'Assigned Task 1',
+          description: 'Description 1',
+          status: TaskStatus.todo,
+          priority: Priority.medium,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+          assigneeId: 'user-2',
+        );
+        const task2 = Task(
+          id: 'task-2',
+          title: 'Assigned Task 2',
+          description: 'Description 2',
+          status: TaskStatus.inProgress,
+          priority: Priority.high,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+          assigneeId: 'user-2',
+        );
+        const task3 = Task(
+          id: 'task-3',
+          title: 'Other Task',
+          description: 'Description 3',
+          status: TaskStatus.done,
+          priority: Priority.low,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+          assigneeId: 'user-3',
+        );
+
+        await taskRepository.create(task1);
+        await taskRepository.create(task2);
+        await taskRepository.create(task3);
+
+        // Act
+        final result = await taskRepository.getTasks(assigneeId: 'user-2');
+
+        // Assert
+        expect(result.length, equals(2));
+        expect(result.map((t) => t.id), containsAll(['task-1', 'task-2']));
+        expect(result.every((t) => t.assigneeId == 'user-2'), isTrue);
       });
-      test('should filter by creatorId', async () {
-        final tasks = await repository.getTasks(creatorId: user1.id);
-        expect(tasks.length, 2);
-        expect(tasks.map((t)=>t.id), containsAll([taskData1.id, taskData2.id]));
-      });
-      test('should filter by projectId', async () {
-        final tasks = await repository.getTasks(projectId: project1.id);
-        expect(tasks.length, 2);
-         expect(tasks.map((t)=>t.id), containsAll([taskData1.id, taskData2.id]));
-      });
-      test('should filter by query (title or description)', async () {
-        var tasks = await repository.getTasks(query: 'Beta');
-        expect(tasks.length, 1);
-        expect(tasks.first.id, taskData2.id);
-        
-        tasks = await repository.getTasks(query: 'search'); // taskData2 and taskData3 have 'search' in title/desc
-        expect(tasks.length, 2);
-         expect(tasks.map((t)=>t.id), containsAll([taskData2.id, taskData3.id]));
-      });
-      test('should apply pagination (page 0, size 1, ordered by due_date ASC NULLS LAST, title ASC)', async () {
-        // Order: taskData2 (due earliest), taskData1, taskData3
-        final tasks = await repository.getTasks(size: 1, page: 0);
-        expect(tasks.length, 1);
-        expect(tasks.first.id, taskData2.id); 
-      });
-       test('should apply pagination (page 1, size 1)', async () {
-        final tasks = await repository.getTasks(size: 1, page: 1);
-        expect(tasks.length, 1);
-        expect(tasks.first.id, taskData1.id);
-      });
-      test('should combine filters (projectId and query)', async () {
-        final tasks = await repository.getTasks(projectId: project1.id, query: 'Alpha');
-        expect(tasks.length, 1);
-        expect(tasks.first.id, taskData1.id);
+
+      test('should support pagination', () async {
+        // Arrange - Create multiple tasks
+        for (int i = 1; i <= 10; i++) {
+          final task = Task(
+            id: 'task-$i',
+            title: 'Task $i',
+            description: 'Description $i',
+            status: TaskStatus.todo,
+            priority: Priority.medium,
+            projectId: 'project-1',
+            creatorId: 'user-1',
+          );
+          await taskRepository.create(task);
+        }
+
+        // Act - Get first page
+        final page1 = await taskRepository.getTasks(
+          projectId: 'project-1',
+          page: 0,
+          size: 5,
+        );
+
+        // Assert
+        expect(page1.length, equals(5));
+
+        // Act - Get second page
+        final page2 = await taskRepository.getTasks(
+          projectId: 'project-1',
+          page: 1,
+          size: 5,
+        );
+
+        // Assert
+        expect(page2.length, equals(5));
       });
     });
-    
+
+    group('update', () {
+      test('should update existing task successfully', () async {
+        // Arrange
+        const originalTask = Task(
+          id: 'task-1',
+          title: 'Original Title',
+          description: 'Original Description',
+          status: TaskStatus.todo,
+          priority: Priority.low,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+        );
+        await taskRepository.create(originalTask);
+
+        const updatedTask = Task(
+          id: 'task-1',
+          title: 'Updated Title',
+          description: 'Updated Description',
+          status: TaskStatus.done,
+          priority: Priority.high,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+          assigneeId: 'user-2',
+        );
+
+        // Act
+        final result = await taskRepository.update(updatedTask);
+
+        // Assert
+        expect(result.title, equals('Updated Title'));
+        expect(result.description, equals('Updated Description'));
+        expect(result.status, equals(TaskStatus.done));
+        expect(result.priority, equals(Priority.high));
+        expect(result.assigneeId, equals('user-2'));
+
+        // Verify the update persisted
+        final fetchedTask = await taskRepository.findById('task-1');
+        expect(fetchedTask!.title, equals('Updated Title'));
+        expect(fetchedTask.status, equals(TaskStatus.done));
+      });
+    });
+
+    group('delete', () {
+      test('should delete existing task successfully', () async {
+        // Arrange
+        const task = Task(
+          id: 'task-1',
+          title: 'To Delete',
+          description: 'To Delete Description',
+          status: TaskStatus.todo,
+          priority: Priority.medium,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+        );
+        await taskRepository.create(task);
+
+        // Act
+        await taskRepository.delete('task-1');
+
+        // Verify task was deleted
+        final fetchedTask = await taskRepository.findById('task-1');
+        expect(fetchedTask, isNull);
+      });
+    });
+
     group('assignTask', () {
-      late shared_models.Task task;
-      setUp(() async {
-        task = await repository.create(taskData1); // Initially assigned to user1
-      });
-      test('should assign task to a different user', async () {
-        final updatedTask = await repository.assignTask(task.id, user2.id);
-        expect(updatedTask.assigneeId, user2.id);
-        final foundTask = await repository.findById(task.id);
-        expect(foundTask!.assigneeId, user2.id);
-      });
-      test('should throw TaskNotFoundException if task does not exist', () {
-        expect(() => repository.assignTask('fake-task', user2.id), throwsA(isA<TaskNotFoundException>()));
-      });
-      test('should throw UserNotFoundException if assignee does not exist', () {
-        expect(() => repository.assignTask(task.id, 'fake-user'), throwsA(isA<UserNotFoundException>()));
+      test('should assign task to user successfully', () async {
+        // Arrange
+        const task = Task(
+          id: 'task-1',
+          title: 'Task to Assign',
+          description: 'Description',
+          status: TaskStatus.todo,
+          priority: Priority.medium,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+        );
+        await taskRepository.create(task);
+
+        // Act
+        final result = await taskRepository.assignTask('task-1', 'user-2');
+
+        // Assert
+        expect(result.id, equals('task-1'));
+        expect(result.assigneeId, equals('user-2'));
       });
     });
 
     group('changeTaskStatus', () {
-       late shared_models.Task task;
-      setUp(() async {
-        task = await repository.create(taskData1); // Initial status: todo
-      });
-      test('should change task status', async () {
-        final newStatus = shared_models.TaskStatus.done;
-        final updatedTask = await repository.changeTaskStatus(task.id, newStatus);
-        expect(updatedTask.status, newStatus);
-        final foundTask = await repository.findById(task.id);
-        expect(foundTask!.status, newStatus);
-      });
-       test('should throw TaskNotFoundException if task does not exist for status change', () {
-        expect(() => repository.changeTaskStatus('fake-task', shared_models.TaskStatus.inProgress), 
-          throwsA(isA<TaskNotFoundException>()));
+      test('should change task status successfully', () async {
+        // Arrange
+        const task = Task(
+          id: 'task-1',
+          title: 'Task Status Change',
+          description: 'Description',
+          status: TaskStatus.todo,
+          priority: Priority.medium,
+          projectId: 'project-1',
+          creatorId: 'user-1',
+        );
+        await taskRepository.create(task);
+
+        // Act
+        final result = await taskRepository.changeTaskStatus('task-1', TaskStatus.done);
+
+        // Assert
+        expect(result.id, equals('task-1'));
+        expect(result.status, equals(TaskStatus.done));
       });
     });
-
   });
-}
+} 

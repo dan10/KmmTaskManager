@@ -2,7 +2,6 @@ import 'package:postgres/postgres.dart';
 import 'package:shared/models.dart' as shared_models;
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
 
-
 class TaskRepository {
   final PostgreSQLConnection _db;
 
@@ -53,7 +52,8 @@ class TaskRepository {
       substitutionValues['projectId'] = projectId;
     }
     if (query != null && query.isNotEmpty) {
-      conditions.add('(title ILIKE @searchQuery OR description ILIKE @searchQuery)');
+      conditions
+          .add('(title ILIKE @searchQuery OR description ILIKE @searchQuery)');
       substitutionValues['searchQuery'] = '%$query%';
     }
 
@@ -61,7 +61,8 @@ class TaskRepository {
     if (conditions.isNotEmpty) {
       sql += ' WHERE ${conditions.join(' AND ')}';
     }
-    sql += ' ORDER BY due_date ASC NULLS LAST, title ASC LIMIT @limit OFFSET @offset';
+    sql +=
+        ' ORDER BY due_date ASC NULLS LAST, title ASC LIMIT @limit OFFSET @offset';
 
     final result = await _db.query(sql, substitutionValues: substitutionValues);
     return result.map(_mapTaskFromRow).toList();
@@ -88,8 +89,8 @@ class TaskRepository {
         'id': task.id,
         'title': task.title,
         'description': task.description,
-        'status': task.status.name, // Use .name for enums from freezed
-        'priority': task.priority.name, // Use .name for enums from freezed
+        'status': _mapTaskStatusToString(task.status),
+        'priority': _mapPriorityToString(task.priority),
         'projectId': task.projectId,
         'assigneeId': task.assigneeId,
         'creatorId': task.creatorId,
@@ -117,8 +118,8 @@ class TaskRepository {
         'id': task.id,
         'title': task.title,
         'description': task.description,
-        'status': task.status.name, // Use .name for enums
-        'priority': task.priority.name, // Use .name for enums
+        'status': _mapTaskStatusToString(task.status),
+        'priority': _mapPriorityToString(task.priority),
         'projectId': task.projectId,
         'assigneeId': task.assigneeId,
         'dueDate': task.dueDate?.toIso8601String(),
@@ -142,7 +143,8 @@ class TaskRepository {
     }
   }
 
-  Future<shared_models.Task> assignTask(String taskId, String assigneeId) async {
+  Future<shared_models.Task> assignTask(
+      String taskId, String assigneeId) async {
     if (!await _taskExists(taskId)) {
       throw TaskNotFoundException(id: taskId);
     }
@@ -157,35 +159,40 @@ class TaskRepository {
 
     if (result > 0) {
       final updatedTask = await findById(taskId);
-      if (updatedTask == null) { // Should ideally not happen if update succeeded
-          throw TaskNotFoundException(id: taskId);
+      if (updatedTask == null) {
+        // Should ideally not happen if update succeeded
+        throw TaskNotFoundException(id: taskId);
       }
       return updatedTask;
     }
     // This path should ideally not be reached if _taskExists passed and DB is consistent.
     // Throwing to indicate update failed unexpectedly.
-    throw Exception('Failed to assign task $taskId, update operation affected 0 rows.');
+    throw Exception(
+        'Failed to assign task $taskId, update operation affected 0 rows.');
   }
 
-  Future<shared_models.Task> changeTaskStatus(String taskId, shared_models.TaskStatus newStatus) async {
+  Future<shared_models.Task> changeTaskStatus(
+      String taskId, shared_models.TaskStatus newStatus) async {
     if (!await _taskExists(taskId)) {
       throw TaskNotFoundException(id: taskId);
     }
 
     final result = await _db.execute(
       'UPDATE tasks SET status = @status WHERE id = @taskId',
-      substitutionValues: {'status': newStatus.name, 'taskId': taskId},
+      substitutionValues: {'status': _mapTaskStatusToString(newStatus), 'taskId': taskId},
     );
 
     if (result > 0) {
       final updatedTask = await findById(taskId);
-       if (updatedTask == null) { // Should ideally not happen
-          throw TaskNotFoundException(id: taskId);
+      if (updatedTask == null) {
+        // Should ideally not happen
+        throw TaskNotFoundException(id: taskId);
       }
       return updatedTask;
     }
     // This path should ideally not be reached.
-    throw Exception('Failed to change task status for $taskId, update operation affected 0 rows.');
+    throw Exception(
+        'Failed to change task status for $taskId, update operation affected 0 rows.');
   }
 
   shared_models.Task _mapTaskFromRow(List<dynamic> row) {
@@ -212,9 +219,21 @@ class TaskRepository {
 
     shared_models.TaskStatus status;
     try {
-       status = shared_models.TaskStatus.values.firstWhere(
-        (e) => shared_models.TaskStatusEnumMap[e] == row[3] as String,
-      );
+      final statusString = row[3] as String;
+      switch (statusString) {
+        case 'TODO':
+          status = shared_models.TaskStatus.todo;
+          break;
+        case 'IN_PROGRESS':
+          status = shared_models.TaskStatus.inProgress;
+          break;
+        case 'DONE':
+          status = shared_models.TaskStatus.done;
+          break;
+        default:
+          print("Error mapping status: $statusString, using default TaskStatus.todo");
+          status = shared_models.TaskStatus.todo;
+      }
     } catch (e) {
       print("Error mapping status: ${row[3]}, using default TaskStatus.todo");
       status = shared_models.TaskStatus.todo; // Default on error
@@ -222,14 +241,25 @@ class TaskRepository {
 
     shared_models.Priority priority;
     try {
-      priority = shared_models.Priority.values.firstWhere(
-        (e) => shared_models.PriorityEnumMap[e] == row[4] as String,
-      );
+      final priorityString = row[4] as String;
+      switch (priorityString) {
+        case 'LOW':
+          priority = shared_models.Priority.low;
+          break;
+        case 'MEDIUM':
+          priority = shared_models.Priority.medium;
+          break;
+        case 'HIGH':
+          priority = shared_models.Priority.high;
+          break;
+        default:
+          print("Error mapping priority: $priorityString, using default Priority.low");
+          priority = shared_models.Priority.low;
+      }
     } catch (e) {
       print("Error mapping priority: ${row[4]}, using default Priority.low");
       priority = shared_models.Priority.low; // Default on error
     }
-
 
     return shared_models.Task(
       id: row[0] as String,
@@ -242,5 +272,27 @@ class TaskRepository {
       creatorId: row[7] as String,
       dueDate: dueDate,
     );
+  }
+
+  String _mapTaskStatusToString(shared_models.TaskStatus status) {
+    switch (status) {
+      case shared_models.TaskStatus.todo:
+        return 'TODO';
+      case shared_models.TaskStatus.inProgress:
+        return 'IN_PROGRESS';
+      case shared_models.TaskStatus.done:
+        return 'DONE';
+    }
+  }
+
+  String _mapPriorityToString(shared_models.Priority priority) {
+    switch (priority) {
+      case shared_models.Priority.low:
+        return 'LOW';
+      case shared_models.Priority.medium:
+        return 'MEDIUM';
+      case shared_models.Priority.high:
+        return 'HIGH';
+    }
   }
 }

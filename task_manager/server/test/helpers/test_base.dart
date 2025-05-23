@@ -1,5 +1,4 @@
 import 'package:postgres/postgres.dart';
-import 'package:test/test.dart';
 import 'dart:async';
 import 'postgres_container.dart';
 import '../../lib/src/data/database.dart';
@@ -75,10 +74,8 @@ class TestBase {
 
   Future<void> tearDown() async {
     try {
-      if (connection != null) {
-        await clearTables();
-        await connection.close();
-      }
+      await clearTables();
+      await connection.close();
     } catch (e) {
       print('Error during tearDown: $e');
     }
@@ -92,9 +89,7 @@ class TestBase {
   }
 
   Future<void> clearTables() async {
-    if (connection != null) {
-      await Database.dropTables(connection);
-      await Database.createTables(connection);
-    }
+    await Database.dropTables(connection);
+    await Database.createTables(connection);
   }
 }

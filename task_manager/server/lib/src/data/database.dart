@@ -23,13 +23,18 @@ class Database {
     await _connection.close();
   }
 
+  // Expose the connection for repositories
+  PostgreSQLConnection get connection => _connection;
+
   static Future<void> createTables(PostgreSQLConnection connection) async {
     await connection.execute('''
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
+        display_name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL
+        password_hash TEXT,
+        google_id TEXT,
+        created_at TEXT NOT NULL
       );
 
       CREATE TABLE IF NOT EXISTS projects (

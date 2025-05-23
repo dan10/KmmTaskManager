@@ -4,10 +4,7 @@ import '../middleware/auth_middleware.dart';
 import '../services/task_service.dart';
 import 'package:shared/models.dart';
 import '../util/shelf_helpers.dart';
-import '../dto/task/task_assign_request_dto.dart';
-import '../dto/task/task_status_change_request_dto.dart';
-import '../exceptions/custom_exceptions.dart'; // Import new exceptions
-import '../dto/error_response_dto.dart';      // Import ErrorResponseDto
+import '../exceptions/custom_exceptions.dart';
 
 class TaskRoutes {
   final TaskService _service;
@@ -16,20 +13,29 @@ class TaskRoutes {
   TaskRoutes(this._service, this._authMiddleware);
 
   Router get router {
-    final router = Router();
+    final baseRouter = Router();
 
-    router.get('/tasks', _authMiddleware.middleware(_getAllTasks)); // Will be updated
-    router.get('/tasks/created-by-me', _authMiddleware.middleware(_getTasksCreatedByMe)); // New
-    router.get('/tasks/project/<projectId>', _authMiddleware.middleware(_getTasksByProject));
-    router.get('/tasks/<id>', _authMiddleware.middleware(_getTaskById));
-    router.post('/tasks', _authMiddleware.middleware(_createTask));
-    router.put('/tasks/<id>', _authMiddleware.middleware(_updateTask));
-    router.delete('/tasks/<id>', _authMiddleware.middleware(_deleteTask));
+    baseRouter.get('/tasks', _getAllTasks); // Will be updated
+    baseRouter.get('/tasks/created-by-me', _getTasksCreatedByMe); // New
+    baseRouter.get('/tasks/project/<projectId>', _getTasksByProject);
+    baseRouter.get('/tasks/<id>', _getTaskById);
+    baseRouter.post('/tasks', _createTask);
+    baseRouter.put('/tasks/<id>', _updateTask);
+    baseRouter.delete('/tasks/<id>', _deleteTask);
 
     // New routes for assigning and changing status
-    router.post('/tasks/<id>/assign', _authMiddleware.middleware(_assignTask));
-    router.post('/tasks/<id>/status', _authMiddleware.middleware(_changeTaskStatus));
+    baseRouter.post('/tasks/<id>/assign', _assignTask);
+    baseRouter.post('/tasks/<id>/status', _changeTaskStatus);
 
+    // Wrap the router with auth middleware using Pipeline
+    final handler = Pipeline()
+        .addMiddleware(_authMiddleware.middleware())
+        .addHandler(baseRouter.call);
+    
+    // Create a new router that delegates to the pipeline
+    final router = Router();
+    router.mount('/', handler);
+    
     return router;
   }
 
@@ -217,6 +223,5 @@ class TaskRoutes {
     final userId = request.context['userId'] as String;
     await _service.deleteTask(id, userId);
     return okJsonResponse({'message': 'Task deleted successfully'});
-    }
   }
 }

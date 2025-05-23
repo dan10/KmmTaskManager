@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:postgres/postgres.dart';
 
 class TestPostgresContainer {
   static const String containerName = 'task-manager-test-db';

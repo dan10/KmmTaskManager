@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../converters/task_status_converter.dart';
+
 part 'task.freezed.dart';
 part 'task.g.dart';
 
@@ -23,11 +25,12 @@ enum Priority {
 
 @freezed
 abstract class Task with _$Task {
+  @JsonSerializable()
   const factory Task({
     required String id,
     required String title,
     required String description,
-    required TaskStatus status,
+    @TaskStatusConverter() required TaskStatus status,
     required Priority priority,
     DateTime? dueDate,
     String? projectId,

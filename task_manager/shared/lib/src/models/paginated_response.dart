@@ -1,27 +1,65 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
+class PaginatedResponse<T> {
+  final List<T> items;
+  final int total;
+  final int page;
+  final int size;
+  final int totalPages;
 
-part 'paginated_response.freezed.dart';
-part 'paginated_response.g.dart';
-
-@freezed
-abstract class PaginatedResponse<T> with _$PaginatedResponse {
-  const factory PaginatedResponse({
-    required List<T> items,
-    required int total,
-    required int page,
-    required int size,
-    required int totalPages,
-  }) = _PaginatedResponse;
+  const PaginatedResponse({
+    required this.items,
+    required this.total,
+    required this.page,
+    required this.size,
+    required this.totalPages,
+  });
 
   factory PaginatedResponse.fromJson(
     Map<String, dynamic> json,
     T Function(Object?) fromJsonT,
-  ) =>
-      _$PaginatedResponseFromJson(json, fromJsonT);
+  ) {
+    return PaginatedResponse<T>(
+      items: (json['items'] as List<dynamic>)
+          .map((item) => fromJsonT(item))
+          .toList(),
+      total: json['total'] as int,
+      page: json['page'] as int,
+      size: json['size'] as int,
+      totalPages: json['totalPages'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson(Object? Function(T) toJsonT) {
+    return {
+      'items': items.map((item) => toJsonT(item)).toList(),
+      'total': total,
+      'page': page,
+      'size': size,
+      'totalPages': totalPages,
+    };
+  }
 
   @override
-  Map<String, dynamic> toJson(
-    Object? Function(T) toJsonT,
-  );
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PaginatedResponse<T> &&
+        other.items == items &&
+        other.total == total &&
+        other.page == page &&
+        other.size == size &&
+        other.totalPages == totalPages;
+  }
+
+  @override
+  int get hashCode {
+    return items.hashCode ^
+        total.hashCode ^
+        page.hashCode ^
+        size.hashCode ^
+        totalPages.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'PaginatedResponse<$T>(items: $items, total: $total, page: $page, size: $size, totalPages: $totalPages)';
+  }
 }

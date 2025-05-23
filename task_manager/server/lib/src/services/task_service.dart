@@ -2,7 +2,6 @@ import 'package:shared/models.dart' as shared_models;
 import '../repositories/task_repository.dart';
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
 
-
 // Old custom exceptions removed from here.
 
 abstract class TaskService {
@@ -16,10 +15,13 @@ abstract class TaskService {
   });
   Future<shared_models.Task?> getTaskById(String id, String userId);
   Future<shared_models.Task> createTask(shared_models.Task task);
-  Future<shared_models.Task> updateTask(String id, shared_models.Task task, String userId);
+  Future<shared_models.Task> updateTask(
+      String id, shared_models.Task task, String userId);
   Future<void> deleteTask(String id, String userId);
-  Future<shared_models.Task> assignTask(String taskId, String assigneeId);       // New
-  Future<shared_models.Task> changeTaskStatus(String taskId, shared_models.TaskStatus newStatus); // New
+  Future<shared_models.Task> assignTask(
+      String taskId, String assigneeId); // New
+  Future<shared_models.Task> changeTaskStatus(
+      String taskId, shared_models.TaskStatus newStatus); // New
 }
 
 class TaskServiceImpl implements TaskService {
@@ -73,7 +75,8 @@ class TaskServiceImpl implements TaskService {
     }
     // Authorization: user must be creator to update.
     if (existingTask.creatorId != userId) {
-      throw ForbiddenException(message: 'User not authorized to update task $id.');
+      throw ForbiddenException(
+          message: 'User not authorized to update task $id.');
     }
     return _repository.update(task);
   }
@@ -86,20 +89,23 @@ class TaskServiceImpl implements TaskService {
     }
     // Authorization: user must be creator to delete.
     if (task.creatorId != userId) {
-      throw ForbiddenException(message: 'User not authorized to delete task $id.');
+      throw ForbiddenException(
+          message: 'User not authorized to delete task $id.');
     }
     await _repository.delete(id);
   }
 
   @override
-  Future<shared_models.Task> assignTask(String taskId, String assigneeId) async {
+  Future<shared_models.Task> assignTask(
+      String taskId, String assigneeId) async {
     // Repository now throws TaskNotFoundException, UserNotFoundException
     return _repository.assignTask(taskId, assigneeId);
     // No need to check for null if repo guarantees to throw or return valid object.
   }
 
   @override
-  Future<shared_models.Task> changeTaskStatus(String taskId, shared_models.TaskStatus newStatus) async {
+  Future<shared_models.Task> changeTaskStatus(
+      String taskId, shared_models.TaskStatus newStatus) async {
     // Repository now throws TaskNotFoundException
     return _repository.changeTaskStatus(taskId, newStatus);
     // No need to check for null if repo guarantees to throw or return valid object.

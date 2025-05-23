@@ -9,8 +9,12 @@ abstract class Project with _$Project {
   const factory Project({
     required String id,
     required String name,
-    required String description,
-    required String creatorId,
+    @Default(0) int completed,
+    @Default(0) int inProgress,
+    @Default(0) int total,
+    String? description,
+    // Additional fields for server-side operations
+    String? creatorId,
     @Default([]) List<String> memberIds,
   }) = _Project;
 

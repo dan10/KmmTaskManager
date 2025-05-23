@@ -16,8 +16,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
   String get id;
-  String get name;
   String get email;
+  String get displayName;
+  String? get googleId;
+  String get createdAt;
   @JsonKey(includeFromJson: false, includeToJson: false)
   String? get passwordHash;
 
@@ -37,19 +39,25 @@ mixin _$User {
         (other.runtimeType == runtimeType &&
             other is User &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.googleId, googleId) ||
+                other.googleId == googleId) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
             (identical(other.passwordHash, passwordHash) ||
                 other.passwordHash == passwordHash));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, email, passwordHash);
+  int get hashCode => Object.hash(
+      runtimeType, id, email, displayName, googleId, createdAt, passwordHash);
 
   @override
   String toString() {
-    return 'User(id: $id, name: $name, email: $email, passwordHash: $passwordHash)';
+    return 'User(id: $id, email: $email, displayName: $displayName, googleId: $googleId, createdAt: $createdAt, passwordHash: $passwordHash)';
   }
 }
 
@@ -60,8 +68,10 @@ abstract mixin class $UserCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String name,
       String email,
+      String displayName,
+      String? googleId,
+      String createdAt,
       @JsonKey(includeFromJson: false, includeToJson: false)
       String? passwordHash});
 }
@@ -79,8 +89,10 @@ class _$UserCopyWithImpl<$Res> implements $UserCopyWith<$Res> {
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
     Object? email = null,
+    Object? displayName = null,
+    Object? googleId = freezed,
+    Object? createdAt = null,
     Object? passwordHash = freezed,
   }) {
     return _then(_self.copyWith(
@@ -88,13 +100,21 @@ class _$UserCopyWithImpl<$Res> implements $UserCopyWith<$Res> {
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: null == displayName
+          ? _self.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String,
+      googleId: freezed == googleId
+          ? _self.googleId
+          : googleId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
               as String,
       passwordHash: freezed == passwordHash
           ? _self.passwordHash
@@ -109,8 +129,10 @@ class _$UserCopyWithImpl<$Res> implements $UserCopyWith<$Res> {
 class _User implements User {
   const _User(
       {required this.id,
-      required this.name,
       required this.email,
+      required this.displayName,
+      this.googleId,
+      required this.createdAt,
       @JsonKey(includeFromJson: false, includeToJson: false)
       this.passwordHash});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
@@ -118,9 +140,13 @@ class _User implements User {
   @override
   final String id;
   @override
-  final String name;
-  @override
   final String email;
+  @override
+  final String displayName;
+  @override
+  final String? googleId;
+  @override
+  final String createdAt;
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   final String? passwordHash;
@@ -146,19 +172,25 @@ class _User implements User {
         (other.runtimeType == runtimeType &&
             other is _User &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.googleId, googleId) ||
+                other.googleId == googleId) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
             (identical(other.passwordHash, passwordHash) ||
                 other.passwordHash == passwordHash));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, email, passwordHash);
+  int get hashCode => Object.hash(
+      runtimeType, id, email, displayName, googleId, createdAt, passwordHash);
 
   @override
   String toString() {
-    return 'User(id: $id, name: $name, email: $email, passwordHash: $passwordHash)';
+    return 'User(id: $id, email: $email, displayName: $displayName, googleId: $googleId, createdAt: $createdAt, passwordHash: $passwordHash)';
   }
 }
 
@@ -170,8 +202,10 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String name,
       String email,
+      String displayName,
+      String? googleId,
+      String createdAt,
       @JsonKey(includeFromJson: false, includeToJson: false)
       String? passwordHash});
 }
@@ -189,8 +223,10 @@ class __$UserCopyWithImpl<$Res> implements _$UserCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? id = null,
-    Object? name = null,
     Object? email = null,
+    Object? displayName = null,
+    Object? googleId = freezed,
+    Object? createdAt = null,
     Object? passwordHash = freezed,
   }) {
     return _then(_User(
@@ -198,13 +234,21 @@ class __$UserCopyWithImpl<$Res> implements _$UserCopyWith<$Res> {
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: null == displayName
+          ? _self.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String,
+      googleId: freezed == googleId
+          ? _self.googleId
+          : googleId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
               as String,
       passwordHash: freezed == passwordHash
           ? _self.passwordHash
