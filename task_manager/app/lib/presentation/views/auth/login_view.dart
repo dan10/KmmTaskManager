@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:math' as math;
 
 import '../../providers/auth_provider.dart';
@@ -25,8 +26,13 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.secondaryContainer, // Secondary color as background
+      backgroundColor: Theme
+          .of(context)
+          .colorScheme
+          .secondaryContainer,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -52,7 +58,6 @@ class _LoginViewState extends State<LoginView> {
                   children: [
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, child) {
-                        // Navigate to home if authenticated
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (authProvider.isAuthenticated) {
                             context.go('/');
@@ -98,7 +103,7 @@ class _LoginViewState extends State<LoginView> {
 
                                 // App Name
                                 Text(
-                                  'Task Manager',
+                                  l10n.authAppName,
                                   style: Theme
                                       .of(context)
                                       .textTheme
@@ -116,8 +121,8 @@ class _LoginViewState extends State<LoginView> {
                                 // Email Field
                                 TextField(
                                   controller: _emailController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Email',
+                                  decoration: InputDecoration(
+                                    labelText: l10n.authEmail,
                                   ),
                                   keyboardType: TextInputType.emailAddress,
                                   enabled: !authProvider.isLoading,
@@ -127,8 +132,8 @@ class _LoginViewState extends State<LoginView> {
                                 // Password Field
                                 TextField(
                                   controller: _passwordController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Password',
+                                  decoration: InputDecoration(
+                                    labelText: l10n.authPassword,
                                   ),
                                   obscureText: true,
                                   enabled: !authProvider.isLoading,
@@ -202,7 +207,7 @@ class _LoginViewState extends State<LoginView> {
                                         ),
                                       ),
                                     )
-                                        : const Text('Login'),
+                                        : Text(l10n.authLoginButton),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -212,7 +217,7 @@ class _LoginViewState extends State<LoginView> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      "Don't have an account? ",
+                                      l10n.authWithoutAccount,
                                       style: TextStyle(
                                         color: Theme
                                             .of(context)
@@ -224,7 +229,7 @@ class _LoginViewState extends State<LoginView> {
                                     TextButton(
                                       onPressed: () => context.go('/register'),
                                       child: Text(
-                                        'Sign Up',
+                                        l10n.authSignUp,
                                         style: TextStyle(
                                           color: Theme
                                               .of(context)
@@ -251,7 +256,7 @@ class _LoginViewState extends State<LoginView> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        'Demo Credentials',
+                                        l10n.authDemoCredentials,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Theme
@@ -262,7 +267,7 @@ class _LoginViewState extends State<LoginView> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Email: test@example.com\nPassword: password',
+                                        l10n.authDemoCredentialsText,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontSize: 12,

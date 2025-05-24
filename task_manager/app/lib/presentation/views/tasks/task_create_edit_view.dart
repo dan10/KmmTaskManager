@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../viewmodels/task_viewmodel.dart';
 import '../../viewmodels/project_viewmodel.dart';
@@ -60,6 +61,8 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
 
   void _loadTask() async {
     if (widget.taskId == null) return;
+
+    final l10n = AppLocalizations.of(context)!;
     
     setState(() {
       _isLoading = true;
@@ -82,7 +85,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to load task: $e';
+        _errorMessage = l10n.taskLoadError(e.toString());
       });
     } finally {
       setState(() {
@@ -102,8 +105,10 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return AppBar(
-      title: Text(_isCreating ? 'Create Task' : 'Edit Task'),
+      title: Text(_isCreating ? l10n.createTask : l10n.editTask),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.go('/?tab=0'),
@@ -176,11 +181,13 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   Widget _buildTitleField() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Task Title',
+          l10n.taskTitleLabel,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -190,7 +197,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
           controller: _titleController,
           enabled: !_isLoading,
           decoration: InputDecoration(
-            hintText: 'Enter task title',
+            hintText: l10n.taskTitlePlaceholder,
             filled: true,
             fillColor: Theme.of(context).colorScheme.surface,
             border: OutlineInputBorder(
@@ -214,7 +221,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Task title is required';
+              return l10n.taskTitleError;
             }
             return null;
           },
@@ -225,11 +232,13 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   Widget _buildDescriptionField() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Task Description',
+          l10n.taskDescriptionLabel,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -239,7 +248,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
           controller: _descriptionController,
           enabled: !_isLoading,
           decoration: InputDecoration(
-            hintText: 'Enter task description (optional)',
+            hintText: l10n.taskDescriptionPlaceholder,
             filled: true,
             fillColor: Theme.of(context).colorScheme.surface,
             border: OutlineInputBorder(
@@ -262,11 +271,13 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   Widget _buildPriorityField() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Task Priority',
+          l10n.taskPriorityLabel,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -308,11 +319,13 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   Widget _buildDueDateField() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Due Date',
+          l10n.taskDueDateLabel,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -336,7 +349,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
                   child: Text(
                     _selectedDueDate != null
                         ? '${_selectedDueDate!.day}/${_selectedDueDate!.month}/${_selectedDueDate!.year}'
-                        : 'DD/MM/YYYY',
+                        : l10n.taskDueDatePlaceholder,
                     style: TextStyle(
                       color: _selectedDueDate != null
                           ? Theme.of(context).colorScheme.onSurface
@@ -357,11 +370,13 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   Widget _buildProjectField() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Project',
+          l10n.taskProjectLabel,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -383,7 +398,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
                 child: DropdownButton<String>(
                   value: _selectedProjectId,
                   isExpanded: true,
-                  hint: const Text('Select a project'),
+                  hint: Text(l10n.taskProjectPlaceholder),
                   icon: const Icon(Icons.arrow_drop_down),
                   onChanged: _isLoading ? null : (String? newValue) {
                     setState(() {
@@ -406,6 +421,8 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   Widget _buildActionButtons() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(bottom: 16),
@@ -415,12 +432,13 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
               child: OutlinedButton(
                 onPressed: _isLoading ? null : () => context.go('/?tab=0'),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 24),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Cancel'),
+                child: Text(l10n.taskCancelButton),
               ),
             ),
             const SizedBox(width: 16),
@@ -428,7 +446,8 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
               child: ElevatedButton(
                 onPressed: _isButtonEnabled ? _handleCreateOrUpdate : null,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 24),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -443,7 +462,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
                         ),
                       )
                     : Text(
-                        _isCreating ? 'Create' : 'Update',
+                  _isCreating ? l10n.taskCreateButton : l10n.taskUpdateButton,
                         style: const TextStyle(color: Colors.white),
                       ),
               ),
@@ -470,13 +489,15 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   void _handleCreateOrUpdate() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     if (_selectedProjectId == null) {
       setState(() {
-        _errorMessage = 'Please select a project';
+        _errorMessage = l10n.taskProjectRequired;
       });
       return;
     }
@@ -512,7 +533,9 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to ${_isCreating ? 'create' : 'update'} task: $e';
+        _errorMessage =
+        _isCreating ? l10n.taskCreateError(e.toString()) : l10n.taskUpdateError(
+            e.toString());
       });
     } finally {
       setState(() {
@@ -522,15 +545,17 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   void _showDeleteConfirmation() {
+    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: const Text('Are you sure you want to delete this task? This action cannot be undone.'),
+        title: Text(l10n.taskDeleteTitle),
+        content: Text(l10n.taskDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.taskCancelButton),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -541,7 +566,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
               _deleteTask();
             },
             child: Text(
-              'Delete',
+              l10n.taskDeleteButton,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onError,
               ),
@@ -553,6 +578,8 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   void _deleteTask() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (widget.taskId == null) return;
 
     setState(() {
@@ -569,7 +596,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to delete task: $e';
+        _errorMessage = l10n.taskDeleteError(e.toString());
       });
     } finally {
       setState(() {

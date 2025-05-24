@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../providers/auth_provider.dart';
 
@@ -30,15 +31,19 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.secondaryContainer, // Secondary color as background
+      backgroundColor: Theme
+          .of(context)
+          .colorScheme
+          .secondaryContainer,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Consumer<AuthProvider>(
               builder: (context, authProvider, child) {
-                // Navigate to home if authenticated
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (authProvider.isAuthenticated) {
                     context.go('/');
@@ -75,7 +80,7 @@ class _RegisterViewState extends State<RegisterView> {
                         
                         // App Name
                         Text(
-                          'Task Manager',
+                          l10n.authAppName,
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -93,8 +98,8 @@ class _RegisterViewState extends State<RegisterView> {
                         // Name Field
                         TextField(
                           controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Full Name',
+                          decoration: InputDecoration(
+                            labelText: l10n.authName,
                           ),
                           textCapitalization: TextCapitalization.words,
                           enabled: !authProvider.isLoading,
@@ -104,8 +109,8 @@ class _RegisterViewState extends State<RegisterView> {
                         // Email Field
                         TextField(
                           controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
+                          decoration: InputDecoration(
+                            labelText: l10n.authEmail,
                           ),
                           keyboardType: TextInputType.emailAddress,
                           enabled: !authProvider.isLoading,
@@ -116,11 +121,14 @@ class _RegisterViewState extends State<RegisterView> {
                         TextField(
                           controller: _passwordController,
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: l10n.authPassword,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword ? Icons.visibility : Icons.visibility_off,
                               ),
+                              tooltip: _obscurePassword ? l10n
+                                  .accessibilityShowPassword : l10n
+                                  .accessibilityHidePassword,
                               onPressed: () {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
@@ -137,11 +145,14 @@ class _RegisterViewState extends State<RegisterView> {
                         TextField(
                           controller: _confirmPasswordController,
                           decoration: InputDecoration(
-                            labelText: 'Confirm Password',
+                            labelText: l10n.authConfirmPassword,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
                               ),
+                              tooltip: _obscureConfirmPassword ? l10n
+                                  .accessibilityShowPassword : l10n
+                                  .accessibilityHidePassword,
                               onPressed: () {
                                 setState(() {
                                   _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -192,7 +203,7 @@ class _RegisterViewState extends State<RegisterView> {
                             onPressed: authProvider.isLoading
                                 ? null
                                 : () async {
-                              if (_validateForm()) {
+                              if (_validateForm(l10n)) {
                                 await authProvider.register(
                                   _emailController.text,
                                   _passwordController.text,
@@ -211,7 +222,7 @@ class _RegisterViewState extends State<RegisterView> {
                                       ),
                                     ),
                                   )
-                                : const Text('Create Account'),
+                                : Text(l10n.authRegisterButton),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -221,7 +232,7 @@ class _RegisterViewState extends State<RegisterView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Already have an account? ',
+                              l10n.authAlreadyHaveAccount,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                               ),
@@ -229,7 +240,7 @@ class _RegisterViewState extends State<RegisterView> {
                             TextButton(
                               onPressed: () => context.go('/login'),
                               child: Text(
-                                'Sign In',
+                                l10n.authSignIn,
                                 style: TextStyle(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
@@ -250,39 +261,38 @@ class _RegisterViewState extends State<RegisterView> {
     );
   }
 
-  bool _validateForm() {
-    // Basic validation
+  bool _validateForm(AppLocalizations l10n) {
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your name')),
+        SnackBar(content: Text(l10n.authNameError)),
       );
       return false;
     }
     
     if (_emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email')),
+        SnackBar(content: Text(l10n.authEmailError)),
       );
       return false;
     }
     
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(_emailController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email')),
+        SnackBar(content: Text(l10n.authEmailError)),
       );
       return false;
     }
-    
-    if (_passwordController.text.length < 6) {
+
+    if (_passwordController.text.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password must be at least 6 characters')),
+        SnackBar(content: Text(l10n.authPasswordError)),
       );
       return false;
     }
     
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+        SnackBar(content: Text(l10n.authConfirmPasswordError)),
       );
       return false;
     }

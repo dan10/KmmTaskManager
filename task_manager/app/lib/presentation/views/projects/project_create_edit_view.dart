@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../viewmodels/project_viewmodel.dart';
 import '../../../domain/entities/project.dart';
@@ -55,6 +56,8 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
   void _loadProject() async {
     if (widget.projectId == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -74,7 +77,7 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to load project: $e';
+        _errorMessage = l10n.projectLoadError(e.toString());
       });
     } finally {
       setState(() {
@@ -94,8 +97,10 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return AppBar(
-      title: Text(_isCreating ? 'Create Project' : 'Edit Project'),
+      title: Text(_isCreating ? l10n.createProject : l10n.editProject),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.go('/?tab=1'),
@@ -156,11 +161,13 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
   }
 
   Widget _buildNameField() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Project Name',
+          l10n.projectNameLabel,
           style: Theme
               .of(context)
               .textTheme
@@ -177,7 +184,7 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
           controller: _nameController,
           enabled: !_isLoading,
           decoration: InputDecoration(
-            hintText: 'Enter project name',
+            hintText: l10n.projectNamePlaceholder,
             filled: true,
             fillColor: Theme
                 .of(context)
@@ -212,7 +219,7 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
             if (value == null || value
                 .trim()
                 .isEmpty) {
-              return 'Project name is required';
+              return l10n.projectNameError;
             }
             return null;
           },
@@ -223,11 +230,13 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
   }
 
   Widget _buildDescriptionField() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Project Description',
+          l10n.projectDescriptionLabel,
           style: Theme
               .of(context)
               .textTheme
@@ -246,7 +255,7 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
             controller: _descriptionController,
             enabled: !_isLoading,
             decoration: InputDecoration(
-              hintText: 'Enter project description (optional)',
+              hintText: l10n.projectDescriptionPlaceholder,
               filled: true,
               fillColor: Theme
                   .of(context)
@@ -277,6 +286,8 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
   }
 
   Widget _buildActionButtons() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -296,7 +307,7 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
                       .primary,
                 ),
               ),
-              child: const Text('Cancel'),
+              child: Text(l10n.projectCancelButton),
             ),
           ),
           const SizedBox(width: 16),
@@ -323,7 +334,8 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
                 ),
               )
                   : Text(
-                _isCreating ? 'Create' : 'Update',
+                _isCreating ? l10n.projectCreateButton : l10n
+                    .projectUpdateButton,
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -334,6 +346,8 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
   }
 
   void _handleCreateOrUpdate() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -370,7 +384,8 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
     } catch (e) {
       setState(() {
         _errorMessage =
-        'Failed to ${_isCreating ? 'create' : 'update'} project: $e';
+        _isCreating ? l10n.projectCreateError(e.toString()) : l10n
+            .projectUpdateError(e.toString());
       });
     } finally {
       setState(() {
