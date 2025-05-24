@@ -1,4 +1,4 @@
-name: shared
+name: task_manager_shared
 description: Shared code between app and server.
 version: 1.0.0
 
