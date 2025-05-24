@@ -5,7 +5,9 @@ class Project {
   final String ownerId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final int taskCount;
+  final int completed;
+  final int inProgress;
+  final int total;
 
   const Project({
     required this.id,
@@ -14,8 +16,13 @@ class Project {
     required this.ownerId,
     this.createdAt,
     this.updatedAt,
-    this.taskCount = 0,
+    this.completed = 0,
+    this.inProgress = 0,
+    this.total = 0,
   });
+
+  // Helper getter for backwards compatibility
+  int get taskCount => total;
 
   Project copyWith({
     String? id,
@@ -24,7 +31,9 @@ class Project {
     String? ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
-    int? taskCount,
+    int? completed,
+    int? inProgress,
+    int? total,
   }) {
     return Project(
       id: id ?? this.id,
@@ -33,7 +42,9 @@ class Project {
       ownerId: ownerId ?? this.ownerId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      taskCount: taskCount ?? this.taskCount,
+      completed: completed ?? this.completed,
+      inProgress: inProgress ?? this.inProgress,
+      total: total ?? this.total,
     );
   }
 
@@ -51,6 +62,6 @@ class Project {
 
   @override
   String toString() {
-    return 'Project{id: $id, name: $name, ownerId: $ownerId, taskCount: $taskCount}';
+    return 'Project{id: $id, name: $name, ownerId: $ownerId, completed: $completed, inProgress: $inProgress, total: $total}';
   }
 } 

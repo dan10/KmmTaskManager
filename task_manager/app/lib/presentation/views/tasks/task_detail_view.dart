@@ -48,7 +48,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
               PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'edit') {
-                    _showEditTaskDialog(context, task);
+                    context.go('/task/${task.id}/edit');
                   } else if (value == 'delete') {
                     _showDeleteConfirmation(context);
                   }
@@ -355,80 +355,6 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
   String _formatDateTime(DateTime date) {
     return '${date.day}/${date.month}/${date.year} at ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _showEditTaskDialog(BuildContext context, Task task) {
-    final titleController = TextEditingController(text: task.title);
-    final descriptionController = TextEditingController(text: task.description);
-    TaskPriority selectedPriority = task.priority;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Edit Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Task Title',
-                  hintText: 'Enter task title',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'Enter task description',
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<TaskPriority>(
-                value: selectedPriority,
-                decoration: const InputDecoration(labelText: 'Priority'),
-                items: TaskPriority.values.map((priority) {
-                  return DropdownMenuItem(
-                    value: priority,
-                    child: Text(priority.name.toUpperCase()),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedPriority = value;
-                    });
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (titleController.text.isNotEmpty) {
-                  Provider.of<TaskViewModel>(context, listen: false).updateTask(
-                    task.id,
-                    title: titleController.text,
-                    description: descriptionController.text.isEmpty ? null : descriptionController.text,
-                    priority: selectedPriority,
-                  );
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Update'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showDeleteConfirmation(BuildContext context) {

@@ -7,10 +7,11 @@ import '../presentation/views/auth/register_view.dart';
 import '../presentation/views/main/main_view.dart';
 import '../presentation/views/projects/project_list_view.dart';
 import '../presentation/views/projects/project_detail_view.dart';
+import '../presentation/views/projects/project_create_edit_view.dart';
 import '../presentation/views/tasks/task_list_view.dart';
 import '../presentation/views/tasks/task_detail_view.dart';
 import '../presentation/views/tasks/task_create_edit_view.dart';
-import '../presentation/viewmodels/auth_viewmodel.dart';
+import '../presentation/providers/auth_provider.dart';
 
 class AppRouter {
   static GoRouter get router => _router;
@@ -18,17 +19,17 @@ class AppRouter {
   static final _router = GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final isAuthRoute = state.matchedLocation == '/login' || 
                          state.matchedLocation == '/register';
 
       // If not authenticated and not on auth route, redirect to login
-      if (!authViewModel.isAuthenticated && !isAuthRoute) {
+      if (!authProvider.isAuthenticated && !isAuthRoute) {
         return '/login';
       }
 
       // If authenticated and on auth route, redirect to home
-      if (authViewModel.isAuthenticated && isAuthRoute) {
+      if (authProvider.isAuthenticated && isAuthRoute) {
         return '/';
       }
 
@@ -38,7 +39,14 @@ class AppRouter {
       GoRoute(
         path: '/',
         name: 'home',
-        builder: (context, state) => const MainView(),
+        builder: (context, state) {
+          final tabParam = state.uri.queryParameters['tab'];
+          int? initialTab;
+          if (tabParam != null) {
+            initialTab = int.tryParse(tabParam);
+          }
+          return MainView(initialTab: initialTab);
+        },
       ),
       GoRoute(
         path: '/login',
@@ -74,32 +82,45 @@ class AppRouter {
         },
         routes: [
           GoRoute(
-            path: 'create',
-            name: 'task-create',
-            builder: (context, state) {
-              final projectId = state.uri.queryParameters['projectId'];
-              return TaskCreateEditView(projectId: projectId);
-            },
-          ),
-          GoRoute(
             path: ':taskId',
             name: 'task-detail',
             builder: (context, state) {
               final taskId = state.pathParameters['taskId']!;
               return TaskDetailView(taskId: taskId);
             },
-            routes: [
-              GoRoute(
-                path: 'edit',
-                name: 'task-edit',
-                builder: (context, state) {
-                  final taskId = state.pathParameters['taskId']!;
-                  return TaskCreateEditView(taskId: taskId);
-                },
-              ),
-            ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/task/create',
+        name: 'task-create',
+        builder: (context, state) {
+          final projectId = state.uri.queryParameters['projectId'];
+          return TaskCreateEditView(projectId: projectId);
+        },
+      ),
+      GoRoute(
+        path: '/task/:taskId/edit',
+        name: 'task-edit',
+        builder: (context, state) {
+          final taskId = state.pathParameters['taskId']!;
+          return TaskCreateEditView(taskId: taskId);
+        },
+      ),
+      GoRoute(
+        path: '/project/create',
+        name: 'project-create',
+        builder: (context, state) {
+          return const ProjectCreateEditView();
+        },
+      ),
+      GoRoute(
+        path: '/project/:projectId/edit',
+        name: 'project-edit',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          return ProjectCreateEditView(projectId: projectId);
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

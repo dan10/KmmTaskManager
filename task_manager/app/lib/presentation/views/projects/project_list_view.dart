@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../viewmodels/project_viewmodel.dart';
 import '../../../domain/entities/project.dart';
@@ -23,98 +24,111 @@ class _ProjectListViewState extends State<ProjectListView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9), // Light gray background to match Compose
-      appBar: AppBar(
-        title: const Text('Projects'),
-        automaticallyImplyLeading: false,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateProjectDialog(context),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        onPressed: () => context.go('/project/create'),
         child: const Icon(Icons.add),
       ),
-      body: Consumer<ProjectViewModel>(
-        builder: (context, projectViewModel, child) {
-          return Column(
-            children: [
-              // Header Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      'Projects',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onBackground,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Search Field
-                    TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        labelText: 'Search projects...',
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
+      body: SafeArea(
+        child: Consumer<ProjectViewModel>(
+          builder: (context, projectViewModel, child) {
+            return Column(
+              children: [
+                // Header Section
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title
+                      Text(
+                        l10n.projectsTitle,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme
+                              .of(context)
+                              .colorScheme
+                              .onSurface,
                         ),
                       ),
-                      onChanged: (value) {
-                        // TODO: Implement search functionality
+                      const SizedBox(height: 16),
+
+                      // Search Field
+                      TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          labelText: l10n.projectsSearchPlaceholder,
+                          prefixIcon: const Icon(Icons.search),
+                          filled: true,
+                          fillColor: Theme
+                              .of(context)
+                              .colorScheme
+                              .surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          // TODO: Implement search functionality
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // All Projects subtitle
+                      Text(
+                        l10n.projectsAll,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: Theme
+                              .of(context)
+                              .colorScheme
+                              .onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Projects List
+                Expanded(
+                  child: projectViewModel.projects.isEmpty
+                      ? _buildEmptyState(l10n)
+                      : RefreshIndicator(
+                    onRefresh: () async {
+                      // TODO: Implement refresh
+                    },
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: projectViewModel.projects.length,
+                      itemBuilder: (context, index) {
+                        final project = projectViewModel.projects[index];
+                        return _buildProjectCard(context, project, l10n);
                       },
                     ),
-                    const SizedBox(height: 16),
-
-                    // All Projects subtitle
-                    Text(
-                      'All Projects',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).colorScheme.onBackground,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-
-              // Projects List
-              Expanded(
-                child: projectViewModel.projects.isEmpty
-                    ? _buildEmptyState()
-                    : RefreshIndicator(
-                        onRefresh: () async {
-                          // TODO: Implement refresh
-                        },
-                        child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: projectViewModel.projects.length,
-                          itemBuilder: (context, index) {
-                            final project = projectViewModel.projects[index];
-                            return _buildProjectCard(context, project);
-                          },
-                        ),
-                      ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -122,230 +136,156 @@ class _ProjectListViewState extends State<ProjectListView> {
           Icon(
             Icons.folder_outlined,
             size: 64,
-            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
+            color: Theme
+                .of(context)
+                .colorScheme
+                .onSurface
+                .withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
-            'No projects yet',
+            l10n.projectsEmptyTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Create your first project to get started',
+            l10n.projectsEmptySubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.5),
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => _showCreateProjectDialog(context),
+            onPressed: () => context.go('/project/create'),
             icon: const Icon(Icons.add),
-            label: const Text('Create Project'),
+            label: Text(l10n.projectsAdd),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildProjectCard(BuildContext context, Project project) {
+  Widget _buildProjectCard(BuildContext context, Project project,
+      AppLocalizations l10n) {
+    // Generate a consistent random color based on project name
+    final colorSeed = project.name.hashCode;
+    final colors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.indigo,
+    ];
+    final projectColor = colors[colorSeed.abs() % colors.length];
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
       ),
-      elevation: 2,
+      elevation: 4,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         onTap: () => context.push('/projects/${project.id}'),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header with icon and title
               Row(
                 children: [
-                  // Project Icon
+                  // Project Icon with colored background
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
+                      color: projectColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Icon(
                       Icons.folder,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      color: projectColor,
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  
-                  // Project Info
+                  const SizedBox(width: 8),
+
+                  // Project Name
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          project.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (project.description != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            project.description!,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
+                    child: Text(
+                      project.name,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-
-                  // More options
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          _showEditProjectDialog(context, project);
-                          break;
-                        case 'delete':
-                          _showDeleteConfirmation(context, project);
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 20),
-                            SizedBox(width: 12),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red, size: 20),
-                            SizedBox(width: 12),
-                            Text('Delete'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
-
-              const SizedBox(height: 16),
-
-              // Project Stats
-              Row(
-                children: [
-                  _buildStatChip(
-                    context,
-                    icon: Icons.assignment,
-                    label: 'Total',
-                    value: '12', // TODO: Get actual task count
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatChip(
-                    context,
-                    icon: Icons.schedule,
-                    label: 'In Progress',
-                    value: '5', // TODO: Get actual in progress count
-                    color: Colors.orange,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatChip(
-                    context,
-                    icon: Icons.check_circle,
-                    label: 'Completed',
-                    value: '7', // TODO: Get actual completed count
-                    color: Colors.green,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
+              const SizedBox(height: 8),
+              
               // Progress Bar
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              LinearProgressIndicator(
+                value: project.total > 0
+                    ? project.completed / project.total
+                    : 0.0,
+                backgroundColor: Theme
+                    .of(context)
+                    .colorScheme
+                    .surfaceVariant,
+                valueColor: AlwaysStoppedAnimation<Color>(projectColor),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              const SizedBox(height: 8),
+
+              // Stats Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Progress',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      Text(
-                        '58%', // TODO: Calculate actual progress
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    l10n.projectCompleted(project.completed),
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodySmall,
                   ),
-                  const SizedBox(height: 4),
-                  LinearProgressIndicator(
-                    value: 0.58, // TODO: Calculate actual progress
-                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.primary,
-                    ),
-                    borderRadius: BorderRadius.circular(4),
+                  Text(
+                    l10n.projectInProgress(project.inProgress),
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodySmall,
+                  ),
+                  Text(
+                    l10n.projectTotal(project.total),
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodySmall,
                   ),
                 ],
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatChip(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
       ),
     );
   }

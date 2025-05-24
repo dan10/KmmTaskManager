@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../tasks/task_list_view.dart';
 import '../projects/project_list_view.dart';
 import '../profile/profile_view.dart';
-import '../../viewmodels/auth_viewmodel.dart';
 
 class MainView extends StatefulWidget {
-  const MainView({super.key});
+  final int? initialTab;
+
+  const MainView({
+    super.key,
+    this.initialTab,
+  });
 
   @override
   State<MainView> createState() => _MainViewState();
 }
 
 class _MainViewState extends State<MainView> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   final List<Widget> _pages = [
     const TaskListView(),
@@ -23,46 +27,51 @@ class _MainViewState extends State<MainView> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialTab ?? 0;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer<AuthViewModel>(
-      builder: (context, authViewModel, child) {
-        return Scaffold(
-          body: IndexedStack(
-            index: _currentIndex,
-            children: _pages,
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Theme
+            .of(context)
+            .primaryColor,
+        unselectedItemColor: Theme
+            .of(context)
+            .colorScheme
+            .onSurface
+            .withValues(alpha: 0.6),
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.task_alt),
+            label: l10n.navTasks,
           ),
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            selectedItemColor: Theme.of(context).colorScheme.primary,
-            unselectedItemColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            elevation: 8,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.assignment_outlined),
-                activeIcon: Icon(Icons.assignment),
-                label: 'Tasks',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.folder_outlined),
-                activeIcon: Icon(Icons.folder),
-                label: 'Projects',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-            ],
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.folder),
+            label: l10n.navProjects,
           ),
-        );
-      },
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: l10n.navProfile,
+          ),
+        ],
+      ),
     );
   }
 } 

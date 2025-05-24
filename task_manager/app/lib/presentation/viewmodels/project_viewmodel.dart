@@ -103,7 +103,9 @@ class ProjectViewModel extends ChangeNotifier {
         description: 'Flutter task manager application',
         ownerId: '1',
         createdAt: DateTime.now().subtract(const Duration(days: 7)),
-        taskCount: 5,
+        completed: 3,
+        inProgress: 2,
+        total: 8,
       ),
       Project(
         id: '2',
@@ -111,7 +113,9 @@ class ProjectViewModel extends ChangeNotifier {
         description: 'Admin dashboard for task management',
         ownerId: '1',
         createdAt: DateTime.now().subtract(const Duration(days: 3)),
-        taskCount: 2,
+        completed: 5,
+        inProgress: 1,
+        total: 6,
       ),
       Project(
         id: '3',
@@ -119,7 +123,9 @@ class ProjectViewModel extends ChangeNotifier {
         description: 'REST API for task manager backend',
         ownerId: '1',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        taskCount: 8,
+        completed: 2,
+        inProgress: 4,
+        total: 12,
       ),
     ];
     

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,6 +38,8 @@ class _TaskListViewState extends State<TaskListView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9), // Match Compose background
       body: SafeArea(
@@ -70,11 +73,11 @@ class _TaskListViewState extends State<TaskListView> {
             return Column(
               children: [
                 // Top Bar Section (similar to Compose)
-                _buildTopBar(context, taskViewModel),
+                _buildTopBar(context, taskViewModel, l10n),
                 
                 // Task List (no tabs, just all tasks)
                 Expanded(
-                  child: _buildTaskList(taskViewModel.tasks),
+                  child: _buildTaskList(taskViewModel.tasks, l10n),
                 ),
               ],
             );
@@ -84,18 +87,18 @@ class _TaskListViewState extends State<TaskListView> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (widget.projectId != null) {
-            context.go('/tasks/create?projectId=${widget.projectId}');
+            context.go('/task/create?projectId=${widget.projectId}');
           } else {
-            context.go('/tasks/create');
+            context.go('/task/create');
           }
         },
-        backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildTopBar(BuildContext context, TaskViewModel taskViewModel) {
+  Widget _buildTopBar(BuildContext context, TaskViewModel taskViewModel,
+      AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -104,7 +107,7 @@ class _TaskListViewState extends State<TaskListView> {
         children: [
           // Title
           Text(
-            widget.projectId != null ? 'Project Tasks' : 'Tasks',
+            widget.projectId != null ? 'Project Tasks' : l10n.tasksTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -112,14 +115,14 @@ class _TaskListViewState extends State<TaskListView> {
           const SizedBox(height: 16),
           
           // Progress Section (similar to YourProgressSection in Compose)
-          _buildProgressSection(context, taskViewModel),
+          _buildProgressSection(context, taskViewModel, l10n),
           const SizedBox(height: 16),
           
           // Search Field
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              labelText: 'Search tasks...',
+              labelText: l10n.tasksSearchPlaceholder,
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surface,
@@ -137,7 +140,8 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Widget _buildProgressSection(BuildContext context, TaskViewModel taskViewModel) {
+  Widget _buildProgressSection(BuildContext context,
+      TaskViewModel taskViewModel, AppLocalizations l10n) {
     final totalTasks = taskViewModel.totalTasks;
     final completedTasks = taskViewModel.completedTasksCount;
     final progress = totalTasks > 0 ? (completedTasks / totalTasks) : 0.0;
@@ -153,13 +157,13 @@ class _TaskListViewState extends State<TaskListView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Your Progress',
+                  l10n.tasksProgressTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  '${(progress * 100).round()}%',
+                  l10n.tasksProgressPercentage((progress * 100).round()),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -169,7 +173,10 @@ class _TaskListViewState extends State<TaskListView> {
             const SizedBox(height: 8),
             LinearProgressIndicator(
               value: progress,
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              backgroundColor: Theme
+                  .of(context)
+                  .colorScheme
+                  .surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
                 Theme.of(context).colorScheme.primary,
               ),
@@ -178,9 +185,13 @@ class _TaskListViewState extends State<TaskListView> {
             ),
             const SizedBox(height: 8),
             Text(
-              '$completedTasks of $totalTasks completed',
+              l10n.tasksProgressCompleted(completedTasks, totalTasks),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme
+                    .of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -189,9 +200,9 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Widget _buildTaskList(List<Task> tasks) {
+  Widget _buildTaskList(List<Task> tasks, AppLocalizations l10n) {
     if (tasks.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(l10n);
     }
 
     return RefreshIndicator(
@@ -201,13 +212,13 @@ class _TaskListViewState extends State<TaskListView> {
         itemCount: tasks.length,
         itemBuilder: (context, index) {
           final task = tasks[index];
-          return _buildTaskCard(task);
+          return _buildTaskCard(task, l10n);
         },
       ),
     );
   }
 
-  Widget _buildTaskCard(Task task) {
+  Widget _buildTaskCard(Task task, AppLocalizations l10n) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -273,7 +284,7 @@ class _TaskListViewState extends State<TaskListView> {
                     if (task.dueDate != null) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'Due: ${_formatDate(task.dueDate!)}',
+                        '${l10n.taskDueDate} ${_formatDate(task.dueDate!)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -286,7 +297,8 @@ class _TaskListViewState extends State<TaskListView> {
                       builder: (context, projectViewModel, child) {
                         final project = projectViewModel.getProject(task.projectId);
                         return Text(
-                          'Project: ${project?.name ?? 'Unknown Project'}',
+                          '${l10n.taskProject} ${project?.name ??
+                              'Unknown Project'}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -320,7 +332,7 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -330,20 +342,32 @@ class _TaskListViewState extends State<TaskListView> {
             Icon(
               Icons.assignment_outlined,
               size: 80,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
-              'No tasks yet',
+              l10n.tasksEmptyTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme
+                    .of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Create your first task to get started',
+              l10n.tasksEmptySubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                color: Theme
+                    .of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.5),
               ),
               textAlign: TextAlign.center,
             ),
@@ -351,13 +375,13 @@ class _TaskListViewState extends State<TaskListView> {
             ElevatedButton.icon(
               onPressed: () {
                 if (widget.projectId != null) {
-                  context.go('/tasks/create?projectId=${widget.projectId}');
+                  context.go('/task/create?projectId=${widget.projectId}');
                 } else {
-                  context.go('/tasks/create');
+                  context.go('/task/create');
                 }
               },
               icon: const Icon(Icons.add),
-              label: const Text('Create Task'),
+              label: Text(l10n.createTask),
             ),
           ],
         ),

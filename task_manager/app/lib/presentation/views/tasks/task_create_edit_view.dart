@@ -106,7 +106,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
       title: Text(_isCreating ? 'Create Task' : 'Edit Task'),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.pop(),
+        onPressed: () => context.go('/?tab=0'),
       ),
       actions: [
         if (!_isCreating)
@@ -119,12 +119,16 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   }
 
   Widget _buildBody() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          if (_errorMessage != null) _buildErrorMessage(),
-          Expanded(
+    return Column(
+      children: [
+        if (_errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildErrorMessage(),
+          ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -141,13 +145,14 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
                     const SizedBox(height: 16),
                     _buildProjectField(),
                   ],
+                  const SizedBox(height: 100), // Extra space for keyboard
                 ],
               ),
             ),
           ),
-          _buildActionButtons(),
-        ],
-      ),
+        ),
+        _buildActionButtons(),
+      ],
     );
   }
 
@@ -408,7 +413,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: _isLoading ? null : () => context.pop(),
+                onPressed: _isLoading ? null : () => context.go('/?tab=0'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -503,7 +508,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
       }
       
       if (mounted) {
-        context.pop();
+        context.go('/?tab=0');
       }
     } catch (e) {
       setState(() {
@@ -560,7 +565,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
       await taskViewModel.deleteTask(widget.taskId!);
       
       if (mounted) {
-        context.pop();
+        context.go('/?tab=0');
       }
     } catch (e) {
       setState(() {

@@ -9,15 +9,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
   
   # State Management (Flutter Official Recommendation)
   provider: ^6.1.1
   
   # Navigation
-  go_router: ^12.1.3
+  go_router: ^14.0.2
   
   # HTTP Client
   dio: ^5.3.4
+  http: ^1.1.0
   
   # JSON Serialization
   json_annotation: ^4.8.1
@@ -31,7 +35,6 @@ dependencies:
   
   # Utils
   logger: ^2.0.2+1
-  intl: ^0.18.1
   uuid: ^4.2.1
   
   # Shared Package
@@ -47,11 +50,17 @@ dev_dependencies:
   json_serializable: ^6.7.1
   
   # Linting
-  flutter_lints: ^3.0.1
+  flutter_lints: ^3.0.0
+
+  # Development dependencies
+  cupertino_icons: ^1.0.6
 
 flutter:
   uses-material-design: true
   
   assets:
     - assets/images/
-    - assets/icons/ 
+    - assets/icons/
+
+  # Generate localization files
+  generate: true 

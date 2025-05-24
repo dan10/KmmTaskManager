@@ -19,6 +19,8 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _state == AuthState.authenticated && _user != null;
 
+  bool get isLoading => _state == AuthState.loading;
+
   Future<void> login(String email, String password) async {
     _setState(AuthState.loading);
     

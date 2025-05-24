@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../viewmodels/auth_viewmodel.dart';
+import '../../providers/auth_provider.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -36,11 +36,11 @@ class _RegisterViewState extends State<RegisterView> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            child: Consumer<AuthViewModel>(
-              builder: (context, authViewModel, child) {
+            child: Consumer<AuthProvider>(
+              builder: (context, authProvider, child) {
                 // Navigate to home if authenticated
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (authViewModel.isAuthenticated) {
+                  if (authProvider.isAuthenticated) {
                     context.go('/');
                   }
                 });
@@ -93,26 +93,22 @@ class _RegisterViewState extends State<RegisterView> {
                         // Name Field
                         TextField(
                           controller: _nameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Full Name',
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surface,
                           ),
                           textCapitalization: TextCapitalization.words,
-                          enabled: !authViewModel.isLoading,
+                          enabled: !authProvider.isLoading,
                         ),
                         const SizedBox(height: 16),
 
                         // Email Field
                         TextField(
                           controller: _emailController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Email',
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surface,
                           ),
                           keyboardType: TextInputType.emailAddress,
-                          enabled: !authViewModel.isLoading,
+                          enabled: !authProvider.isLoading,
                         ),
                         const SizedBox(height: 16),
 
@@ -121,8 +117,6 @@ class _RegisterViewState extends State<RegisterView> {
                           controller: _passwordController,
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surface,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -135,7 +129,7 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                           ),
                           obscureText: _obscurePassword,
-                          enabled: !authViewModel.isLoading,
+                          enabled: !authProvider.isLoading,
                         ),
                         const SizedBox(height: 16),
 
@@ -144,8 +138,6 @@ class _RegisterViewState extends State<RegisterView> {
                           controller: _confirmPasswordController,
                           decoration: InputDecoration(
                             labelText: 'Confirm Password',
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surface,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
@@ -158,12 +150,12 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                           ),
                           obscureText: _obscureConfirmPassword,
-                          enabled: !authViewModel.isLoading,
+                          enabled: !authProvider.isLoading,
                         ),
                         const SizedBox(height: 24),
 
                         // Error Message
-                        if (authViewModel.state == AuthViewState.error)
+                        if (authProvider.state == AuthState.error)
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
@@ -181,7 +173,8 @@ class _RegisterViewState extends State<RegisterView> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    authViewModel.errorMessage ?? 'An error occurred',
+                                    authProvider.errorMessage ??
+                                        'An error occurred',
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.onErrorContainer,
                                     ),
@@ -194,18 +187,20 @@ class _RegisterViewState extends State<RegisterView> {
                         // Register Button
                         SizedBox(
                           width: double.infinity,
-                          height: 48,
+                          height: 56,
                           child: ElevatedButton(
-                            onPressed: authViewModel.isLoading ? null : () async {
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : () async {
                               if (_validateForm()) {
-                                await authViewModel.register(
+                                await authProvider.register(
                                   _emailController.text,
                                   _passwordController.text,
                                   _nameController.text,
                                 );
                               }
                             },
-                            child: authViewModel.isLoading
+                            child: authProvider.isLoading
                                 ? SizedBox(
                                     width: 24,
                                     height: 24,

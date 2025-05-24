@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../viewmodels/auth_viewmodel.dart';
+import '../../providers/auth_provider.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -14,9 +14,9 @@ class ProfileView extends StatelessWidget {
         title: const Text('Profile'),
         automaticallyImplyLeading: false,
       ),
-      body: Consumer<AuthViewModel>(
-        builder: (context, authViewModel, child) {
-          final user = authViewModel.user;
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          final user = authProvider.user;
           
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -149,7 +149,7 @@ class ProfileView extends StatelessWidget {
                     onPressed: () async {
                       final shouldLogout = await _showLogoutDialog(context);
                       if (shouldLogout == true) {
-                        await authViewModel.logout();
+                        await authProvider.logout();
                         if (context.mounted) {
                           context.go('/login');
                         }

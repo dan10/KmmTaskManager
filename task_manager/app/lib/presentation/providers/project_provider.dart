@@ -31,7 +31,9 @@ class ProjectProvider extends ChangeNotifier {
           description: 'This is a sample project',
           ownerId: '1',
           createdAt: DateTime.now().subtract(const Duration(days: 7)),
-          taskCount: 5,
+          completed: 3,
+          inProgress: 1,
+          total: 5,
         ),
         Project(
           id: '2',
@@ -39,7 +41,9 @@ class ProjectProvider extends ChangeNotifier {
           description: 'Another sample project',
           ownerId: '1',
           createdAt: DateTime.now().subtract(const Duration(days: 3)),
-          taskCount: 2,
+          completed: 1,
+          inProgress: 1,
+          total: 2,
         ),
       ];
       
