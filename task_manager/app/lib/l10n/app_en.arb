@@ -493,5 +493,96 @@
   "taskCancelButton": "Cancel",
   "@taskCancelButton": {
     "description": "Cancel task button text"
+  },
+
+  "validationEmailRequired": "Email is required",
+  "@validationEmailRequired": {
+    "description": "Error message when email field is empty"
+  },
+  "validationEmailInvalid": "Please enter a valid email address",
+  "@validationEmailInvalid": {
+    "description": "Error message when email format is invalid"
+  },
+  "validationPasswordRequired": "Password is required",
+  "@validationPasswordRequired": {
+    "description": "Error message when password field is empty"
+  },
+  "validationPasswordTooShort": "Password must be at least 8 characters long",
+  "@validationPasswordTooShort": {
+    "description": "Error message when password is too short"
+  },
+  "validationPasswordTooLong": "Password must be less than 128 characters long",
+  "@validationPasswordTooLong": {
+    "description": "Error message when password is too long"
+  },
+  "validationPasswordNeedsLowercase": "Password must contain at least one lowercase letter",
+  "@validationPasswordNeedsLowercase": {
+    "description": "Error message when password lacks lowercase letters"
+  },
+  "validationPasswordNeedsUppercase": "Password must contain at least one uppercase letter",
+  "@validationPasswordNeedsUppercase": {
+    "description": "Error message when password lacks uppercase letters"
+  },
+  "validationPasswordNeedsNumber": "Password must contain at least one number",
+  "@validationPasswordNeedsNumber": {
+    "description": "Error message when password lacks numbers"
+  },
+  "validationPasswordNeedsSpecialChar": "Password must contain at least one special character",
+  "@validationPasswordNeedsSpecialChar": {
+    "description": "Error message when password lacks special characters"
+  },
+  "validationConfirmPasswordRequired": "Please confirm your password",
+  "@validationConfirmPasswordRequired": {
+    "description": "Error message when confirm password field is empty"
+  },
+  "validationPasswordsDoNotMatch": "Passwords do not match",
+  "@validationPasswordsDoNotMatch": {
+    "description": "Error message when passwords don't match"
+  },
+  "validationNameRequired": "Name is required",
+  "@validationNameRequired": {
+    "description": "Error message when name field is empty"
+  },
+  "validationNameTooShort": "Name must be at least 2 characters long",
+  "@validationNameTooShort": {
+    "description": "Error message when name is too short"
+  },
+  "validationNameTooLong": "Name must be less than 50 characters long",
+  "@validationNameTooLong": {
+    "description": "Error message when name is too long"
+  },
+  "validationNameInvalidCharacters": "Name can only contain letters, spaces, hyphens, and apostrophes",
+  "@validationNameInvalidCharacters": {
+    "description": "Error message when name contains invalid characters"
+  },
+  "validationFieldRequired": "{fieldName} is required",
+  "@validationFieldRequired": {
+    "description": "Generic error message for required fields",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Email"
+      }
+    }
+  },
+  "passwordStrengthVeryWeak": "Very Weak",
+  "@passwordStrengthVeryWeak": {
+    "description": "Password strength indicator for very weak passwords"
+  },
+  "passwordStrengthWeak": "Weak",
+  "@passwordStrengthWeak": {
+    "description": "Password strength indicator for weak passwords"
+  },
+  "passwordStrengthMedium": "Medium",
+  "@passwordStrengthMedium": {
+    "description": "Password strength indicator for medium passwords"
+  },
+  "passwordStrengthStrong": "Strong",
+  "@passwordStrengthStrong": {
+    "description": "Password strength indicator for strong passwords"
+  },
+  "passwordStrengthVeryStrong": "Very Strong",
+  "@passwordStrengthVeryStrong": {
+    "description": "Password strength indicator for very strong passwords"
   }
 } 

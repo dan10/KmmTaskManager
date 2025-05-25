@@ -114,5 +114,99 @@
 
   "taskCreateButton": "Criar",
   "taskUpdateButton": "Salvar Alterações",
-  "taskCancelButton": "Cancelar"
+  "taskCancelButton": "Cancelar",
+  "@taskCancelButton": {
+    "description": "Cancel task button text"
+  },
+
+  "validationEmailRequired": "O email é obrigatório",
+  "@validationEmailRequired": {
+    "description": "Error message when email field is empty"
+  },
+  "validationEmailInvalid": "Por favor insira um endereço de email válido",
+  "@validationEmailInvalid": {
+    "description": "Error message when email format is invalid"
+  },
+  "validationPasswordRequired": "A senha é obrigatória",
+  "@validationPasswordRequired": {
+    "description": "Error message when password field is empty"
+  },
+  "validationPasswordTooShort": "A senha deve ter pelo menos 8 caracteres",
+  "@validationPasswordTooShort": {
+    "description": "Error message when password is too short"
+  },
+  "validationPasswordTooLong": "A senha deve ter menos de 128 caracteres",
+  "@validationPasswordTooLong": {
+    "description": "Error message when password is too long"
+  },
+  "validationPasswordNeedsLowercase": "A senha deve conter pelo menos uma letra minúscula",
+  "@validationPasswordNeedsLowercase": {
+    "description": "Error message when password lacks lowercase letters"
+  },
+  "validationPasswordNeedsUppercase": "A senha deve conter pelo menos uma letra maiúscula",
+  "@validationPasswordNeedsUppercase": {
+    "description": "Error message when password lacks uppercase letters"
+  },
+  "validationPasswordNeedsNumber": "A senha deve conter pelo menos um número",
+  "@validationPasswordNeedsNumber": {
+    "description": "Error message when password lacks numbers"
+  },
+  "validationPasswordNeedsSpecialChar": "A senha deve conter pelo menos um caractere especial",
+  "@validationPasswordNeedsSpecialChar": {
+    "description": "Error message when password lacks special characters"
+  },
+  "validationConfirmPasswordRequired": "Por favor confirme sua senha",
+  "@validationConfirmPasswordRequired": {
+    "description": "Error message when confirm password field is empty"
+  },
+  "validationPasswordsDoNotMatch": "As senhas não coincidem",
+  "@validationPasswordsDoNotMatch": {
+    "description": "Error message when passwords don't match"
+  },
+  "validationNameRequired": "O nome é obrigatório",
+  "@validationNameRequired": {
+    "description": "Error message when name field is empty"
+  },
+  "validationNameTooShort": "O nome deve ter pelo menos 2 caracteres",
+  "@validationNameTooShort": {
+    "description": "Error message when name is too short"
+  },
+  "validationNameTooLong": "O nome deve ter menos de 50 caracteres",
+  "@validationNameTooLong": {
+    "description": "Error message when name is too long"
+  },
+  "validationNameInvalidCharacters": "O nome pode conter apenas letras, espaços, hífens e apostrofes",
+  "@validationNameInvalidCharacters": {
+    "description": "Error message when name contains invalid characters"
+  },
+  "validationFieldRequired": "{fieldName} é obrigatório",
+  "@validationFieldRequired": {
+    "description": "Generic error message for required fields",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Email"
+      }
+    }
+  },
+  "passwordStrengthVeryWeak": "Muito Fraca",
+  "@passwordStrengthVeryWeak": {
+    "description": "Password strength indicator for very weak passwords"
+  },
+  "passwordStrengthWeak": "Fraca",
+  "@passwordStrengthWeak": {
+    "description": "Password strength indicator for weak passwords"
+  },
+  "passwordStrengthMedium": "Média",
+  "@passwordStrengthMedium": {
+    "description": "Password strength indicator for medium passwords"
+  },
+  "passwordStrengthStrong": "Forte",
+  "@passwordStrengthStrong": {
+    "description": "Password strength indicator for strong passwords"
+  },
+  "passwordStrengthVeryStrong": "Muito Forte",
+  "@passwordStrengthVeryStrong": {
+    "description": "Password strength indicator for very strong passwords"
+  }
 } 

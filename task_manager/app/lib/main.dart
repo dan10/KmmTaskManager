@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'core/di/providers.dart';
 import 'navigation/app_router.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/task_provider.dart';
@@ -12,7 +13,7 @@ import 'presentation/viewmodels/project_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // TODO: Initialize services when dependencies are available
   // await StorageService.instance.init();
   // await ApiService.instance.init();
@@ -27,6 +28,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Dependency injection providers
+        ...DependencyProviders.providers,
+
+        // Legacy providers (keeping for backward compatibility)
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => ProjectProvider()),

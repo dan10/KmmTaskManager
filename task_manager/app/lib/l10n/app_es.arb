@@ -114,5 +114,99 @@
 
   "taskCreateButton": "Crear",
   "taskUpdateButton": "Guardar Cambios",
-  "taskCancelButton": "Cancelar"
+  "taskCancelButton": "Cancelar",
+  "@taskCancelButton": {
+    "description": "Cancel task button text"
+  },
+
+  "validationEmailRequired": "El correo electrónico es obligatorio",
+  "@validationEmailRequired": {
+    "description": "Error message when email field is empty"
+  },
+  "validationEmailInvalid": "Por favor ingrese una dirección de correo electrónico válida",
+  "@validationEmailInvalid": {
+    "description": "Error message when email format is invalid"
+  },
+  "validationPasswordRequired": "La contraseña es obligatoria",
+  "@validationPasswordRequired": {
+    "description": "Error message when password field is empty"
+  },
+  "validationPasswordTooShort": "La contraseña debe tener al menos 8 caracteres",
+  "@validationPasswordTooShort": {
+    "description": "Error message when password is too short"
+  },
+  "validationPasswordTooLong": "La contraseña debe tener menos de 128 caracteres",
+  "@validationPasswordTooLong": {
+    "description": "Error message when password is too long"
+  },
+  "validationPasswordNeedsLowercase": "La contraseña debe contener al menos una letra minúscula",
+  "@validationPasswordNeedsLowercase": {
+    "description": "Error message when password lacks lowercase letters"
+  },
+  "validationPasswordNeedsUppercase": "La contraseña debe contener al menos una letra mayúscula",
+  "@validationPasswordNeedsUppercase": {
+    "description": "Error message when password lacks uppercase letters"
+  },
+  "validationPasswordNeedsNumber": "La contraseña debe contener al menos un número",
+  "@validationPasswordNeedsNumber": {
+    "description": "Error message when password lacks numbers"
+  },
+  "validationPasswordNeedsSpecialChar": "La contraseña debe contener al menos un carácter especial",
+  "@validationPasswordNeedsSpecialChar": {
+    "description": "Error message when password lacks special characters"
+  },
+  "validationConfirmPasswordRequired": "Por favor confirme su contraseña",
+  "@validationConfirmPasswordRequired": {
+    "description": "Error message when confirm password field is empty"
+  },
+  "validationPasswordsDoNotMatch": "Las contraseñas no coinciden",
+  "@validationPasswordsDoNotMatch": {
+    "description": "Error message when passwords don't match"
+  },
+  "validationNameRequired": "El nombre es obligatorio",
+  "@validationNameRequired": {
+    "description": "Error message when name field is empty"
+  },
+  "validationNameTooShort": "El nombre debe tener al menos 2 caracteres",
+  "@validationNameTooShort": {
+    "description": "Error message when name is too short"
+  },
+  "validationNameTooLong": "El nombre debe tener menos de 50 caracteres",
+  "@validationNameTooLong": {
+    "description": "Error message when name is too long"
+  },
+  "validationNameInvalidCharacters": "El nombre solo puede contener letras, espacios, guiones y apostrofes",
+  "@validationNameInvalidCharacters": {
+    "description": "Error message when name contains invalid characters"
+  },
+  "validationFieldRequired": "{fieldName} es obligatorio",
+  "@validationFieldRequired": {
+    "description": "Generic error message for required fields",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Correo electrónico"
+      }
+    }
+  },
+  "passwordStrengthVeryWeak": "Muy Débil",
+  "@passwordStrengthVeryWeak": {
+    "description": "Password strength indicator for very weak passwords"
+  },
+  "passwordStrengthWeak": "Débil",
+  "@passwordStrengthWeak": {
+    "description": "Password strength indicator for weak passwords"
+  },
+  "passwordStrengthMedium": "Medio",
+  "@passwordStrengthMedium": {
+    "description": "Password strength indicator for medium passwords"
+  },
+  "passwordStrengthStrong": "Fuerte",
+  "@passwordStrengthStrong": {
+    "description": "Password strength indicator for strong passwords"
+  },
+  "passwordStrengthVeryStrong": "Muy Fuerte",
+  "@passwordStrengthVeryStrong": {
+    "description": "Password strength indicator for very strong passwords"
+  }
 } 

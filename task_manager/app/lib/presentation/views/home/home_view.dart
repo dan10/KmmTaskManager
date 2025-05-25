@@ -58,7 +58,8 @@ class _HomeViewState extends State<HomeView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Welcome back, ${authViewModel.user?.name ?? 'User'}!',
+                                    'Welcome back, ${authViewModel.currentUser
+                                        ?.displayName ?? 'User'}!',
                                     style: Theme.of(context).textTheme.titleLarge,
                                   ),
                                   const SizedBox(height: 4),

@@ -31,7 +31,8 @@ class ProfileView extends StatelessWidget {
                         radius: 60,
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         child: Text(
-                          user?.name.substring(0, 1).toUpperCase() ?? 'U',
+                          user?.displayName.substring(0, 1).toUpperCase() ??
+                              'U',
                           style: TextStyle(
                             fontSize: 48,
                             fontWeight: FontWeight.bold,
@@ -41,7 +42,7 @@ class ProfileView extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        user?.name ?? 'Unknown User',
+                        user?.displayName ?? 'Unknown User',
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -71,7 +72,7 @@ class ProfileView extends StatelessWidget {
                   context,
                   icon: Icons.person,
                   title: 'Full Name',
-                  value: user?.name ?? 'Not provided',
+                  value: user?.displayName ?? 'Not provided',
                 ),
                 const SizedBox(height: 12),
                 
@@ -85,11 +86,9 @@ class ProfileView extends StatelessWidget {
                 
                 _buildInfoCard(
                   context,
-                  icon: Icons.calendar_today,
-                  title: 'Member Since',
-                  value: user?.createdAt != null 
-                      ? _formatDate(user!.createdAt!)
-                      : 'Unknown',
+                  icon: Icons.account_circle,
+                  title: 'User ID',
+                  value: user?.id ?? 'Not provided',
                 ),
                 const SizedBox(height: 32),
 

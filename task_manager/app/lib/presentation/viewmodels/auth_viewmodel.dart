@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/repositories/auth_repository.dart';
+import 'package:task_manager_shared/models.dart';
+import '../../data/repositories/auth_repository.dart';
 
-enum AuthViewState {
+enum AuthState {
   initial,
   loading,
   authenticated,
@@ -10,125 +10,126 @@ enum AuthViewState {
   error,
 }
 
+/// Main authentication ViewModel for session management
+/// Handles overall auth state, logout, and session initialization
 class AuthViewModel extends ChangeNotifier {
-  // TODO: Inject repository when data layer is implemented
-  // final AuthRepository _authRepository;
-  
-  AuthViewState _state = AuthViewState.initial;
-  User? _user;
+  AuthRepository? _authRepository;
+
+  AuthViewModel(this._authRepository);
+
+  // Update repository for Provider dependency injection
+  void updateRepository(AuthRepository authRepository) {
+    _authRepository = authRepository;
+  }
+
+  // State
+  AuthState _state = AuthState.initial;
+  UserPublicResponseDto? _currentUser;
   String? _errorMessage;
+  bool _isLoading = false;
 
-  AuthViewState get state => _state;
-  User? get user => _user;
+  // Getters
+  AuthState get state => _state;
+
+  UserPublicResponseDto? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
-  bool get isAuthenticated => _state == AuthViewState.authenticated && _user != null;
-  bool get isLoading => _state == AuthViewState.loading;
 
-  // TODO: Constructor will accept repository when implemented
-  // AuthViewModel(this._authRepository);
+  bool get isLoading => _isLoading;
 
-  Future<void> login(String email, String password) async {
-    if (_isFormValid(email, password)) {
-      _setState(AuthViewState.loading);
-      
-      try {
-        // TODO: Replace with actual repository call
-        await _simulateLogin(email, password);
-      } catch (e) {
-        _setError(e.toString());
+  bool get isAuthenticated => _state == AuthState.authenticated;
+
+  // Initialize auth state (check if user is already logged in)
+  Future<void> initialize() async {
+    if (_authRepository == null) return;
+
+    try {
+      _setLoading(true);
+
+      final isLoggedIn = await _authRepository!.isLoggedIn();
+      if (isLoggedIn) {
+        _currentUser = await _authRepository!.getCurrentUser();
+        _setState(AuthState.authenticated);
+      } else {
+        _setState(AuthState.unauthenticated);
       }
-    } else {
-      _setError('Please fill in all fields');
+    } catch (e) {
+      _setError('Failed to initialize authentication: ${e.toString()}');
+    } finally {
+      _setLoading(false);
     }
   }
 
-  Future<void> register(String email, String password, String name) async {
-    if (_isRegistrationFormValid(email, password, name)) {
-      _setState(AuthViewState.loading);
-      
-      try {
-        // TODO: Replace with actual repository call
-        await _simulateRegister(email, password, name);
-      } catch (e) {
-        _setError(e.toString());
-      }
-    } else {
-      _setError('Please fill in all fields');
-    }
+  // Set authenticated state (called after successful login/register)
+  void setAuthenticated(UserPublicResponseDto user) {
+    _currentUser = user;
+    _setState(AuthState.authenticated);
   }
 
+  // Logout
   Future<void> logout() async {
-    _setState(AuthViewState.loading);
+    if (_authRepository == null) return;
+
+    try {
+      _setLoading(true);
+
+      await _authRepository!.logout();
+      _currentUser = null;
+      _setState(AuthState.unauthenticated);
+    } catch (e) {
+      _setError('Logout failed: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Get current token
+  Future<String?> getToken() async {
+    if (_authRepository == null) return null;
+
+    try {
+      return await _authRepository!.getStoredToken();
+    } catch (e) {
+      // Log error but don't throw - return null instead
+      return null;
+    }
+  }
+
+  // Refresh current user data
+  Future<void> refreshUser() async {
+    if (_authRepository == null) return;
     
     try {
-      // TODO: Replace with actual repository call
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      _user = null;
-      _setState(AuthViewState.unauthenticated);
+      _currentUser = await _authRepository!.getCurrentUser();
+      notifyListeners();
     } catch (e) {
-      _setError(e.toString());
+      _setError('Failed to refresh user data: ${e.toString()}');
     }
   }
 
-  // TODO: Remove simulation methods when repository is implemented
-  Future<void> _simulateLogin(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (email == 'test@example.com' && password == 'password') {
-      _user = const User(
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-      );
-      _setState(AuthViewState.authenticated);
-    } else {
-      throw Exception('Invalid credentials');
-    }
+  // Clear error
+  void clearError() {
+    _clearError();
   }
 
-  Future<void> _simulateRegister(String email, String password, String name) async {
-    await Future.delayed(const Duration(seconds: 1));
-    
-    _user = User(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      email: email,
-      name: name,
-    );
-    _setState(AuthViewState.authenticated);
-  }
-
-  bool _isFormValid(String email, String password) {
-    return email.isNotEmpty && password.isNotEmpty && _isValidEmail(email);
-  }
-
-  bool _isRegistrationFormValid(String email, String password, String name) {
-    return email.isNotEmpty && 
-           password.isNotEmpty && 
-           name.isNotEmpty && 
-           _isValidEmail(email) &&
-           password.length >= 6;
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-  }
-
-  void _setState(AuthViewState newState) {
+  // Private helper methods
+  void _setState(AuthState newState) {
     _state = newState;
-    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void _setLoading(bool loading) {
+    _isLoading = loading;
     notifyListeners();
   }
 
   void _setError(String error) {
-    _state = AuthViewState.error;
     _errorMessage = error;
+    _state = AuthState.error;
     notifyListeners();
   }
 
-  void clearError() {
-    if (_state == AuthViewState.error) {
-      _setState(_user != null ? AuthViewState.authenticated : AuthViewState.unauthenticated);
-    }
+  void _clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 } 

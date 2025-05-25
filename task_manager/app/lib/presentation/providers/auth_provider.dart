@@ -1,95 +1,65 @@
-import 'package:flutter/foundation.dart';
-import '../../domain/entities/user.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_manager_shared/models.dart';
+import '../viewmodels/auth_viewmodel.dart';
 
-enum AuthState {
-  initial,
-  loading,
-  authenticated,
-  unauthenticated,
-  error,
-}
+// Re-export the AuthState from the view model
+export '../viewmodels/auth_viewmodel.dart' show AuthState;
 
+/// Legacy AuthProvider for backward compatibility
+/// Wraps the AuthViewModel for session management only
+/// Login/Register functionality is now handled by separate ViewModels
 class AuthProvider extends ChangeNotifier {
-  AuthState _state = AuthState.initial;
-  User? _user;
-  String? _errorMessage;
+  AuthViewModel? _authViewModel;
 
-  AuthState get state => _state;
-  User? get user => _user;
-  String? get errorMessage => _errorMessage;
-  bool get isAuthenticated => _state == AuthState.authenticated && _user != null;
+  // Initialize with context to get AuthViewModel from Provider
+  void initialize(BuildContext context) {
+    if (_authViewModel != null) return;
 
-  bool get isLoading => _state == AuthState.loading;
-
-  Future<void> login(String email, String password) async {
-    _setState(AuthState.loading);
-    
-    try {
-      // TODO: Implement actual login with repository
-      await Future.delayed(const Duration(seconds: 1)); // Simulate API call
-      
-      if (email == 'test@example.com' && password == 'password') {
-        _user = const User(
-          id: '1',
-          email: 'test@example.com',
-          name: 'Test User',
-        );
-        _setState(AuthState.authenticated);
-      } else {
-        _setError('Invalid credentials');
-      }
-    } catch (e) {
-      _setError(e.toString());
-    }
+    _authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    // Listen to changes in the auth view model
+    _authViewModel!.addListener(_onAuthStateChanged);
+    // Initialize the authentication state
+    _authViewModel!.initialize();
   }
 
-  Future<void> register(String email, String password, String name) async {
-    _setState(AuthState.loading);
-    
-    try {
-      // TODO: Implement actual registration with repository
-      await Future.delayed(const Duration(seconds: 1)); // Simulate API call
-      
-      _user = User(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        email: email,
-        name: name,
-      );
-      _setState(AuthState.authenticated);
-    } catch (e) {
-      _setError(e.toString());
-    }
-  }
+  // Delegate properties to the view model
+  AuthState get state => _authViewModel?.state ?? AuthState.initial;
 
+  UserPublicResponseDto? get user => _authViewModel?.currentUser;
+
+  String? get errorMessage => _authViewModel?.errorMessage;
+
+  bool get isAuthenticated => _authViewModel?.isAuthenticated ?? false;
+
+  bool get isLoading => _authViewModel?.isLoading ?? false;
+
+  // Session management methods only
   Future<void> logout() async {
-    _setState(AuthState.loading);
-    
-    try {
-      // TODO: Implement actual logout with repository
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      _user = null;
-      _setState(AuthState.unauthenticated);
-    } catch (e) {
-      _setError(e.toString());
-    }
+    await _authViewModel?.logout();
   }
 
-  void _setState(AuthState newState) {
-    _state = newState;
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  void _setError(String error) {
-    _state = AuthState.error;
-    _errorMessage = error;
-    notifyListeners();
+  Future<String?> getToken() async {
+    return await _authViewModel?.getToken();
   }
 
   void clearError() {
-    if (_state == AuthState.error) {
-      _setState(_user != null ? AuthState.authenticated : AuthState.unauthenticated);
-    }
+    _authViewModel?.clearError();
+  }
+
+  // Set authenticated state (called by login/register ViewModels)
+  void setAuthenticated(UserPublicResponseDto user) {
+    _authViewModel?.setAuthenticated(user);
+  }
+
+  // Listen to auth view model changes and notify listeners
+  void _onAuthStateChanged() {
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authViewModel?.removeListener(_onAuthStateChanged);
+    super.dispose();
   }
 } 
