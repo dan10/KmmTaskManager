@@ -136,5 +136,10 @@
   "passwordStrengthWeak": "Fraca",
   "passwordStrengthMedium": "Média",
   "passwordStrengthStrong": "Forte",
-  "passwordStrengthVeryStrong": "Muito Forte"
+  "passwordStrengthVeryStrong": "Muito Forte",
+
+  "taskProjectHint": "Selecione um projeto",
+  "saveChanges": "Salvar Alterações",
+  "taskCreated": "Tarefa criada com sucesso",
+  "taskUpdated": "Tarefa atualizada com sucesso"
 } 

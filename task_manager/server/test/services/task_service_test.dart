@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../../lib/src/services/task_service.dart';
 import '../../lib/src/repositories/task_repository.dart';
 import '../../lib/src/exceptions/custom_exceptions.dart';
@@ -83,7 +83,7 @@ void main() {
     group('createTask', () {
       test('should create a new task successfully', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'New Task',
           description: 'Task Description',
@@ -108,7 +108,7 @@ void main() {
 
       test('should throw exception for invalid project', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'New Task',
           description: 'Task Description',
@@ -129,7 +129,7 @@ void main() {
     group('getTaskById', () {
       test('should return task when user has access', () async {
         // Arrange - Create a task first
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Test Task',
           description: 'Test Description',
@@ -153,7 +153,7 @@ void main() {
 
       test('should return task when user is assignee', () async {
         // Arrange - Create a task assigned to user-2
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Assigned Task',
           description: 'Test Description',
@@ -186,7 +186,7 @@ void main() {
     group('getTasks', () {
       test('should return tasks filtered by project', () async {
         // Arrange - Create multiple tasks
-        const task1 = Task(
+        const task1 = TaskDto(
           id: 'task-1',
           title: 'Project Task 1',
           description: 'Description 1',
@@ -195,7 +195,7 @@ void main() {
           projectId: 'project-1',
           creatorId: 'user-1',
         );
-        const task2 = Task(
+        const task2 = TaskDto(
           id: 'task-2',
           title: 'Project Task 2',
           description: 'Description 2',
@@ -224,7 +224,7 @@ void main() {
 
       test('should return tasks filtered by assignee', () async {
         // Arrange
-        const task1 = Task(
+        const task1 = TaskDto(
           id: 'task-1',
           title: 'Assigned Task',
           description: 'Description 1',
@@ -234,7 +234,7 @@ void main() {
           creatorId: 'user-1',
           assigneeId: 'user-2',
         );
-        const task2 = Task(
+        const task2 = TaskDto(
           id: 'task-2',
           title: 'Unassigned Task',
           description: 'Description 2',
@@ -262,7 +262,7 @@ void main() {
 
       test('should support text search in title and description', () async {
         // Arrange
-        const task1 = Task(
+        const task1 = TaskDto(
           id: 'task-1',
           title: 'Important Bug Fix',
           description: 'Fix critical issue',
@@ -271,7 +271,7 @@ void main() {
           projectId: 'project-1',
           creatorId: 'user-1',
         );
-        const task2 = Task(
+        const task2 = TaskDto(
           id: 'task-2',
           title: 'Feature Development',
           description: 'Add new feature',
@@ -301,7 +301,7 @@ void main() {
     group('updateTask', () {
       test('should update task when user is creator', () async {
         // Arrange - Create original task
-        const originalTask = Task(
+        const originalTask = TaskDto(
           id: 'task-1',
           title: 'Original Title',
           description: 'Original Description',
@@ -312,7 +312,7 @@ void main() {
         );
         await taskRepository.create(originalTask);
 
-        const updatedTask = Task(
+        const updatedTask = TaskDto(
           id: 'task-1',
           title: 'Updated Title',
           description: 'Updated Description',
@@ -336,7 +336,7 @@ void main() {
 
       test('should throw ForbiddenException when user is not creator', () async {
         // Arrange - Create task with user-1 as creator
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Original Title',
           description: 'Original Description',
@@ -347,7 +347,7 @@ void main() {
         );
         await taskRepository.create(task);
 
-        const updatedTask = Task(
+        const updatedTask = TaskDto(
           id: 'task-1',
           title: 'Hacked Title',
           description: 'Updated Description',
@@ -368,7 +368,7 @@ void main() {
     group('deleteTask', () {
       test('should delete task when user is creator', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Task to Delete',
           description: 'Description',
@@ -389,7 +389,7 @@ void main() {
 
       test('should throw ForbiddenException when user is not creator', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Task to Delete',
           description: 'Description',
@@ -411,7 +411,7 @@ void main() {
     group('assignTask', () {
       test('should assign task to user successfully', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Task to Assign',
           description: 'Description',
@@ -434,7 +434,7 @@ void main() {
     group('changeTaskStatus', () {
       test('should change task status successfully', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Task Status Change',
           description: 'Description',

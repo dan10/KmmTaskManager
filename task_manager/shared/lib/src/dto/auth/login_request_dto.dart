@@ -1,26 +1,20 @@
-class LoginRequestDto {
-  final String email;
-  final String password;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const LoginRequestDto({
-    required this.email,
-    required this.password,
-  });
+part 'login_request_dto.freezed.dart';
+part 'login_request_dto.g.dart';
 
-  factory LoginRequestDto.fromJson(Map<String, dynamic> json) {
-    return LoginRequestDto(
-      email: json['email'] as String,
-      password: json['password'] as String,
-    );
-  }
+@freezed
+abstract class LoginRequestDto with _$LoginRequestDto {
+  const factory LoginRequestDto({
+    required String email,
+    required String password,
+  }) = _LoginRequestDto;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'email': email,
-      'password': password,
-    };
-  }
+  factory LoginRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$LoginRequestDtoFromJson(json);
+}
 
+extension LoginRequestDtoExtension on LoginRequestDto {
   Map<String, String> validate() {
     final details = <String, String>{};
 

@@ -6,9 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'core/di/providers.dart';
 import 'navigation/app_router.dart';
 import 'presentation/providers/auth_provider.dart';
-import 'presentation/providers/task_provider.dart';
 import 'presentation/providers/project_provider.dart';
-import 'presentation/viewmodels/task_viewmodel.dart';
 import 'presentation/viewmodels/project_viewmodel.dart';
 
 void main() async {
@@ -33,9 +31,7 @@ class MyApp extends StatelessWidget {
 
         // Legacy providers (keeping for backward compatibility)
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
-        ChangeNotifierProvider(create: (_) => TaskViewModel()),
         ChangeNotifierProvider(create: (_) => ProjectViewModel()),
       ],
       child: MaterialApp.router(

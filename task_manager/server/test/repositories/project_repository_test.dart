@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../../lib/src/repositories/project_repository.dart';
 import '../../lib/src/repositories/auth_repository.dart';
 import '../helpers/test_base.dart';
@@ -40,7 +40,7 @@ void main() {
   tearDownAll(() async {
     await testBase.tearDown();
   });
-
+  
   setUp(() async {
     // Clear projects and project_members before each test
     await testBase.connection.execute('DELETE FROM project_members');

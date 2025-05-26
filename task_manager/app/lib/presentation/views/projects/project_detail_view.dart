@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:task_manager_shared/models.dart';
 
 import '../../viewmodels/project_viewmodel.dart';
-import '../../viewmodels/task_viewmodel.dart';
-import '../../../domain/entities/task.dart';
+import '../../viewmodels/task_list_viewmodel.dart';
 
 class ProjectDetailView extends StatefulWidget {
   final String projectId;
@@ -23,8 +23,8 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
-      taskViewModel.loadTasks(projectId: widget.projectId);
+      final taskListViewModel = Provider.of<TaskListViewModel>(context, listen: false);
+      taskListViewModel.loadTasks(projectId: widget.projectId);
     });
   }
 
@@ -101,10 +101,10 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Consumer<TaskViewModel>(
-                        builder: (context, taskViewModel, child) {
-                          final projectTasks = taskViewModel.getTasksForProject(widget.projectId);
-                          final completedTasks = projectTasks.where((task) => task.status == TaskStatus.completed).length;
+                      Consumer<TaskListViewModel>(
+                        builder: (context, taskListViewModel, child) {
+                          final projectTasks = taskListViewModel.tasks.where((task) => task.projectId == widget.projectId).toList();
+                          final completedTasks = projectTasks.where((task) => task.status == TaskStatus.done).length;
                           
                           return Row(
                             children: [
@@ -132,13 +132,13 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
 
               // Tasks Section
               Expanded(
-                child: Consumer<TaskViewModel>(
-                  builder: (context, taskViewModel, child) {
-                    if (taskViewModel.isLoading) {
+                child: Consumer<TaskListViewModel>(
+                  builder: (context, taskListViewModel, child) {
+                    if (taskListViewModel.isLoading) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    final projectTasks = taskViewModel.getTasksForProject(widget.projectId);
+                    final projectTasks = taskListViewModel.tasks.where((task) => task.projectId == widget.projectId).toList();
 
                     if (projectTasks.isEmpty) {
                       return Center(
@@ -183,8 +183,8 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (task.description != null)
-                                  Text(task.description!),
+                                if (task.description.isNotEmpty)
+                                  Text(task.description),
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
@@ -194,7 +194,7 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
                                       Text(
                                         'Due: ${_formatDate(task.dueDate!)}',
                                         style: TextStyle(
-                                          color: task.isOverdue ? Colors.red : Colors.grey[600],
+                                          color: _isOverdue(task) ? Colors.red : Colors.grey[600],
                                           fontSize: 12,
                                         ),
                                       ),
@@ -204,12 +204,12 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
                             ),
                             trailing: PopupMenuButton<String>(
                               onSelected: (value) {
-                                if (value == 'complete' && task.status != TaskStatus.completed) {
-                                  taskViewModel.updateTaskStatus(task.id, TaskStatus.completed);
+                                if (value == 'complete' && task.status != TaskStatus.done) {
+                                  taskListViewModel.changeTaskStatus(task.id, TaskStatus.done);
                                 } else if (value == 'progress' && task.status != TaskStatus.inProgress) {
-                                  taskViewModel.updateTaskStatus(task.id, TaskStatus.inProgress);
+                                  taskListViewModel.changeTaskStatus(task.id, TaskStatus.inProgress);
                                 } else if (value == 'todo' && task.status != TaskStatus.todo) {
-                                  taskViewModel.updateTaskStatus(task.id, TaskStatus.todo);
+                                  taskListViewModel.changeTaskStatus(task.id, TaskStatus.todo);
                                 }
                               },
                               itemBuilder: (context) => [
@@ -235,7 +235,7 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
                                       ],
                                     ),
                                   ),
-                                if (task.status != TaskStatus.completed)
+                                if (task.status != TaskStatus.done)
                                   const PopupMenuItem(
                                     value: 'complete',
                                     child: Row(
@@ -276,27 +276,28 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
     );
   }
 
-  Widget _buildPriorityChip(TaskPriority priority) {
+  Widget _buildPriorityChip(Priority priority) {
     Color color;
     String text;
     
     switch (priority) {
-      case TaskPriority.high:
+      case Priority.high:
         color = Colors.red;
-        text = 'High';
+        text = 'High Priority';
         break;
-      case TaskPriority.medium:
+      case Priority.medium:
         color = Colors.orange;
-        text = 'Medium';
+        text = 'Medium Priority';
         break;
-      case TaskPriority.low:
+      case Priority.low:
         color = Colors.green;
-        text = 'Low';
+        text = 'Low Priority';
         break;
     }
 
     return Chip(
-      label: Text(text, style: const TextStyle(fontSize: 10)),
+      avatar: Icon(Icons.flag, size: 16, color: color),
+      label: Text(text),
       backgroundColor: color.withOpacity(0.1),
       side: BorderSide(color: color),
     );
@@ -308,7 +309,7 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
         return Colors.grey;
       case TaskStatus.inProgress:
         return Colors.blue;
-      case TaskStatus.completed:
+      case TaskStatus.done:
         return Colors.green;
     }
   }
@@ -319,7 +320,7 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
         return Icons.radio_button_unchecked;
       case TaskStatus.inProgress:
         return Icons.play_circle;
-      case TaskStatus.completed:
+      case TaskStatus.done:
         return Icons.check_circle;
     }
   }
@@ -328,10 +329,15 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
+  bool _isOverdue(TaskDto task) {
+    if (task.dueDate == null) return false;
+    return task.dueDate!.isBefore(DateTime.now()) && task.status != TaskStatus.done;
+  }
+
   void _showCreateTaskDialog(BuildContext context) {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
-    TaskPriority selectedPriority = TaskPriority.medium;
+    Priority selectedPriority = Priority.medium;
 
     showDialog(
       context: context,
@@ -358,10 +364,10 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<TaskPriority>(
+              DropdownButtonFormField<Priority>(
                 value: selectedPriority,
                 decoration: const InputDecoration(labelText: 'Priority'),
-                items: TaskPriority.values.map((priority) {
+                items: Priority.values.map((priority) {
                   return DropdownMenuItem(
                     value: priority,
                     child: Text(priority.name.toUpperCase()),
@@ -385,12 +391,13 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
             ElevatedButton(
               onPressed: () {
                 if (titleController.text.isNotEmpty) {
-                  Provider.of<TaskViewModel>(context, listen: false).createTask(
+                  final request = TaskCreateRequestDto(
                     title: titleController.text,
-                    description: descriptionController.text.isEmpty ? null : descriptionController.text,
+                    description: descriptionController.text.isEmpty ? '' : descriptionController.text,
                     priority: selectedPriority,
                     projectId: widget.projectId,
                   );
+                  Provider.of<TaskListViewModel>(context, listen: false).createTask(request);
                   Navigator.of(context).pop();
                 }
               },

@@ -1,31 +1,29 @@
-class CreateProjectRequestDto {
-  final String name;
-  final String? description;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const CreateProjectRequestDto({
-    required this.name,
-    this.description,
-  });
+part 'create_project_request_dto.freezed.dart';
+part 'create_project_request_dto.g.dart';
 
-  factory CreateProjectRequestDto.fromJson(Map<String, dynamic> json) {
-    return CreateProjectRequestDto(
-      name: json['name'] as String,
-      description: json['description'] as String?,
-    );
-  }
+@freezed
+abstract class CreateProjectRequestDto with _$CreateProjectRequestDto {
+  const factory CreateProjectRequestDto({
+    required String name,
+    String? description,
+  }) = _CreateProjectRequestDto;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'description': description,
-    };
-  }
+  factory CreateProjectRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$CreateProjectRequestDtoFromJson(json);
+}
 
+extension CreateProjectRequestDtoExtension on CreateProjectRequestDto {
   Map<String, String> validate() {
     final details = <String, String>{};
 
-    if (name.isEmpty) {
+    if (name.trim().isEmpty) {
       details['name'] = 'Project name cannot be empty.';
+    } else if (name.trim().length < 3) {
+      details['name'] = 'Project name must be at least 3 characters long.';
+    } else if (name.trim().length > 100) {
+      details['name'] = 'Project name cannot exceed 100 characters.';
     }
 
     return details;

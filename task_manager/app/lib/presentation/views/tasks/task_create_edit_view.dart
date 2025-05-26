@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager_shared/models.dart';
 
-import '../../viewmodels/task_viewmodel.dart';
+import '../../viewmodels/task_create_edit_viewmodel.dart';
 import '../../viewmodels/project_viewmodel.dart';
-import '../../../domain/entities/task.dart';
 
 class TaskCreateEditView extends StatefulWidget {
   final String? taskId;
@@ -26,26 +26,26 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   
-  TaskPriority _selectedPriority = TaskPriority.medium;
+  Priority _selectedPriority = Priority.medium;
   DateTime? _selectedDueDate;
   String? _selectedProjectId;
-  bool _isLoading = false;
-  String? _errorMessage;
-  Task? _currentTask;
+  String? _selectedAssigneeId;
 
   bool get _isCreating => widget.taskId == null;
-  bool get _isButtonEnabled => _titleController.text.isNotEmpty && !_isLoading && _selectedProjectId != null;
 
   @override
   void initState() {
     super.initState();
     _selectedProjectId = widget.projectId;
     
-    if (!_isCreating) {
-      _loadTask();
-    }
-    
-    _titleController.addListener(_updateButtonState);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewModel = Provider.of<TaskCreateEditViewModel>(context, listen: false);
+      if (_isCreating) {
+        viewModel.initializeForCreate(projectId: widget.projectId);
+      } else {
+        viewModel.initializeForEdit(widget.taskId!);
+      }
+    });
   }
 
   @override
@@ -55,416 +55,333 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
     super.dispose();
   }
 
-  void _updateButtonState() {
-    setState(() {});
-  }
-
-  void _loadTask() async {
-    if (widget.taskId == null) return;
-
-    final l10n = AppLocalizations.of(context)!;
-    
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
-      final task = taskViewModel.getTask(widget.taskId!);
-      
-      if (task != null) {
-        setState(() {
-          _currentTask = task;
-          _titleController.text = task.title;
-          _descriptionController.text = task.description ?? '';
-          _selectedPriority = task.priority;
-          _selectedDueDate = task.dueDate;
-          _selectedProjectId = task.projectId;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = l10n.taskLoadError(e.toString());
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: _isLoading && _isCreating
-          ? const Center(child: CircularProgressIndicator())
-          : _buildBody(),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
     final l10n = AppLocalizations.of(context)!;
     
-    return AppBar(
-      title: Text(_isCreating ? l10n.createTask : l10n.editTask),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.go('/?tab=0'),
-      ),
-      actions: [
-        if (!_isCreating)
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: _showDeleteConfirmation,
+    return Consumer<TaskCreateEditViewModel>(
+      builder: (context, viewModel, child) {
+        // Update form fields when task is loaded for editing
+        if (viewModel.isEditing && viewModel.task != null) {
+          _updateFormFromViewModel(viewModel);
+        }
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF1F5F9),
+          appBar: AppBar(
+            title: Text(_isCreating ? l10n.createTask : l10n.editTask),
+            backgroundColor: const Color(0xFFF1F5F9),
+            elevation: 0,
+            actions: [
+              if (!_isCreating)
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _showDeleteConfirmation(context, viewModel),
+                ),
+            ],
           ),
-      ],
+          body: _buildBody(context, viewModel, l10n),
+        );
+      },
     );
   }
 
-  Widget _buildBody() {
-    return Column(
-      children: [
-        if (_errorMessage != null)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _buildErrorMessage(),
-          ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTitleField(),
-                  const SizedBox(height: 16),
-                  _buildDescriptionField(),
-                  const SizedBox(height: 16),
-                  _buildPriorityField(),
-                  const SizedBox(height: 16),
-                  _buildDueDateField(),
-                  if (_isCreating) ...[
-                    const SizedBox(height: 16),
-                    _buildProjectField(),
-                  ],
-                  const SizedBox(height: 100), // Extra space for keyboard
-                ],
-              ),
-            ),
-          ),
-        ),
-        _buildActionButtons(),
-      ],
-    );
-  }
+  Widget _buildBody(BuildContext context, TaskCreateEditViewModel viewModel, AppLocalizations l10n) {
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-  Widget _buildErrorMessage() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        _errorMessage!,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onErrorContainer,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitleField() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.taskTitleLabel,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 4),
-        TextFormField(
-          controller: _titleController,
-          enabled: !_isLoading,
-          decoration: InputDecoration(
-            hintText: l10n.taskTitlePlaceholder,
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+    if (viewModel.state == TaskCreateEditState.error) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              viewModel.errorMessage ?? 'An error occurred',
+              textAlign: TextAlign.center,
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.error,
-                width: 2,
-              ),
-            ),
-          ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return l10n.taskTitleError;
-            }
-            return null;
-          },
-          maxLines: 1,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDescriptionField() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.taskDescriptionLabel,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 4),
-        TextFormField(
-          controller: _descriptionController,
-          enabled: !_isLoading,
-          decoration: InputDecoration(
-            hintText: l10n.taskDescriptionPlaceholder,
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              ),
-            ),
-          ),
-          maxLines: 3,
-          minLines: 3,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriorityField() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.taskPriorityLabel,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<TaskPriority>(
-              value: _selectedPriority,
-              isExpanded: true,
-              icon: const Icon(Icons.arrow_drop_down),
-              onChanged: _isLoading ? null : (TaskPriority? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    _selectedPriority = newValue;
-                  });
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.clearError();
+                if (_isCreating) {
+                  viewModel.initializeForCreate(projectId: widget.projectId);
+                } else {
+                  viewModel.initializeForEdit(widget.taskId!);
                 }
               },
-              items: TaskPriority.values.map((TaskPriority priority) {
-                return DropdownMenuItem<TaskPriority>(
-                  value: priority,
-                  child: Text(priority.name.toUpperCase()),
-                );
-              }).toList(),
+              child: const Text('Retry'),
             ),
-          ),
+          ],
         ),
-      ],
-    );
-  }
+      );
+    }
 
-  Widget _buildDueDateField() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.taskDueDateLabel,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 4),
-        InkWell(
-          onTap: _isLoading ? null : _selectDueDate,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title Field
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.taskTitleLabel,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        hintText: l10n.taskTitlePlaceholder,
+                        errorText: viewModel.titleError,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return l10n.taskTitleError;
+                        }
+                        if (value.trim().length < 3) {
+                          return 'Title must be at least 3 characters';
+                        }
+                        if (value.trim().length > 100) {
+                          return 'Title must be less than 100 characters';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) => viewModel.updateTitle(value),
+                    ),
+                  ],
+                ),
               ),
             ),
-            child: Row(
+
+            const SizedBox(height: 16),
+
+            // Description Field
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.taskDescriptionLabel,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: InputDecoration(
+                        hintText: l10n.taskDescriptionPlaceholder,
+                        errorText: viewModel.descriptionError,
+                      ),
+                      maxLines: 4,
+                      validator: (value) {
+                        if (value != null && value.trim().isNotEmpty) {
+                          if (value.trim().length < 10) {
+                            return 'Description must be at least 10 characters';
+                          }
+                          if (value.trim().length > 500) {
+                            return 'Description must be less than 500 characters';
+                          }
+                        }
+                        return null;
+                      },
+                      onChanged: (value) => viewModel.updateDescription(value),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Priority and Due Date Row
+            Row(
               children: [
+                // Priority Field
                 Expanded(
-                  child: Text(
-                    _selectedDueDate != null
-                        ? '${_selectedDueDate!.day}/${_selectedDueDate!.month}/${_selectedDueDate!.year}'
-                        : l10n.taskDueDatePlaceholder,
-                    style: TextStyle(
-                      color: _selectedDueDate != null
-                          ? Theme.of(context).colorScheme.onSurface
-                          : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.taskPriorityLabel,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<Priority>(
+                            value: _selectedPriority,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            items: Priority.values.map((priority) {
+                              return DropdownMenuItem(
+                                value: priority,
+                                child: Text(priority.name.toUpperCase()),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedPriority = value;
+                                });
+                                viewModel.updatePriority(value);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.calendar_today,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                
+                const SizedBox(width: 16),
+                
+                // Due Date Field
+                Expanded(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.taskDueDateLabel,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          InkWell(
+                            onTap: () => _selectDueDate(context, viewModel),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Theme.of(context).colorScheme.outline),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _selectedDueDate != null
+                                          ? _formatDate(_selectedDueDate!)
+                                          : l10n.taskDueDatePlaceholder,
+                                      style: TextStyle(
+                                        color: _selectedDueDate != null
+                                            ? Theme.of(context).colorScheme.onSurface
+                                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                      ),
+                                    ),
+                                  ),
+                                  if (_selectedDueDate != null)
+                                    IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        setState(() {
+                                          _selectedDueDate = null;
+                                        });
+                                        viewModel.updateDueDate(null);
+                                      },
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildProjectField() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.taskProjectLabel,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Consumer<ProjectViewModel>(
-          builder: (context, projectViewModel, child) {
-            return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                ),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedProjectId,
-                  isExpanded: true,
-                  hint: Text(l10n.taskProjectPlaceholder),
-                  icon: const Icon(Icons.arrow_drop_down),
-                  onChanged: _isLoading ? null : (String? newValue) {
-                    setState(() {
-                      _selectedProjectId = newValue;
-                    });
-                  },
-                  items: projectViewModel.projects.map((project) {
-                    return DropdownMenuItem<String>(
-                      value: project.id,
-                      child: Text(project.name),
-                    );
-                  }).toList(),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
+            const SizedBox(height: 16),
 
-  Widget _buildActionButtons() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _isLoading ? null : () => context.go('/?tab=0'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            // Project Field
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.taskProject,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Consumer<ProjectViewModel>(
+                      builder: (context, projectViewModel, child) {
+                        return DropdownButtonFormField<String>(
+                          value: _selectedProjectId,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          hint: Text(l10n.taskProjectHint),
+                          items: projectViewModel.projects.map((project) {
+                            return DropdownMenuItem(
+                              value: project.id,
+                              child: Text(project.name),
+                            );
+                          }).toList(),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.taskProjectRequired;
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedProjectId = value;
+                            });
+                            viewModel.updateProjectId(value);
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                child: Text(l10n.taskCancelButton),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
+
+            const SizedBox(height: 32),
+
+            // Save Button
+            SizedBox(
+              width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isButtonEnabled ? _handleCreateOrUpdate : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: _isLoading
+                onPressed: viewModel.isSaving ? null : () => _saveTask(context, viewModel, l10n),
+                child: viewModel.isSaving
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(
-                  _isCreating ? l10n.taskCreateButton : l10n.taskUpdateButton,
-                        style: const TextStyle(color: Colors.white),
-                      ),
+                    : Text(_isCreating ? l10n.createTask : l10n.saveChanges),
               ),
             ),
           ],
@@ -473,135 +390,92 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
     );
   }
 
-  Future<void> _selectDueDate() async {
-    final DateTime? picked = await showDatePicker(
+  void _updateFormFromViewModel(TaskCreateEditViewModel viewModel) {
+    if (_titleController.text != viewModel.title) {
+      _titleController.text = viewModel.title;
+    }
+    if (_descriptionController.text != viewModel.description) {
+      _descriptionController.text = viewModel.description;
+    }
+    if (_selectedPriority != viewModel.priority) {
+      _selectedPriority = viewModel.priority;
+    }
+    if (_selectedDueDate != viewModel.dueDate) {
+      _selectedDueDate = viewModel.dueDate;
+    }
+    if (_selectedProjectId != viewModel.projectId) {
+      _selectedProjectId = viewModel.projectId;
+    }
+    if (_selectedAssigneeId != viewModel.assigneeId) {
+      _selectedAssigneeId = viewModel.assigneeId;
+    }
+  }
+
+  Future<void> _selectDueDate(BuildContext context, TaskCreateEditViewModel viewModel) async {
+    final date = await showDatePicker(
       context: context,
-      initialDate: _selectedDueDate ?? DateTime.now().add(const Duration(days: 1)),
+      initialDate: _selectedDueDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     
-    if (picked != null && picked != _selectedDueDate) {
+    if (date != null) {
       setState(() {
-        _selectedDueDate = picked;
+        _selectedDueDate = date;
       });
+      viewModel.updateDueDate(date);
     }
   }
 
-  void _handleCreateOrUpdate() async {
-    final l10n = AppLocalizations.of(context)!;
-    
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_selectedProjectId == null) {
-      setState(() {
-        _errorMessage = l10n.taskProjectRequired;
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
-      
-      if (_isCreating) {
-        await taskViewModel.createTask(
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-          priority: _selectedPriority,
-          projectId: _selectedProjectId!,
-          dueDate: _selectedDueDate,
+  Future<void> _saveTask(BuildContext context, TaskCreateEditViewModel viewModel, AppLocalizations l10n) async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final success = await viewModel.saveTask();
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isCreating ? l10n.taskCreated : l10n.taskUpdated),
+            backgroundColor: Colors.green,
+          ),
         );
-      } else {
-        await taskViewModel.updateTask(
-          widget.taskId!,
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-          priority: _selectedPriority,
-          dueDate: _selectedDueDate,
-        );
+        context.pop();
       }
-      
-      if (mounted) {
-        context.go('/?tab=0');
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage =
-        _isCreating ? l10n.taskCreateError(e.toString()) : l10n.taskUpdateError(
-            e.toString());
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
-  void _showDeleteConfirmation() {
-    final l10n = AppLocalizations.of(context)!;
-    
+  void _showDeleteConfirmation(BuildContext context, TaskCreateEditViewModel viewModel) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.taskDeleteTitle),
-        content: Text(l10n.taskDeleteMessage),
+        title: const Text('Delete Task'),
+        content: const Text('Are you sure you want to delete this task? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.taskCancelButton),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            onPressed: () {
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
               Navigator.of(context).pop();
-              _deleteTask();
+              final success = await viewModel.deleteTask();
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Task deleted successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                context.pop();
+              }
             },
-            child: Text(
-              l10n.taskDeleteButton,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onError,
-              ),
-            ),
+            child: const Text('Delete'),
           ),
         ],
       ),
     );
   }
 
-  void _deleteTask() async {
-    final l10n = AppLocalizations.of(context)!;
-    
-    if (widget.taskId == null) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
-      await taskViewModel.deleteTask(widget.taskId!);
-      
-      if (mounted) {
-        context.go('/?tab=0');
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = l10n.taskDeleteError(e.toString());
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 } 

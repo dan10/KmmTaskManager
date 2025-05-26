@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:shelf/shelf.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../../lib/src/routes/project_routes.dart';
 import '../../lib/src/services/project_service.dart';
 import '../../lib/src/repositories/project_repository.dart';
@@ -13,18 +13,18 @@ void main() {
   group('ProjectRoutes Integration Tests', () {
     late TestBase testBase;
     late ProjectService projectService;
-    late ProjectRepository projectRepository;
+  late ProjectRepository projectRepository;
     late ProjectRoutes projectRoutes;
     
     const testUserId = 'test_user_123';
 
-    setUpAll(() async {
+  setUpAll(() async {
       testBase = TestBase();
       await testBase.setUp();
       
       // Set up real services with container database
       projectRepository = ProjectRepositoryImpl(testBase.connection);
-      projectService = ProjectServiceImpl(projectRepository);
+    projectService = ProjectServiceImpl(projectRepository);
       
       // Create a simple mock middleware for testing
       final mockJwtService = MockJwtService();
@@ -37,7 +37,7 @@ void main() {
       await testBase.tearDown();
     });
 
-    setUp(() async {
+      setUp(() async {
       // Clear all tables before each test
       await testBase.connection.execute('DELETE FROM project_members');
       await testBase.connection.execute('DELETE FROM projects');
@@ -123,7 +123,7 @@ void main() {
         expect(createdProject['creatorId'], equals(testUserId));
       });
     });
-
+    
     group('GET /projects/<id>', () {
       test('should return project when user has access', () async {
         await testBase.connection.execute('''

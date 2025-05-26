@@ -1,5 +1,5 @@
 import 'package:postgres/postgres.dart';
-import 'package:shared/models.dart' as shared;
+import 'package:task_manager_shared/models.dart' as shared;
 
 class AuthRepository {
   final PostgreSQLConnection _db;

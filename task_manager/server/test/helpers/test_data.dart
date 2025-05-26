@@ -1,4 +1,4 @@
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 
 class TestData {
   static User createTestUser({
@@ -16,7 +16,7 @@ class TestData {
     );
   }
 
-  static Task createTestTask({
+  static TaskDto createTestTask({
     String? id,
     String? title,
     String? description,
@@ -27,7 +27,7 @@ class TestData {
     String? assigneeId,
     DateTime? dueDate,
   }) {
-    return Task(
+    return TaskDto(
       id: id ?? 'test-task-id',
       title: title ?? 'Test Task',
       description: description ?? 'Test Description',

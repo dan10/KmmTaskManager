@@ -4,7 +4,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'task.dart';
+part of 'task_update_request_dto.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -14,34 +14,31 @@ part of 'task.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$Task {
-  String get id;
-  String get title;
-  String get description;
-  @TaskStatusConverter()
-  TaskStatus get status;
-  Priority get priority;
+mixin _$TaskUpdateRequestDto {
+  String? get title;
+  String? get description;
+  TaskStatus? get status;
+  Priority? get priority;
   DateTime? get dueDate;
   String? get projectId;
   String? get assigneeId;
-  String get creatorId;
 
-  /// Create a copy of Task
+  /// Create a copy of TaskUpdateRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $TaskCopyWith<Task> get copyWith =>
-      _$TaskCopyWithImpl<Task>(this as Task, _$identity);
+  $TaskUpdateRequestDtoCopyWith<TaskUpdateRequestDto> get copyWith =>
+      _$TaskUpdateRequestDtoCopyWithImpl<TaskUpdateRequestDto>(
+          this as TaskUpdateRequestDto, _$identity);
 
-  /// Serializes this Task to a JSON map.
+  /// Serializes this TaskUpdateRequestDto to a JSON map.
   Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is Task &&
-            (identical(other.id, id) || other.id == id) &&
+            other is TaskUpdateRequestDto &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.description, description) ||
                 other.description == description) &&
@@ -52,82 +49,74 @@ mixin _$Task {
             (identical(other.projectId, projectId) ||
                 other.projectId == projectId) &&
             (identical(other.assigneeId, assigneeId) ||
-                other.assigneeId == assigneeId) &&
-            (identical(other.creatorId, creatorId) ||
-                other.creatorId == creatorId));
+                other.assigneeId == assigneeId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, description, status,
-      priority, dueDate, projectId, assigneeId, creatorId);
+  int get hashCode => Object.hash(runtimeType, title, description, status,
+      priority, dueDate, projectId, assigneeId);
 
   @override
   String toString() {
-    return 'Task(id: $id, title: $title, description: $description, status: $status, priority: $priority, dueDate: $dueDate, projectId: $projectId, assigneeId: $assigneeId, creatorId: $creatorId)';
+    return 'TaskUpdateRequestDto(title: $title, description: $description, status: $status, priority: $priority, dueDate: $dueDate, projectId: $projectId, assigneeId: $assigneeId)';
   }
 }
 
 /// @nodoc
-abstract mixin class $TaskCopyWith<$Res> {
-  factory $TaskCopyWith(Task value, $Res Function(Task) _then) =
-      _$TaskCopyWithImpl;
+abstract mixin class $TaskUpdateRequestDtoCopyWith<$Res> {
+  factory $TaskUpdateRequestDtoCopyWith(TaskUpdateRequestDto value,
+          $Res Function(TaskUpdateRequestDto) _then) =
+      _$TaskUpdateRequestDtoCopyWithImpl;
   @useResult
   $Res call(
-      {String id,
-      String title,
-      String description,
-      @TaskStatusConverter() TaskStatus status,
-      Priority priority,
+      {String? title,
+      String? description,
+      TaskStatus? status,
+      Priority? priority,
       DateTime? dueDate,
       String? projectId,
-      String? assigneeId,
-      String creatorId});
+      String? assigneeId});
 }
 
 /// @nodoc
-class _$TaskCopyWithImpl<$Res> implements $TaskCopyWith<$Res> {
-  _$TaskCopyWithImpl(this._self, this._then);
+class _$TaskUpdateRequestDtoCopyWithImpl<$Res>
+    implements $TaskUpdateRequestDtoCopyWith<$Res> {
+  _$TaskUpdateRequestDtoCopyWithImpl(this._self, this._then);
 
-  final Task _self;
-  final $Res Function(Task) _then;
+  final TaskUpdateRequestDto _self;
+  final $Res Function(TaskUpdateRequestDto) _then;
 
-  /// Create a copy of Task
+  /// Create a copy of TaskUpdateRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? title = null,
-    Object? description = null,
-    Object? status = null,
-    Object? priority = null,
+    Object? title = freezed,
+    Object? description = freezed,
+    Object? status = freezed,
+    Object? priority = freezed,
     Object? dueDate = freezed,
     Object? projectId = freezed,
     Object? assigneeId = freezed,
-    Object? creatorId = null,
   }) {
     return _then(_self.copyWith(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
+      title: freezed == title
           ? _self.title
           : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: null == description
+              as String?,
+      description: freezed == description
           ? _self.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      status: null == status
+              as String?,
+      status: freezed == status
           ? _self.status
           : status // ignore: cast_nullable_to_non_nullable
-              as TaskStatus,
-      priority: null == priority
+              as TaskStatus?,
+      priority: freezed == priority
           ? _self.priority
           : priority // ignore: cast_nullable_to_non_nullable
-              as Priority,
+              as Priority?,
       dueDate: freezed == dueDate
           ? _self.dueDate
           : dueDate // ignore: cast_nullable_to_non_nullable
@@ -140,61 +129,51 @@ class _$TaskCopyWithImpl<$Res> implements $TaskCopyWith<$Res> {
           ? _self.assigneeId
           : assigneeId // ignore: cast_nullable_to_non_nullable
               as String?,
-      creatorId: null == creatorId
-          ? _self.creatorId
-          : creatorId // ignore: cast_nullable_to_non_nullable
-              as String,
     ));
   }
 }
 
 /// @nodoc
-
 @JsonSerializable()
-class _Task implements Task {
-  const _Task(
-      {required this.id,
-      required this.title,
-      required this.description,
-      @TaskStatusConverter() required this.status,
-      required this.priority,
+class _TaskUpdateRequestDto implements TaskUpdateRequestDto {
+  const _TaskUpdateRequestDto(
+      {this.title,
+      this.description,
+      this.status,
+      this.priority,
       this.dueDate,
       this.projectId,
-      this.assigneeId,
-      required this.creatorId});
-  factory _Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);
+      this.assigneeId});
+  factory _TaskUpdateRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$TaskUpdateRequestDtoFromJson(json);
 
   @override
-  final String id;
+  final String? title;
   @override
-  final String title;
+  final String? description;
   @override
-  final String description;
+  final TaskStatus? status;
   @override
-  @TaskStatusConverter()
-  final TaskStatus status;
-  @override
-  final Priority priority;
+  final Priority? priority;
   @override
   final DateTime? dueDate;
   @override
   final String? projectId;
   @override
   final String? assigneeId;
-  @override
-  final String creatorId;
 
-  /// Create a copy of Task
+  /// Create a copy of TaskUpdateRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$TaskCopyWith<_Task> get copyWith =>
-      __$TaskCopyWithImpl<_Task>(this, _$identity);
+  _$TaskUpdateRequestDtoCopyWith<_TaskUpdateRequestDto> get copyWith =>
+      __$TaskUpdateRequestDtoCopyWithImpl<_TaskUpdateRequestDto>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$TaskToJson(
+    return _$TaskUpdateRequestDtoToJson(
       this,
     );
   }
@@ -203,8 +182,7 @@ class _Task implements Task {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _Task &&
-            (identical(other.id, id) || other.id == id) &&
+            other is _TaskUpdateRequestDto &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.description, description) ||
                 other.description == description) &&
@@ -215,83 +193,76 @@ class _Task implements Task {
             (identical(other.projectId, projectId) ||
                 other.projectId == projectId) &&
             (identical(other.assigneeId, assigneeId) ||
-                other.assigneeId == assigneeId) &&
-            (identical(other.creatorId, creatorId) ||
-                other.creatorId == creatorId));
+                other.assigneeId == assigneeId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, description, status,
-      priority, dueDate, projectId, assigneeId, creatorId);
+  int get hashCode => Object.hash(runtimeType, title, description, status,
+      priority, dueDate, projectId, assigneeId);
 
   @override
   String toString() {
-    return 'Task(id: $id, title: $title, description: $description, status: $status, priority: $priority, dueDate: $dueDate, projectId: $projectId, assigneeId: $assigneeId, creatorId: $creatorId)';
+    return 'TaskUpdateRequestDto(title: $title, description: $description, status: $status, priority: $priority, dueDate: $dueDate, projectId: $projectId, assigneeId: $assigneeId)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$TaskCopyWith<$Res> implements $TaskCopyWith<$Res> {
-  factory _$TaskCopyWith(_Task value, $Res Function(_Task) _then) =
-      __$TaskCopyWithImpl;
+abstract mixin class _$TaskUpdateRequestDtoCopyWith<$Res>
+    implements $TaskUpdateRequestDtoCopyWith<$Res> {
+  factory _$TaskUpdateRequestDtoCopyWith(_TaskUpdateRequestDto value,
+          $Res Function(_TaskUpdateRequestDto) _then) =
+      __$TaskUpdateRequestDtoCopyWithImpl;
   @override
   @useResult
   $Res call(
-      {String id,
-      String title,
-      String description,
-      @TaskStatusConverter() TaskStatus status,
-      Priority priority,
+      {String? title,
+      String? description,
+      TaskStatus? status,
+      Priority? priority,
       DateTime? dueDate,
       String? projectId,
-      String? assigneeId,
-      String creatorId});
+      String? assigneeId});
 }
 
 /// @nodoc
-class __$TaskCopyWithImpl<$Res> implements _$TaskCopyWith<$Res> {
-  __$TaskCopyWithImpl(this._self, this._then);
+class __$TaskUpdateRequestDtoCopyWithImpl<$Res>
+    implements _$TaskUpdateRequestDtoCopyWith<$Res> {
+  __$TaskUpdateRequestDtoCopyWithImpl(this._self, this._then);
 
-  final _Task _self;
-  final $Res Function(_Task) _then;
+  final _TaskUpdateRequestDto _self;
+  final $Res Function(_TaskUpdateRequestDto) _then;
 
-  /// Create a copy of Task
+  /// Create a copy of TaskUpdateRequestDto
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? id = null,
-    Object? title = null,
-    Object? description = null,
-    Object? status = null,
-    Object? priority = null,
+    Object? title = freezed,
+    Object? description = freezed,
+    Object? status = freezed,
+    Object? priority = freezed,
     Object? dueDate = freezed,
     Object? projectId = freezed,
     Object? assigneeId = freezed,
-    Object? creatorId = null,
   }) {
-    return _then(_Task(
-      id: null == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
+    return _then(_TaskUpdateRequestDto(
+      title: freezed == title
           ? _self.title
           : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: null == description
+              as String?,
+      description: freezed == description
           ? _self.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      status: null == status
+              as String?,
+      status: freezed == status
           ? _self.status
           : status // ignore: cast_nullable_to_non_nullable
-              as TaskStatus,
-      priority: null == priority
+              as TaskStatus?,
+      priority: freezed == priority
           ? _self.priority
           : priority // ignore: cast_nullable_to_non_nullable
-              as Priority,
+              as Priority?,
       dueDate: freezed == dueDate
           ? _self.dueDate
           : dueDate // ignore: cast_nullable_to_non_nullable
@@ -304,10 +275,6 @@ class __$TaskCopyWithImpl<$Res> implements _$TaskCopyWith<$Res> {
           ? _self.assigneeId
           : assigneeId // ignore: cast_nullable_to_non_nullable
               as String?,
-      creatorId: null == creatorId
-          ? _self.creatorId
-          : creatorId // ignore: cast_nullable_to_non_nullable
-              as String,
     ));
   }
 }

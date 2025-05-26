@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../../lib/src/services/project_service.dart';
 import '../../lib/src/repositories/project_repository.dart';
 import '../../lib/src/exceptions/custom_exceptions.dart';

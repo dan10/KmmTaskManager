@@ -2,7 +2,7 @@ import 'dart:convert'; // For utf8 and jsonDecode
 import 'package:crypto/crypto.dart'; // For sha256
 import 'package:http/http.dart' as http; // For tokeninfo endpoint call
 // import 'package:jwt_decoder/jwt_decoder.dart'; // No longer needed for Google token
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../repositories/auth_repository.dart';
 import '../services/jwt_service.dart';
 import '../exceptions/custom_exceptions.dart';

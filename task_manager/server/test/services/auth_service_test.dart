@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:test/test.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../../lib/src/repositories/auth_repository.dart';
 import '../../lib/src/services/auth_service.dart';
 import '../../lib/src/exceptions/custom_exceptions.dart';

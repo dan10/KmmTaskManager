@@ -1,4 +1,4 @@
-import 'package:shared/models.dart' as shared_models;
+import 'package:task_manager_shared/models.dart' as shared_models;
 import '../repositories/project_repository.dart';
 
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions

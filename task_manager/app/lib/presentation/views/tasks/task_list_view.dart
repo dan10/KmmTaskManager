@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:task_manager_shared/models.dart';
 
-import '../../viewmodels/task_viewmodel.dart';
+import '../../viewmodels/task_list_viewmodel.dart';
 import '../../viewmodels/project_viewmodel.dart';
-import '../../../domain/entities/task.dart';
 
 class TaskListView extends StatefulWidget {
   final String? projectId;
@@ -26,7 +26,7 @@ class _TaskListViewState extends State<TaskListView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TaskViewModel>(context, listen: false).loadTasks(projectId: widget.projectId);
+      Provider.of<TaskListViewModel>(context, listen: false).loadTasks(projectId: widget.projectId);
     });
   }
 
@@ -43,13 +43,13 @@ class _TaskListViewState extends State<TaskListView> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9), // Match Compose background
       body: SafeArea(
-        child: Consumer<TaskViewModel>(
-          builder: (context, taskViewModel, child) {
-            if (taskViewModel.isLoading) {
+        child: Consumer<TaskListViewModel>(
+          builder: (context, taskListViewModel, child) {
+            if (taskListViewModel.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (taskViewModel.state == TaskViewState.error) {
+            if (taskListViewModel.state == TaskListState.error) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -57,12 +57,12 @@ class _TaskListViewState extends State<TaskListView> {
                     const Icon(Icons.error_outline, size: 64, color: Colors.red),
                     const SizedBox(height: 16),
                     Text(
-                      taskViewModel.errorMessage ?? 'Error loading tasks',
+                      taskListViewModel.errorMessage ?? 'Error loading tasks',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => taskViewModel.loadTasks(projectId: widget.projectId),
+                      onPressed: () => taskListViewModel.loadTasks(projectId: widget.projectId),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -73,11 +73,11 @@ class _TaskListViewState extends State<TaskListView> {
             return Column(
               children: [
                 // Top Bar Section (similar to Compose)
-                _buildTopBar(context, taskViewModel, l10n),
+                _buildTopBar(context, taskListViewModel, l10n),
                 
                 // Task List (no tabs, just all tasks)
                 Expanded(
-                  child: _buildTaskList(taskViewModel.tasks, l10n),
+                  child: _buildTaskList(taskListViewModel.tasks, l10n),
                 ),
               ],
             );
@@ -97,7 +97,7 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Widget _buildTopBar(BuildContext context, TaskViewModel taskViewModel,
+  Widget _buildTopBar(BuildContext context, TaskListViewModel taskListViewModel,
       AppLocalizations l10n) {
     return Container(
       width: double.infinity,
@@ -115,7 +115,7 @@ class _TaskListViewState extends State<TaskListView> {
           const SizedBox(height: 16),
           
           // Progress Section (similar to YourProgressSection in Compose)
-          _buildProgressSection(context, taskViewModel, l10n),
+          _buildProgressSection(context, taskListViewModel, l10n),
           const SizedBox(height: 16),
           
           // Search Field
@@ -141,9 +141,9 @@ class _TaskListViewState extends State<TaskListView> {
   }
 
   Widget _buildProgressSection(BuildContext context,
-      TaskViewModel taskViewModel, AppLocalizations l10n) {
-    final totalTasks = taskViewModel.totalTasks;
-    final completedTasks = taskViewModel.completedTasksCount;
+      TaskListViewModel taskListViewModel, AppLocalizations l10n) {
+    final totalTasks = taskListViewModel.totalTasksCount;
+    final completedTasks = taskListViewModel.doneTasksCount;
     final progress = totalTasks > 0 ? (completedTasks / totalTasks) : 0.0;
 
     return Card(
@@ -200,13 +200,13 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Widget _buildTaskList(List<Task> tasks, AppLocalizations l10n) {
+  Widget _buildTaskList(List<TaskDto> tasks, AppLocalizations l10n) {
     if (tasks.isEmpty) {
       return _buildEmptyState(l10n);
     }
 
     return RefreshIndicator(
-      onRefresh: () => Provider.of<TaskViewModel>(context, listen: false).loadTasks(projectId: widget.projectId),
+      onRefresh: () => Provider.of<TaskListViewModel>(context, listen: false).loadTasks(projectId: widget.projectId),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: tasks.length,
@@ -218,7 +218,7 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Widget _buildTaskCard(Task task, AppLocalizations l10n) {
+  Widget _buildTaskCard(TaskDto task, AppLocalizations l10n) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -245,7 +245,7 @@ class _TaskListViewState extends State<TaskListView> {
                             task.title,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: task.status == TaskStatus.completed
+                              color: task.status == TaskStatus.done
                                   ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
                                   : Theme.of(context).colorScheme.onSurface,
                             ),
@@ -271,10 +271,10 @@ class _TaskListViewState extends State<TaskListView> {
                       ],
                     ),
                     
-                    if (task.description != null) ...[
+                    if (task.description.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Text(
-                        task.description!,
+                        task.description,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                         ),
@@ -292,19 +292,20 @@ class _TaskListViewState extends State<TaskListView> {
                     ],
                     
                     // Project info
-                    const SizedBox(height: 8),
-                    Consumer<ProjectViewModel>(
-                      builder: (context, projectViewModel, child) {
-                        final project = projectViewModel.getProject(task.projectId);
-                        return Text(
-                          '${l10n.taskProject} ${project?.name ??
-                              'Unknown Project'}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        );
-                      },
-                    ),
+                    if (task.projectId != null) ...[
+                      const SizedBox(height: 8),
+                      Consumer<ProjectViewModel>(
+                        builder: (context, projectViewModel, child) {
+                          final project = projectViewModel.getProject(task.projectId!);
+                          return Text(
+                            '${l10n.taskProject} ${project?.name ?? 'Unknown Project'}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -313,13 +314,13 @@ class _TaskListViewState extends State<TaskListView> {
               
               // Checkbox (matching Compose)
               Checkbox(
-                value: task.status == TaskStatus.completed,
+                value: task.status == TaskStatus.done,
                 onChanged: (bool? value) {
-                  final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
+                  final taskListViewModel = Provider.of<TaskListViewModel>(context, listen: false);
                   if (value == true) {
-                    taskViewModel.updateTaskStatus(task.id, TaskStatus.completed);
+                    taskListViewModel.changeTaskStatus(task.id, TaskStatus.done);
                   } else {
-                    taskViewModel.updateTaskStatus(task.id, TaskStatus.todo);
+                    taskListViewModel.changeTaskStatus(task.id, TaskStatus.todo);
                   }
                 },
                 activeColor: _getPriorityColor(task.priority),
@@ -389,24 +390,24 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Color _getPriorityColor(TaskPriority priority) {
+  Color _getPriorityColor(Priority priority) {
     switch (priority) {
-      case TaskPriority.high:
+      case Priority.high:
         return const Color(0xFFDC2626); // Bright Red
-      case TaskPriority.medium:
+      case Priority.medium:
         return const Color(0xFFEAB308); // Bright Yellow
-      case TaskPriority.low:
+      case Priority.low:
         return const Color(0xFF22C55E); // Bright Green
     }
   }
 
-  Color _getPriorityBackgroundColor(TaskPriority priority) {
+  Color _getPriorityBackgroundColor(Priority priority) {
     switch (priority) {
-      case TaskPriority.high:
+      case Priority.high:
         return const Color(0xFFFFE4E4); // Light Red
-      case TaskPriority.medium:
+      case Priority.medium:
         return const Color(0xFFFEF9C3); // Light Yellow
-      case TaskPriority.low:
+      case Priority.low:
         return const Color(0xFFDCFCE7); // Light Green
     }
   }
@@ -418,7 +419,7 @@ class _TaskListViewState extends State<TaskListView> {
   void _showCreateTaskDialog(BuildContext context) {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
-    TaskPriority selectedPriority = TaskPriority.medium;
+    Priority selectedPriority = Priority.medium;
     String? selectedProjectId = widget.projectId;
 
     showDialog(
@@ -446,10 +447,10 @@ class _TaskListViewState extends State<TaskListView> {
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<TaskPriority>(
+              DropdownButtonFormField<Priority>(
                 value: selectedPriority,
                 decoration: const InputDecoration(labelText: 'Priority'),
-                items: TaskPriority.values.map((priority) {
+                items: Priority.values.map((priority) {
                   return DropdownMenuItem(
                     value: priority,
                     child: Text(priority.name.toUpperCase()),
@@ -495,12 +496,13 @@ class _TaskListViewState extends State<TaskListView> {
             ElevatedButton(
               onPressed: () {
                 if (titleController.text.isNotEmpty && selectedProjectId != null) {
-                  Provider.of<TaskViewModel>(context, listen: false).createTask(
+                  final request = TaskCreateRequestDto(
                     title: titleController.text,
-                    description: descriptionController.text.isEmpty ? null : descriptionController.text,
+                    description: descriptionController.text.isEmpty ? '' : descriptionController.text,
                     priority: selectedPriority,
-                    projectId: selectedProjectId!,
+                    projectId: selectedProjectId,
                   );
+                  Provider.of<TaskListViewModel>(context, listen: false).createTask(request);
                   Navigator.of(context).pop();
                 }
               },
@@ -526,7 +528,7 @@ class _TaskListViewState extends State<TaskListView> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
-              Provider.of<TaskViewModel>(context, listen: false).deleteTask(taskId);
+              Provider.of<TaskListViewModel>(context, listen: false).deleteTask(taskId);
               Navigator.of(context).pop();
             },
             child: const Text('Delete'),

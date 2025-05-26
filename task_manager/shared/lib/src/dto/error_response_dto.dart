@@ -1,31 +1,17 @@
-class ErrorResponseDto {
-  final int statusCode;
-  final String error; // e.g., "Not Found", "Bad Request"
-  final String? message;
-  final Map<String, dynamic>? details;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const ErrorResponseDto({
-    required this.statusCode,
-    required this.error,
-    this.message,
-    this.details,
-  });
+part 'error_response_dto.freezed.dart';
+part 'error_response_dto.g.dart';
 
-  factory ErrorResponseDto.fromJson(Map<String, dynamic> json) {
-    return ErrorResponseDto(
-      statusCode: json['statusCode'] as int,
-      error: json['error'] as String,
-      message: json['message'] as String?,
-      details: json['details'] as Map<String, dynamic>?,
-    );
-  }
+@freezed
+abstract class ErrorResponseDto with _$ErrorResponseDto {
+  const factory ErrorResponseDto({
+    required int statusCode,
+    required String error, // e.g., "Not Found", "Bad Request"
+    String? message,
+    Map<String, dynamic>? details,
+  }) = _ErrorResponseDto;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'statusCode': statusCode,
-      'error': error,
-      'message': message,
-      'details': details,
-    };
-  }
+  factory ErrorResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$ErrorResponseDtoFromJson(json);
 } 

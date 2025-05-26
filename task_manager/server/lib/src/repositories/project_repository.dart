@@ -1,5 +1,5 @@
 import 'package:postgres/postgres.dart';
-import 'package:shared/models.dart' as shared_models;
+import 'package:task_manager_shared/models.dart' as shared_models;
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
 
 abstract class ProjectRepository {

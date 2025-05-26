@@ -1,5 +1,5 @@
 import 'package:postgres/postgres.dart';
-import 'package:shared/models.dart' as shared_models;
+import 'package:task_manager_shared/models.dart' as shared_models;
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
 
 class TaskRepository {
@@ -25,7 +25,7 @@ class TaskRepository {
     return result.isNotEmpty;
   }
 
-  Future<List<shared_models.Task>> getTasks({
+  Future<List<shared_models.TaskDto>> getTasks({
     String? assigneeId,
     String? creatorId,
     String? projectId,
@@ -68,7 +68,7 @@ class TaskRepository {
     return result.map(_mapTaskFromRow).toList();
   }
 
-  Future<shared_models.Task?> findById(String id) async {
+  Future<shared_models.TaskDto?> findById(String id) async {
     final result = await _db.query(
       'SELECT * FROM tasks WHERE id = @id',
       substitutionValues: {'id': id},
@@ -78,7 +78,7 @@ class TaskRepository {
     return _mapTaskFromRow(result.first);
   }
 
-  Future<shared_models.Task> create(shared_models.Task task) async {
+  Future<shared_models.TaskDto> create(shared_models.TaskDto task) async {
     final result = await _db.query(
       '''
       INSERT INTO tasks (id, title, description, status, priority, project_id, assignee_id, creator_id, due_date)
@@ -101,7 +101,7 @@ class TaskRepository {
     return _mapTaskFromRow(result.first);
   }
 
-  Future<shared_models.Task> update(shared_models.Task task) async {
+  Future<shared_models.TaskDto> update(shared_models.TaskDto task) async {
     await _db.execute(
       '''
       UPDATE tasks
@@ -143,7 +143,7 @@ class TaskRepository {
     }
   }
 
-  Future<shared_models.Task> assignTask(
+  Future<shared_models.TaskDto> assignTask(
       String taskId, String assigneeId) async {
     if (!await _taskExists(taskId)) {
       throw TaskNotFoundException(id: taskId);
@@ -171,7 +171,7 @@ class TaskRepository {
         'Failed to assign task $taskId, update operation affected 0 rows.');
   }
 
-  Future<shared_models.Task> changeTaskStatus(
+  Future<shared_models.TaskDto> changeTaskStatus(
       String taskId, shared_models.TaskStatus newStatus) async {
     if (!await _taskExists(taskId)) {
       throw TaskNotFoundException(id: taskId);
@@ -195,27 +195,9 @@ class TaskRepository {
         'Failed to change task status for $taskId, update operation affected 0 rows.');
   }
 
-  shared_models.Task _mapTaskFromRow(List<dynamic> row) {
+  shared_models.TaskDto _mapTaskFromRow(List<dynamic> row) {
     final dueDateValue = row[8];
     final dueDate = dueDateValue is DateTime ? dueDateValue : null;
-
-    // Assumes TaskStatus and Priority enums in shared_models have @JsonValue or similar for string mapping
-    // If they use .name for serialization (as per freezed defaults with json_serializable)
-    // then this mapping needs to match that.
-    // The shared/task.dart uses @JsonKey(name: 'TODO') etc.
-    // So, `TaskStatus.values.byName(row[3] as String)` might work if the stored value matches the enum key.
-    // Or, if stored value is 'TODO', 'IN_PROGRESS', etc.
-    // The current `e.toString() == row[3]` is fragile if enum.toString() changes.
-    // Using .name is typically more robust if the DB stores the enum key string.
-    // Given the shared model uses @JsonKey, it implies the string values in DB are 'TODO', 'IN_PROGRESS', etc.
-    // So, a more robust mapping would be:
-    // shared_models.TaskStatus.values.firstWhere((e) => e.toJson() == row[3] as String)
-    // Or if .name is directly 'TODO', 'IN_PROGRESS'
-    // shared_models.TaskStatus.values.byName( (row[3] as String).toLowerCase().replaceAll('_',' ') ) - this gets complex.
-    // Let's stick to current mapping assuming DB stores exactly what e.toString() produces or what fromJson expects.
-    // The shared Task.fromJson uses _$TaskStatusEnumMap.entries.firstWhere((e) => e.value == json).key;
-    // And TaskStatus.g.dart uses _$TaskStatusEnumMap = { TaskStatus.todo: 'TODO', ... }
-    // So, DB should store 'TODO', 'IN_PROGRESS', 'DONE'.
 
     shared_models.TaskStatus status;
     try {
@@ -261,7 +243,7 @@ class TaskRepository {
       priority = shared_models.Priority.low; // Default on error
     }
 
-    return shared_models.Task(
+    return shared_models.TaskDto(
       id: row[0] as String,
       title: row[1] as String,
       description: (row[2] as String?) ?? '',

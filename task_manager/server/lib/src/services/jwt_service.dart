@@ -1,5 +1,5 @@
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
-import 'package:shared/src/models/user.dart';
+import 'package:task_manager_shared/models.dart';
 import '../config/app_config.dart';
 
 

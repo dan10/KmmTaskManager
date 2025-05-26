@@ -1,11 +1,11 @@
-import 'package:shared/models.dart' as shared_models;
+import 'package:task_manager_shared/models.dart' as shared_models;
 import '../repositories/task_repository.dart';
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
 
 // Old custom exceptions removed from here.
 
 abstract class TaskService {
-  Future<List<shared_models.Task>> getTasks({
+  Future<List<shared_models.TaskDto>> getTasks({
     String? assigneeId,
     String? creatorId,
     String? projectId,
@@ -13,14 +13,14 @@ abstract class TaskService {
     int page = 0,
     int size = 10,
   });
-  Future<shared_models.Task?> getTaskById(String id, String userId);
-  Future<shared_models.Task> createTask(shared_models.Task task);
-  Future<shared_models.Task> updateTask(
-      String id, shared_models.Task task, String userId);
+  Future<shared_models.TaskDto?> getTaskById(String id, String userId);
+  Future<shared_models.TaskDto> createTask(shared_models.TaskDto task);
+  Future<shared_models.TaskDto> updateTask(
+      String id, shared_models.TaskDto task, String userId);
   Future<void> deleteTask(String id, String userId);
-  Future<shared_models.Task> assignTask(
+  Future<shared_models.TaskDto> assignTask(
       String taskId, String assigneeId); // New
-  Future<shared_models.Task> changeTaskStatus(
+  Future<shared_models.TaskDto> changeTaskStatus(
       String taskId, shared_models.TaskStatus newStatus); // New
 }
 
@@ -30,7 +30,7 @@ class TaskServiceImpl implements TaskService {
   TaskServiceImpl(this._repository);
 
   @override
-  Future<List<shared_models.Task>> getTasks({
+  Future<List<shared_models.TaskDto>> getTasks({
     String? assigneeId,
     String? creatorId,
     String? projectId,
@@ -49,7 +49,7 @@ class TaskServiceImpl implements TaskService {
   }
 
   @override
-  Future<shared_models.Task?> getTaskById(String id, String userId) async {
+  Future<shared_models.TaskDto?> getTaskById(String id, String userId) async {
     final task = await _repository.findById(id);
     // Basic authorization: user must be creator or assignee to fetch by ID directly.
     // More granular access control could be added (e.g. project member).
@@ -61,14 +61,14 @@ class TaskServiceImpl implements TaskService {
   }
 
   @override
-  Future<shared_models.Task> createTask(shared_models.Task task) async {
+  Future<shared_models.TaskDto> createTask(shared_models.TaskDto task) async {
     // TODO: Add validation, e.g., check if project_id exists if provided.
     return _repository.create(task);
   }
 
   @override
-  Future<shared_models.Task> updateTask(
-      String id, shared_models.Task task, String userId) async {
+  Future<shared_models.TaskDto> updateTask(
+      String id, shared_models.TaskDto task, String userId) async {
     final existingTask = await _repository.findById(id);
     if (existingTask == null) {
       throw TaskNotFoundException(id: id);
@@ -96,7 +96,7 @@ class TaskServiceImpl implements TaskService {
   }
 
   @override
-  Future<shared_models.Task> assignTask(
+  Future<shared_models.TaskDto> assignTask(
       String taskId, String assigneeId) async {
     // Repository now throws TaskNotFoundException, UserNotFoundException
     return _repository.assignTask(taskId, assigneeId);
@@ -104,7 +104,7 @@ class TaskServiceImpl implements TaskService {
   }
 
   @override
-  Future<shared_models.Task> changeTaskStatus(
+  Future<shared_models.TaskDto> changeTaskStatus(
       String taskId, shared_models.TaskStatus newStatus) async {
     // Repository now throws TaskNotFoundException
     return _repository.changeTaskStatus(taskId, newStatus);

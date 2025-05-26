@@ -1,22 +1,19 @@
-class TaskAssignRequestDto {
-  final String assigneeId;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const TaskAssignRequestDto({
-    required this.assigneeId,
-  });
+part 'task_assign_request_dto.freezed.dart';
+part 'task_assign_request_dto.g.dart';
 
-  factory TaskAssignRequestDto.fromJson(Map<String, dynamic> json) {
-    return TaskAssignRequestDto(
-      assigneeId: json['assigneeId'] as String,
-    );
-  }
+@freezed
+abstract class TaskAssignRequestDto with _$TaskAssignRequestDto {
+  const factory TaskAssignRequestDto({
+    required String assigneeId,
+  }) = _TaskAssignRequestDto;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'assigneeId': assigneeId,
-    };
-  }
+  factory TaskAssignRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$TaskAssignRequestDtoFromJson(json);
+}
 
+extension TaskAssignRequestDtoExtension on TaskAssignRequestDto {
   Map<String, String> validate() {
     final details = <String, String>{};
     if (assigneeId.isEmpty) {

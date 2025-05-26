@@ -584,5 +584,22 @@
   "passwordStrengthVeryStrong": "Very Strong",
   "@passwordStrengthVeryStrong": {
     "description": "Password strength indicator for very strong passwords"
+  },
+
+  "taskProjectHint": "Select a project",
+  "@taskProjectHint": {
+    "description": "Hint text for task project dropdown"
+  },
+  "saveChanges": "Save Changes",
+  "@saveChanges": {
+    "description": "Save changes button text"
+  },
+  "taskCreated": "Task created successfully",
+  "@taskCreated": {
+    "description": "Success message when task is created"
+  },
+  "taskUpdated": "Task updated successfully",
+  "@taskUpdated": {
+    "description": "Success message when task is updated"
   }
 } 

@@ -4,7 +4,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:uuid/uuid.dart';
 import '../middleware/auth_middleware.dart';
 import '../services/project_service.dart';
-import 'package:shared/models.dart' as shared_models;
+import 'package:task_manager_shared/models.dart' as shared_models;
 import '../util/shelf_helpers.dart';
 import '../exceptions/custom_exceptions.dart';
 
@@ -85,11 +85,23 @@ class ProjectRoutes {
     try {
       final userId = request.context['userId'] as String;
       final projectData = await request.readJsonBody();
-      final projectId = projectData['id'] as String? ?? const Uuid().v4();
+      
+      // Use shared DTO for request validation
+      final createRequest = shared_models.CreateProjectRequestDto.fromJson(projectData);
+      
+      // Validate the request
+      if (!createRequest.isValid) {
+        final errors = createRequest.validate();
+        final errorMessage = errors.values.join(', ');
+        throw ValidationException(message: errorMessage);
+      }
+
+      // Convert to Project model for service layer
+      final projectId = const Uuid().v4();
       final project = shared_models.Project(
         id: projectId,
-        name: projectData['name'] as String,
-        description: projectData['description'] as String?,
+        name: createRequest.name,
+        description: createRequest.description,
         creatorId: userId,
         memberIds: [userId],
       );
@@ -98,6 +110,9 @@ class ProjectRoutes {
 
       return okJsonResponse(createdProject.toJson());
     } catch (e) {
+      if (e is ValidationException) {
+        throw e; // Re-throw validation exceptions to be handled by middleware
+      }
       return Response.internalServerError(
         body: jsonEncode({'error': e.toString()}),
         headers: {'content-type': 'application/json'},
@@ -113,14 +128,30 @@ class ProjectRoutes {
         throw ValidationException(message: 'Project ID is required');
       }
       final projectData = await request.readJsonBody();
+      
+      // Use shared DTO for request validation
+      final updateRequest = shared_models.ProjectUpdateRequestDto.fromJson(projectData);
+      
+      // Validate the request
+      if (!updateRequest.isValid) {
+        final errors = updateRequest.validate();
+        final errorMessage = errors.values.join(', ');
+        throw ValidationException(message: errorMessage);
+      }
+
+      // Get existing project first
+      final existingProject = await _projectService.getProjectById(projectId, userId);
+      if (existingProject == null) {
+        throw ValidationException(message: 'Project not found or user not authorized');
+      }
+
+      // Create updated project by merging existing data with updates
       final project = shared_models.Project(
         id: projectId,
-        name: projectData['name'] as String,
-        description: projectData['description'] as String?,
-        creatorId: projectData['creatorId'] as String,
-        memberIds: (projectData['memberIds'] as List<dynamic>)
-            .map((e) => e as String)
-            .toList(),
+        name: updateRequest.name ?? existingProject.name,
+        description: updateRequest.description ?? existingProject.description,
+        creatorId: existingProject.creatorId,
+        memberIds: updateRequest.memberIds ?? existingProject.memberIds,
       );
 
       final updatedProject =
@@ -128,6 +159,9 @@ class ProjectRoutes {
 
       return okJsonResponse(updatedProject.toJson());
     } catch (e) {
+      if (e is ValidationException) {
+        throw e; // Re-throw validation exceptions to be handled by middleware
+      }
       if (e is ForbiddenException) {
         return Response.forbidden(
           jsonEncode({'error': e.message}),

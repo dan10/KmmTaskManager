@@ -1,5 +1,5 @@
 import 'package:shelf/shelf.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../exceptions/app_exception.dart';
 // custom_exceptions.dart is not directly used here but good to keep in mind its types extend AppException
 // import '../exceptions/custom_exceptions.dart'; 

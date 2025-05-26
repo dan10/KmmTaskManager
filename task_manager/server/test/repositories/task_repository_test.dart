@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../../lib/src/repositories/task_repository.dart';
 import '../helpers/test_base.dart';
 
@@ -101,7 +101,7 @@ void main() {
     group('create and findById', () {
       test('should create a new task successfully', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Test Task',
           description: 'Test Description',
@@ -136,7 +136,7 @@ void main() {
     group('getTasks', () {
       test('should filter tasks by projectId', () async {
         // Arrange
-        const task1 = Task(
+        const task1 = TaskDto(
           id: 'task-1',
           title: 'Task 1',
           description: 'Description 1',
@@ -145,7 +145,7 @@ void main() {
           projectId: 'project-1',
           creatorId: 'user-1',
         );
-        const task2 = Task(
+        const task2 = TaskDto(
           id: 'task-2',
           title: 'Task 2',
           description: 'Description 2',
@@ -154,7 +154,7 @@ void main() {
           projectId: 'project-1',
           creatorId: 'user-1',
         );
-        const task3 = Task(
+        const task3 = TaskDto(
           id: 'task-3',
           title: 'Task 3',
           description: 'Description 3',
@@ -179,7 +179,7 @@ void main() {
 
       test('should filter tasks by assigneeId', () async {
         // Arrange
-        const task1 = Task(
+        const task1 = TaskDto(
           id: 'task-1',
           title: 'Assigned Task 1',
           description: 'Description 1',
@@ -189,7 +189,7 @@ void main() {
           creatorId: 'user-1',
           assigneeId: 'user-2',
         );
-        const task2 = Task(
+        const task2 = TaskDto(
           id: 'task-2',
           title: 'Assigned Task 2',
           description: 'Description 2',
@@ -199,7 +199,7 @@ void main() {
           creatorId: 'user-1',
           assigneeId: 'user-2',
         );
-        const task3 = Task(
+        const task3 = TaskDto(
           id: 'task-3',
           title: 'Other Task',
           description: 'Description 3',
@@ -226,7 +226,7 @@ void main() {
       test('should support pagination', () async {
         // Arrange - Create multiple tasks
         for (int i = 1; i <= 10; i++) {
-          final task = Task(
+          final task = TaskDto(
             id: 'task-$i',
             title: 'Task $i',
             description: 'Description $i',
@@ -263,7 +263,7 @@ void main() {
     group('update', () {
       test('should update existing task successfully', () async {
         // Arrange
-        const originalTask = Task(
+        const originalTask = TaskDto(
           id: 'task-1',
           title: 'Original Title',
           description: 'Original Description',
@@ -274,7 +274,7 @@ void main() {
         );
         await taskRepository.create(originalTask);
 
-        const updatedTask = Task(
+        const updatedTask = TaskDto(
           id: 'task-1',
           title: 'Updated Title',
           description: 'Updated Description',
@@ -305,7 +305,7 @@ void main() {
     group('delete', () {
       test('should delete existing task successfully', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'To Delete',
           description: 'To Delete Description',
@@ -328,7 +328,7 @@ void main() {
     group('assignTask', () {
       test('should assign task to user successfully', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Task to Assign',
           description: 'Description',
@@ -351,7 +351,7 @@ void main() {
     group('changeTaskStatus', () {
       test('should change task status successfully', () async {
         // Arrange
-        const task = Task(
+        const task = TaskDto(
           id: 'task-1',
           title: 'Task Status Change',
           description: 'Description',

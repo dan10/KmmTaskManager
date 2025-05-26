@@ -208,5 +208,9 @@
   "passwordStrengthVeryStrong": "Muito Forte",
   "@passwordStrengthVeryStrong": {
     "description": "Password strength indicator for very strong passwords"
-  }
+  },
+  "taskProjectHint": "Selecione um projeto",
+  "saveChanges": "Salvar Alterações",
+  "taskCreated": "Tarefa criada com sucesso",
+  "taskUpdated": "Tarefa atualizada com sucesso"
 } 

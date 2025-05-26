@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:task_manager_shared/models.dart';
 
-import '../../viewmodels/task_viewmodel.dart';
-import '../../viewmodels/project_viewmodel.dart';
-import '../../../domain/entities/task.dart';
+import '../../viewmodels/task_detail_viewmodel.dart';
 
 class TaskDetailView extends StatefulWidget {
   final String taskId;
@@ -20,57 +20,83 @@ class TaskDetailView extends StatefulWidget {
 
 class _TaskDetailViewState extends State<TaskDetailView> {
   @override
-  Widget build(BuildContext context) {
-    return Consumer<TaskViewModel>(
-      builder: (context, taskViewModel, child) {
-        final task = taskViewModel.getTask(widget.taskId);
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TaskDetailViewModel>(context, listen: false).loadTask(widget.taskId);
+    });
+  }
 
-        if (task == null) {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Consumer<TaskDetailViewModel>(
+      builder: (context, taskDetailViewModel, child) {
+        if (taskDetailViewModel.isLoading) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Task Not Found')),
-            body: const Center(
+            appBar: AppBar(title: Text(l10n.taskDetailsTitle)),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (taskDetailViewModel.state == TaskDetailState.error) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.taskDetailsTitle)),
+            body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  SizedBox(height: 16),
-                  Text('Task not found'),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    taskDetailViewModel.errorMessage ?? 'Error loading task',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => taskDetailViewModel.loadTask(widget.taskId),
+                    child: const Text('Retry'),
+                  ),
                 ],
               ),
             ),
           );
         }
 
+        final task = taskDetailViewModel.task;
+        if (task == null) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.taskDetailsTitle)),
+            body: const Center(child: Text('Task not found')),
+          );
+        }
+
         return Scaffold(
+          backgroundColor: const Color(0xFFF1F5F9),
           appBar: AppBar(
-            title: Text(task.title),
+            title: Text(l10n.taskDetailsTitle),
+            backgroundColor: const Color(0xFFF1F5F9),
+            elevation: 0,
             actions: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => context.go('/tasks/${task.id}/edit'),
+              ),
               PopupMenuButton<String>(
                 onSelected: (value) {
-                  if (value == 'edit') {
-                    context.go('/task/${task.id}/edit');
-                  } else if (value == 'delete') {
-                    _showDeleteConfirmation(context);
+                  if (value == 'delete') {
+                    _showDeleteConfirmation(context, taskDetailViewModel);
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit),
-                        SizedBox(width: 8),
-                        Text('Edit'),
-                      ],
-                    ),
-                  ),
                   const PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
                         Icon(Icons.delete, color: Colors.red),
                         SizedBox(width: 8),
-                        Text('Delete'),
+                        Text('Delete Task'),
                       ],
                     ),
                   ),
@@ -83,7 +109,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Task Header Card
+                // Task Title Card
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -92,94 +118,46 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              backgroundColor: _getStatusColor(task.status),
-                              child: Icon(
-                                _getStatusIcon(task.status),
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    task.title,
-                                    style: Theme.of(context).textTheme.titleLarge,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _getStatusText(task.status),
-                                    style: TextStyle(
-                                      color: _getStatusColor(task.status),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                task.title,
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _getPriorityBackgroundColor(task.priority),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                task.priority.name.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: _getPriorityColor(task.priority),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            _buildPriorityChip(task.priority),
-                            Consumer<ProjectViewModel>(
-                              builder: (context, projectViewModel, child) {
-                                final project = projectViewModel.getProject(task.projectId);
-                                return Chip(
-                                  avatar: const Icon(Icons.folder, size: 16),
-                                  label: Text(project?.name ?? 'Unknown Project'),
-                                );
-                              },
-                            ),
-                            if (task.dueDate != null)
-                              Chip(
-                                avatar: Icon(
-                                  Icons.schedule,
-                                  size: 16,
-                                  color: task.isOverdue ? Colors.red : null,
-                                ),
-                                label: Text(
-                                  'Due ${_formatDate(task.dueDate!)}',
-                                  style: TextStyle(
-                                    color: task.isOverdue ? Colors.red : null,
-                                  ),
-                                ),
-                                backgroundColor: task.isOverdue ? Colors.red.withOpacity(0.1) : null,
-                              ),
-                          ],
-                        ),
+                        if (task.description.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            task.description,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 16),
 
-                // Description Card
-                if (task.description != null) ...[
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Description',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(task.description!),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Status Actions Card
+                // Status Section
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -187,58 +165,50 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Actions',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          'Status',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         Row(
                           children: [
-                            if (task.status != TaskStatus.todo)
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  onPressed: () => taskViewModel.updateTaskStatus(task.id, TaskStatus.todo),
-                                  icon: const Icon(Icons.radio_button_unchecked),
-                                  label: const Text('Mark as Todo'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                ),
+                            Expanded(
+                              child: _buildStatusButton(
+                                context,
+                                'To Do',
+                                TaskStatus.todo,
+                                task.status,
+                                () => taskDetailViewModel.changeTaskStatus(task.id, TaskStatus.todo),
                               ),
-                            if (task.status != TaskStatus.todo && task.status != TaskStatus.inProgress)
-                              const SizedBox(width: 8),
-                            if (task.status != TaskStatus.inProgress)
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  onPressed: () => taskViewModel.updateTaskStatus(task.id, TaskStatus.inProgress),
-                                  icon: const Icon(Icons.play_circle),
-                                  label: const Text('Start'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _buildStatusButton(
+                                context,
+                                'In Progress',
+                                TaskStatus.inProgress,
+                                task.status,
+                                () => taskDetailViewModel.changeTaskStatus(task.id, TaskStatus.inProgress),
                               ),
-                            if (task.status != TaskStatus.inProgress && task.status != TaskStatus.completed)
-                              const SizedBox(width: 8),
-                            if (task.status != TaskStatus.completed)
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  onPressed: () => taskViewModel.updateTaskStatus(task.id, TaskStatus.completed),
-                                  icon: const Icon(Icons.check_circle),
-                                  label: const Text('Complete'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _buildStatusButton(
+                                context,
+                                'Done',
+                                TaskStatus.done,
+                                task.status,
+                                () => taskDetailViewModel.changeTaskStatus(task.id, TaskStatus.done),
                               ),
+                            ),
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 16),
 
                 // Task Details Card
@@ -250,14 +220,49 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                       children: [
                         Text(
                           'Details',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 16),
-                        _buildDetailRow('Created', task.createdAt != null ? _formatDateTime(task.createdAt!) : 'Unknown'),
-                        if (task.updatedAt != null)
-                          _buildDetailRow('Updated', _formatDateTime(task.updatedAt!)),
-                        if (task.assigneeId != null)
-                          _buildDetailRow('Assignee', 'User ${task.assigneeId}'),
+                        
+                        if (task.dueDate != null) ...[
+                          _buildDetailRow(
+                            context,
+                            'Due Date',
+                            _formatDate(task.dueDate!),
+                            Icons.calendar_today,
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        
+                        _buildDetailRow(
+                          context,
+                          'Priority',
+                          task.priority.name.toUpperCase(),
+                          Icons.flag,
+                          color: _getPriorityColor(task.priority),
+                        ),
+                        
+                        if (task.projectId != null) ...[
+                          const SizedBox(height: 12),
+                          _buildDetailRow(
+                            context,
+                            'Project',
+                            task.projectId!,
+                            Icons.folder,
+                          ),
+                        ],
+                        
+                        if (task.assigneeId != null) ...[
+                          const SizedBox(height: 12),
+                          _buildDetailRow(
+                            context,
+                            'Assigned to',
+                            task.assigneeId!,
+                            Icons.person,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -270,82 +275,91 @@ class _TaskDetailViewState extends State<TaskDetailView> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(child: Text(value)),
-        ],
+  Widget _buildStatusButton(
+    BuildContext context,
+    String label,
+    TaskStatus status,
+    TaskStatus currentStatus,
+    VoidCallback onPressed,
+  ) {
+    final isSelected = status == currentStatus;
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.surface,
+        foregroundColor: isSelected
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.onSurface,
+        elevation: isSelected ? 2 : 0,
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline,
+          width: 1,
+        ),
       ),
+      child: Text(label),
     );
   }
 
-  Widget _buildPriorityChip(TaskPriority priority) {
-    Color color;
-    String text;
-    
+  Widget _buildDetailRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon, {
+    Color? color,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: color ?? Theme.of(context).colorScheme.primary,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getPriorityColor(Priority priority) {
     switch (priority) {
-      case TaskPriority.high:
-        color = Colors.red;
-        text = 'High Priority';
-        break;
-      case TaskPriority.medium:
-        color = Colors.orange;
-        text = 'Medium Priority';
-        break;
-      case TaskPriority.low:
-        color = Colors.green;
-        text = 'Low Priority';
-        break;
-    }
-
-    return Chip(
-      avatar: Icon(Icons.flag, size: 16, color: color),
-      label: Text(text),
-      backgroundColor: color.withOpacity(0.1),
-      side: BorderSide(color: color),
-    );
-  }
-
-  Color _getStatusColor(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.todo:
-        return Colors.grey;
-      case TaskStatus.inProgress:
-        return Colors.blue;
-      case TaskStatus.completed:
-        return Colors.green;
+      case Priority.high:
+        return const Color(0xFFDC2626);
+      case Priority.medium:
+        return const Color(0xFFEAB308);
+      case Priority.low:
+        return const Color(0xFF22C55E);
     }
   }
 
-  IconData _getStatusIcon(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.todo:
-        return Icons.radio_button_unchecked;
-      case TaskStatus.inProgress:
-        return Icons.play_circle;
-      case TaskStatus.completed:
-        return Icons.check_circle;
-    }
-  }
-
-  String _getStatusText(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.todo:
-        return 'To Do';
-      case TaskStatus.inProgress:
-        return 'In Progress';
-      case TaskStatus.completed:
-        return 'Completed';
+  Color _getPriorityBackgroundColor(Priority priority) {
+    switch (priority) {
+      case Priority.high:
+        return const Color(0xFFFFE4E4);
+      case Priority.medium:
+        return const Color(0xFFFEF9C3);
+      case Priority.low:
+        return const Color(0xFFDCFCE7);
     }
   }
 
@@ -353,11 +367,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  String _formatDateTime(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} at ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(BuildContext context, TaskDetailViewModel viewModel) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -371,7 +381,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
-              Provider.of<TaskViewModel>(context, listen: false).deleteTask(widget.taskId);
+              viewModel.deleteTask(widget.taskId);
               Navigator.of(context).pop();
               context.pop(); // Go back to previous screen
             },

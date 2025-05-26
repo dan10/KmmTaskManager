@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:shelf/shelf.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 import '../../lib/src/routes/auth_routes.dart';
 import '../../lib/src/services/auth_service.dart';
 import '../../lib/src/services/jwt_service.dart';

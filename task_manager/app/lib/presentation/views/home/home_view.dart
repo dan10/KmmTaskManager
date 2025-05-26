@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../viewmodels/auth_viewmodel.dart';
 import '../../viewmodels/project_viewmodel.dart';
-import '../../viewmodels/task_viewmodel.dart';
+import '../../viewmodels/task_list_viewmodel.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -24,10 +24,10 @@ class _HomeViewState extends State<HomeView> {
 
   void _loadData() {
     final projectViewModel = Provider.of<ProjectViewModel>(context, listen: false);
-    final taskViewModel = Provider.of<TaskViewModel>(context, listen: false);
+    final taskListViewModel = Provider.of<TaskListViewModel>(context, listen: false);
     
     projectViewModel.loadProjects();
-    taskViewModel.loadTasks();
+    taskListViewModel.loadTasks();
   }
 
   @override
@@ -81,9 +81,9 @@ class _HomeViewState extends State<HomeView> {
                 const SizedBox(height: 24),
 
                 // Quick Stats
-                Consumer<TaskViewModel>(
-                  builder: (context, taskViewModel, child) {
-                    if (taskViewModel.state == TaskViewState.loaded) {
+                Consumer<TaskListViewModel>(
+                  builder: (context, taskListViewModel, child) {
+                    if (taskListViewModel.state == TaskListState.loaded) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -98,7 +98,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: _buildStatCard(
                                   icon: Icons.task_alt,
                                   title: 'Total Tasks',
-                                  value: taskViewModel.totalTasks.toString(),
+                                  value: taskListViewModel.totalItems.toString(),
                                   color: Colors.blue,
                                 ),
                               ),
@@ -107,7 +107,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: _buildStatCard(
                                   icon: Icons.check_circle,
                                   title: 'Completed',
-                                  value: taskViewModel.completedTasksCount.toString(),
+                                  value: taskListViewModel.doneTasks.length.toString(),
                                   color: Colors.green,
                                 ),
                               ),
@@ -120,7 +120,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: _buildStatCard(
                                   icon: Icons.pending_actions,
                                   title: 'Pending',
-                                  value: taskViewModel.pendingTasksCount.toString(),
+                                  value: (taskListViewModel.todoTasks.length + taskListViewModel.inProgressTasks.length).toString(),
                                   color: Colors.orange,
                                 ),
                               ),
@@ -129,7 +129,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: _buildStatCard(
                                   icon: Icons.warning,
                                   title: 'Overdue',
-                                  value: taskViewModel.overdueTasks.length.toString(),
+                                  value: taskListViewModel.overdueTasks.length.toString(),
                                   color: Colors.red,
                                 ),
                               ),

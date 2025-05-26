@@ -1,22 +1,19 @@
-class GoogleLoginRequestDto {
-  final String idToken;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const GoogleLoginRequestDto({
-    required this.idToken,
-  });
+part 'google_login_request_dto.freezed.dart';
+part 'google_login_request_dto.g.dart';
 
-  factory GoogleLoginRequestDto.fromJson(Map<String, dynamic> json) {
-    return GoogleLoginRequestDto(
-      idToken: json['idToken'] as String,
-    );
-  }
+@freezed
+abstract class GoogleLoginRequestDto with _$GoogleLoginRequestDto {
+  const factory GoogleLoginRequestDto({
+    required String idToken,
+  }) = _GoogleLoginRequestDto;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'idToken': idToken,
-    };
-  }
+  factory GoogleLoginRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$GoogleLoginRequestDtoFromJson(json);
+}
 
+extension GoogleLoginRequestDtoExtension on GoogleLoginRequestDto {
   Map<String, String> validate() {
     final details = <String, String>{};
 

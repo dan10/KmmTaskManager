@@ -1,49 +1,21 @@
-import '../../../models.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class TaskStatusChangeRequestDto {
-  final TaskStatus status;
+import 'task_dto.dart';
 
-  const TaskStatusChangeRequestDto({
-    required this.status,
-  });
+part 'task_status_change_request_dto.freezed.dart';
+part 'task_status_change_request_dto.g.dart';
 
-  factory TaskStatusChangeRequestDto.fromJson(Map<String, dynamic> json) {
-    final statusString = json['status'] as String;
-    TaskStatus status;
-    switch (statusString.toUpperCase()) {
-      case 'TODO':
-        status = TaskStatus.todo;
-        break;
-      case 'IN_PROGRESS':
-        status = TaskStatus.inProgress;
-        break;
-      case 'DONE':
-        status = TaskStatus.done;
-        break;
-      default:
-        status = TaskStatus.todo; // Default fallback
-    }
-    return TaskStatusChangeRequestDto(status: status);
-  }
+@freezed
+abstract class TaskStatusChangeRequestDto with _$TaskStatusChangeRequestDto {
+  const factory TaskStatusChangeRequestDto({
+    required TaskStatus status,
+  }) = _TaskStatusChangeRequestDto;
 
-  Map<String, dynamic> toJson() {
-    String statusString;
-    switch (status) {
-      case TaskStatus.todo:
-        statusString = 'TODO';
-        break;
-      case TaskStatus.inProgress:
-        statusString = 'IN_PROGRESS';
-        break;
-      case TaskStatus.done:
-        statusString = 'DONE';
-        break;
-    }
-    return {
-      'status': statusString,
-    };
-  }
+  factory TaskStatusChangeRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$TaskStatusChangeRequestDtoFromJson(json);
+}
 
+extension TaskStatusChangeRequestDtoExtension on TaskStatusChangeRequestDto {
   Map<String, String> validate() {
     // TaskStatus is an enum, so it's already validated
     return {};

@@ -1,30 +1,21 @@
-class RegisterRequestDto {
-  final String displayName;
-  final String email;
-  final String password;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const RegisterRequestDto({
-    required this.displayName,
-    required this.email,
-    required this.password,
-  });
+part 'register_request_dto.freezed.dart';
+part 'register_request_dto.g.dart';
 
-  factory RegisterRequestDto.fromJson(Map<String, dynamic> json) {
-    return RegisterRequestDto(
-      displayName: json['displayName'] as String,
-      email: json['email'] as String,
-      password: json['password'] as String,
-    );
-  }
+@freezed
+abstract class RegisterRequestDto with _$RegisterRequestDto {
+  const factory RegisterRequestDto({
+    required String displayName,
+    required String email,
+    required String password,
+  }) = _RegisterRequestDto;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'displayName': displayName,
-      'email': email,
-      'password': password,
-    };
-  }
+  factory RegisterRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$RegisterRequestDtoFromJson(json);
+}
 
+extension RegisterRequestDtoExtension on RegisterRequestDto {
   Map<String, String> validate() {
     final details = <String, String>{};
 

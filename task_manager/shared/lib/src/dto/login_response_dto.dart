@@ -1,25 +1,17 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'user_public_response_dto.dart';
 
-class LoginResponseDto {
-  final String token;
-  final UserPublicResponseDto user;
+part 'login_response_dto.freezed.dart';
+part 'login_response_dto.g.dart';
 
-  const LoginResponseDto({
-    required this.token,
-    required this.user,
-  });
+@freezed
+abstract class LoginResponseDto with _$LoginResponseDto {
+  const factory LoginResponseDto({
+    required String token,
+    required UserPublicResponseDto user,
+  }) = _LoginResponseDto;
 
-  factory LoginResponseDto.fromJson(Map<String, dynamic> json) {
-    return LoginResponseDto(
-      token: json['token'] as String,
-      user: UserPublicResponseDto.fromJson(json['user'] as Map<String, dynamic>),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'token': token,
-      'user': user.toJson(),
-    };
-  }
+  factory LoginResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$LoginResponseDtoFromJson(json);
 } 

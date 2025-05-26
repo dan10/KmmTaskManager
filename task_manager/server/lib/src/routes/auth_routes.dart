@@ -1,6 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:shared/models.dart';
+import 'package:task_manager_shared/models.dart';
 
 import '../services/auth_service.dart';
 import '../services/jwt_service.dart';
