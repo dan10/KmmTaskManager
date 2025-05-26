@@ -1,0 +1,200 @@
+services:
+  # Dart Application server
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    container_name: dart-task-manager-server
+    ports:
+      - "8081:8080"
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - DATABASE_URL=postgres://postgres:postgres@db-dart:5432/task_manager
+      - JWT_SECRET=your-secret-key-here-make-this-secure-in-production
+      - LOG_LEVEL=INFO
+    depends_on:
+      db-dart:
+        condition: service_healthy
+    networks:
+      - dart-task-manager-network
+    restart: unless-stopped
+    deploy:
+      labels:
+        app: "dart-task-manager"
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL database for Dart
+  db-dart:
+    image: postgres:15-alpine
+    container_name: postgres-dart-task-manager
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=task_manager
+      # Performance tuning
+      - POSTGRES_SHARED_BUFFERS=256MB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=768MB
+      - POSTGRES_WORK_MEM=8MB
+      - POSTGRES_MAINTENANCE_WORK_MEM=64MB
+      - POSTGRES_MAX_CONNECTIONS=100
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d task_manager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dart_data:/var/lib/postgresql/data
+    networks:
+      - dart-task-manager-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # Prometheus for metrics collection (Dart)
+  prometheus-dart:
+    image: prom/prometheus:latest
+    container_name: prometheus-dart-task-manager
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_dart_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=15d'
+    networks:
+      - dart-task-manager-network
+    restart: unless-stopped
+    depends_on:
+      - cadvisor-dart
+      - node_exporter-dart
+      - server
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 512M
+
+  # Grafana for metrics visualization (Dart)
+  grafana-dart:
+    image: grafana/grafana:latest
+    container_name: grafana-dart-task-manager
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_dart_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus-dart
+    networks:
+      - dart-task-manager-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 512M
+
+  # cAdvisor for container metrics (Dart)
+  cadvisor-dart:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor-dart-task-manager
+    privileged: true
+    ports:
+      - "8082:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    command:
+      - '--store_container_labels=true'
+      - '--whitelisted_container_labels=dart-task-manager,app'
+    networks:
+      - dart-task-manager-network
+    restart: unless-stopped
+    depends_on:
+      - server
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+
+  # Node Exporter for host metrics (Dart)
+  node_exporter-dart:
+    image: prom/node-exporter:latest
+    container_name: node-exporter-dart-task-manager
+    ports:
+      - "9101:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    networks:
+      - dart-task-manager-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
+volumes:
+  postgres_dart_data:
+  grafana_dart_data:
+  prometheus_dart_data:
+
+networks:
+  dart-task-manager-network:
+    driver: bridge 
