@@ -1,0 +1,36 @@
+# Fast Dart Dockerfile - assumes binary is already compiled locally
+# Build the binary first with: dart compile exe bin/server.dart -o bin/server
+
+FROM alpine:3.19 AS runtime
+
+# Install minimal runtime dependencies
+RUN apk add --no-cache \
+    ca-certificates \
+    curl \
+    gcompat
+
+# Create non-root user
+RUN addgroup -g 1000 appuser && \
+    adduser -D -s /bin/sh -u 1000 -G appuser appuser
+
+# Create app directory
+RUN mkdir -p /app/bin && chown -R appuser:appuser /app
+
+# Copy the pre-compiled binary
+COPY server/bin/server /app/bin/server
+RUN chown appuser:appuser /app/bin/server && chmod +x /app/bin/server
+
+# Switch to non-root user
+USER appuser
+
+WORKDIR /app
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Start server
+CMD ["/app/bin/server"] 

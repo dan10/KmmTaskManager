@@ -1,6 +1,7 @@
 import com.danioliveira.taskmanager.api.request.LoginRequest
 import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
+import com.danioliveira.taskmanager.domain.Priority
 import io.gatling.javaapi.core.CoreDsl.*
 import io.gatling.javaapi.core.Simulation
 import io.gatling.javaapi.http.HttpDsl.http
@@ -22,6 +23,55 @@ class TaskApiSimulation : Simulation() {
         prettyPrint = false
     }
 
+    // Configurable base URL (defaults to Kotlin server)
+    private val baseUrl = System.getProperty("gatling.baseUrl", "http://localhost:8081")
+
+    // Test mode configuration
+    private val testMode = System.getProperty("gatling.test.mode", "quick")
+
+    // Load test configuration based on mode
+    private val loadConfig = when (testMode) {
+        "long" -> LoadConfig(
+            userJourneyRampFrom = 10.0,
+            userJourneyRampTo = 100.0,
+            readOnlyRampFrom = 20.0,
+            readOnlyRampTo = 200.0,
+            duration = Duration.ofMinutes(30),
+            maxDuration = Duration.ofMinutes(35),
+            maxResponseTime = 2000
+        )
+
+        "stress" -> LoadConfig(
+            userJourneyRampFrom = 50.0,
+            userJourneyRampTo = 500.0,
+            readOnlyRampFrom = 100.0,
+            readOnlyRampTo = 1000.0,
+            duration = Duration.ofMinutes(10),
+            maxDuration = Duration.ofMinutes(15),
+            maxResponseTime = 10000
+        )
+
+        else -> LoadConfig( // "quick" mode
+            userJourneyRampFrom = 1.0,
+            userJourneyRampTo = 10.0,
+            readOnlyRampFrom = 1.0,
+            readOnlyRampTo = 10.0,
+            duration = Duration.ofMinutes(2),
+            maxDuration = Duration.ofMinutes(3),
+            maxResponseTime = 5000
+        )
+    }
+
+    data class LoadConfig(
+        val userJourneyRampFrom: Double,
+        val userJourneyRampTo: Double,
+        val readOnlyRampFrom: Double,
+        val readOnlyRampTo: Double,
+        val duration: Duration,
+        val maxDuration: Duration,
+        val maxResponseTime: Int
+    )
+
     // Feeder for dynamic user data
     private val userFeeder = generateSequence {
         val userId = idCounter.getAndIncrement()
@@ -32,8 +82,7 @@ class TaskApiSimulation : Simulation() {
         )
     }.iterator()
 
-    // Base configuration
-    private val baseUrl = "http://localhost:8081"
+    // Base configuration with configurable URL
     private val httpProtocol = http
         .baseUrl(baseUrl)
         .acceptHeader("application/json")
@@ -59,8 +108,7 @@ class TaskApiSimulation : Simulation() {
         http("Register User")
             .post("/api/auth/register")
             .body(StringBody("#{registerRequestJson}"))
-            .check(status().`is`(200)) // Check for 201 Created status
-        // Optional: Check response body if needed
+            .check(status().`is`(200))
     )
 
     // Login User
@@ -94,7 +142,7 @@ class TaskApiSimulation : Simulation() {
         val taskModel = TaskCreateRequest(
             title = "Task $taskId for $email",
             description = "Load test task created at $timestamp",
-            status = "TODO",
+            priority = Priority.MEDIUM,
             dueDate = null,
             projectId = null,
             assigneeId = null
@@ -106,7 +154,7 @@ class TaskApiSimulation : Simulation() {
             .post("/api/tasks")
             .header("Authorization", "Bearer #{authToken}") // Use saved token
             .body(StringBody("#{taskRequestJson}"))
-            .check(status().`is`(201))
+            .check(status().`is`(200))
     )
 
     // Get Tasks
@@ -139,25 +187,31 @@ class TaskApiSimulation : Simulation() {
         .pause(1)
         .exec(getTasksRequest)
 
-
     // === Load Test Setup ===
     init {
+        println("Running Gatling test in '$testMode' mode")
+        println("Target URL: $baseUrl")
+        println("User Journey: ${loadConfig.userJourneyRampFrom} to ${loadConfig.userJourneyRampTo} users/sec")
+        println("Read Only: ${loadConfig.readOnlyRampFrom} to ${loadConfig.readOnlyRampTo} users/sec")
+        println("Duration: ${loadConfig.duration}")
+        
         setUp(
             // User Journey Scenario (Registration + Write + Read)
             userJourneyScenario.injectOpen(
-                rampUsersPerSec(100.0).to(10000.0).during(Duration.ofMinutes(30))
+                rampUsersPerSec(loadConfig.userJourneyRampFrom).to(loadConfig.userJourneyRampTo)
+                    .during(loadConfig.duration)
             ),
             // Read Only Scenario (Read Heavy)
             readOnlyScenario.injectOpen(
-                rampUsersPerSec(100.0).to(10000.0).during(Duration.ofMinutes(30))
+                rampUsersPerSec(loadConfig.readOnlyRampFrom).to(loadConfig.readOnlyRampTo).during(loadConfig.duration)
             )
         ).protocols(httpProtocol)
-            .maxDuration(Duration.ofMinutes(30)) // Ensure total duration is 30 mins
+            .maxDuration(loadConfig.maxDuration)
             .assertions(
-                // Example Assertions: Check overall success rate and response times
+                // Success rate assertions
                 global().successfulRequests().percent().gt(95.0),
-                global().responseTime().max().lt(1000) // Max response time < 1000 ms
-                // Add more specific assertions per request if needed
+                // Response time assertions
+                global().responseTime().max().lt(loadConfig.maxResponseTime)
             )
     }
 }

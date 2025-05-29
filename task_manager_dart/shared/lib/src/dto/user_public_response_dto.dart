@@ -1,23 +1,20 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../models/user.dart';
 
-class UserPublicResponseDto {
-  final String id;
-  final String displayName;
-  final String email;
+part 'user_public_response_dto.freezed.dart';
 
-  const UserPublicResponseDto({
-    required this.id,
-    required this.displayName,
-    required this.email,
-  });
+part 'user_public_response_dto.g.dart';
 
-  factory UserPublicResponseDto.fromJson(Map<String, dynamic> json) {
-    return UserPublicResponseDto(
-      id: json['id'] as String,
-      displayName: json['displayName'] as String,
-      email: json['email'] as String,
-    );
-  }
+@freezed
+abstract class UserPublicResponseDto with _$UserPublicResponseDto {
+  const factory UserPublicResponseDto({
+    required String id,
+    required String displayName,
+    required String email,
+  }) = _UserPublicResponseDto;
+
+  factory UserPublicResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$UserPublicResponseDtoFromJson(json);
 
   factory UserPublicResponseDto.fromUser(User user) {
     return UserPublicResponseDto(
@@ -25,13 +22,5 @@ class UserPublicResponseDto {
       displayName: user.displayName,
       email: user.email,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'displayName': displayName,
-      'email': email,
-    };
   }
 } 

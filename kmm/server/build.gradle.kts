@@ -20,6 +20,33 @@ ktor {
     }
 }
 
+// Custom Gatling tasks for different scenarios
+tasks.register("gatlingRunQuick") {
+    group = "gatling"
+    description = "Run Gatling load tests with reduced load for quick testing"
+    dependsOn("gatlingRun")
+    doFirst {
+        System.setProperty("gatling.test.mode", "quick")
+    }
+}
+
+tasks.register("gatlingRunLong") {
+    group = "gatling"
+    description = "Run Gatling load tests for 30 minutes with high load"
+    dependsOn("gatlingRun")
+    doFirst {
+        System.setProperty("gatling.test.mode", "long")
+    }
+}
+
+tasks.register("gatlingRunStress") {
+    group = "gatling"
+    description = "Run Gatling stress tests with very high load"
+    dependsOn("gatlingRun")
+    doFirst {
+        System.setProperty("gatling.test.mode", "stress")
+    }
+}
 dependencies {
     implementation(projects.shared)
     implementation(libs.logback)
@@ -44,8 +71,7 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
     // Ktor Request Validation
     implementation(libs.ktor.server.request.validation)
-    // Ktor File Uploads
-    implementation(libs.ktor.server.cio)
+    // Ktor File Uploads (already included above)
     // Google API Client for token verification
     implementation(libs.google.api)
     implementation(libs.koin.ktor)
@@ -73,5 +99,6 @@ dependencies {
     gatlingImplementation(libs.gatling.app)
     gatlingImplementation(libs.gatling.charts)
     gatlingImplementation(libs.ktor.serialization.kotlinx.json)
+    gatlingImplementation(libs.kotlinx.datetime) // Add kotlinx-datetime for LocalDateTime support
     gatlingImplementation(projects.shared)
 }

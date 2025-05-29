@@ -25,7 +25,7 @@ import '../lib/src/services/metrics_service.dart';
 
 // Middleware
 import '../lib/src/middleware/auth_middleware.dart';
-// import '../lib/src/middleware/error_handling_middleware.dart'; // Import error handler - temporarily disabled
+import '../lib/src/middleware/error_handling_middleware.dart'; // Import error handler
 
 // Routes
 import '../lib/src/routes/auth_routes.dart';
@@ -75,7 +75,7 @@ void main() async {
   final handler = Pipeline()
       .addMiddleware(corsHeaders())      // Apply CORS headers first
       // .addMiddleware(logRequests())      // Then log requests - temporarily disabled
-      // .addMiddleware(errorHandlingMiddleware()) // Add error handling middleware - temporarily disabled
+      .addMiddleware(errorHandlingMiddleware()) // Add error handling middleware
       .addHandler(router);
 
   // 8. Start Server

@@ -18,14 +18,14 @@ The Docker setup includes the following services:
 
 ## Port Configuration (No Conflicts with Ktor)
 
-| Service | Dart Port | Ktor Port | Description |
-|---------|-----------|-----------|-------------|
-| Application | 8081 | 8080 | Main API server |
-| Database | 5433 | 5432 | PostgreSQL database |
-| Prometheus | 9091 | 9090 | Metrics collection |
-| Grafana | 3001 | 3000 | Metrics visualization |
-| cAdvisor | 8082 | 8081 | Container monitoring |
-| Node Exporter | 9101 | 9100 | Host metrics |
+| Service       | Dart Port | Ktor Port | Description           |
+|---------------|-----------|-----------|-----------------------|
+| Application   | 8082      | 8080      | Main API server       |
+| Database      | 5433      | 5432      | PostgreSQL database   |
+| Prometheus    | 9091      | 9090      | Metrics collection    |
+| Grafana       | 3001      | 3000      | Metrics visualization |
+| cAdvisor      | 8083      | 8082      | Container monitoring  |
+| Node Exporter | 9101      | 9100      | Host metrics          |
 
 ## Quick Start
 
@@ -55,11 +55,11 @@ docker-compose up -d --scale server=3
 
 ## Service Details
 
-### Dart Server (Port 8081)
+### Dart Server (Port 8082)
 - **Container**: `dart-task-manager-server`
-- **URL**: http://localhost:8081
-- **Health Check**: http://localhost:8081/health
-- **Metrics**: http://localhost:8081/metrics (built-in Prometheus metrics)
+- **URL**: http://localhost:8082
+- **Health Check**: http://localhost:8082/health
+- **Metrics**: http://localhost:8082/metrics (built-in Prometheus metrics)
 - **Environment Variables**:
   - `DATABASE_URL`: PostgreSQL connection string
   - `JWT_SECRET`: JWT signing secret (change in production!)
@@ -89,9 +89,9 @@ docker-compose up -d --scale server=3
 - **Datasource**: Automatically configured Prometheus
 - **Dashboards**: Dart-specific dashboard included
 
-#### cAdvisor (Port 8082)
+#### cAdvisor (Port 8083)
 - Container resource monitoring
-- **URL**: http://localhost:8082
+- **URL**: http://localhost:8083
 - **Metrics**: CPU, Memory, Network, Disk usage per container
 
 #### Node Exporter (Port 9101)
@@ -144,7 +144,7 @@ All services run in the `dart-task-manager-network` bridge network:
 - Internal communication uses service names (e.g., `server`, `db-dart`)
 - External access via exposed ports
 - **Isolated from Ktor application network**
-- Direct access to application on port 8081
+- Direct access to application on port 8082
 
 ## Performance Comparison Setup
 
@@ -163,8 +163,8 @@ To compare performance between Dart and Ktor applications:
    ```
 
 3. **Access Both Applications**:
-   - Dart: http://localhost:8081
-   - Ktor: http://localhost:8080
+    - Dart: http://localhost:8082
+    - Ktor: http://localhost:8081
 
 4. **Monitor Both**:
    - Dart Grafana: http://localhost:3001
@@ -224,7 +224,7 @@ The `dart-dashboard.json` includes panels for:
 
 1. **Port conflicts**: Ensure Ktor application is using different ports
    ```bash
-   netstat -tlnp | grep :8081
+   netstat -tlnp | grep :8082
    ```
 
 2. **Permission issues**: Ensure Docker has proper permissions
@@ -241,7 +241,7 @@ The `dart-dashboard.json` includes panels for:
 
 5. **Metrics not showing**: Check metrics endpoint
    ```bash
-   curl http://localhost:8081/metrics
+   curl http://localhost:8082/metrics
    ```
 
 ### Useful Commands

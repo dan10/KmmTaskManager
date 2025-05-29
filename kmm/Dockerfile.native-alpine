@@ -1,0 +1,53 @@
+# Multi-stage Docker build using Oracle GraalVM with Alpine runtime
+# Uses Oracle GraalVM for native compilation and Alpine for minimal runtime
+
+# Using Oracle GraalVM for JDK 21
+FROM container-registry.oracle.com/graalvm/native-image:21-ol8 AS builder
+
+# Install necessary utilities including xargs for gradlew
+RUN microdnf install -y findutils && microdnf clean all
+
+# Set the working directory
+WORKDIR /build
+
+# Copy the source code into the image for building
+COPY . /build
+
+# Make gradlew executable
+RUN chmod +x ./gradlew
+
+# Set memory limits for the build process (reduced)
+ENV GRADLE_OPTS="-Xmx1g -XX:MaxMetaspaceSize=256m -XX:+UseG1GC"
+ENV JAVA_OPTS="-Xmx512m"
+
+# Build the native executable with reduced memory
+RUN ./gradlew server:nativeCompile --no-daemon --no-configuration-cache \
+    -Dorg.gradle.jvmargs="-Xmx1g -XX:MaxMetaspaceSize=256m -XX:+UseG1GC" \
+    -Dgraalvm.native-image.args="--gc=G1 -J-Xmx800m -J-XX:+UseG1GC --no-fallback"
+
+# The deployment Image - using Alpine for minimal size
+FROM alpine:latest
+
+# Install runtime dependencies for GraalVM native images
+RUN apk add --no-cache gcompat libstdc++ && rm -rf /var/cache/apk/*
+
+# Expose the application port
+EXPOSE 8081
+
+# Copy the native executable from builder stage
+COPY --from=builder /build/server/build/native/nativeCompile/task-manager-native /app
+
+# Set executable permissions
+RUN chmod +x /app
+
+# Create a non-root user for security
+RUN addgroup -g 1000 appuser && adduser -D -s /bin/sh -u 1000 -G appuser appuser
+RUN chown appuser:appuser /app
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:8081/api/admin/health || exit 1
+
+# Run the application
+ENTRYPOINT ["/app"] 

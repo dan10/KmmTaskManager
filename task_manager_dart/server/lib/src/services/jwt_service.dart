@@ -27,17 +27,21 @@ class JwtService {
       // 'exp' is automatically set by dart_jsonwebtoken if expiresIn is provided
     };
 
-    final jwt = JWT(payload, issuer: 'task_manager_server');
+    final jwt = JWT(payload, issuer: 'taskit');
     final token = jwt.sign(
       SecretKey(_appConfig.jwtSecret),
-      expiresIn: const Duration(days: 7), // Standard 'exp' claim
+      expiresIn: const Duration(
+          hours: 1), // Match Kotlin server's 1 hour validity
     );
     return token;
   }
 
   Map<String, dynamic>? validateToken(String token) {
     try {
+      print('Validating token: ${token.substring(0, 20)}...');
+      print('Using JWT secret: ${_appConfig.jwtSecret.substring(0, 10)}...');
       final jwt = JWT.verify(token, SecretKey(_appConfig.jwtSecret));
+      print('Token validation successful');
       return jwt.payload as Map<String, dynamic>;
     } on JWTExpiredException {
       print('JWT Expired');

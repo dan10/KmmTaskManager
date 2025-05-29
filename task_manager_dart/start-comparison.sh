@@ -57,7 +57,7 @@ echo -e "${BLUE}🔍 Checking port availability...${NC}"
 ports_ok=true
 
 # Dart application ports
-check_port 8081 "Dart Application" || ports_ok=false
+check_port 8082 "Dart Application" || ports_ok=false
 check_port 5433 "Dart PostgreSQL" || ports_ok=false
 check_port 9091 "Dart Prometheus" || ports_ok=false
 check_port 3001 "Dart Grafana" || ports_ok=false
@@ -86,7 +86,7 @@ echo ""
 echo -e "${BLUE}⏳ Waiting for services to be ready...${NC}"
 
 # Wait for core services
-wait_for_service "http://localhost:8081/health" "Dart Application"
+wait_for_service "http://localhost:8082/health" "Dart Application"
 wait_for_service "http://localhost:9091" "Dart Prometheus"
 wait_for_service "http://localhost:3001" "Dart Grafana"
 
@@ -97,9 +97,9 @@ echo -e "${BLUE}📊 Access Points:${NC}"
 echo "┌─────────────────────────────────────────────────────────────┐"
 echo "│                    DART APPLICATION                         │"
 echo "├─────────────────────────────────────────────────────────────┤"
-echo "│ Application:     http://localhost:8081                     │"
-echo "│ Health Check:    http://localhost:8081/health              │"
-echo "│ Metrics:         http://localhost:8081/metrics             │"
+echo "│ Application:     http://localhost:8082                     │"
+echo "│ Health Check:    http://localhost:8082/health              │"
+echo "│ Metrics:         http://localhost:8082/metrics             │"
 echo "│ Database:        localhost:5433 (postgres/postgres)        │"
 echo "├─────────────────────────────────────────────────────────────┤"
 echo "│                     MONITORING                              │"
@@ -120,7 +120,7 @@ echo "   - Dart:  http://localhost:3001"
 echo "   - Ktor:  http://localhost:3000"
 echo ""
 echo "3. Run load tests against both applications:"
-echo "   - Dart:  curl http://localhost:8081/api/..."
+echo "   - Dart:  curl http://localhost:8082/api/..."
 echo "   - Ktor:  curl http://localhost:8080/api/..."
 echo ""
 echo "4. Monitor resource usage:"

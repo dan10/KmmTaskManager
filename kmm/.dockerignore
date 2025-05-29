@@ -1,0 +1,105 @@
+# Gradle build artifacts
+**/build/
+**/out/
+**/.gradle/
+
+# IDE files
+**/.idea/
+**/.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Local development
+**/.env
+**/local.properties
+
+# Documentation
+**/*.md
+**/docs/
+
+# Scripts (except the ones we need)
+*.sh
+!gradlew
+!gradlew.bat
+
+# Logs
+**/*.log
+
+# Temporary files
+**/tmp/
+**/temp/
+
+# Node modules (if any)
+**/node_modules/
+
+# Docker files (except the one being used)
+Dockerfile*
+!Dockerfile.native-multistage
+
+# Kotlin Multiplatform specific
+**/kotlin-js-store/
+
+# Android specific (if any)
+**/src/androidMain/
+**/src/androidTest/
+
+# iOS specific
+**/src/iosMain/
+**/src/iosTest/
+
+# Build artifacts
+.gradle/
+.kotlin/
+.junie/
+**/build/
+**/.gradle/
+
+# Exception: Allow the built JAR and native binary for fast Docker builds
+!server/build/libs/fat.jar
+!server/build/native/nativeCompile/task-manager-native
+!server/reflection-config.json
+!server/resource-config.json
+
+# Compose App (not needed for server build)
+composeApp/
+
+# iOS App (not needed for server build)
+iosApp/
+
+# Paging Compose (not needed for server build)
+paging-compose/
+
+# Documentation and scripts
+*.md
+*.sh
+grafana/
+prometheus*.yml
+
+# Docker files (avoid recursion)
+docker-compose*.yml
+
+# Stress testing results
+stress-test-results-*/
+stress-tests/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Dart/Flutter (not needed for Kotlin server)
+.dart_tool/
+.packages
+pubspec.lock
+
+# Don't exclude shared/ - it's needed for the server build
+!shared/ 

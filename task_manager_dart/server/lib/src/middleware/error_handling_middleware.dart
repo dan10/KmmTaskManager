@@ -36,7 +36,7 @@ Middleware errorHandlingMiddleware() {
            // final errorDto = ErrorResponseDto(statusCode: 401, error: 'Unauthorized', message: 'Authentication error.');
            // return jsonResponse(errorDto.toJson(), statusCode: 401);
         } */
-          else {
+        else {
           // Generic fallback for unknown errors
           final errorDto = ErrorResponseDto(
             statusCode: 500,
