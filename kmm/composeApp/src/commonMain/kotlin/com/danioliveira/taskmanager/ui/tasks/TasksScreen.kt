@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import com.danioliveira.taskmanager.domain.Priority
@@ -73,6 +76,9 @@ fun TasksScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
     navigateToCreateTask: () -> Unit
 ) {
+    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+        viewModel.checkAndRefresh()
+    }
 
     Surface(color = Color(0XFFF1F5F9)) {
         // Create a wrapper for the onAction function that handles navigation
@@ -127,42 +133,39 @@ private fun TasksScreen(
         },
         floatingActionButton = { AddTaskButton(onAction) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            LazyColumn {
-                items(
-                    count = pagingItems.itemCount,
-                    key = pagingItems.itemKey { it.id },
-                    contentType = pagingItems.itemContentType { "task" }) { index ->
-                    val task = pagingItems[index]
-                    if (task != null) {
-                        TaskItem(
-                            task = task,
-                            onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
-                            onCheckedChange = {},
-                        )
-                    }
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey { it.id },
+                contentType = pagingItems.itemContentType { "task" }) { index ->
+                val task = pagingItems[index]
+                if (task != null) {
+                    TaskItem(
+                        task = task,
+                        onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
+                        onCheckedChange = {},
+                    )
                 }
+            }
 
-                if (pagingItems.loadState.append == LoadState.Loading) {
-                    item {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                        )
-                    }
+            if (pagingItems.loadState.append == LoadState.Loading) {
+                item {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
                 }
+            }
 
-                if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
-                    item {
-                        EmptyTasksList()
-                    }
+            if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
+                item {
+                    EmptyTasksList()
                 }
             }
         }
@@ -232,7 +235,10 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = stringResource(Res.string.tasks_progress_percentage, (progress * 100).toInt()),
+                    text = stringResource(
+                        Res.string.tasks_progress_percentage,
+                        (progress * 100).toInt()
+                    ),
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold
                 )
@@ -244,7 +250,11 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
                 strokeCap = StrokeCap.Round
             )
             Text(
-                text = stringResource(Res.string.tasks_progress_completed, completedTasks, totalTasks),
+                text = stringResource(
+                    Res.string.tasks_progress_completed,
+                    completedTasks,
+                    totalTasks
+                ),
                 style = MaterialTheme.typography.caption
             )
         }
@@ -384,17 +394,7 @@ fun TasksScreenPreview() {
 @Composable
 fun EmptyTasksScreenPreview() {
     // create list of fake data for preview
-    val fakeData = List(0) {
-        Task(
-            id = Uuid.parse("00000000-0000-0000-0000-000000000000"),
-            title = "Preview Task",
-            description = "This is a preview task description",
-            projectName = "Preview Project",
-            status = TaskStatus.TODO,
-            priority = Priority.MEDIUM,
-            dueDate = LocalDateTime.parse("2023-12-31T00:00:00")
-        )
-    }
+    val fakeData = emptyList<Task>()
     // create pagingData from a list of fake data
     val pagingData = PagingData.from(fakeData)
     // pass pagingData containing fake data to a MutableStateFlow

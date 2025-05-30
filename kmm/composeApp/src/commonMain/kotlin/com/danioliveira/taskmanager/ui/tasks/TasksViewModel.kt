@@ -10,6 +10,8 @@ import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
 import kotlinx.coroutines.launch
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flatMapLatest
 
 class TasksViewModel(
     private val getTasksUseCase: GetTasksUseCase,
@@ -22,18 +24,20 @@ class TasksViewModel(
     var searchQuery by mutableStateOf("")
         private set
 
-    val taskFlow = getTasksUseCase(10, searchQuery.takeIf { it.isNotBlank() })
+    // Use a SharedFlow to trigger refresh of the paging data
+    private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1)
+
+    val taskFlow = refreshTrigger
+        .flatMapLatest {
+            getTasksUseCase(10, searchQuery.takeIf { it.isNotBlank() })
+        }
         .cachedIn(viewModelScope)
 
-    init {
-        loadTasks()
-        loadTaskProgress()
-    }
 
     // This method uses GetTasksUseCase to load tasks
     private fun loadTasks() {
-        // Use the paginated version of GetTasksUseCase
-        getTasksUseCase(10, searchQuery.takeIf { it.isNotBlank() })
+        // Trigger refresh of the paging data
+        refreshTrigger.tryEmit(Unit)
     }
 
     // This method uses GetTaskProgressUseCase to load progress information for the screen header
@@ -59,12 +63,22 @@ class TasksViewModel(
         loadTaskProgress()
     }
 
+    // Public method to refresh tasks - can be called from outside
+    fun refresh() {
+        refreshTasks()
+    }
+
+    // Method to check if refresh is needed and perform it
+    fun checkAndRefresh() {
+        // Always refresh when this method is called
+        // This will be called from the UI when returning from task operations
+        refresh()
+    }
 
     fun updateSearchQuery(query: String) {
         searchQuery = query
         loadTasks()
     }
-
 
     private fun openTask(taskId: Uuid) {
         // This method is now empty because navigation is handled in the UI layer
