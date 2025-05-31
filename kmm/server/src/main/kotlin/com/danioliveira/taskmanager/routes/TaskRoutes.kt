@@ -56,7 +56,7 @@ fun Route.taskRoutes() {
                     description = request.description,
                     projectId = projectId,
                     assigneeId = request.assigneeId,
-                    priority = Priority.MEDIUM, // Default priority regardless of status
+                    priority = request.priority,
                     dueDate = request.dueDate
                 )
 

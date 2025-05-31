@@ -151,6 +151,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         assigneeId: UUID?,
         creatorId: UUID,
         status: TaskStatus,
+        priority: Priority,
         dueDate: LocalDateTime?
     ): TaskResponse {
         val creator = UserDAOEntity.findById(creatorId) ?: throw IllegalArgumentException("Creator not found")
@@ -162,7 +163,7 @@ internal class TaskRepositoryImpl : TaskRepository {
             this.assignee = assigneeId?.let { UserDAOEntity.findById(it) }
             this.creator = creator
             this.status = status
-            this.priority = Priority.MEDIUM // Default priority
+            this.priority = priority
             this.dueDate = dueDate
             this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }

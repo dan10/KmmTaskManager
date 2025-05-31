@@ -62,6 +62,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.days
 import kotlin.uuid.ExperimentalUuidApi
+import com.danioliveira.taskmanager.utils.PriorityFormatter
 
 @OptIn(ExperimentalUuidApi::class)
 @Composable
@@ -249,7 +250,7 @@ private fun PriorityDropdown(
         onClick = { onExpandedChange(true) },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(currentPriority.name)
+        Text(PriorityFormatter.formatPriority(currentPriority))
         Spacer(Modifier.weight(1f))
         Icon(Icons.Default.ArrowDropDown, contentDescription = null)
 
@@ -264,7 +265,7 @@ private fun PriorityDropdown(
                         onExpandedChange(false)
                     }
                 ) {
-                    Text(priorityOption.name)
+                    Text(PriorityFormatter.formatPriority(priorityOption))
                 }
             }
         }

@@ -36,9 +36,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.File
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskPriority
 import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import com.danioliveira.taskmanager.utils.PriorityFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_back
 import kmmtaskmanager.composeapp.generated.resources.content_description_file
@@ -234,7 +236,11 @@ fun PriorityBadge(priority: TaskPriority) {
             .padding(horizontal = 8.dp, vertical = 2.dp)
     ) {
         Text(
-            text = priority.name,
+            text = when (priority) {
+                TaskPriority.HIGH -> PriorityFormatter.formatPriority(Priority.HIGH)
+                TaskPriority.MEDIUM -> PriorityFormatter.formatPriority(Priority.MEDIUM)
+                TaskPriority.LOW -> PriorityFormatter.formatPriority(Priority.LOW)
+            },
             style = MaterialTheme.typography.caption,
             color = priority.color
         )

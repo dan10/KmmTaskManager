@@ -133,4 +133,9 @@
     <string name="date_picker_ok">Aceptar</string>
     <string name="date_picker_select_date">Seleccionar fecha</string>
     <string name="date_picker_placeholder">DD/MM/AAAA</string>
+
+    <!-- Priority strings -->
+    <string name="priority_high">Alta</string>
+    <string name="priority_medium">Media</string>
+    <string name="priority_low">Baja</string>
 </resources>

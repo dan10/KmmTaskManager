@@ -73,6 +73,7 @@ internal class TaskService(
                 assigneeId = assigneeUUID,
                 creatorId = creatorUUID,
                 status = com.danioliveira.taskmanager.domain.TaskStatus.TODO, // Default status for new tasks
+                priority = request.priority,
                 dueDate = request.dueDate
             )
         }

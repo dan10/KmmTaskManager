@@ -23,6 +23,7 @@ import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
+import com.danioliveira.taskmanager.utils.PriorityFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.task_due_date
 import kmmtaskmanager.composeapp.generated.resources.task_project
@@ -62,7 +63,7 @@ fun TaskItem(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -73,7 +74,8 @@ fun TaskItem(
                         color = if (task.status == TaskStatus.DONE)
                             MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                         else
-                            MaterialTheme.colors.onSurface
+                            MaterialTheme.colors.onSurface,
+                        modifier = Modifier.weight(1f)
                     )
 
                     // Priority Tag
@@ -83,7 +85,7 @@ fun TaskItem(
                         elevation = 0.dp
                     ) {
                         Text(
-                            text = task.priority.name,
+                            text = PriorityFormatter.formatPriority(task.priority),
                             style = MaterialTheme.typography.caption.copy(
                                 fontWeight = FontWeight.Medium
                             ),

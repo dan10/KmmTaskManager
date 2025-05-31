@@ -41,6 +41,7 @@ internal interface TaskRepository {
         assigneeId: java.util.UUID?,
         creatorId: java.util.UUID,
         status: TaskStatus,
+        priority: Priority,
         dueDate: LocalDateTime?
     ): TaskResponse
 
