@@ -127,4 +127,10 @@
     <string name="project_create_error">Error al crear proyecto: %s</string>
     <string name="project_update_error">Error al actualizar proyecto: %s</string>
     <string name="project_update_failed">Error al actualizar proyecto</string>
+
+    <!-- DatePicker strings -->
+    <string name="date_picker_cancel">Cancelar</string>
+    <string name="date_picker_ok">Aceptar</string>
+    <string name="date_picker_select_date">Seleccionar fecha</string>
+    <string name="date_picker_placeholder">DD/MM/AAAA</string>
 </resources>

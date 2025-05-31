@@ -232,8 +232,6 @@ private fun TaskFormFields(
 
     // Due date field
     DatePickerFieldToModal(
-        label = stringResource(Res.string.task_due_date_label),
-        placeholder = "DD/MM/YYYY",
         selectedDate = state.dueDate,
         onDateSelected = onDateSelected,
         modifier = Modifier.fillMaxWidth()

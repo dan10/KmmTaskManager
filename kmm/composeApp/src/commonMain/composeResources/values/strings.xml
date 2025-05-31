@@ -109,7 +109,7 @@
     <string name="task_description_label">Description</string>
     <string name="task_status_label">Status</string>
     <string name="task_priority_label">Priority</string>
-    <string name="task_due_date_label">Due Date (DD/MM/YYYY)</string>
+    <string name="task_due_date_label">Due Date (MM/DD/YYYY)</string>
     <string name="task_due_date_error">Please enter a valid date in DD/MM/YYYY format</string>
     <string name="task_create_button">Create</string>
     <string name="task_update_button">Save Changes</string>
@@ -128,4 +128,10 @@
     <string name="project_create_error">Failed to create project: %s</string>
     <string name="project_update_error">Failed to update project: %s</string>
     <string name="project_update_failed">Failed to update project</string>
+
+    <!-- DatePicker strings -->
+    <string name="date_picker_cancel">Cancel</string>
+    <string name="date_picker_ok">OK</string>
+    <string name="date_picker_select_date">Select date</string>
+    <string name="date_picker_placeholder">DD/MM/YYYY</string>
 </resources>
