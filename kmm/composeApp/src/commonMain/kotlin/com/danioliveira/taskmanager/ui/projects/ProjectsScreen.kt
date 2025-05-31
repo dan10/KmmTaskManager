@@ -167,10 +167,20 @@ private fun ProjectsContent(
 
         ProjectsSubheader()
 
-        ProjectsList(
-            pagingItems = pagingItems,
-            onAction = onAction
-        )
+        // Show loading indicator when initial loading
+        if (state.isLoading && pagingItems.itemCount == 0) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            ProjectsList(
+                pagingItems = pagingItems,
+                onAction = onAction
+            )
+        }
     }
 }
 

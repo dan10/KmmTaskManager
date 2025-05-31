@@ -133,39 +133,51 @@ private fun TasksScreen(
         },
         floatingActionButton = { AddTaskButton(onAction) }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(
-                count = pagingItems.itemCount,
-                key = pagingItems.itemKey { it.id },
-                contentType = pagingItems.itemContentType { "task" }) { index ->
-                val task = pagingItems[index]
-                if (task != null) {
-                    TaskItem(
-                        task = task,
-                        onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
-                        onCheckedChange = {},
-                    )
-                }
+        // Show loading indicator when initial loading
+        if (state.isLoading && pagingItems.itemCount == 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-
-            if (pagingItems.loadState.append == LoadState.Loading) {
-                item {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                    )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(
+                    count = pagingItems.itemCount,
+                    key = pagingItems.itemKey { it.id },
+                    contentType = pagingItems.itemContentType { "task" }) { index ->
+                    val task = pagingItems[index]
+                    if (task != null) {
+                        TaskItem(
+                            task = task,
+                            onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
+                            onCheckedChange = {},
+                        )
+                    }
                 }
-            }
 
-            if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
-                item {
-                    EmptyTasksList()
+                if (pagingItems.loadState.append == LoadState.Loading) {
+                    item {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
+
+                if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
+                    item {
+                        EmptyTasksList()
+                    }
                 }
             }
         }
