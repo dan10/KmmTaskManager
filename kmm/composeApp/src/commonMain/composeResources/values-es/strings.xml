@@ -87,9 +87,9 @@
     <string name="projects_empty_title">No se encontraron Proyectos</string>
     <string name="projects_empty_subtitle">Crea tu primer proyecto para comenzar</string>
     <string name="project_icon">Icono del proyecto</string>
-    <string name="project_completed">%d completadas</string>
-    <string name="project_in_progress">%d en progreso</string>
-    <string name="project_total">%d total</string>
+    <string name="project_completed">%1$d completadas</string>
+    <string name="project_in_progress">%1$d en progreso</string>
+    <string name="project_total">%1$d total</string>
 
     <!-- ProjectDetailsScreen strings -->
     <string name="project_details_title">Detalles del Proyecto</string>

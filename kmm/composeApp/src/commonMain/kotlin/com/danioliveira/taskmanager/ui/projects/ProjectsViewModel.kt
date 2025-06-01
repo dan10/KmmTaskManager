@@ -33,6 +33,10 @@ class ProjectsViewModel(
         loadProjects()
     }
 
+    fun checkAndRefresh() {
+        refreshProjects()
+    }
+
     fun updateSearchQuery(query: String) {
         val newState = TextFieldState()
         newState.edit { append(query) }

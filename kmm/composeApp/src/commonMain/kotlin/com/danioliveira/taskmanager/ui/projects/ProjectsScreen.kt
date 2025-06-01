@@ -42,6 +42,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import com.danioliveira.taskmanager.domain.Project
@@ -77,6 +79,10 @@ fun ProjectsScreen(
     navigateToProjectDetail: (String) -> Unit,
     navigateToCreateProject: () -> Unit
 ) {
+    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+        viewModel.checkAndRefresh()
+    }
+
     Surface(color = Color(0XFFF1F5F9)) {
         // Create a wrapper for the onAction function that handles navigation
         val onAction: (ProjectsAction) -> Unit = { action ->
@@ -101,8 +107,7 @@ fun ProjectsScreen(
         ProjectsScreen(
             state = viewModel.state,
             pagingItems = viewModel.projectFlow.collectAsLazyPagingItems(),
-            onAction = onAction,
-            onSearchTextChange = viewModel::updateSearchQuery
+            onAction = onAction
         )
     }
 }
@@ -111,8 +116,7 @@ fun ProjectsScreen(
 private fun ProjectsScreen(
     state: ProjectsState,
     pagingItems: LazyPagingItems<Project>,
-    onAction: (ProjectsAction) -> Unit,
-    onSearchTextChange: (String) -> Unit
+    onAction: (ProjectsAction) -> Unit
 ) {
     Scaffold(
         backgroundColor = Color(0xFFF1F5F9),
@@ -124,8 +128,7 @@ private fun ProjectsScreen(
             paddingValues = paddingValues,
             state = state,
             pagingItems = pagingItems,
-            onAction = onAction,
-            onSearchTextChange = onSearchTextChange
+            onAction = onAction
         )
     }
 }
@@ -149,8 +152,7 @@ private fun ProjectsContent(
     paddingValues: PaddingValues,
     state: ProjectsState,
     pagingItems: LazyPagingItems<Project>,
-    onAction: (ProjectsAction) -> Unit,
-    onSearchTextChange: (String) -> Unit
+    onAction: (ProjectsAction) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -161,14 +163,13 @@ private fun ProjectsContent(
         ProjectsHeader()
 
         ProjectsSearchField(
-            searchFieldState = state.searchFieldState,
-            onSearchTextChange = onSearchTextChange
+            searchFieldState = state.searchFieldState
         )
 
         ProjectsSubheader()
 
         // Show loading indicator when initial loading
-        if (state.isLoading && pagingItems.itemCount == 0) {
+        if (pagingItems.loadState.append == LoadState.Loading && pagingItems.itemCount == 0) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -196,8 +197,7 @@ private fun ProjectsHeader() {
 
 @Composable
 private fun ProjectsSearchField(
-    searchFieldState: TextFieldState,
-    onSearchTextChange: (String) -> Unit
+    searchFieldState: TextFieldState
 ) {
     TrackItInputField(
         state = searchFieldState,
@@ -400,8 +400,7 @@ private fun ProjectsScreenPreview() {
         ProjectsScreen(
             state = ProjectsState(isLoading = false),
             pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-            onAction = {},
-            onSearchTextChange = {}
+            onAction = {}
         )
     }
 }
@@ -417,8 +416,7 @@ private fun PojectsEmptyScreenPreview() {
         ProjectsScreen(
             state = ProjectsState(isLoading = false),
             pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-            onAction = {},
-            onSearchTextChange = {}
+            onAction = {}
         )
     }
 }
