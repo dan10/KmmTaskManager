@@ -12,9 +12,20 @@ data class CreateEditProjectState(
     val description: TextFieldState = TextFieldState(""),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val projectNameHasError: Boolean = false,
-    val isButtonEnabled: Boolean = false // Logic for this will be in ViewModel
-)
+) {
+
+    val projectNameHasError
+        get() = projectName.text.trim().isEmpty()
+
+    private val projectNameIsNotEmpty
+        get() = projectName.text.trim().isNotEmpty()
+
+    val isFormValid
+        get() = projectNameIsNotEmpty
+
+    val isButtonEnabled
+        get() = isFormValid && !isLoading
+}
 
 /**
  * Actions for the CreateEditProject screen.

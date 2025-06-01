@@ -232,7 +232,6 @@ fun CreateProjectScreenPreview() {
                 isCreating = true,
                 projectName = TextFieldState("Mobile App"),
                 description = TextFieldState("Develop a new task management app."),
-                isButtonEnabled = true
             ),
             onBack = {},
             actions = {}
@@ -250,7 +249,6 @@ fun CreateProjectScreenLoadingPreview() {
                 projectName = TextFieldState("Website Redesign"),
                 description = TextFieldState("Complete redesign of the company website."),
                 isLoading = true,
-                isButtonEnabled = false
             ),
             onBack = {},
             actions = {}

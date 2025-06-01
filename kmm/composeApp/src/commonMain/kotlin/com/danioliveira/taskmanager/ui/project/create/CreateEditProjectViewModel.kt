@@ -47,7 +47,9 @@ class CreateEditProjectViewModel(
     private fun initialize(projectId: String?) {
         if (projectId == null) {
             // Creating a new project
-            _uiState.update { it.copy(isCreating = true) }
+            _uiState.update { 
+                it.copy(isCreating = true) 
+            }
         } else {
             // Editing an existing project
             loadProject(projectId)
@@ -68,8 +70,7 @@ class CreateEditProjectViewModel(
                         it.copy(
                             projectName = TextFieldState(project.name),
                             description = TextFieldState(project.description ?: ""),
-                            isLoading = false,
-                            isButtonEnabled = true
+                            isLoading = false
                         )
                     }
                 },
@@ -107,18 +108,7 @@ class CreateEditProjectViewModel(
      */
     private fun validateForm(): Boolean {
         val state = _uiState.value
-        val projectName = state.projectName.text.trim()
-
-        val isValid = projectName.isNotEmpty()
-
-        _uiState.update {
-            it.copy(
-                projectNameHasError = projectName.isEmpty(),
-                isButtonEnabled = isValid
-            )
-        }
-
-        return isValid
+        return state.isFormValid
     }
 
     /**
@@ -197,20 +187,6 @@ class CreateEditProjectViewModel(
                         }
                     }
                 }
-            )
-        }
-    }
-
-    /**
-     * Updates the button enabled state based on the current form values.
-     */
-    fun updateButtonState() {
-        val state = _uiState.value
-        val projectName = state.projectName.text.trim()
-
-        _uiState.update {
-            it.copy(
-                isButtonEnabled = projectName.isNotEmpty()
             )
         }
     }
