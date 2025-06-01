@@ -45,9 +45,19 @@ import com.danioliveira.taskmanager.paging.compose.itemContentType
 import com.danioliveira.taskmanager.paging.compose.itemKey
 import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.content_description_back
+import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
+import kmmtaskmanager.composeapp.generated.resources.project_details_title
+import kmmtaskmanager.composeapp.generated.resources.project_progress_title
+import kmmtaskmanager.composeapp.generated.resources.project_status_completed
+import kmmtaskmanager.composeapp.generated.resources.project_status_in_progress
+import kmmtaskmanager.composeapp.generated.resources.project_status_total_tasks
+import kmmtaskmanager.composeapp.generated.resources.project_tasks_empty
+import kmmtaskmanager.composeapp.generated.resources.project_tasks_title
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.uuid.ExperimentalUuidApi
@@ -97,7 +107,7 @@ private fun ProjectDetailsScreen(
                 .navigationBarsPadding(),
             topBar = {
                 ProjectDetailsTopBar(
-                    title = state.project?.name ?: "Project Details",
+                    title = state.project?.name ?: stringResource(Res.string.project_details_title),
                     onBack = onBack
                 )
             },
@@ -141,7 +151,7 @@ private fun ProjectDetailsTopBar(title: String, onBack: () -> Unit) {
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = stringResource(Res.string.content_description_back)
                 )
             }
         }
@@ -156,7 +166,7 @@ private fun CreateTaskFAB(onClick: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = "Create Task",
+            contentDescription = stringResource(Res.string.content_description_create_task),
             tint = MaterialTheme.colors.onPrimary
         )
     }
@@ -200,7 +210,7 @@ private fun ProjectDetailsContent(
         }
 
         Text(
-            text = "Tasks:",
+            text = stringResource(Res.string.project_tasks_title),
             style = MaterialTheme.typography.h6
         )
 
@@ -275,7 +285,7 @@ private fun EmptyTasksMessage() {
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "No tasks found for this project")
+        Text(text = stringResource(Res.string.project_tasks_empty))
     }
 }
 
@@ -290,12 +300,12 @@ fun ProjectHeader(project: Project) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                ProjectStatus(label = "Total Tasks", value = project.total)
-                ProjectStatus(label = "In Progress", value = project.inProgress)
-                ProjectStatus(label = "Completed", value = project.completed)
+                ProjectStatus(label = stringResource(Res.string.project_status_total_tasks), value = project.total)
+                ProjectStatus(label = stringResource(Res.string.project_status_in_progress), value = project.inProgress)
+                ProjectStatus(label = stringResource(Res.string.project_status_completed), value = project.completed)
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Progress", style = MaterialTheme.typography.caption)
+            Text(text = stringResource(Res.string.project_progress_title), style = MaterialTheme.typography.caption)
             Spacer(modifier = Modifier.height(4.dp))
 
             // Calculate progress percentage

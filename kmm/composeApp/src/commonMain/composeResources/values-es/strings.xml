@@ -95,6 +95,13 @@
     <string name="project_details_title">Detalles del Proyecto</string>
     <string name="project_id">ID del Proyecto: %s</string>
     <string name="project_details_placeholder">Los detalles del proyecto se mostrarán aquí</string>
+    <string name="project_tasks_title">Tareas:</string>
+    <string name="project_status_total_tasks">Total de Tareas</string>
+    <string name="project_status_in_progress">En Progreso</string>
+    <string name="project_status_completed">Completadas</string>
+    <string name="project_progress_title">Progreso</string>
+    <string name="project_tasks_empty">No se encontraron tareas para este proyecto</string>
+    <string name="content_description_create_task">Crear Tarea</string>
 
     <!-- ProfileScreen strings -->
     <string name="profile_coming_soon">Pantalla de Perfil - Próximamente</string>
