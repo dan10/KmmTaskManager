@@ -71,7 +71,6 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
     // Ktor Request Validation
     implementation(libs.ktor.server.request.validation)
-    // Ktor File Uploads (already included above)
     // Google API Client for token verification
     implementation(libs.google.api)
     implementation(libs.koin.ktor)
@@ -89,7 +88,6 @@ dependencies {
     testImplementation(libs.testcontainers.core)
     testImplementation(libs.testcontainers.junit)
     testImplementation(libs.testcontainers.postgresql)
-    testImplementation(libs.testcontainers.minio)
 
     // Load testing with Gatling
     // Required for Java DSL

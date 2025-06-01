@@ -359,7 +359,7 @@ private fun ProjectDetailsScreenPreview() {
                 1 -> Priority.MEDIUM
                 else -> Priority.LOW
             },
-            dueDate = "2024-12-${index + 10}T00:00:00".toLocalDateTime(),
+            dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
             projectName = "Website Redesign"
         )
     }
@@ -447,7 +447,7 @@ private fun ProjectTasksListPreview() {
                 1 -> Priority.MEDIUM
                 else -> Priority.LOW
             },
-            dueDate = "2024-12-${index + 10}T00:00:00".toLocalDateTime(),
+            dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
             projectName = "Website Redesign"
         )
     }

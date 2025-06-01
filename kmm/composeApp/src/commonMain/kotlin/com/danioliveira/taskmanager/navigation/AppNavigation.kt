@@ -47,9 +47,6 @@ sealed interface Screen {
     data class TasksDetails(val taskId: String) : Screen
 
     @Serializable
-    data class TasksFiles(val taskId: String) : Screen
-
-    @Serializable
     data class TasksComments(val taskId: String) : Screen
 
     // Project-related screens

@@ -33,7 +33,6 @@ object TestDatabase {
                 UsersTable,
                 ProjectsTable,
                 TasksTable,
-                FileUploadsTable,
                 ProjectInvitationsTable,
                 ProjectAssignmentsTable
             )
@@ -48,7 +47,6 @@ object TestDatabase {
         transaction {
             ProjectAssignmentsTable.deleteAll()
             ProjectInvitationsTable.deleteAll()
-            FileUploadsTable.deleteAll()
             TasksTable.deleteAll()
             ProjectsTable.deleteAll()
             UsersTable.deleteAll()

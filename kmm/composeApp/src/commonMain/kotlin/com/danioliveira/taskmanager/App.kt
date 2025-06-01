@@ -38,7 +38,6 @@ import com.danioliveira.taskmanager.ui.register.RegisterScreen
 import com.danioliveira.taskmanager.ui.task.comments.TasksCommentsScreen
 import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditScreen
 import com.danioliveira.taskmanager.ui.task.details.TasksDetailsScreen
-import com.danioliveira.taskmanager.ui.task.files.TaskFilesScreen
 import com.danioliveira.taskmanager.ui.tasks.TasksScreen
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
@@ -198,13 +197,13 @@ fun TaskItNavHost(
         composable<Screen.TasksDetails> { backStackEntry ->
             TasksDetailsScreen(
                 onBack = { navController.popBackStack() },
-                onFilesClick = { id -> navController.navigate(Screen.TasksFiles(id)) }
-            )
-        }
-
-        composable<Screen.TasksFiles> { backStackEntry ->
-            TaskFilesScreen(
-                onBack = { navController.popBackStack() }
+                onEditTask = { taskId -> 
+                    navController.navigate(Screen.CreateEditTask(taskId))
+                },
+                onDeleteTask = { taskId ->
+                    // Navigate back after deletion
+                    navController.popBackStack()
+                }
             )
         }
 

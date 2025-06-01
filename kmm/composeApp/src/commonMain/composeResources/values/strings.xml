@@ -61,7 +61,6 @@
     <string name="task_view_files">View Files</string>
     <string name="task_view_comments">View Comments</string>
     <string name="task_due_date">Due:</string>
-    <string name="task_no_due_date">No due date</string>
     <string name="task_project">Project:</string>
     <string name="date_format_pattern">MM/dd/yyyy</string>
     <string name="task_assigned_to">Assigned to:</string>
@@ -112,7 +111,7 @@
     <string name="task_due_date_label">Due Date (MM/DD/YYYY)</string>
     <string name="task_due_date_error">Please enter a valid date in DD/MM/YYYY format</string>
     <string name="task_create_button">Create</string>
-    <string name="task_update_button">Save Changes</string>
+    <string name="task_update_button">Save</string>
     <string name="task_cancel_button">Cancel</string>
 
     <!-- CreateEditProjectScreen strings -->
@@ -139,4 +138,12 @@
     <string name="priority_high">High</string>
     <string name="priority_medium">Medium</string>
     <string name="priority_low">Low</string>
+
+    <!-- Task Details strings -->
+    <string name="task_actions">Actions</string>
+    <string name="task_edit_button">Edit</string>
+    <string name="task_delete_button">Delete</string>
+    <string name="task_no_due_date">No due date</string>
+    <string name="content_description_edit_task">Edit Task</string>
+    <string name="content_description_delete_task">Delete Task</string>
 </resources>

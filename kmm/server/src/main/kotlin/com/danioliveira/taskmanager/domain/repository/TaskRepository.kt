@@ -1,6 +1,5 @@
 package com.danioliveira.taskmanager.domain.repository
 
-import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
@@ -65,29 +64,4 @@ internal interface TaskRepository {
      * @return The task progress for the user.
      */
     suspend fun Transaction.getUserTaskProgress(userId: String): TaskProgressResponse
-
-    /**
-     * Get files associated with a task.
-     * @param taskId The ID of the task.
-     * @return List of files associated with the task.
-     */
-    suspend fun Transaction.getTaskFiles(taskId: String): List<FileResponse>
-
-    /**
-     * Upload a file for a task.
-     * @param taskId The ID of the task.
-     * @param fileName The name of the file.
-     * @param fileContent The content of the file.
-     * @param contentType The MIME type of the file.
-     * @param uploaderId The ID of the user uploading the file.
-     * @param s3Url The URL of the file in S3.
-     * @return The uploaded file.
-     */
-    suspend fun Transaction.uploadTaskFile(
-        taskId: String,
-        fileName: String,
-        contentType: String,
-        uploaderId: String,
-        s3Url: String
-    ): FileResponse
 }

@@ -27,7 +27,6 @@ fun Route.adminRoutes() {
                     // Delete in order to respect foreign key constraints
                     ProjectAssignmentsTable.deleteAll()
                     ProjectInvitationsTable.deleteAll()
-                    FileUploadsTable.deleteAll()
                     TasksTable.deleteAll()
                     ProjectsTable.deleteAll()
                     UsersTable.deleteAll()
@@ -59,8 +58,7 @@ fun Route.adminRoutes() {
                         "projects" to ProjectsTable.selectAll().count(),
                         "tasks" to TasksTable.selectAll().count(),
                         "project_assignments" to ProjectAssignmentsTable.selectAll().count(),
-                        "project_invitations" to ProjectInvitationsTable.selectAll().count(),
-                        "file_uploads" to FileUploadsTable.selectAll().count()
+                        "project_invitations" to ProjectInvitationsTable.selectAll().count()
                     )
                 }
 

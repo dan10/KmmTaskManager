@@ -92,7 +92,6 @@ private fun connectToDatabase(url: String, driver: String, user: String, passwor
             UsersTable,
             ProjectsTable,
             TasksTable,
-            FileUploadsTable,
             ProjectInvitationsTable,
             ProjectAssignmentsTable
         )

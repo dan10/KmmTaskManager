@@ -21,6 +21,7 @@ import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectTasksUseCa
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectsUseCase
 import com.danioliveira.taskmanager.domain.usecase.register.RegisterUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.CreateEditTaskUseCase
+import com.danioliveira.taskmanager.domain.usecase.tasks.DeleteTaskUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskDetailsUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
@@ -72,6 +73,7 @@ val appModule = module {
     factoryOf(::GetProjectDetailsUseCase)
     factoryOf(::GetProjectTasksUseCase)
     factoryOf(::CreateEditTaskUseCase)
+    factoryOf(::DeleteTaskUseCase)
     factoryOf(::GetTaskDetailsUseCase)
     factoryOf(::CreateEditProjectUseCase)
 

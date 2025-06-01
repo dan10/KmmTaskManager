@@ -60,7 +60,6 @@
     <string name="task_view_files">Ver Arquivos</string>
     <string name="task_view_comments">Ver Comentários</string>
     <string name="task_due_date">Vencimento:</string>
-    <string name="task_no_due_date">Sem data de vencimento</string>
     <string name="task_project">Projeto:</string>
     <string name="date_format_pattern">dd/MM/yyyy</string>
     <string name="task_assigned_to">Atribuído a:</string>
@@ -111,7 +110,7 @@
     <string name="task_due_date_label">Data de Vencimento (DD/MM/AAAA)</string>
     <string name="task_due_date_error">Por favor, insira uma data válida no formato DD/MM/AAAA</string>
     <string name="task_create_button">Criar</string>
-    <string name="task_update_button">Salvar Alterações</string>
+    <string name="task_update_button">Salvar</string>
     <string name="task_cancel_button">Cancelar</string>
 
     <!-- CreateEditProjectScreen strings -->
@@ -138,4 +137,12 @@
     <string name="priority_high">Alta</string>
     <string name="priority_medium">Média</string>
     <string name="priority_low">Baixa</string>
+
+    <!-- Task Details strings -->
+    <string name="task_actions">Ações</string>
+    <string name="task_edit_button">Editar</string>
+    <string name="task_delete_button">Excluir</string>
+    <string name="task_no_due_date">Sem data de vencimento</string>
+    <string name="content_description_edit_task">Editar Tarefa</string>
+    <string name="content_description_delete_task">Excluir Tarefa</string>
 </resources>

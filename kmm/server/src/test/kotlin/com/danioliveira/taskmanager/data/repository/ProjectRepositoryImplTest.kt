@@ -4,6 +4,7 @@ import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
@@ -280,9 +281,10 @@ class ProjectRepositoryImplTest {
                         "TODO Task $i",
                         "Description for TODO task $i",
                         projectId,
-                        null,
+                        testUserId,
                         testUserId,
                         TaskStatus.TODO,
+                        Priority.MEDIUM,
                         null
                     )
                 }
@@ -297,9 +299,10 @@ class ProjectRepositoryImplTest {
                         "In Progress Task $i",
                         "Description for in progress task $i",
                         projectId,
-                        null,
+                        testUserId,
                         testUserId,
                         TaskStatus.IN_PROGRESS,
+                        Priority.HIGH,
                         null
                     )
                 }
@@ -314,9 +317,10 @@ class ProjectRepositoryImplTest {
                         "Done Task $i",
                         "Description for done task $i",
                         projectId,
-                        null,
+                        testUserId,
                         testUserId,
                         TaskStatus.DONE,
+                        Priority.LOW,
                         null
                     )
                 }

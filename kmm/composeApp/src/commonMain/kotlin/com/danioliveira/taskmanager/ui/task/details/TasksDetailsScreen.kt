@@ -14,20 +14,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,23 +38,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.danioliveira.taskmanager.domain.File
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskPriority
 import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.utils.PriorityFormatter
+import com.danioliveira.taskmanager.util.DateFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_back
-import kmmtaskmanager.composeapp.generated.resources.content_description_file
-import kmmtaskmanager.composeapp.generated.resources.content_description_more
-import kmmtaskmanager.composeapp.generated.resources.task_add_files
-import kmmtaskmanager.composeapp.generated.resources.task_assigned_to
+import kmmtaskmanager.composeapp.generated.resources.content_description_edit_task
+import kmmtaskmanager.composeapp.generated.resources.content_description_delete_task
+import kmmtaskmanager.composeapp.generated.resources.task_actions
 import kmmtaskmanager.composeapp.generated.resources.task_details_title
 import kmmtaskmanager.composeapp.generated.resources.task_due_date
-import kmmtaskmanager.composeapp.generated.resources.task_files
+import kmmtaskmanager.composeapp.generated.resources.task_edit_button
+import kmmtaskmanager.composeapp.generated.resources.task_delete_button
+import kmmtaskmanager.composeapp.generated.resources.task_no_due_date
 import kmmtaskmanager.composeapp.generated.resources.task_project
-import kmmtaskmanager.composeapp.generated.resources.task_view_all
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -61,10 +64,11 @@ import org.koin.compose.viewmodel.koinViewModel
 fun TasksDetailsScreen(
     viewModel: TasksDetailsViewModel = koinViewModel(),
     onBack: () -> Unit,
-    onFilesClick: (String) -> Unit
+    onEditTask: (String) -> Unit = {},
+    onDeleteTask: (String) -> Unit = {}
 ) {
     viewModel.onBack = onBack
-    viewModel.onFilesClick = onFilesClick
+    viewModel.onEditTask = onEditTask
 
     Surface(color = Color(0XFFF1F5F9)) {
         TasksDetailsScreenContent(
@@ -98,14 +102,6 @@ private fun TaskDetailsTopBar(onAction: (TasksDetailsAction) -> Unit) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(Res.string.content_description_back)
-                )
-            }
-        },
-        actions = {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = stringResource(Res.string.content_description_more)
                 )
             }
         }
@@ -149,8 +145,7 @@ private fun TaskDetailsContent(
                     priority = state.task.priority.toTaskPriority(),
                     description = state.task.description,
                     dueDate = state.task.dueDate,
-                    project = state.task.projectName ?: "No Project",
-                    assignedTo = "Assigned User" // This would need to be fetched from the user repository
+                    projectName = state.task.projectName
                 )
             } else {
                 Box(
@@ -169,20 +164,85 @@ private fun TaskDetailsContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        // Action buttons section
         item {
-            FilesSection(
-                files = listOf(
-                    File("Q4_Presentation.pdf", "2.4 MB", "2024-11-20"),
-                    File("Metrics_Summary.xlsx", "1.1 MB", "2024-11-19"),
-                    File("Budget_2024.xlsx", "1.3 MB", "2024-11-18"),
-                    File("Client_Feedback.docx", "0.8 MB", "2024-11-17")
-                ),
-                onViewAll = {
-                    state.task?.id?.toString()?.let { taskId ->
-                        onAction(TasksDetailsAction.NavigateToFiles(taskId))
-                    }
-                }
+            if (state.task != null) {
+                TaskActionButtons(
+                    isDeleting = state.isDeleting,
+                    onAction = onAction
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskActionButtons(
+    isDeleting: Boolean,
+    onAction: (TasksDetailsAction) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.task_actions),
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = { onAction(TasksDetailsAction.EditTask) },
+                    modifier = Modifier.weight(1f),
+                    enabled = !isDeleting,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = MaterialTheme.colors.primary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(Res.string.content_description_edit_task),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Text(stringResource(Res.string.task_edit_button))
+                }
+                
+                OutlinedButton(
+                    onClick = { onAction(TasksDetailsAction.DeleteTask) },
+                    modifier = Modifier.weight(1f),
+                    enabled = !isDeleting,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colors.error
+                    )
+                ) {
+                    if (isDeleting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = MaterialTheme.colors.error,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(Res.string.content_description_delete_task),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Text(stringResource(Res.string.task_delete_button))
+                }
+            }
         }
     }
 }
@@ -193,8 +253,7 @@ fun TaskInfoCard(
     priority: TaskPriority,
     description: String,
     dueDate: LocalDateTime?,
-    project: String,
-    assignedTo: String
+    projectName: String?
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -220,9 +279,24 @@ fun TaskInfoCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = description, style = MaterialTheme.typography.body2)
             Spacer(modifier = Modifier.height(8.dp))
-            InfoRow(label = stringResource(Res.string.task_due_date), value = dueDate?.toString() ?: "No due date")
-            InfoRow(label = stringResource(Res.string.task_project), value = project)
-            InfoRow(label = stringResource(Res.string.task_assigned_to), value = assignedTo)
+            
+            // Due date row
+            InfoRow(
+                label = stringResource(Res.string.task_due_date), 
+                value = if (dueDate != null) {
+                    DateFormatter.formatDate(dueDate)
+                } else {
+                    stringResource(Res.string.task_no_due_date)
+                }
+            )
+            
+            // Project row - only show if task has a project
+            projectName?.let { project ->
+                InfoRow(
+                    label = stringResource(Res.string.task_project), 
+                    value = project
+                )
+            }
         }
     }
 }
@@ -255,102 +329,6 @@ fun InfoRow(label: String, value: String) {
         Text(text = value, style = MaterialTheme.typography.body2)
     }
 }
-
-
-@Composable
-fun FilesSection(
-    files: List<File>,
-    onViewAll: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 2.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            SectionHeader(title = stringResource(Res.string.task_files), onViewAll = onViewAll)
-            Spacer(modifier = Modifier.height(8.dp))
-            if (files.isEmpty()) {
-                Text(
-                    text = "No files available",
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            } else {
-                files.take(3).forEach { file ->
-                    FileItem(file)
-                }
-                if (files.size > 3) {
-                    Text(
-                        text = "... and ${files.size - 3} more files",
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Divider()
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(Res.string.task_add_files),
-                    tint = MaterialTheme.colors.primary
-                )
-                Spacer(modifier = Modifier.padding(2.dp))
-                Text(
-                    text = stringResource(Res.string.task_add_files),
-                    style = MaterialTheme.typography.subtitle2,
-                    color = MaterialTheme.colors.primary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FileItem(file: File) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Icon(
-            modifier = Modifier.size(32.dp),
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(Res.string.content_description_file),
-        )
-        Spacer(modifier = Modifier.padding(4.dp))
-        Column {
-            Text(text = file.name, style = MaterialTheme.typography.subtitle2)
-            Spacer(modifier = Modifier.padding(2.dp))
-            Text(text = "${file.size} • Uploaded ${file.uploadedDate}", style = MaterialTheme.typography.caption)
-        }
-    }
-}
-
-@Composable
-fun SectionHeader(title: String, onViewAll: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = title, style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
-        Text(
-            modifier = Modifier.clickable { onViewAll() },
-            text = stringResource(Res.string.task_view_all),
-            style = MaterialTheme.typography.caption,
-            color = MaterialTheme.colors.primary
-        )
-    }
-}
-
 
 @Preview
 @Composable

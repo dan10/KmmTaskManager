@@ -2,7 +2,6 @@ package com.danioliveira.taskmanager.domain.service
 
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
-import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
@@ -11,8 +10,6 @@ import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
-import com.danioliveira.taskmanager.utils.FileValidator
-import com.danioliveira.taskmanager.utils.S3ClientFactory
 import java.util.UUID
 
 internal class TaskService(
@@ -165,55 +162,5 @@ internal class TaskService(
      */
     suspend fun getUserTaskProgress(userId: String): TaskProgressResponse = dbQuery {
         with(repository) { getUserTaskProgress(userId) }
-    }
-
-    /**
-     * Get files associated with a task.
-     * @param taskId The ID of the task.
-     * @return List of files associated with the task.
-     */
-    suspend fun getTaskFiles(taskId: String): List<FileResponse> = dbQuery {
-        with(repository) { getTaskFiles(taskId) }
-    }
-
-    /**
-     * Upload a file for a task.
-     * @param taskId The ID of the task.
-     * @param fileName The name of the file.
-     * @param contentType The MIME type of the file.
-     * @param fileBytes The content of the file.
-     * @param uploaderId The ID of the user uploading the file.
-     * @return The uploaded file.
-     * @throws ValidationException If the file type is not allowed.
-     */
-    suspend fun uploadTaskFile(
-        taskId: String,
-        fileName: String,
-        contentType: String,
-        fileBytes: ByteArray,
-        uploaderId: String
-    ): FileResponse = dbQuery {
-        // Validate file type
-        if (!FileValidator.isValidMimeType(contentType)) {
-            throw ValidationException("File type not allowed. Allowed types: ${FileValidator.getAllowedMimeTypesAsString()}")
-        }
-
-        // Check if task exists
-        findById(taskId) // This will throw NotFoundException if task doesn't exist
-
-        // Upload file to MinIO
-        val s3Client = S3ClientFactory.createFromEnv()
-        val s3Url = s3Client.uploadFile(fileName, contentType, fileBytes)
-
-        // Save file metadata to database
-        with(repository) {
-            uploadTaskFile(
-                taskId = taskId,
-                fileName = fileName,
-                contentType = contentType,
-                uploaderId = uploaderId,
-                s3Url = s3Url
-            )
-        }
     }
 }

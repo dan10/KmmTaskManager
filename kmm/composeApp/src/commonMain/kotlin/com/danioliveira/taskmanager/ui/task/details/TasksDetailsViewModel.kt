@@ -8,18 +8,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.danioliveira.taskmanager.data.mapper.toTask
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskDetailsUseCase
+import com.danioliveira.taskmanager.domain.usecase.tasks.DeleteTaskUseCase
 import kotlinx.coroutines.launch
 
 class TasksDetailsViewModel(
     private val savedStateHandle: SavedStateHandle,
-    private val getTaskDetailsUseCase: GetTaskDetailsUseCase
+    private val getTaskDetailsUseCase: GetTaskDetailsUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase
 ) : ViewModel() {
 
     var state by mutableStateOf(TasksDetailsState())
         private set
 
     var onBack: () -> Unit = {}
-    var onFilesClick: (String) -> Unit = {}
+    var onEditTask: (String) -> Unit = {}
 
     init {
         loadTaskDetails()
@@ -56,16 +58,38 @@ class TasksDetailsViewModel(
     fun handleActions(action: TasksDetailsAction) {
         when (action) {
             is TasksDetailsAction.LoadTaskDetails -> loadTaskDetails()
-            is TasksDetailsAction.NavigateToFiles -> navigateToFiles(action.taskId)
             is TasksDetailsAction.NavigateBack -> navigateBack()
+            is TasksDetailsAction.EditTask -> editTask()
+            is TasksDetailsAction.DeleteTask -> deleteTask()
         }
-    }
-
-    private fun navigateToFiles(taskId: String) {
-        onFilesClick(taskId)
     }
 
     private fun navigateBack() {
         onBack()
+    }
+
+    private fun editTask() {
+        state.task?.let { task ->
+            onEditTask(task.id.toString())
+        }
+    }
+
+    private fun deleteTask() {
+        state.task?.let { task ->
+            state = state.copy(isDeleting = true, errorMessage = null)
+            viewModelScope.launch {
+                deleteTaskUseCase(task.id.toString())
+                    .onSuccess {
+                        state = state.copy(isDeleting = false)
+                        onBack() // Navigate back after successful deletion
+                    }
+                    .onFailure { error ->
+                        state = state.copy(
+                            isDeleting = false,
+                            errorMessage = error.message ?: "Failed to delete task"
+                        )
+                    }
+            }
+        }
     }
 }

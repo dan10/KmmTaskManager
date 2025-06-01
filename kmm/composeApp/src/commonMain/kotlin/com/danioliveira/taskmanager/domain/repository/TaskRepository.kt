@@ -3,7 +3,6 @@ package com.danioliveira.taskmanager.domain.repository
 import androidx.paging.PagingData
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
-import com.danioliveira.taskmanager.api.response.FileResponse
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
@@ -101,12 +100,4 @@ interface TaskRepository {
      * @return Result containing true if the task was deleted successfully, false otherwise
      */
     suspend fun deleteTask(taskId: String): Result<Boolean>
-
-    /**
-     * Gets files associated with a task.
-     *
-     * @param taskId The ID of the task
-     * @return Result containing a list of file details
-     */
-    suspend fun getTaskFiles(taskId: String): Result<List<FileResponse>>
 }
