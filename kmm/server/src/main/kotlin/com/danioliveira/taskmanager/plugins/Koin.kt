@@ -34,5 +34,5 @@ fun getAppModule(environment: ApplicationEnvironment) = module {
     single<DomainProjectAssignmentRepo> { ProjectAssignmentRepositoryImpl() }
     single { UserService(get(), get()) }
     single { ProjectService(get(), get()) }
-    single { TaskService(get(), get()) }
+    single { TaskService(get(), get(), get()) }
 }

@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.usecase.tasks.CreateEditTaskUseCase
+import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectDetailsUseCase
+import com.danioliveira.taskmanager.data.mapper.toProject
 import com.danioliveira.taskmanager.navigation.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +19,8 @@ import kotlinx.datetime.LocalDateTime
 
 class TaskCreateEditViewModel(
     savedStateHandle: SavedStateHandle,
-    private val createEditTaskUseCase: CreateEditTaskUseCase
+    private val createEditTaskUseCase: CreateEditTaskUseCase,
+    private val getProjectDetailsUseCase: GetProjectDetailsUseCase
 ) : ViewModel() {
 
     // Navigation callbacks to be set from outside
@@ -29,23 +32,57 @@ class TaskCreateEditViewModel(
     val uiState: StateFlow<TaskCreateEditState> = _uiState.asStateFlow()
 
     init {
-        val taskId = savedStateHandle.toRoute<Screen.CreateEditTask>().taskId
-        initialize(taskId)
+        val route = savedStateHandle.toRoute<Screen.CreateEditTask>()
+        val taskId = route.taskId
+        val projectId = route.projectId
+        initialize(taskId, projectId)
     }
 
     /**
-     * Initializes the ViewModel with an existing task if editing.
+     * Initializes the ViewModel with an existing task if editing and project if specified.
      *
      * @param taskId The ID of the task to edit, or null if creating a new task
+     * @param projectId The ID of the project to associate the task with, or null if no project
      */
-    fun initialize(taskId: String?) {
+    fun initialize(taskId: String?, projectId: String?) {
         if (taskId == null) {
             // Creating a new task
-            _uiState.update { it.copy(isCreating = true) }
+            _uiState.update { it.copy(isCreating = true, projectId = projectId) }
+            if (projectId != null) {
+                loadProjectDetails(projectId)
+            }
         } else {
             // Editing an existing task
-            _uiState.update { it.copy(isCreating = false, taskId = taskId, isLoading = true) }
+            _uiState.update { 
+                it.copy(isCreating = false, taskId = taskId, projectId = projectId, isLoading = true) 
+            }
             loadTask(taskId)
+            if (projectId != null) {
+                loadProjectDetails(projectId)
+            }
+        }
+    }
+
+    /**
+     * Loads project details for the given project ID.
+     *
+     * @param projectId The ID of the project to load
+     */
+    private fun loadProjectDetails(projectId: String) {
+        viewModelScope.launch {
+            val result = getProjectDetailsUseCase(projectId)
+            result.fold(
+                onSuccess = { projectResponse ->
+                    val project = projectResponse.toProject()
+                    _uiState.update { state ->
+                        state.copy(projectName = project.name)
+                    }
+                },
+                onFailure = { error ->
+                    // Don't show error for project loading failure, just leave project name empty
+                    println("Failed to load project details: ${error.message}")
+                }
+            )
         }
     }
 
@@ -96,7 +133,9 @@ class TaskCreateEditViewModel(
                     title = title.text.toString(),
                     description = description.text.toString().takeIf { it.isNotEmpty() },
                     priority = priority,
-                    dueDate = dueDate
+                    dueDate = dueDate,
+                    projectId = projectId,
+                    assigneeId = null // Don't auto-assign - user must be a project member
                 )
             }
 
@@ -233,17 +272,5 @@ class TaskCreateEditViewModel(
                 dueDate = date
             )
         }
-    }
-
-    /**
-     * Formats a LocalDateTime to a string in the format DD/MM/YYYY.
-     *
-     * @param date The date to format
-     * @return The formatted date string
-     */
-    private fun formatDate(date: LocalDateTime): String {
-        return "${date.dayOfMonth.toString().padStart(2, '0')}/${
-            date.monthNumber.toString().padStart(2, '0')
-        }/${date.year}"
     }
 }

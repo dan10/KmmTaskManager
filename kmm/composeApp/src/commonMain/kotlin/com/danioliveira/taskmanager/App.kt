@@ -182,7 +182,6 @@ fun TaskItNavHost(
         }
 
         composable<Screen.CreateEditProject> { backStackEntry ->
-            val projectId = backStackEntry.toRoute<Screen.CreateEditProject>().projectId
             CreateEditProjectScreen(
                 onBack = { navController.popBackStack() }
             )
@@ -217,7 +216,10 @@ fun TaskItNavHost(
 
         composable<Screen.ProjectDetails> { backStackEntry ->
             ProjectDetailsScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                navigateToCreateTask = {
+                    navController.navigate(Screen.CreateEditTask(taskId = null, projectId = it))
+                }
             )
         }
     }

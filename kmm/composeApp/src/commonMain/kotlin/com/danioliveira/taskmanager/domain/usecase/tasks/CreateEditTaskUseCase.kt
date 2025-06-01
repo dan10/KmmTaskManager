@@ -22,19 +22,25 @@ class CreateEditTaskUseCase(private val taskRepository: TaskRepository) {
      * @param description The task description (optional)
      * @param priority The task priority
      * @param dueDate The task due date (optional)
+     * @param projectId The project ID to associate the task with (optional)
+     * @param assigneeId The user ID to assign the task to (optional)
      * @return Result containing the created task details
      */
     suspend fun createTask(
         title: String,
         description: String?,
         priority: Priority,
-        dueDate: LocalDateTime?
+        dueDate: LocalDateTime?,
+        projectId: String? = null,
+        assigneeId: String? = null
     ): Result<TaskResponse> {
         val request = TaskCreateRequest(
             title = title,
             description = description,
             priority = priority,
-            dueDate = dueDate
+            dueDate = dueDate,
+            projectId = projectId,
+            assigneeId = assigneeId
         )
 
         return taskRepository.createTask(request)

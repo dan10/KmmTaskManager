@@ -11,4 +11,5 @@ data class ProjectDetailsState(
 sealed interface ProjectDetailsAction {
     data object RefreshTasks : ProjectDetailsAction
     data class UpdateTaskStatus(val taskId: String, val status: String) : ProjectDetailsAction
+    data object CreateTask : ProjectDetailsAction
 }

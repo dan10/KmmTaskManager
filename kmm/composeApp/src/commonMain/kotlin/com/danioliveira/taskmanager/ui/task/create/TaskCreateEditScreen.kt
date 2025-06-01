@@ -19,6 +19,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -53,6 +54,7 @@ import kmmtaskmanager.composeapp.generated.resources.task_priority_label
 import kmmtaskmanager.composeapp.generated.resources.task_title_error
 import kmmtaskmanager.composeapp.generated.resources.task_title_label
 import kmmtaskmanager.composeapp.generated.resources.task_update_button
+import kmmtaskmanager.composeapp.generated.resources.project_name_label
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -191,6 +193,25 @@ private fun TaskFormFields(
     onPrioritySelected: (Priority) -> Unit,
     onDateSelected: (LocalDateTime) -> Unit
 ) {
+    // Project field (if project is associated)
+    if (state.projectName != null) {
+        Text(
+            text = stringResource(Res.string.project_name_label),
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+        )
+        
+        OutlinedTextField(
+            value = state.projectName,
+            onValueChange = { /* Read-only field */ },
+            readOnly = true,
+            enabled = false,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
     // Title field
     TrackItInputField(
         state = state.title,

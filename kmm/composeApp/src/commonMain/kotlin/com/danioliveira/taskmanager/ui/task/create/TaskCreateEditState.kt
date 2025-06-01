@@ -12,6 +12,8 @@ data class TaskCreateEditState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val taskId: String? = null,
+    val projectId: String? = null,
+    val projectName: String? = null,
     val title: TextFieldState = TextFieldState(),
     val description: TextFieldState = TextFieldState(),
     val priority: Priority = Priority.MEDIUM,

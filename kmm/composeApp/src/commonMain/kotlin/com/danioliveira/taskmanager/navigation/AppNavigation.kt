@@ -57,5 +57,5 @@ sealed interface Screen {
     data class CreateEditProject(val projectId: String?) : Screen
 
     @Serializable
-    data class CreateEditTask(val taskId: String?) : Screen
+    data class CreateEditTask(val taskId: String?, val projectId: String? = null) : Screen
 }

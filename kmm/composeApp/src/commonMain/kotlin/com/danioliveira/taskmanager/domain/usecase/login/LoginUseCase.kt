@@ -23,8 +23,9 @@ class LoginUseCase(private val authRepository: AuthRepository) {
         val result = authRepository.login(loginRequest)
 
         result.onSuccess { authResponse ->
-            // Save the token for future requests
+            // Save the token and user information for future requests
             authRepository.saveToken(authResponse.token)
+            authRepository.saveUser(authResponse.user)
         }
 
         return result

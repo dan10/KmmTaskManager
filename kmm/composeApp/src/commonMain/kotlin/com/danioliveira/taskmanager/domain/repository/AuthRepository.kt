@@ -3,6 +3,7 @@ package com.danioliveira.taskmanager.domain.repository
 import com.danioliveira.taskmanager.api.request.LoginRequest
 import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.api.response.AuthResponse
+import com.danioliveira.taskmanager.domain.User
 
 /**
  * Repository interface for authentication operations.
@@ -42,6 +43,25 @@ interface AuthRepository {
      * Clears the saved authentication token.
      */
     suspend fun clearToken()
+
+    /**
+     * Saves the current user information.
+     *
+     * @param user The user information to save
+     */
+    suspend fun saveUser(user: User)
+
+    /**
+     * Gets the saved user information.
+     *
+     * @return The saved user information or null if not found
+     */
+    suspend fun getUser(): User?
+
+    /**
+     * Clears the saved user information.
+     */
+    suspend fun clearUser()
 
     /**
      * Checks if the user is authenticated.

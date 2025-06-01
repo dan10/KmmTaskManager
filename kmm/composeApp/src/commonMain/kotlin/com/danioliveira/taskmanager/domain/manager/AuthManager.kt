@@ -1,6 +1,7 @@
 package com.danioliveira.taskmanager.domain.manager
 
 import com.danioliveira.taskmanager.data.storage.TokenStorage
+import com.danioliveira.taskmanager.domain.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,10 +30,20 @@ class AuthManager(
     }
 
     /**
-     * Logs out the user by clearing the token and updating the authentication state.
+     * Gets the current user information.
+     *
+     * @return The current user or null if not authenticated
+     */
+    suspend fun getCurrentUser(): User? {
+        return tokenStorage.getUser()
+    }
+
+    /**
+     * Logs out the user by clearing the token, user information, and updating the authentication state.
      */
     suspend fun logout() {
         tokenStorage.clearToken()
+        tokenStorage.clearUser()
         _isAuthenticated.value = false
     }
 }

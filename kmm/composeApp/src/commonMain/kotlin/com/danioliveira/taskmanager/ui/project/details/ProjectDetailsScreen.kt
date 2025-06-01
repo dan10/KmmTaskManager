@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
@@ -22,12 +24,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import com.danioliveira.taskmanager.domain.Priority
@@ -51,18 +56,32 @@ import kotlin.uuid.Uuid
 @Composable
 fun ProjectDetailsScreen(
     onBack: () -> Unit,
+    navigateToCreateTask: (String) -> Unit,
     viewModel: ProjectDetailsViewModel = koinViewModel()
 ) {
+    // Refresh data when screen is created
+    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+        viewModel.checkAndRefresh()
+    }
+
     // Set up navigation callback
     LaunchedEffect(viewModel) {
         viewModel.onBack = onBack
+        viewModel.onCreateTask = {
+            navigateToCreateTask(it)
+        }
     }
 
     // Get the current state
     val state = viewModel.state
     val pagingItems = viewModel.taskFlow.collectAsLazyPagingItems()
 
-    ProjectDetailsScreen(state, onBack, pagingItems, actions = viewModel::handleActions)
+    ProjectDetailsScreen(
+        state = state,
+        onBack = onBack,
+        pagingItems = pagingItems,
+        actions = viewModel::handleActions
+    )
 }
 
 @Composable
@@ -74,14 +93,25 @@ private fun ProjectDetailsScreen(
 ) {
     Surface(color = MaterialTheme.colors.background) {
         Scaffold(
+            modifier = Modifier.fillMaxSize()
+                .navigationBarsPadding(),
             topBar = {
                 ProjectDetailsTopBar(
                     title = state.project?.name ?: "Project Details",
                     onBack = onBack
                 )
+            },
+            floatingActionButton = {
+                CreateTaskFAB(
+                    onClick = { actions(ProjectDetailsAction.CreateTask) }
+                )
             }
         ) { paddingValues ->
-            Column(modifier = Modifier.padding(paddingValues)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
                 when {
                     state.isLoading -> LoadingState()
                     state.errorMessage != null -> ErrorState(errorMessage = state.errorMessage)
@@ -116,6 +146,20 @@ private fun ProjectDetailsTopBar(title: String, onBack: () -> Unit) {
             }
         }
     )
+}
+
+@Composable
+private fun CreateTaskFAB(onClick: () -> Unit) {
+    FloatingActionButton(
+        onClick = onClick,
+        backgroundColor = MaterialTheme.colors.primary
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Create Task",
+            tint = MaterialTheme.colors.onPrimary
+        )
+    }
 }
 
 @Composable
@@ -175,7 +219,10 @@ private fun ProjectTasksList(
     pagingItems: LazyPagingItems<Task>,
     onTaskStatusChange: (String, String) -> Unit
 ) {
-    LazyColumn {
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(
             count = pagingItems.itemCount,
             key = pagingItems.itemKey { it.id },

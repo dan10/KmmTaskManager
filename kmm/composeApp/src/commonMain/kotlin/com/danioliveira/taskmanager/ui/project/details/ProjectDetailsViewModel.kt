@@ -15,27 +15,38 @@ import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectDetailsUse
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectTasksUseCase
 import com.danioliveira.taskmanager.navigation.Screen
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 class ProjectDetailsViewModel(
     savedStateHandle: SavedStateHandle,
     private val getProjectDetailsUseCase: GetProjectDetailsUseCase,
-    getProjectTasksUseCase: GetProjectTasksUseCase
+    private val getProjectTasksUseCase: GetProjectTasksUseCase
 ) : ViewModel() {
 
     var state by mutableStateOf(ProjectDetailsState())
         private set
 
     var onBack: () -> Unit = {}
+    var onCreateTask: (String) -> Unit = {}
 
     val projectId = savedStateHandle.toRoute<Screen.ProjectDetails>().projectId
 
+    // Use a SharedFlow to trigger refresh of the paging data
+    private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1)
+
     // Create a Flow of PagingData<Task> for the project tasks
-    val taskFlow: Flow<PagingData<Task>> = getProjectTasksUseCase(projectId)
+    val taskFlow: Flow<PagingData<Task>> = refreshTrigger
+        .flatMapLatest {
+            getProjectTasksUseCase(projectId)
+        }
         .cachedIn(viewModelScope)
 
     init {
         loadProjectDetails()
+        // Trigger initial load of tasks
+        refreshTrigger.tryEmit(Unit)
     }
 
     private fun loadProjectDetails() {
@@ -59,8 +70,13 @@ class ProjectDetailsViewModel(
     }
 
     private fun refreshTasks() {
-        // The taskFlow will be refreshed automatically when collected again
-        // This is just a placeholder for now
+        // Trigger refresh of the paging data
+        refreshTrigger.tryEmit(Unit)
+    }
+
+    fun checkAndRefresh() {
+        loadProjectDetails()
+        refreshTasks()
     }
 
     private fun updateTaskStatus(taskId: String, status: String) {
@@ -69,10 +85,17 @@ class ProjectDetailsViewModel(
         println("Updating task $taskId status to $status")
     }
 
+    private fun createTask() {
+        state.project?.id?.let { projectId ->
+            onCreateTask(projectId)
+        }
+    }
+
     fun handleActions(action: ProjectDetailsAction) {
         when (action) {
             is ProjectDetailsAction.RefreshTasks -> refreshTasks()
             is ProjectDetailsAction.UpdateTaskStatus -> updateTaskStatus(action.taskId, action.status)
+            is ProjectDetailsAction.CreateTask -> createTask()
         }
     }
 }

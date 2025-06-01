@@ -43,5 +43,5 @@ fun getTestModule(config: ApplicationConfig): Module = module {
     // Services
     single { UserService(get(), get()) }
     single { ProjectService(get(), get()) }
-    single { TaskService(get(), get()) }
+    single { TaskService(get(), get(), get()) }
 }

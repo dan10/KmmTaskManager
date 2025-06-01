@@ -9,12 +9,14 @@ import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
+import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import java.util.UUID
 
 internal class TaskService(
     private val repository: TaskRepository,
-    private val projectAssignmentRepository: ProjectAssignmentRepository
+    private val projectAssignmentRepository: ProjectAssignmentRepository,
+    private val projectRepository: ProjectRepository
 ) {
     suspend fun findAll(projectId: String?, page: Int = 0, size: Int = 10): PaginatedResponse<TaskResponse> = dbQuery {
         with(repository) { findAllByProjectId(projectId, page, size) }
@@ -51,14 +53,21 @@ internal class TaskService(
             UUID.fromString(request.assigneeId)
         }
 
-        // Rule 2: If project is specified, validate that assignee is part of the project
+        // Rule 2: If project is specified, validate that assignee is part of the project OR is the project owner
         val projectUUID = request.projectId?.let { UUID.fromString(it) }
         if (projectUUID != null && assigneeUUID != null) {
+            // Check if user is the project owner
+            val project = with(projectRepository) { findById(projectUUID) }
+            val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
+            
+            // Check if user is assigned to the project
             val isAssigneeInProject = with(projectAssignmentRepository) {
                 isUserAssignedToProject(projectUUID, assigneeUUID)
             }
-            if (!isAssigneeInProject) {
-                throw ValidationException("Assignee must be a member of the project")
+            
+            // User must be either the project owner OR a project member
+            if (!isProjectOwner && !isAssigneeInProject) {
+                throw ValidationException("Assignee must be a member of the project or the project owner")
             }
         }
 
@@ -80,16 +89,24 @@ internal class TaskService(
         with(repository) {
             val current = findById(id) ?: throw NotFoundException("Task", id)
 
-            // If assignee is being changed and task has a project, validate that new assignee is part of the project
+            // If assignee is being changed and task has a project, validate that new assignee is part of the project or is the project owner
             val newAssigneeId = request.assigneeId
             if (newAssigneeId != null && newAssigneeId != current.assigneeId && current.projectId != null) {
                 val assigneeUUID = UUID.fromString(newAssigneeId)
                 val projectUUID = UUID.fromString(current.projectId)
+                
+                // Check if user is the project owner
+                val project = with(projectRepository) { findById(projectUUID) }
+                val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
+                
+                // Check if user is assigned to the project
                 val isAssigneeInProject = with(projectAssignmentRepository) {
                     isUserAssignedToProject(projectUUID, assigneeUUID)
                 }
-                if (!isAssigneeInProject) {
-                    throw ValidationException("Assignee must be a member of the project")
+                
+                // User must be either the project owner OR a project member
+                if (!isProjectOwner && !isAssigneeInProject) {
+                    throw ValidationException("Assignee must be a member of the project or the project owner")
                 }
             }
 
@@ -113,15 +130,23 @@ internal class TaskService(
     suspend fun assign(id: String, assigneeId: String): TaskResponse = dbQuery {
         val current = with(repository) { findById(id) } ?: throw NotFoundException("Task", id)
 
-        // Validate that assignee is part of the project if the task has a project
+        // Validate that assignee is part of the project or is the project owner if the task has a project
         val assigneeUUID = UUID.fromString(assigneeId)
         if (current.projectId != null) {
             val projectUUID = UUID.fromString(current.projectId)
+            
+            // Check if user is the project owner
+            val project = with(projectRepository) { findById(projectUUID) }
+            val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
+            
+            // Check if user is assigned to the project
             val isAssigneeInProject = with(projectAssignmentRepository) {
                 isUserAssignedToProject(projectUUID, assigneeUUID)
             }
-            if (!isAssigneeInProject) {
-                throw ValidationException("Assignee must be a member of the project")
+            
+            // User must be either the project owner OR a project member
+            if (!isProjectOwner && !isAssigneeInProject) {
+                throw ValidationException("Assignee must be a member of the project or the project owner")
             }
         }
 
