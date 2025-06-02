@@ -35,8 +35,7 @@ import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectScreen
 import com.danioliveira.taskmanager.ui.project.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
-import com.danioliveira.taskmanager.ui.task.comments.TasksCommentsScreen
-import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditScreen
+ import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditScreen
 import com.danioliveira.taskmanager.ui.task.details.TasksDetailsScreen
 import com.danioliveira.taskmanager.ui.tasks.TasksScreen
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
@@ -199,14 +198,6 @@ fun TaskItNavHost(
                 onEditTask = { taskId -> 
                     navController.navigate(Screen.CreateEditTask(taskId))
                 }
-            )
-        }
-
-        composable<Screen.TasksComments> { backStackEntry ->
-            val taskId = backStackEntry.toRoute<Screen.TasksComments>().taskId
-            TasksCommentsScreen(
-                taskId = taskId,
-                onBack = { navController.popBackStack() }
             )
         }
 

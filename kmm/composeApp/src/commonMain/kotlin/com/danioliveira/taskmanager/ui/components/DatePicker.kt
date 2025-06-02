@@ -61,7 +61,7 @@ fun DatePickerFieldToModal(
         modifier = modifier
             .fillMaxWidth()
             .clickable { showModal = true },
-        enabled = false // Make the field read-only but still clickable
+        enabled = false
     )
 
     if (showModal) {
@@ -83,8 +83,6 @@ private fun Material3DatePickerModal(
     onDateSelected: (LocalDateTime) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // Convert LocalDateTime to milliseconds for Material3 DatePicker
-    // Use UTC to avoid timezone conversion issues
     val initialDateMillis = initialDate?.date?.atTime(12, 0)?.toInstant(TimeZone.UTC)
         ?.toEpochMilliseconds()
     
@@ -98,11 +96,8 @@ private fun Material3DatePickerModal(
             TextButton(
                 onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        // Convert milliseconds back to LocalDateTime
-                        // Use UTC to avoid timezone conversion issues
                         val instant = Instant.fromEpochMilliseconds(millis)
                         val localDate = instant.toLocalDateTime(TimeZone.UTC).date
-                        // Convert to LocalDateTime at midnight in current timezone
                         onDateSelected(localDate.atTime(0, 0))
                     }
                 }
@@ -120,7 +115,6 @@ private fun Material3DatePickerModal(
     }
 }
 
-// Format date using the localized DateFormatter
 @Composable
 fun formatDate(date: LocalDateTime): String {
     return DateFormatter.formatDate(date)

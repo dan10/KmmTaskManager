@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -25,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.danioliveira.taskmanager.ui.components.TrackItButton
+import com.danioliveira.taskmanager.ui.components.TaskItPrimaryActionButton
 import com.danioliveira.taskmanager.ui.components.TrackItInputField
 import com.danioliveira.taskmanager.ui.components.TrackItPasswordField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
@@ -72,7 +73,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreen(
     state: LoginState,
-    email: String,
+    email: TextFieldState,
     emailHasError: Boolean,
     password: TextFieldState,
     passwordHasError: Boolean,
@@ -113,10 +114,9 @@ fun LoginScreen(
                 )
 
                 TrackItInputField(
-                    value = email,
-                    onValueChange = { onAction(LoginAction.UpdateEmail(it)) },
+                    state = email,
                     label = stringResource(Res.string.title_email),
-                    singleLine = true,
+                    lineLimits = TextFieldLineLimits.SingleLine,
                     enabled = !state.isLoading,
                     isError = emailHasError,
                     errorMessage = stringResource(Res.string.title_email_error)
@@ -132,14 +132,13 @@ fun LoginScreen(
                 )
 
                 Spacer(modifier = Modifier.height(0.dp))
-                TrackItButton(
+                TaskItPrimaryActionButton(
                     modifier = Modifier.fillMaxWidth(),
-                    label = stringResource(Res.string.title_login_button),
+                    text = stringResource(Res.string.title_login_button),
                     onClick = { onAction(LoginAction.Login) },
                     enabled = isFormValid,
                     isLoading = state.isLoading
                 )
-
 
                 LoginAccountLink(
                     modifier = Modifier.fillMaxWidth(),
@@ -178,7 +177,7 @@ fun LoginAccountLink(
 @Preview
 @Composable
 fun LoginScreenPreview() {
-    var email by remember { mutableStateOf("") }
+    val email = TextFieldState()
     val password = TextFieldState()
     TaskItTheme {
         LoginScreen(
@@ -190,7 +189,6 @@ fun LoginScreenPreview() {
             isFormValid = true,
             onAction = {
                 when (it) {
-                    is LoginAction.UpdateEmail -> email = it.email
                     is LoginAction.Login -> Unit
                 }
             },

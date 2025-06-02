@@ -69,12 +69,10 @@ fun ProjectDetailsScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
     viewModel: ProjectDetailsViewModel = koinViewModel()
 ) {
-    // Refresh data when screen is created
     LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         viewModel.checkAndRefresh()
     }
 
-    // Set up navigation callback
     LaunchedEffect(viewModel) {
         viewModel.onBack = onBack
         viewModel.onCreateTask = {
@@ -82,7 +80,6 @@ fun ProjectDetailsScreen(
         }
     }
 
-    // Get the current state
     val state = viewModel.state
     val pagingItems = viewModel.taskFlow.collectAsLazyPagingItems()
 
@@ -172,7 +169,6 @@ private fun ProjectDetailsContent(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Project Header
         project?.let {
             ProjectHeader(it)
             Spacer(modifier = Modifier.height(16.dp))
@@ -185,7 +181,6 @@ private fun ProjectDetailsContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Task list
         ProjectTasksList(
             pagingItems = pagingItems,
             navigateToTaskDetail = navigateToTaskDetail,
@@ -223,7 +218,6 @@ private fun ProjectTasksList(
             }
         }
 
-        // Loading indicator
         if (pagingItems.loadState.append == LoadState.Loading) {
             item {
                 TaskItSmallLoadingIndicator(
@@ -234,7 +228,6 @@ private fun ProjectTasksList(
             }
         }
 
-        // Empty state
         if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
             item {
                 TaskItEmptyState(
@@ -261,7 +254,6 @@ fun ProjectHeader(project: Project) {
         Text(text = stringResource(Res.string.project_progress_title), style = MaterialTheme.typography.caption)
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Calculate progress percentage
         val progressPercentage = if (project.total > 0) {
             (project.completed * 100) / project.total
         } else {
@@ -324,7 +316,6 @@ private fun ProjectDetailsScreenPreview() {
         errorMessage = null
     )
 
-    // Create mock tasks
     val mockTasks = List(5) { index ->
         Task(
             id = Uuid.random(),
@@ -345,9 +336,7 @@ private fun ProjectDetailsScreenPreview() {
         )
     }
 
-    // Create pagingData from a list of mock tasks
     val pagingData = PagingData.from(mockTasks)
-    // Pass pagingData containing mock tasks to a MutableStateFlow
     val mockTaskFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {
@@ -374,7 +363,6 @@ private fun ProjectDetailsContentPreview() {
         description = "Redesign the company website"
     )
 
-    // Create mock tasks
     val mockTasks = List(5) { index ->
         Task(
             id = Uuid.random(),
@@ -395,9 +383,7 @@ private fun ProjectDetailsContentPreview() {
         )
     }
 
-    // Create pagingData from a list of mock tasks
     val pagingData = PagingData.from(mockTasks)
-    // Pass pagingData containing mock tasks to a MutableStateFlow
     val mockTaskFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {

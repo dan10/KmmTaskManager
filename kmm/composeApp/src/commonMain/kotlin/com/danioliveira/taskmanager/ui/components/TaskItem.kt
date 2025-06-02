@@ -81,7 +81,6 @@ fun TaskItem(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Priority Tag
                     Surface(
                         color = priority.backgroundColor,
                         shape = MaterialTheme.shapes.small,
@@ -112,7 +111,6 @@ fun TaskItem(
                     )
                 }
 
-                // Status display
                 Text(
                     text = "${stringResource(Res.string.task_status_label)}: ${TaskStatusFormatter.formatTaskStatus(task.status)}",
                     style = MaterialTheme.typography.caption,

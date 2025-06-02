@@ -122,7 +122,7 @@ fun TaskActionButtons(
             onEdit = { onAction(TasksDetailsAction.EditTask) },
             onDelete = { onAction(TasksDetailsAction.DeleteTask) },
             isDeleting = isDeleting,
-            enabled = !isDeleting
+            deleteEnabled = !isDeleting
         )
     }
 }

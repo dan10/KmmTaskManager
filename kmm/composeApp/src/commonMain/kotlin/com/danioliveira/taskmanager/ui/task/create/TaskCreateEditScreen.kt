@@ -55,12 +55,11 @@ fun TaskCreateEditScreen(
     onBack: () -> Unit = {},
     viewModel: TaskCreateEditViewModel = koinViewModel()
 ) {
-    // Set navigation callbacks
     viewModel.onTaskCreated = onBack
     viewModel.onTaskUpdated = onBack
     viewModel.onTaskDeleted = onBack
 
-    // Collect UI state
+
     val state by viewModel.uiState.collectAsState()
     TaskCreateEditScreen(state, onBack, viewModel::handleActions)
 }

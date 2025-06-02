@@ -71,8 +71,8 @@ class ProjectsViewModel(
         when (action) {
             is ProjectsAction.LoadProjects -> loadProjects()
             is ProjectsAction.RefreshProjects -> refreshProjects()
-            is ProjectsAction.OpenProjectDetails -> openProject(action.projectId)
-            ProjectsAction.OpenCreateProject -> {} // Handled in UI layer
+            is ProjectsAction.OpenProjectDetails -> Unit
+            ProjectsAction.OpenCreateProject -> Unit
             is ProjectsAction.UpdateSearchQuery -> updateSearchQuery(action.query)
         }
     }

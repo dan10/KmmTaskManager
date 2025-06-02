@@ -27,12 +27,11 @@ class LoginViewModel(
     var uiState: LoginState by mutableStateOf(LoginState())
         private set
 
-    var loginText by mutableStateOf("")
-        private set
+    var loginText = TextFieldState()
 
     val passwordText = TextFieldState()
 
-    val emailHasError: StateFlow<Boolean> = snapshotFlow { loginText }
+    val emailHasError: StateFlow<Boolean> = snapshotFlow { loginText.text }
         .mapLatest { !ValidationUtils.isEmailValid(it) }
         .stateIn(
             scope = viewModelScope,
@@ -64,7 +63,7 @@ class LoginViewModel(
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, errorMessage = null)
 
-            loginUseCase(loginText, passwordText.text.toString())
+            loginUseCase(loginText.text.toString(), passwordText.text.toString())
                 .onSuccess {
                     uiState = uiState.copy(isLoading = false)
                     navigateToHome()
@@ -80,7 +79,6 @@ class LoginViewModel(
 
     fun handleActions(action: LoginAction) {
         when(action) {
-            is LoginAction.UpdateEmail -> loginText = action.email
             is LoginAction.Login -> login()
         }
     }

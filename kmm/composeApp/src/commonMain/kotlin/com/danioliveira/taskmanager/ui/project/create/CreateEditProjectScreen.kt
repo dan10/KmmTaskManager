@@ -69,17 +69,14 @@ private fun CreateEditProjectScreen(
                 .navigationBarsPadding()
                 .padding(16.dp)
         ) {
-            // Error message
             TaskItErrorMessage(errorMessage = state.errorMessage)
 
-            // Form fields
             ProjectFormFields(
                 state = state
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Buttons
             TaskItCreateEditButtons(
                 isCreating = state.isCreating,
                 isLoading = state.isLoading,
@@ -101,7 +98,6 @@ private fun CreateEditProjectScreen(
 private fun ProjectFormFields(
     state: CreateEditProjectState
 ) {
-    // Project Name field
     TrackItInputField(
         state = state.projectName,
         label = stringResource(Res.string.project_name_label),
@@ -113,7 +109,6 @@ private fun ProjectFormFields(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // Description field
     TrackItInputField(
         state = state.description,
         label = stringResource(Res.string.project_description_label),
@@ -125,7 +120,6 @@ private fun ProjectFormFields(
     )
 }
 
-// --- Previews ---
 @Preview
 @Composable
 fun CreateProjectScreenPreview() {

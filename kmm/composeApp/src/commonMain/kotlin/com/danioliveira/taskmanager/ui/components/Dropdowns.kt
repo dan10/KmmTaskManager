@@ -88,43 +88,4 @@ fun TaskItStatusDropdown(
             }
         }
     }
-}
-
-/**
- * Generic dropdown component for any enum type.
- */
-@Composable
-fun <T> TaskItDropdown(
-    currentValue: T,
-    options: List<T>,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    onValueSelected: (T) -> Unit,
-    valueFormatter: @Composable (T) -> String,
-    modifier: Modifier = Modifier
-) {
-    OutlinedButton(
-        onClick = { onExpandedChange(true) },
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Text(valueFormatter(currentValue))
-        Spacer(Modifier.weight(1f))
-        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) }
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    onClick = {
-                        onValueSelected(option)
-                        onExpandedChange(false)
-                    }
-                ) {
-                    Text(valueFormatter(option))
-                }
-            }
-        }
-    }
 } 

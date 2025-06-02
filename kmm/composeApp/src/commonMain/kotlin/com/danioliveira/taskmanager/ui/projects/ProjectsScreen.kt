@@ -85,21 +85,17 @@ fun ProjectsScreen(
     }
 
     Surface(color = Color(0XFFF1F5F9)) {
-        // Create a wrapper for the onAction function that handles navigation
         val onAction: (ProjectsAction) -> Unit = { action ->
             when (action) {
                 is ProjectsAction.OpenProjectDetails -> {
-                    // Handle navigation directly
                     navigateToProjectDetail(action.projectId)
                 }
 
                 is ProjectsAction.OpenCreateProject -> {
-                    // Handle navigation to create project
                     navigateToCreateProject()
                 }
 
                 else -> {
-                    // Pass other actions to the ViewModel
                     viewModel.handleActions(action)
                 }
             }
@@ -169,7 +165,6 @@ private fun ProjectsContent(
 
         ProjectsSubheader()
 
-        // Show loading indicator when initial loading
         if (pagingItems.loadState.append == LoadState.Loading && pagingItems.itemCount == 0) {
             TaskItLoadingState()
         } else {
@@ -262,7 +257,6 @@ private fun ProjectsList(
                     title = stringResource(Res.string.projects_empty_title),
                     message = stringResource(Res.string.projects_empty_subtitle),
                     content = {
-                        // Custom image for projects empty state
                         Image(
                             painter = painterResource(Res.drawable.ic_folder),
                             colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
@@ -307,7 +301,7 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_folder),
                         contentDescription = stringResource(Res.string.project_icon),
-                        tint = randomColor, // Apply the random color
+                        tint = randomColor,
                         modifier = Modifier.size(24.dp).align(Alignment.Center)
                     )
                 }
@@ -350,7 +344,6 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
 @Preview
 @Composable
 private fun ProjectsScreenPreview() {
-    // Create fake data for preview
     val fakeData = List(5) { index ->
         Project(
             id = "project-$index",
@@ -361,9 +354,7 @@ private fun ProjectsScreenPreview() {
             description = "Description for project $index"
         )
     }
-    // Create pagingData from a list of fake data
     val pagingData = PagingData.from(fakeData)
-    // Pass pagingData containing fake data to a MutableStateFlow
     val fakeDataFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {
@@ -379,7 +370,6 @@ private fun ProjectsScreenPreview() {
 @Composable
 private fun PojectsEmptyScreenPreview() {
     val pagingData = PagingData.from(emptyList<Project>())
-    // Pass pagingData containing fake data to a MutableStateFlow
     val fakeDataFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {

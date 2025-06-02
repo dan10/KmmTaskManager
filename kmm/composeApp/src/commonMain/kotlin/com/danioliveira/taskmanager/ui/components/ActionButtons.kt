@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
+// TaskItSmallLoadingIndicator is expected to be available from another components file (e.g., States.kt)
+// import androidx.compose.material.CircularProgressIndicator // Only if TaskItSmallLoadingIndicator is defined here
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
@@ -18,7 +21,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -31,9 +33,87 @@ import kmmtaskmanager.composeapp.generated.resources.task_edit_button
 import kmmtaskmanager.composeapp.generated.resources.task_update_button
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * Primary and secondary action buttons layout.
- */
+@Composable
+fun ActionButtonContent(
+    icon: ImageVector,
+    contentDescription: String?,
+    text: String
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = contentDescription,
+        modifier = Modifier.size(18.dp)
+    )
+    Spacer(modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
+    Text(text)
+}
+
+@Composable
+fun TaskItPrimaryActionButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isLoading: Boolean = false,
+    icon: ImageVector? = null,
+    iconContentDescription: String? = null,
+    colors: ButtonColors = ButtonDefaults.buttonColors()
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled && !isLoading,
+        colors = colors
+    ) {
+        if (isLoading) {
+            TaskItSmallLoadingIndicator() // Assumes this is defined (e.g., in States.kt)
+            Spacer(modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
+            Text(text)
+        } else if (icon != null) {
+            ActionButtonContent(
+                icon = icon,
+                contentDescription = iconContentDescription,
+                text = text
+            )
+        } else {
+            Text(text)
+        }
+    }
+}
+
+@Composable
+fun TaskItSecondaryActionButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isLoading: Boolean = false,
+    icon: ImageVector? = null,
+    iconContentDescription: String? = null,
+    colors: ButtonColors = ButtonDefaults.outlinedButtonColors()
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled && !isLoading,
+        colors = colors
+    ) {
+        if (isLoading) {
+            TaskItSmallLoadingIndicator() // Assumes this is defined (e.g., in States.kt)
+            Spacer(modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
+            Text(text)
+        } else if (icon != null) {
+            ActionButtonContent(
+                icon = icon,
+                contentDescription = iconContentDescription,
+                text = text
+            )
+        } else {
+            Text(text)
+        }
+    }
+}
+
 @Composable
 fun TaskItActionButtons(
     primaryText: String,
@@ -43,41 +123,31 @@ fun TaskItActionButtons(
     modifier: Modifier = Modifier,
     primaryEnabled: Boolean = true,
     secondaryEnabled: Boolean = true,
-    isLoading: Boolean = false
+    primaryIsLoading: Boolean = false,
+    secondaryIsLoading: Boolean = false
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedButton(
+        TaskItSecondaryActionButton(
+            text = secondaryText,
             onClick = onSecondaryClick,
             modifier = Modifier.weight(1f),
-            enabled = secondaryEnabled
-        ) {
-            Text(secondaryText)
-        }
-
-        Button(
+            enabled = secondaryEnabled,
+            isLoading = secondaryIsLoading
+        )
+        TaskItPrimaryActionButton(
+            text = primaryText,
             onClick = onPrimaryClick,
             modifier = Modifier.weight(1f),
-            enabled = primaryEnabled
-        ) {
-            if (isLoading) {
-                TaskItSmallLoadingIndicator()
-            } else {
-                Text(
-                    text = primaryText,
-                    color = Color.White
-                )
-            }
-        }
+            enabled = primaryEnabled,
+            isLoading = primaryIsLoading
+        )
     }
 }
 
-/**
- * Create/Edit screen action buttons (Cancel/Save).
- */
 @Composable
 fun TaskItCreateEditButtons(
     isCreating: Boolean,
@@ -97,113 +167,46 @@ fun TaskItCreateEditButtons(
         modifier = modifier,
         primaryEnabled = isButtonEnabled,
         secondaryEnabled = !isLoading,
-        isLoading = isLoading
+        primaryIsLoading = isLoading,
+        secondaryIsLoading = false
     )
 }
 
-/**
- * Edit and Delete action buttons with icons.
- */
 @Composable
 fun TaskItEditDeleteButtons(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
-    isDeleting: Boolean = false,
-    enabled: Boolean = true
+    editEnabled: Boolean = true,
+    deleteEnabled: Boolean = true,
+    isDeleting: Boolean = false
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Button(
+        TaskItPrimaryActionButton(
+            text = stringResource(Res.string.task_edit_button),
+            icon = Icons.Filled.Edit,
+            iconContentDescription = stringResource(Res.string.content_description_edit_task),
             onClick = onEdit,
             modifier = Modifier.weight(1f),
-            enabled = enabled && !isDeleting,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.primary
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = stringResource(Res.string.content_description_edit_task),
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(stringResource(Res.string.task_edit_button))
-        }
-        
-        OutlinedButton(
+            enabled = editEnabled && !isDeleting,
+            isLoading = false
+        )
+        TaskItSecondaryActionButton(
+            text = stringResource(Res.string.task_delete_button),
+            icon = Icons.Filled.Delete,
+            iconContentDescription = stringResource(Res.string.content_description_delete_task),
             onClick = onDelete,
             modifier = Modifier.weight(1f),
-            enabled = enabled,
+            enabled = deleteEnabled,
+            isLoading = isDeleting,
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colors.error
             )
-        ) {
-            if (isDeleting) {
-                TaskItSmallLoadingIndicator()
-            } else {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(Res.string.content_description_delete_task),
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(stringResource(Res.string.task_delete_button))
-        }
+        )
     }
 }
 
-/**
- * Single action button with icon and text.
- */
-@Composable
-fun TaskItActionButton(
-    text: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    isLoading: Boolean = false,
-    isPrimary: Boolean = true
-) {
-    if (isPrimary) {
-        Button(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled
-        ) {
-            if (isLoading) {
-                TaskItSmallLoadingIndicator()
-            } else {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.padding(4.dp))
-                Text(text)
-            }
-        }
-    } else {
-        OutlinedButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled
-        ) {
-            if (isLoading) {
-                TaskItSmallLoadingIndicator()
-            } else {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.padding(4.dp))
-                Text(text)
-            }
-        }
-    }
-} 
