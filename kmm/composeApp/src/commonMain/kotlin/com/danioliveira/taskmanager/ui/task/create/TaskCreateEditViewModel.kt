@@ -105,6 +105,8 @@ class TaskCreateEditViewModel(
                             priority = task.priority,
                             dueDate = task.dueDate,
                             status = task.status,
+                            projectId = task.projectId,
+                            projectName = task.projectName,
                             errorMessage = null
                         )
                     }

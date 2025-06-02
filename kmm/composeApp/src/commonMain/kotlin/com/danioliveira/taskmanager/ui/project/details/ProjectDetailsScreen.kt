@@ -67,6 +67,7 @@ import kotlin.uuid.Uuid
 fun ProjectDetailsScreen(
     onBack: () -> Unit,
     navigateToCreateTask: (String) -> Unit,
+    navigateToTaskDetail: (Uuid) -> Unit,
     viewModel: ProjectDetailsViewModel = koinViewModel()
 ) {
     // Refresh data when screen is created
@@ -90,6 +91,7 @@ fun ProjectDetailsScreen(
         state = state,
         onBack = onBack,
         pagingItems = pagingItems,
+        navigateToTaskDetail = navigateToTaskDetail,
         actions = viewModel::handleActions
     )
 }
@@ -99,6 +101,7 @@ private fun ProjectDetailsScreen(
     state: ProjectDetailsState,
     onBack: () -> Unit,
     pagingItems: LazyPagingItems<Task>,
+    navigateToTaskDetail: (Uuid) -> Unit,
     actions: (ProjectDetailsAction) -> Unit
 ) {
     Surface(color = MaterialTheme.colors.background) {
@@ -128,6 +131,7 @@ private fun ProjectDetailsScreen(
                     else -> ProjectDetailsContent(
                         project = state.project,
                         pagingItems = pagingItems,
+                        navigateToTaskDetail = navigateToTaskDetail,
                         onTaskStatusChange = { taskId, status ->
                             actions(
                                 ProjectDetailsAction.UpdateTaskStatus(
@@ -196,6 +200,7 @@ private fun ErrorState(errorMessage: String) {
 private fun ProjectDetailsContent(
     project: Project?,
     pagingItems: LazyPagingItems<Task>,
+    navigateToTaskDetail: (Uuid) -> Unit,
     onTaskStatusChange: (String, String) -> Unit
 ) {
     Column(
@@ -219,6 +224,7 @@ private fun ProjectDetailsContent(
         // Task list
         ProjectTasksList(
             pagingItems = pagingItems,
+            navigateToTaskDetail = navigateToTaskDetail,
             onTaskStatusChange = onTaskStatusChange
         )
     }
@@ -227,6 +233,7 @@ private fun ProjectDetailsContent(
 @Composable
 private fun ProjectTasksList(
     pagingItems: LazyPagingItems<Task>,
+    navigateToTaskDetail: (Uuid) -> Unit,
     onTaskStatusChange: (String, String) -> Unit
 ) {
     LazyColumn(
@@ -242,7 +249,7 @@ private fun ProjectTasksList(
             if (task != null) {
                 TaskItem(
                     task = task,
-                    onClick = { /* No-op for now */ },
+                    onClick = { navigateToTaskDetail(task.id) },
                     onCheckedChange = { isChecked ->
                         val newStatus = if (isChecked) TaskStatus.DONE.name else TaskStatus.TODO.name
                         onTaskStatusChange(task.id.toString(), newStatus)
@@ -432,6 +439,7 @@ private fun ProjectDetailsScreenPreview() {
             state = mockState,
             onBack = {},
             pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+            navigateToTaskDetail = { _ -> },
             actions = {}
         )
     }
@@ -480,6 +488,7 @@ private fun ProjectDetailsContentPreview() {
         ProjectDetailsContent(
             project = mockProject,
             pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+            navigateToTaskDetail = { _ -> },
             onTaskStatusChange = { _, _ -> }
         )
     }
@@ -519,6 +528,7 @@ private fun ProjectTasksListPreview() {
         Surface {
             ProjectTasksList(
                 pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+                navigateToTaskDetail = { _ -> },
                 onTaskStatusChange = { _, _ -> }
             )
         }
@@ -538,6 +548,7 @@ private fun EmptyProjectTasksListPreview() {
         Surface {
             ProjectTasksList(
                 pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+                navigateToTaskDetail = { _ -> },
                 onTaskStatusChange = { _, _ -> }
             )
         }

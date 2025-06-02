@@ -219,6 +219,9 @@ fun TaskItNavHost(
                 onBack = { navController.popBackStack() },
                 navigateToCreateTask = {
                     navController.navigate(Screen.CreateEditTask(taskId = null, projectId = it))
+                },
+                navigateToTaskDetail = { taskId -> 
+                    navController.navigate(Screen.TasksDetails(taskId.toString())) 
                 }
             )
         }
