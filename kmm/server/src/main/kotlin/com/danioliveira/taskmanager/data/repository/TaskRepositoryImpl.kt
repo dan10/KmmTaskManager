@@ -23,6 +23,7 @@ import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
 import java.util.UUID
+import org.jetbrains.exposed.sql.lowerCase
 import kotlin.math.ceil
 
 internal class TaskRepositoryImpl : TaskRepository {
@@ -93,7 +94,11 @@ internal class TaskRepositoryImpl : TaskRepository {
 
         var condition: Op<Boolean> = TasksTable.assignee eq assigneeUuid
         if (!query.isNullOrBlank()) {
-            condition = condition and (TasksTable.title like "%${query}%")
+            val searchQuery = "%${query.lowercase()}%"
+            condition = condition and (
+                (TasksTable.title.lowerCase() like searchQuery) or 
+                (TasksTable.description.lowerCase() like searchQuery)
+            )
         }
 
         val taskQuery = TaskDAOEntity.find { condition }

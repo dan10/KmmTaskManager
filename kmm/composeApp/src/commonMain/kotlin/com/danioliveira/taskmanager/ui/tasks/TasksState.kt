@@ -1,12 +1,13 @@
 package com.danioliveira.taskmanager.ui.tasks
 
+import androidx.compose.foundation.text.input.TextFieldState
 import kotlin.uuid.Uuid
 
 data class TasksState(
     val isLoading: Boolean = false,
     val completedTasks: Int = 0,
     val totalTasks: Int = 0,
-    val errorMessage: String? = null
+    val searchFieldState: TextFieldState = TextFieldState()
 )
 
 sealed interface TasksAction {

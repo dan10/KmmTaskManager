@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.FloatingActionButton
@@ -104,9 +107,7 @@ fun TasksScreen(
         TasksScreen(
             state = viewModel.state,
             pagingItems = viewModel.taskFlow.collectAsLazyPagingItems(),
-            searchText = viewModel.searchQuery,
-            onAction = onAction,
-            onSearchTextChange = viewModel::updateSearchQuery
+            onAction = onAction
         )
     }
 }
@@ -115,9 +116,7 @@ fun TasksScreen(
 private fun TasksScreen(
     state: TasksState,
     pagingItems: LazyPagingItems<Task>,
-    searchText: String,
-    onAction: (TasksAction) -> Unit,
-    onSearchTextChange: (String) -> Unit
+    onAction: (TasksAction) -> Unit
 ) {
 
     Scaffold(
@@ -126,10 +125,8 @@ private fun TasksScreen(
             TasksTopBar(
                 completedTasks = state.completedTasks,
                 totalTasks = state.totalTasks,
-                searchText = searchText,
-                onSearchTextChange = {
-                    onSearchTextChange(it)
-                })
+                searchFieldState = state.searchFieldState
+            )
         },
         floatingActionButton = { AddTaskButton(onAction) }
     ) { paddingValues ->
@@ -187,8 +184,7 @@ private fun TasksScreen(
 private fun TasksTopBar(
     completedTasks: Int,
     totalTasks: Int,
-    searchText: String,
-    onSearchTextChange: (String) -> Unit
+    searchFieldState: TextFieldState
 ) {
     Column(
         modifier = Modifier
@@ -203,22 +199,28 @@ private fun TasksTopBar(
         Spacer(modifier = Modifier.height(16.dp))
         YourProgressSection(completedTasks = completedTasks, totalTasks = totalTasks)
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = onSearchTextChange,
-            singleLine = true,
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(
-                    Icons.Filled.Search,
-                    contentDescription = stringResource(Res.string.content_description_search)
-                )
-            },
-            placeholder = { Text(stringResource(Res.string.tasks_search_placeholder)) },
-            colors = TextFieldDefaults.outlinedTextFieldColors(backgroundColor = MaterialTheme.colors.surface)
-        )
+        TasksSearchField(searchFieldState = searchFieldState)
     }
+}
+
+@Composable
+private fun TasksSearchField(
+    searchFieldState: TextFieldState
+) {
+    OutlinedTextField(
+        state = searchFieldState,
+        lineLimits = TextFieldLineLimits.SingleLine,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth(),
+        leadingIcon = {
+            Icon(
+                Icons.Filled.Search,
+                contentDescription = stringResource(Res.string.content_description_search)
+            )
+        },
+        placeholder = { Text(stringResource(Res.string.tasks_search_placeholder)) },
+        colors = TextFieldDefaults.outlinedTextFieldColors(backgroundColor = MaterialTheme.colors.surface)
+    )
 }
 
 @Composable
@@ -389,9 +391,7 @@ fun TasksScreenPreview() {
             ),
             // pass flow to composable
             pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-            searchText = "",
-            onAction = {},
-            onSearchTextChange = {}
+            onAction = {}
         )
     }
 }
@@ -420,9 +420,7 @@ fun EmptyTasksScreenPreview() {
             ),
             // pass flow to composable
             pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-            searchText = "",
-            onAction = {},
-            onSearchTextChange = {}
+            onAction = {}
         )
     }
 }

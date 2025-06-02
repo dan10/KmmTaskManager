@@ -19,6 +19,8 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
 import java.util.UUID
+import org.jetbrains.exposed.sql.lowerCase
+import org.jetbrains.exposed.sql.or
 import kotlin.math.ceil
 
 /**
@@ -55,7 +57,11 @@ class ProjectRepositoryImpl : ProjectRepository {
     ): PaginatedResponse<ProjectResponse> {
         var condition = ProjectsTable.owner eq ownerId
         if (!query.isNullOrBlank()) {
-            condition = condition and (ProjectsTable.name like "%${query}%")
+            val searchQuery = "%${query.lowercase()}%"
+            condition = condition and (
+                (ProjectsTable.name.lowerCase() like searchQuery) or 
+                (ProjectsTable.description.lowerCase() like searchQuery)
+            )
         }
         val projectQuery = ProjectDAOEntity.find { condition }
         return projectQuery.toPaginatedResponse(page, size)
@@ -63,7 +69,11 @@ class ProjectRepositoryImpl : ProjectRepository {
 
     override suspend fun Transaction.findAll(page: Int, size: Int, query: String?): PaginatedResponse<ProjectResponse> {
         val projectQuery = if (!query.isNullOrBlank()) {
-            ProjectDAOEntity.find { ProjectsTable.name like "%${query}%" }
+            val searchQuery = "%${query.lowercase()}%"
+            ProjectDAOEntity.find { 
+                (ProjectsTable.name.lowerCase() like searchQuery) or 
+                (ProjectsTable.description.lowerCase() like searchQuery)
+            }
         } else {
             ProjectDAOEntity.all()
         }
