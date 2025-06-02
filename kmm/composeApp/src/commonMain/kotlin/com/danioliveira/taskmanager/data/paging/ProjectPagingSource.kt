@@ -2,7 +2,7 @@ package com.danioliveira.taskmanager.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.danioliveira.taskmanager.api.response.ProjectResponse
+import com.danioliveira.taskmanager.data.mapper.toProject
 import com.danioliveira.taskmanager.data.network.ProjectApiService
 import com.danioliveira.taskmanager.domain.Project
 
@@ -31,7 +31,7 @@ class ProjectPagingSource(
         return try {
             val response = apiService.getProjects(page, pageSize, query)
 
-            val projects = response.items.map { it.toDomainModel() }
+            val projects = response.items.map { it.toProject() }
 
             LoadResult.Page(
                 data = projects,
@@ -41,16 +41,5 @@ class ProjectPagingSource(
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
-    }
-
-    private fun ProjectResponse.toDomainModel(): Project {
-        return Project(
-            id = id,
-            name = name,
-            completed = completed,
-            inProgress = inProgress,
-            total = total,
-            description = description
-        )
     }
 }

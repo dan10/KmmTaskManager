@@ -2,11 +2,10 @@ package com.danioliveira.taskmanager.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.danioliveira.taskmanager.api.response.TaskResponse
+import com.danioliveira.taskmanager.data.mapper.toTask
 import com.danioliveira.taskmanager.data.network.TaskApiService
 import com.danioliveira.taskmanager.domain.Task
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 /**
  * PagingSource implementation for tasks in a specific project.
@@ -34,7 +33,7 @@ class ProjectTaskPagingSource(
         return try {
             val response = apiService.getTasksByProjectId(projectId, page, pageSize)
 
-            val tasks = response.items.map { it.toDomainModel() }
+            val tasks = response.items.map { it.toTask() }
 
             LoadResult.Page(
                 data = tasks,
@@ -44,18 +43,5 @@ class ProjectTaskPagingSource(
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
-    }
-
-    @OptIn(ExperimentalUuidApi::class)
-    private fun TaskResponse.toDomainModel(): Task {
-        return Task(
-            id = Uuid.parse(id),
-            title = title,
-            description = description,
-            projectName = projectId,
-            status = status,
-            priority = priority,
-            dueDate = dueDate
-        )
     }
 }

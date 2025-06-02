@@ -17,6 +17,7 @@ data class TaskResponse(
     val priority: Priority,
     val dueDate: LocalDateTime?,
     val projectId: String?,
+    val projectName: String?,
     val assigneeId: String?,
     val creatorId: String
 )

@@ -246,7 +246,8 @@ private fun ProjectTasksList(
                     onCheckedChange = { isChecked ->
                         val newStatus = if (isChecked) TaskStatus.DONE.name else TaskStatus.TODO.name
                         onTaskStatusChange(task.id.toString(), newStatus)
-                    }
+                    },
+                    showProjectName = false
                 )
             }
         }

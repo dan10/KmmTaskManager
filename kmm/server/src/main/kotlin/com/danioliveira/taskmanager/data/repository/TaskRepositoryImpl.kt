@@ -176,6 +176,7 @@ internal class TaskRepositoryImpl : TaskRepository {
             priority = this.priority,
             dueDate = this.dueDate,
             projectId = this.project?.id?.value?.toString(),
+            projectName = this.project?.name,
             assigneeId = this.assignee?.id?.value?.toString(),
             creatorId = this.creator.id.value.toString()
         )

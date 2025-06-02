@@ -14,7 +14,7 @@ fun TaskResponse.toTask(): Task {
         id = Uuid.parse(id),
         title = title,
         description = description,
-        projectName = projectId, // Note: This is just the ID, not the name
+        projectName = projectName,
         status = status,
         priority = priority,
         dueDate = dueDate

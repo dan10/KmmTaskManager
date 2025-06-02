@@ -38,7 +38,8 @@ fun TaskItem(
     task: Task,
     onClick: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showProjectName: Boolean = true
 ) {
     Card(
         modifier = modifier
@@ -109,9 +110,9 @@ fun TaskItem(
                     )
                 }
 
-                task.projectName?.let {
+                if (showProjectName && task.projectName != null) {
                     Text(
-                        text = "${stringResource(Res.string.task_project)} $it",
+                        text = "${stringResource(Res.string.task_project)} ${task.projectName}",
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.primary
                     )
