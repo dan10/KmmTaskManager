@@ -198,10 +198,6 @@ fun TaskItNavHost(
                 onBack = { navController.popBackStack() },
                 onEditTask = { taskId -> 
                     navController.navigate(Screen.CreateEditTask(taskId))
-                },
-                onDeleteTask = { taskId ->
-                    // Navigate back after deletion
-                    navController.popBackStack()
                 }
             )
         }
