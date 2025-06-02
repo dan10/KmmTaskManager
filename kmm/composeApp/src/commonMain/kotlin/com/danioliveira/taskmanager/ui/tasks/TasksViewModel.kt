@@ -1,6 +1,5 @@
 package com.danioliveira.taskmanager.ui.tasks
 
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,17 +7,20 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
-import kotlinx.coroutines.launch
-import kotlin.uuid.Uuid
+import com.danioliveira.taskmanager.domain.usecase.tasks.UpdateTaskStatusUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
+import kotlin.uuid.Uuid
 
 class TasksViewModel(
     private val getTasksUseCase: GetTasksUseCase,
     private val getTaskProgressUseCase: GetTaskProgressUseCase,
+    private val updateTaskStatusUseCase: UpdateTaskStatusUseCase
 ) : ViewModel() {
 
     var state by mutableStateOf(TasksState())
@@ -91,24 +93,26 @@ class TasksViewModel(
         refresh()
     }
 
-    fun updateSearchQuery(query: String) {
-        val newState = TextFieldState()
-        newState.edit { append(query) }
-        state = state.copy(searchFieldState = newState)
-    }
-
-    private fun openTask(taskId: Uuid) {
-        // This method is now empty because navigation is handled in the UI layer
-        // We keep it for compatibility with the existing code
+    private fun updateTaskStatus(taskId: Uuid, status: TaskStatus) {
+        viewModelScope.launch {
+            updateTaskStatusUseCase(taskId.toString(), status)
+                .onSuccess { 
+                    // Refresh the task list and progress after successful status update
+                    refreshTasks()
+                }
+                .onFailure { error ->
+                    // Handle error - for now we just refresh to get the current state
+                    refreshTasks()
+                }
+        }
     }
 
     fun handleActions(action: TasksAction) {
         when(action) {
             is TasksAction.LoadTasks -> loadTasks()
             is TasksAction.RefreshTasks -> refreshTasks()
-            is TasksAction.OpenTaskDetails -> openTask(action.taskId)
-            TasksAction.OpenCreateTask -> {} // Handled in UI layer
-            is TasksAction.UpdateSearchQuery -> updateSearchQuery(action.query)
+            is TasksAction.UpdateTaskStatus -> updateTaskStatus(action.taskId, action.status)
+            else -> Unit
         }
     }
 }

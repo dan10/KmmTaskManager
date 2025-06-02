@@ -25,6 +25,7 @@ import com.danioliveira.taskmanager.domain.usecase.tasks.DeleteTaskUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskDetailsUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.GetTasksUseCase
+import com.danioliveira.taskmanager.domain.usecase.tasks.UpdateTaskStatusUseCase
 import com.danioliveira.taskmanager.ui.login.LoginViewModel
 import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectViewModel
 import com.danioliveira.taskmanager.ui.project.details.ProjectDetailsViewModel
@@ -76,6 +77,7 @@ val appModule = module {
     factoryOf(::DeleteTaskUseCase)
     factoryOf(::GetTaskDetailsUseCase)
     factoryOf(::CreateEditProjectUseCase)
+    factoryOf(::UpdateTaskStatusUseCase)
 
     // ViewModels
     viewModelOf(::LoginViewModel)

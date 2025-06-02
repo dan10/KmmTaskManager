@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.Card
@@ -155,7 +154,10 @@ private fun TasksScreen(
                         TaskItem(
                             task = task,
                             onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
-                            onCheckedChange = {},
+                            onCheckedChange = { isChecked ->
+                                val newStatus = if (isChecked) TaskStatus.DONE else TaskStatus.TODO
+                                onAction(TasksAction.UpdateTaskStatus(task.id, newStatus))
+                            },
                         )
                     }
                 }

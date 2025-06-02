@@ -24,9 +24,11 @@ import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
 import com.danioliveira.taskmanager.utils.PriorityFormatter
+import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.task_due_date
 import kmmtaskmanager.composeapp.generated.resources.task_project
+import kmmtaskmanager.composeapp.generated.resources.task_status_label
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -109,6 +111,13 @@ fun TaskItem(
                         color = MaterialTheme.colors.primary
                     )
                 }
+
+                // Status display
+                Text(
+                    text = "${stringResource(Res.string.task_status_label)}: ${TaskStatusFormatter.formatTaskStatus(task.status)}",
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.secondary
+                )
 
                 if (showProjectName && task.projectName != null) {
                     Text(
