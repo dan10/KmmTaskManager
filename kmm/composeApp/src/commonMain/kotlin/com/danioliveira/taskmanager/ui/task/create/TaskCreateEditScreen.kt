@@ -38,23 +38,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.ui.components.DatePickerFieldToModal
 import com.danioliveira.taskmanager.ui.components.TrackItInputField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import com.danioliveira.taskmanager.utils.PriorityFormatter
+import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_back
 import kmmtaskmanager.composeapp.generated.resources.content_description_delete
 import kmmtaskmanager.composeapp.generated.resources.create_task
 import kmmtaskmanager.composeapp.generated.resources.edit_task
+import kmmtaskmanager.composeapp.generated.resources.project_name_label
 import kmmtaskmanager.composeapp.generated.resources.task_cancel_button
 import kmmtaskmanager.composeapp.generated.resources.task_create_button
 import kmmtaskmanager.composeapp.generated.resources.task_description_label
-import kmmtaskmanager.composeapp.generated.resources.task_due_date_label
 import kmmtaskmanager.composeapp.generated.resources.task_priority_label
+import kmmtaskmanager.composeapp.generated.resources.task_status_label
 import kmmtaskmanager.composeapp.generated.resources.task_title_error
 import kmmtaskmanager.composeapp.generated.resources.task_title_label
 import kmmtaskmanager.composeapp.generated.resources.task_update_button
-import kmmtaskmanager.composeapp.generated.resources.project_name_label
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -64,7 +67,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.days
 import kotlin.uuid.ExperimentalUuidApi
-import com.danioliveira.taskmanager.utils.PriorityFormatter
 
 @OptIn(ExperimentalUuidApi::class)
 @Composable
@@ -89,6 +91,7 @@ private fun TaskCreateEditScreen(
     actions: (TaskCreateEditAction) -> Unit
 ) {
     var priorityDropdownExpanded by remember { mutableStateOf(false) }
+    var statusDropdownExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -115,6 +118,9 @@ private fun TaskCreateEditScreen(
                 priorityDropdownExpanded = priorityDropdownExpanded,
                 onPriorityDropdownExpandedChange = { priorityDropdownExpanded = it },
                 onPrioritySelected = { actions(TaskCreateEditAction.SetPriority(it)) },
+                statusDropdownExpanded = statusDropdownExpanded,
+                onStatusDropdownExpandedChange = { statusDropdownExpanded = it },
+                onStatusSelected = { actions(TaskCreateEditAction.SetStatus(it)) },
                 onDateSelected = { actions(TaskCreateEditAction.SetDate(it)) }
             )
 
@@ -191,6 +197,9 @@ private fun TaskFormFields(
     priorityDropdownExpanded: Boolean,
     onPriorityDropdownExpandedChange: (Boolean) -> Unit,
     onPrioritySelected: (Priority) -> Unit,
+    statusDropdownExpanded: Boolean,
+    onStatusDropdownExpandedChange: (Boolean) -> Unit,
+    onStatusSelected: (TaskStatus) -> Unit,
     onDateSelected: (LocalDateTime) -> Unit
 ) {
     // Project field (if project is associated)
@@ -252,6 +261,24 @@ private fun TaskFormFields(
 
     Spacer(modifier = Modifier.height(16.dp))
 
+    // Status dropdown - only show when editing a task
+    if (!state.isCreating) {
+        Text(
+            text = stringResource(Res.string.task_status_label),
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+        )
+
+        StatusDropdown(
+            currentStatus = state.status,
+            expanded = statusDropdownExpanded,
+            onExpandedChange = onStatusDropdownExpandedChange,
+            onStatusSelected = onStatusSelected
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
     // Due date field
     DatePickerFieldToModal(
         selectedDate = state.dueDate,
@@ -287,6 +314,39 @@ private fun PriorityDropdown(
                     }
                 ) {
                     Text(PriorityFormatter.formatPriority(priorityOption))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusDropdown(
+    currentStatus: TaskStatus,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onStatusSelected: (TaskStatus) -> Unit
+) {
+    OutlinedButton(
+        onClick = { onExpandedChange(true) },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(TaskStatusFormatter.formatTaskStatus(currentStatus))
+        Spacer(Modifier.weight(1f))
+        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) }
+        ) {
+            TaskStatus.entries.forEach { statusOption ->
+                DropdownMenuItem(
+                    onClick = {
+                        onStatusSelected(statusOption)
+                        onExpandedChange(false)
+                    }
+                ) {
+                    Text(TaskStatusFormatter.formatTaskStatus(statusOption))
                 }
             }
         }

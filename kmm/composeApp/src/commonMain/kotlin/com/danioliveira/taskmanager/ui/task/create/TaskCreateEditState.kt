@@ -43,6 +43,7 @@ sealed interface TaskCreateEditAction {
     data object UpdateTask : TaskCreateEditAction
     data object DeleteTask : TaskCreateEditAction
     data class SetPriority(val priority: Priority) : TaskCreateEditAction
+    data class SetStatus(val status: TaskStatus) : TaskCreateEditAction
     data object ShowDatePicker : TaskCreateEditAction
     data object HideDatePicker : TaskCreateEditAction
     data class SetDate(val date: LocalDateTime) : TaskCreateEditAction

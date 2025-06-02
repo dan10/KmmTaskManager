@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.usecase.tasks.CreateEditTaskUseCase
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectDetailsUseCase
 import com.danioliveira.taskmanager.data.mapper.toProject
@@ -233,6 +234,15 @@ class TaskCreateEditViewModel(
     }
 
     /**
+     * Sets the status of the task.
+     *
+     * @param status The new status
+     */
+    private fun setStatus(status: TaskStatus) {
+        _uiState.update { it.copy(status = status) }
+    }
+
+    /**
      * Handles actions from the UI.
      *
      * @param action The action to handle
@@ -243,6 +253,7 @@ class TaskCreateEditViewModel(
             is TaskCreateEditAction.UpdateTask -> updateTask()
             is TaskCreateEditAction.DeleteTask -> deleteTask()
             is TaskCreateEditAction.SetPriority -> setPriority(action.priority)
+            is TaskCreateEditAction.SetStatus -> setStatus(action.status)
             is TaskCreateEditAction.ShowDatePicker -> showDatePicker()
             is TaskCreateEditAction.HideDatePicker -> hideDatePicker()
             is TaskCreateEditAction.SetDate -> setDate(action.date)

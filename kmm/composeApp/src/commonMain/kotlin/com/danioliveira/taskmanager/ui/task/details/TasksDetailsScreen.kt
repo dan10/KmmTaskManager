@@ -1,7 +1,6 @@
 package com.danioliveira.taskmanager.ui.task.details
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -40,21 +38,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskPriority
+import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.toTaskPriority
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
-import com.danioliveira.taskmanager.utils.PriorityFormatter
 import com.danioliveira.taskmanager.util.DateFormatter
+import com.danioliveira.taskmanager.utils.PriorityFormatter
+import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_back
-import kmmtaskmanager.composeapp.generated.resources.content_description_edit_task
 import kmmtaskmanager.composeapp.generated.resources.content_description_delete_task
+import kmmtaskmanager.composeapp.generated.resources.content_description_edit_task
 import kmmtaskmanager.composeapp.generated.resources.task_actions
+import kmmtaskmanager.composeapp.generated.resources.task_delete_button
 import kmmtaskmanager.composeapp.generated.resources.task_details_title
 import kmmtaskmanager.composeapp.generated.resources.task_due_date
 import kmmtaskmanager.composeapp.generated.resources.task_edit_button
-import kmmtaskmanager.composeapp.generated.resources.task_delete_button
 import kmmtaskmanager.composeapp.generated.resources.task_no_due_date
 import kmmtaskmanager.composeapp.generated.resources.task_project
+import kmmtaskmanager.composeapp.generated.resources.task_status_label
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -64,8 +65,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun TasksDetailsScreen(
     viewModel: TasksDetailsViewModel = koinViewModel(),
     onBack: () -> Unit,
-    onEditTask: (String) -> Unit = {},
-    onDeleteTask: (String) -> Unit = {}
+    onEditTask: (String) -> Unit = {}
 ) {
     viewModel.onBack = onBack
     viewModel.onEditTask = onEditTask
@@ -144,6 +144,7 @@ private fun TaskDetailsContent(
                     title = state.task.title,
                     priority = state.task.priority.toTaskPriority(),
                     description = state.task.description,
+                    status = state.task.status,
                     dueDate = state.task.dueDate,
                     projectName = state.task.projectName
                 )
@@ -252,6 +253,7 @@ fun TaskInfoCard(
     title: String,
     priority: TaskPriority,
     description: String,
+    status: TaskStatus,
     dueDate: LocalDateTime?,
     projectName: String?
 ) {
@@ -288,6 +290,12 @@ fun TaskInfoCard(
                 } else {
                     stringResource(Res.string.task_no_due_date)
                 }
+            )
+            
+            // Status row
+            InfoRow(
+                label = stringResource(Res.string.task_status_label),
+                value = TaskStatusFormatter.formatTaskStatus(status)
             )
             
             // Project row - only show if task has a project

@@ -146,6 +146,11 @@
     <string name="priority_medium">Medium</string>
     <string name="priority_low">Low</string>
 
+    <!-- Task Status strings -->
+    <string name="task_status_todo">To Do</string>
+    <string name="task_status_in_progress">In Progress</string>
+    <string name="task_status_done">Done</string>
+
     <!-- Task Details strings -->
     <string name="task_actions">Actions</string>
     <string name="task_edit_button">Edit</string>
