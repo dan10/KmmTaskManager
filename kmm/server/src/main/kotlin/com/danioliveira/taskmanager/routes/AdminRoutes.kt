@@ -1,10 +1,16 @@
 package com.danioliveira.taskmanager.routes
 
-import com.danioliveira.taskmanager.data.tables.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import com.danioliveira.taskmanager.data.tables.ProjectAssignmentsTable
+import com.danioliveira.taskmanager.data.tables.ProjectInvitationsTable
+import com.danioliveira.taskmanager.data.tables.ProjectsTable
+import com.danioliveira.taskmanager.data.tables.TasksTable
+import com.danioliveira.taskmanager.data.tables.UsersTable
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction

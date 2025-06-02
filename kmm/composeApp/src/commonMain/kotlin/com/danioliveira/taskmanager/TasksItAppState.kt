@@ -81,15 +81,6 @@ class TasksItAppState(
                 currentDestination.hasRoute(Screen.Register::class)
     }
 
-    /**
-     * Checks if the bottom bar should be shown for the current screen.
-     */
-    @Composable
-    fun shouldShowBottomBar(): Boolean {
-        return currentDestination?.hasRoute(Screen.Tasks::class) == true ||
-                currentDestination?.hasRoute(Screen.Projects::class) == true ||
-                currentDestination?.hasRoute(Screen.Profile::class) == true
-    }
 
     private fun shouldShowBottomBar2(currentDestination: NavDestination): Boolean {
         return currentDestination.hasRoute(Screen.Tasks::class) ||

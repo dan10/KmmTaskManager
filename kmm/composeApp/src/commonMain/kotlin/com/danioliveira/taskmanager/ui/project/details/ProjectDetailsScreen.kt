@@ -1,7 +1,6 @@
 package com.danioliveira.taskmanager.ui.project.details
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,19 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,9 +38,14 @@ import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.itemContentType
 import com.danioliveira.taskmanager.paging.compose.itemKey
 import com.danioliveira.taskmanager.ui.components.TaskItem
+import com.danioliveira.taskmanager.ui.components.TaskItEmptyState
+import com.danioliveira.taskmanager.ui.components.TaskItErrorState
+import com.danioliveira.taskmanager.ui.components.TaskItInfoCard
+import com.danioliveira.taskmanager.ui.components.TaskItLoadingState
+import com.danioliveira.taskmanager.ui.components.TaskItSmallLoadingIndicator
+import com.danioliveira.taskmanager.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
-import kmmtaskmanager.composeapp.generated.resources.content_description_back
 import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
 import kmmtaskmanager.composeapp.generated.resources.project_details_title
 import kmmtaskmanager.composeapp.generated.resources.project_progress_title
@@ -109,9 +108,9 @@ private fun ProjectDetailsScreen(
             modifier = Modifier.fillMaxSize()
                 .navigationBarsPadding(),
             topBar = {
-                ProjectDetailsTopBar(
+                TaskItTopAppBar(
                     title = state.project?.name ?: stringResource(Res.string.project_details_title),
-                    onBack = onBack
+                    onNavigateBack = onBack
                 )
             },
             floatingActionButton = {
@@ -126,8 +125,8 @@ private fun ProjectDetailsScreen(
                     .padding(paddingValues)
             ) {
                 when {
-                    state.isLoading -> LoadingState()
-                    state.errorMessage != null -> ErrorState(errorMessage = state.errorMessage)
+                    state.isLoading -> TaskItLoadingState()
+                    state.errorMessage != null -> TaskItErrorState(state.errorMessage)
                     else -> ProjectDetailsContent(
                         project = state.project,
                         pagingItems = pagingItems,
@@ -148,21 +147,6 @@ private fun ProjectDetailsScreen(
 }
 
 @Composable
-private fun ProjectDetailsTopBar(title: String, onBack: () -> Unit) {
-    TopAppBar(
-        title = { Text(title) },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(Res.string.content_description_back)
-                )
-            }
-        }
-    )
-}
-
-@Composable
 private fun CreateTaskFAB(onClick: () -> Unit) {
     FloatingActionButton(
         onClick = onClick,
@@ -173,26 +157,6 @@ private fun CreateTaskFAB(onClick: () -> Unit) {
             contentDescription = stringResource(Res.string.content_description_create_task),
             tint = MaterialTheme.colors.onPrimary
         )
-    }
-}
-
-@Composable
-private fun LoadingState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorState(errorMessage: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = errorMessage)
     }
 }
 
@@ -262,77 +226,61 @@ private fun ProjectTasksList(
         // Loading indicator
         if (pagingItems.loadState.append == LoadState.Loading) {
             item {
-                LoadingIndicator()
+                TaskItSmallLoadingIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
             }
         }
 
         // Empty state
         if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
             item {
-                EmptyTasksMessage()
+                TaskItEmptyState(
+                    title = stringResource(Res.string.project_tasks_empty),
+                    message = "Get started by creating your first task!"
+                )
             }
         }
     }
 }
 
 @Composable
-private fun LoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun EmptyTasksMessage() {
-    Box(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = stringResource(Res.string.project_tasks_empty))
-    }
-}
-
-@Composable
 fun ProjectHeader(project: Project) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 2.dp
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                ProjectStatus(label = stringResource(Res.string.project_status_total_tasks), value = project.total)
-                ProjectStatus(label = stringResource(Res.string.project_status_in_progress), value = project.inProgress)
-                ProjectStatus(label = stringResource(Res.string.project_status_completed), value = project.completed)
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = stringResource(Res.string.project_progress_title), style = MaterialTheme.typography.caption)
-            Spacer(modifier = Modifier.height(4.dp))
+    TaskItInfoCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            ProjectStatus(label = stringResource(Res.string.project_status_total_tasks), value = project.total)
+            ProjectStatus(label = stringResource(Res.string.project_status_in_progress), value = project.inProgress)
+            ProjectStatus(label = stringResource(Res.string.project_status_completed), value = project.completed)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = stringResource(Res.string.project_progress_title), style = MaterialTheme.typography.caption)
+        Spacer(modifier = Modifier.height(4.dp))
 
-            // Calculate progress percentage
-            val progressPercentage = if (project.total > 0) {
-                (project.completed * 100) / project.total
-            } else {
-                0
-            }
+        // Calculate progress percentage
+        val progressPercentage = if (project.total > 0) {
+            (project.completed * 100) / project.total
+        } else {
+            0
+        }
 
-            LinearProgressIndicator(
-                progress = progressPercentage / 100f,
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colors.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+        LinearProgressIndicator(
+            progress = progressPercentage / 100f,
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colors.primary
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
             Text(
                 text = "$progressPercentage%",
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier.align(Alignment.End)
+                style = MaterialTheme.typography.caption
             )
         }
     }
@@ -348,43 +296,11 @@ fun ProjectStatus(label: String, value: Int) {
 
 @Preview
 @Composable
-private fun LoadingStatePreview() {
-    TaskItTheme {
-        LoadingState()
-    }
-}
-
-@Preview
-@Composable
-private fun ErrorStatePreview() {
-    TaskItTheme {
-        ErrorState(errorMessage = "Failed to load project details")
-    }
-}
-
-@Preview
-@Composable
-private fun LoadingIndicatorPreview() {
-    TaskItTheme {
-        LoadingIndicator()
-    }
-}
-
-@Preview
-@Composable
-private fun EmptyTasksMessagePreview() {
-    TaskItTheme {
-        EmptyTasksMessage()
-    }
-}
-
-@Preview
-@Composable
 private fun ProjectDetailsTopBarPreview() {
     TaskItTheme {
-        ProjectDetailsTopBar(
+        TaskItTopAppBar(
             title = "Project Details",
-            onBack = {}
+            onNavigateBack = {}
         )
     }
 }
@@ -491,66 +407,5 @@ private fun ProjectDetailsContentPreview() {
             navigateToTaskDetail = { _ -> },
             onTaskStatusChange = { _, _ -> }
         )
-    }
-}
-
-@OptIn(ExperimentalUuidApi::class)
-@Preview
-@Composable
-private fun ProjectTasksListPreview() {
-    // Create mock tasks
-    val mockTasks = List(5) { index ->
-        Task(
-            id = Uuid.random(),
-            title = "Task ${index + 1}",
-            description = "Description for task ${index + 1}",
-            status = when (index % 3) {
-                0 -> TaskStatus.TODO
-                1 -> TaskStatus.IN_PROGRESS
-                else -> TaskStatus.DONE
-            },
-            priority = when (index % 3) {
-                0 -> Priority.HIGH
-                1 -> Priority.MEDIUM
-                else -> Priority.LOW
-            },
-            dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
-            projectName = "Website Redesign"
-        )
-    }
-
-    // Create pagingData from a list of mock tasks
-    val pagingData = PagingData.from(mockTasks)
-    // Pass pagingData containing mock tasks to a MutableStateFlow
-    val mockTaskFlow = MutableStateFlow(pagingData)
-
-    TaskItTheme {
-        Surface {
-            ProjectTasksList(
-                pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
-                navigateToTaskDetail = { _ -> },
-                onTaskStatusChange = { _, _ -> }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalUuidApi::class)
-@Preview
-@Composable
-private fun EmptyProjectTasksListPreview() {
-    // Create pagingData from an empty list
-    val pagingData = PagingData.from(emptyList<Task>())
-    // Pass pagingData containing empty list to a MutableStateFlow
-    val mockTaskFlow = MutableStateFlow(pagingData)
-
-    TaskItTheme {
-        Surface {
-            ProjectTasksList(
-                pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
-                navigateToTaskDetail = { _ -> },
-                onTaskStatusChange = { _, _ -> }
-            )
-        }
     }
 }

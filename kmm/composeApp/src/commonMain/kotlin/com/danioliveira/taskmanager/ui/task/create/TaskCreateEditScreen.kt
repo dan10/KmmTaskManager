@@ -1,8 +1,6 @@
 package com.danioliveira.taskmanager.ui.task.create
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,53 +9,36 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.ui.components.DatePickerFieldToModal
+import com.danioliveira.taskmanager.ui.components.TaskItCreateEditButtons
+import com.danioliveira.taskmanager.ui.components.TaskItCreateEditTopAppBar
+import com.danioliveira.taskmanager.ui.components.TaskItErrorMessage
+import com.danioliveira.taskmanager.ui.components.TaskItFieldLabel
+import com.danioliveira.taskmanager.ui.components.TaskItPriorityDropdown
+import com.danioliveira.taskmanager.ui.components.TaskItStatusDropdown
 import com.danioliveira.taskmanager.ui.components.TrackItInputField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
-import com.danioliveira.taskmanager.utils.PriorityFormatter
-import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
-import kmmtaskmanager.composeapp.generated.resources.content_description_back
-import kmmtaskmanager.composeapp.generated.resources.content_description_delete
 import kmmtaskmanager.composeapp.generated.resources.create_task
 import kmmtaskmanager.composeapp.generated.resources.edit_task
 import kmmtaskmanager.composeapp.generated.resources.project_name_label
-import kmmtaskmanager.composeapp.generated.resources.task_cancel_button
-import kmmtaskmanager.composeapp.generated.resources.task_create_button
 import kmmtaskmanager.composeapp.generated.resources.task_description_label
 import kmmtaskmanager.composeapp.generated.resources.task_priority_label
 import kmmtaskmanager.composeapp.generated.resources.task_status_label
 import kmmtaskmanager.composeapp.generated.resources.task_title_error
 import kmmtaskmanager.composeapp.generated.resources.task_title_label
-import kmmtaskmanager.composeapp.generated.resources.task_update_button
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -75,9 +56,9 @@ fun TaskCreateEditScreen(
     viewModel: TaskCreateEditViewModel = koinViewModel()
 ) {
     // Set navigation callbacks
-        viewModel.onTaskCreated = onBack
-        viewModel.onTaskUpdated = onBack
-        viewModel.onTaskDeleted = onBack
+    viewModel.onTaskCreated = onBack
+    viewModel.onTaskUpdated = onBack
+    viewModel.onTaskDeleted = onBack
 
     // Collect UI state
     val state by viewModel.uiState.collectAsState()
@@ -95,9 +76,12 @@ private fun TaskCreateEditScreen(
 
     Scaffold(
         topBar = {
-            TaskTopAppBar(
-                isCreating = state.isCreating,
-                onBack = onBack,
+            TaskItCreateEditTopAppBar(
+                title = stringResource(
+                    if (state.isCreating) Res.string.create_task else Res.string.edit_task
+                ),
+                onNavigateBack = onBack,
+                showDeleteAction = !state.isCreating,
                 onDelete = { actions(TaskCreateEditAction.DeleteTask) }
             )
         }
@@ -110,7 +94,7 @@ private fun TaskCreateEditScreen(
                 .padding(16.dp)
         ) {
             // Error message
-            ErrorMessage(errorMessage = state.errorMessage)
+            TaskItErrorMessage(errorMessage = state.errorMessage)
 
             // Form fields
             TaskFormFields(
@@ -127,7 +111,7 @@ private fun TaskCreateEditScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Buttons
-            TaskActionButtons(
+            TaskItCreateEditButtons(
                 isCreating = state.isCreating,
                 isLoading = state.isLoading,
                 isButtonEnabled = state.isButtonEnabled,
@@ -145,53 +129,6 @@ private fun TaskCreateEditScreen(
 }
 
 @Composable
-private fun TaskTopAppBar(
-    isCreating: Boolean,
-    onBack: () -> Unit,
-    onDelete: () -> Unit
-) {
-    TopAppBar(
-        title = { 
-            Text(
-                text = stringResource(
-                    if (isCreating) Res.string.create_task else Res.string.edit_task
-                )
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(Res.string.content_description_back)
-                )
-            }
-        },
-        actions = {
-            if (!isCreating) {
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = stringResource(Res.string.content_description_delete)
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-private fun ErrorMessage(errorMessage: String?) {
-    errorMessage?.let { error ->
-        Text(
-            text = error,
-            color = MaterialTheme.colors.error,
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-    }
-}
-
-@Composable
 private fun TaskFormFields(
     state: TaskCreateEditState,
     priorityDropdownExpanded: Boolean,
@@ -204,11 +141,7 @@ private fun TaskFormFields(
 ) {
     // Project field (if project is associated)
     if (state.projectName != null) {
-        Text(
-            text = stringResource(Res.string.project_name_label),
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-        )
+        TaskItFieldLabel(stringResource(Res.string.project_name_label))
         
         OutlinedTextField(
             value = state.projectName,
@@ -246,13 +179,9 @@ private fun TaskFormFields(
     Spacer(modifier = Modifier.height(16.dp))
 
     // Priority dropdown
-    Text(
-        text = stringResource(Res.string.task_priority_label),
-        style = MaterialTheme.typography.caption,
-        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-    )
+    TaskItFieldLabel(stringResource(Res.string.task_priority_label))
 
-    PriorityDropdown(
+    TaskItPriorityDropdown(
         currentPriority = state.priority,
         expanded = priorityDropdownExpanded,
         onExpandedChange = onPriorityDropdownExpandedChange,
@@ -263,13 +192,9 @@ private fun TaskFormFields(
 
     // Status dropdown - only show when editing a task
     if (!state.isCreating) {
-        Text(
-            text = stringResource(Res.string.task_status_label),
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-        )
+        TaskItFieldLabel(stringResource(Res.string.task_status_label))
 
-        StatusDropdown(
+        TaskItStatusDropdown(
             currentStatus = state.status,
             expanded = statusDropdownExpanded,
             onExpandedChange = onStatusDropdownExpandedChange,
@@ -285,116 +210,6 @@ private fun TaskFormFields(
         onDateSelected = onDateSelected,
         modifier = Modifier.fillMaxWidth()
     )
-}
-
-@Composable
-private fun PriorityDropdown(
-    currentPriority: Priority,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    onPrioritySelected: (Priority) -> Unit
-) {
-    OutlinedButton(
-        onClick = { onExpandedChange(true) },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(PriorityFormatter.formatPriority(currentPriority))
-        Spacer(Modifier.weight(1f))
-        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) }
-        ) {
-            Priority.entries.forEach { priorityOption ->
-                DropdownMenuItem(
-                    onClick = {
-                        onPrioritySelected(priorityOption)
-                        onExpandedChange(false)
-                    }
-                ) {
-                    Text(PriorityFormatter.formatPriority(priorityOption))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatusDropdown(
-    currentStatus: TaskStatus,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    onStatusSelected: (TaskStatus) -> Unit
-) {
-    OutlinedButton(
-        onClick = { onExpandedChange(true) },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(TaskStatusFormatter.formatTaskStatus(currentStatus))
-        Spacer(Modifier.weight(1f))
-        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) }
-        ) {
-            TaskStatus.entries.forEach { statusOption ->
-                DropdownMenuItem(
-                    onClick = {
-                        onStatusSelected(statusOption)
-                        onExpandedChange(false)
-                    }
-                ) {
-                    Text(TaskStatusFormatter.formatTaskStatus(statusOption))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TaskActionButtons(
-    isCreating: Boolean,
-    isLoading: Boolean,
-    isButtonEnabled: Boolean,
-    onCancel: () -> Unit,
-    onCreateOrUpdate: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        OutlinedButton(
-            onClick = onCancel,
-            modifier = Modifier.weight(1f),
-            enabled = !isLoading
-        ) {
-            Text(stringResource(Res.string.task_cancel_button))
-        }
-
-        Button(
-            onClick = onCreateOrUpdate,
-            modifier = Modifier.weight(1f),
-            enabled = isButtonEnabled
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.height(24.dp)
-                )
-            } else {
-                Text(
-                    text = stringResource(
-                        if (isCreating) Res.string.task_create_button
-                        else Res.string.task_update_button
-                    ),
-                    color = Color.White
-                )
-            }
-        }
-    }
 }
 
 @Preview

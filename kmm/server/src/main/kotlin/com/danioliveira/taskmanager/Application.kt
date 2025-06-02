@@ -2,18 +2,24 @@ package com.danioliveira.taskmanager
 
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.domain.AppConfig
-import com.danioliveira.taskmanager.plugins.*
+import com.danioliveira.taskmanager.plugins.configureDI
+import com.danioliveira.taskmanager.plugins.configureDatabase
+import com.danioliveira.taskmanager.plugins.configureMetrics
+import com.danioliveira.taskmanager.plugins.configureRequestValidation
+import com.danioliveira.taskmanager.plugins.configureSecurity
+import com.danioliveira.taskmanager.plugins.configureSerialization
+import com.danioliveira.taskmanager.plugins.configureStatusPages
 import com.danioliveira.taskmanager.routes.adminRoutes
 import com.danioliveira.taskmanager.routes.authRoutes
 import com.danioliveira.taskmanager.routes.projectRoutes
 import com.danioliveira.taskmanager.routes.taskRoutes
-import io.ktor.server.application.*
-import io.ktor.server.netty.*
-import io.ktor.server.engine.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.Application
+import io.ktor.server.netty.EngineMain
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 import org.koin.ktor.ext.inject
 
-fun main(args: Array<String>) = io.ktor.server.netty.EngineMain.main(args)
+fun main(args: Array<String>) = EngineMain.main(args)
 
 fun Application.module() {
     // Configure plugins

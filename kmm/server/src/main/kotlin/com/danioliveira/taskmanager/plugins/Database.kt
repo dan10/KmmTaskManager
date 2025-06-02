@@ -11,27 +11,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
 
 /**
- * Configure the database using the application environment.
- * This method is kept for backward compatibility.
- */
-fun Application.configureDatabase() {
-    val config = environment.config.config("ktor.database")
-    val url = config.property("url").getString()
-    val driver = config.property("driver").getString()
-    val user = config.property("user").getString()
-    val password = config.property("password").getString()
-    val maxPoolSize = config.propertyOrNull("maximumPoolSize")?.getString()?.toInt() ?: 10
-
-    // Log the configuration
-    log.info("Configuring database with maxPoolSize: $maxPoolSize")
-
-    connectToDatabase(url, driver, user, password, maxPoolSize)
-}
-
-/**
  * Configure the database using the AppConfig.
  */
-fun Application.configureDatabase(appConfig: AppConfig) {
+fun configureDatabase(appConfig: AppConfig) {
     val dbConfig = appConfig.database
     // Use a default maxPoolSize of 10 if not specified in the config
     val maxPoolSize = 10

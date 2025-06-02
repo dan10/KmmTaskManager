@@ -20,31 +20,14 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-/**
- * The class responsible for accessing the data from a [Flow] of [PagingData]. In order to obtain an
- * instance of [LazyPagingItems] use the [collectAsLazyPagingItems] extension method of [Flow] with
- * [PagingData]. This instance can be used for Lazy foundations such as [LazyListScope.items] to
- * display data received from the [Flow] of [PagingData].
- *
- * Previewing [LazyPagingItems] is supported on a list of mock data. See sample for how to preview
- * mock data.
- *
- * @sample androidx.paging.compose.samples.PagingPreview
- * @param T the type of value used by [PagingData].
- */
-public class LazyPagingItems<T : Any>
+
+class LazyPagingItems<T : Any>
 internal constructor(
-    /** the [Flow] object which contains a stream of [PagingData] elements. */
     private val flow: Flow<PagingData<T>>
 ) {
     private val mainDispatcher = UiDispatcher
 
-    /**
-     * If the [flow] is a SharedFlow, it is expected to be the flow returned by from
-     * pager.flow.cachedIn(scope) which could contain a cached PagingData. We pass the cached
-     * PagingData to the presenter so that if the PagingData contains cached data, the presenter can
-     * be initialized with the data prior to collection on pager.
-     */
+
     private val pagingDataPresenter =
         object :
             PagingDataPresenter<T>(
@@ -59,11 +42,7 @@ internal constructor(
             }
         }
 
-    /**
-     * Contains the immutable [ItemSnapshotList] of currently presented items, including any
-     * placeholders if they are enabled. Note that similarly to [peek] accessing the items in a list
-     * will not trigger any loads. Use [get] to achieve such behavior.
-     */
+
     var itemSnapshotList by mutableStateOf(pagingDataPresenter.snapshot())
         private set
 
@@ -75,24 +54,13 @@ internal constructor(
         itemSnapshotList = pagingDataPresenter.snapshot()
     }
 
-    /**
-     * Returns the presented item at the specified position, notifying Paging of the item access to
-     * trigger any loads necessary to fulfill prefetchDistance.
-     *
-     * @see peek
-     */
+
     operator fun get(index: Int): T? {
         pagingDataPresenter[index] // this registers the value load
         return itemSnapshotList[index]
     }
 
-    /**
-     * Returns the presented item at the specified position, without notifying Paging of the item
-     * access that would normally trigger page loads.
-     *
-     * @param index Index of the presented item to return, including placeholders.
-     * @return The presented item at position [index], `null` if it is a placeholder
-     */
+
     fun peek(index: Int): T? {
         return itemSnapshotList[index]
     }
@@ -131,7 +99,7 @@ internal constructor(
     }
 
     /** A [CombinedLoadStates] object which represents the current loading state. */
-    public var loadState: CombinedLoadStates by
+    var loadState: CombinedLoadStates by
     mutableStateOf(
         pagingDataPresenter.loadStateFlow.value
             ?: CombinedLoadStates(
@@ -156,15 +124,7 @@ private val IncompleteLoadState = LoadState.NotLoading(false)
 private val InitialLoadStates =
     LoadStates(LoadState.Loading, IncompleteLoadState, IncompleteLoadState)
 
-/**
- * Collects values from this [Flow] of [PagingData] and represents them inside a [LazyPagingItems]
- * instance. The [LazyPagingItems] instance can be used for lazy foundations such as
- * [LazyListScope.items] in order to display the data obtained from a [Flow] of [PagingData].
- *
- * @sample androidx.paging.compose.samples.PagingBackendSample
- * @param context the [CoroutineContext] to perform the collection of [PagingData] and
- *   [CombinedLoadStates].
- */
+
 @Composable
 public fun <T : Any> Flow<PagingData<T>>.collectAsLazyPagingItems(
     context: CoroutineContext = EmptyCoroutineContext

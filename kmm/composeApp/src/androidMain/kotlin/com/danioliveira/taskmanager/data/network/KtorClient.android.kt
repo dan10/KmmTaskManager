@@ -20,16 +20,9 @@ actual fun createPlatformEngine(): HttpClientEngine {
  * - On Windows: Run 'ipconfig' in command prompt and look for your network adapter's IPv4 address
  */
 actual fun getBaseUrl(): String {
-    // For emulator
-    val emulatorUrl = "http://10.0.2.2:8081"
 
-    // For physical device - replace with your computer's actual IP address
-    // Example: "http://192.168.1.100:8081"
     val physicalDeviceUrl = "http://192.168.68.52:8081"
 
     // Use physicalDeviceUrl when testing on a physical device
     return physicalDeviceUrl
-
-    // Default to emulator URL
-    //return emulatorUrl
 }

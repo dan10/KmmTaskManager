@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
@@ -40,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -51,6 +49,9 @@ import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.itemContentType
 import com.danioliveira.taskmanager.paging.compose.itemKey
+import com.danioliveira.taskmanager.ui.components.TaskItEmptyState
+import com.danioliveira.taskmanager.ui.components.TaskItLoadingState
+import com.danioliveira.taskmanager.ui.components.TaskItSmallLoadingIndicator
 import com.danioliveira.taskmanager.ui.components.TrackItInputField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -170,12 +171,7 @@ private fun ProjectsContent(
 
         // Show loading indicator when initial loading
         if (pagingItems.loadState.append == LoadState.Loading && pagingItems.itemCount == 0) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            TaskItLoadingState()
         } else {
             ProjectsList(
                 pagingItems = pagingItems,
@@ -252,7 +248,7 @@ private fun ProjectsList(
 
         if (pagingItems.loadState.append == LoadState.Loading) {
             item {
-                CircularProgressIndicator(
+                TaskItSmallLoadingIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentWidth(Alignment.CenterHorizontally)
@@ -262,7 +258,21 @@ private fun ProjectsList(
 
         if (pagingItems.itemCount == 0) {
             item {
-                EmptyProjectsList()
+                TaskItEmptyState(
+                    title = stringResource(Res.string.projects_empty_title),
+                    message = stringResource(Res.string.projects_empty_subtitle),
+                    content = {
+                        // Custom image for projects empty state
+                        Image(
+                            painter = painterResource(Res.drawable.ic_folder),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(120.dp)
+                                .padding(bottom = 16.dp)
+                        )
+                    }
+                )
             }
         }
     }
@@ -334,46 +344,6 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun EmptyProjectsList() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        // Illustration1
-        Image(
-            painter = painterResource(Res.drawable.ic_folder),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
-
-            contentDescription = null,
-            modifier = Modifier
-                .size(200.dp)
-                .padding(bottom = 24.dp)
-        )
-
-        // Title
-        Text(
-            text = stringResource(Res.string.projects_empty_title),
-            style = MaterialTheme.typography.h6,
-            color = MaterialTheme.colors.onSurface,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        // Message
-        Text(
-            text = stringResource(Res.string.projects_empty_subtitle),
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
-        )
     }
 }
 

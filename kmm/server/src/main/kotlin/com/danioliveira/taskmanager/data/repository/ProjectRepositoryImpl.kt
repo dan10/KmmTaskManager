@@ -90,87 +90,6 @@ class ProjectRepositoryImpl : ProjectRepository {
     override suspend fun Transaction.delete(id: UUID): Boolean =
         ProjectDAOEntity.findById(id)?.let { it.delete(); true } ?: false
 
-    private fun Transaction.toPaginatedResponse(
-        query: SizedIterable<ProjectDAOEntity>,
-        page: Int,
-        size: Int
-    ): PaginatedResponse<ProjectResponse> {
-        // Get all project IDs in the current page
-        val projectIds = query.orderBy(ProjectsTable.createdAt to SortOrder.DESC)
-            .limit(size)
-            .offset((page * size).toLong())
-            .map { it.id.value }
-
-        // Get task counts for all projects in one batch
-        val taskCounts = getTaskCountsForProjects(projectIds)
-
-        // Map entities to responses with task counts
-        val items = query.orderBy(ProjectsTable.createdAt to SortOrder.DESC)
-            .limit(size)
-            .offset((page * size).toLong())
-            .map { entity ->
-                entity.toResponse(taskCounts[entity.id.value] ?: TaskCounts())
-            }
-
-        // Calculate total and pages
-        val total = query.count()
-        val totalPages = if (size > 0) ceil(total.toDouble() / size).toInt() else 0
-
-        return PaginatedResponse(
-            items = items,
-            total = total,
-            page = page,
-            size = size,
-            totalPages = totalPages
-        )
-    }
-
-    /**
-     * Converts a query result to a paginated response within a transaction context.
-     * This method optimizes performance by:
-     * 1. Fetching project IDs once and reusing them
-     * 2. Batching task count calculations for all projects in one operation
-     * 3. Applying proper pagination with sorting
-     *
-     * @param query The query result to paginate
-     * @param page The page number (0-based)
-     * @param size The page size
-     * @return A paginated response containing project data with task counts
-     */
-    private fun Transaction.toPaginatedResponseFromIterable(
-        query: SizedIterable<ProjectDAOEntity>,
-        page: Int,
-        size: Int
-    ): PaginatedResponse<ProjectResponse> {
-        // Get all project IDs in the current page
-        val projectIds = query.orderBy(ProjectsTable.createdAt to SortOrder.DESC)
-            .limit(size)
-            .offset((page * size).toLong())
-            .map { it.id.value }
-
-        // Get task counts for all projects in one batch
-        val taskCounts = getTaskCountsForProjects(projectIds)
-
-        // Map entities to responses with task counts
-        val items = query.orderBy(ProjectsTable.createdAt to SortOrder.DESC)
-            .limit(size)
-            .offset((page * size).toLong())
-            .map { entity ->
-                entity.toResponse(taskCounts[entity.id.value] ?: TaskCounts())
-            }
-
-        // Calculate total and pages
-        val total = query.count()
-        val totalPages = if (size > 0) ceil(total.toDouble() / size).toInt() else 0
-
-        return PaginatedResponse(
-            items = items,
-            total = total,
-            page = page,
-            size = size,
-            totalPages = totalPages
-        )
-    }
 
     private fun SizedIterable<ProjectDAOEntity>.toPaginatedResponse(
         page: Int,
@@ -240,7 +159,7 @@ class ProjectRepositoryImpl : ProjectRepository {
      * @param projectId The ID of the project to get task counts for
      * @return A TaskCounts object containing total, completed, and in-progress task counts
      */
-    private fun Transaction.getTaskCountsForProject(projectId: UUID): TaskCounts {
+    private fun getTaskCountsForProject(projectId: UUID): TaskCounts {
         // Get all tasks for this project in a single query
         val tasks = TaskDAOEntity.find { TasksTable.project eq projectId }.toList()
 
@@ -266,7 +185,7 @@ class ProjectRepositoryImpl : ProjectRepository {
      * @param projectIds List of project IDs to get task counts for
      * @return A map of project IDs to TaskCounts objects
      */
-    private fun Transaction.getTaskCountsForProjects(projectIds: List<UUID>): Map<UUID, TaskCounts> {
+    private fun getTaskCountsForProjects(projectIds: List<UUID>): Map<UUID, TaskCounts> {
         if (projectIds.isEmpty()) return emptyMap()
 
         // Create a map to store task counts for each project

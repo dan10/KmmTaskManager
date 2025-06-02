@@ -67,11 +67,6 @@ class ProjectsViewModel(
         state = state.copy(searchFieldState = newState)
     }
 
-    private fun openProject(projectId: String) {
-        // This method is now empty because navigation is handled in the UI layer
-        // We keep it for compatibility with the existing code
-    }
-
     fun handleActions(action: ProjectsAction) {
         when (action) {
             is ProjectsAction.LoadProjects -> loadProjects()

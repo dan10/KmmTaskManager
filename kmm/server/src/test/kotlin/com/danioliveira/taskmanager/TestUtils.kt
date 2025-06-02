@@ -73,32 +73,3 @@ fun createTestUser(
         user.id.value.toString()
     }
 }
-
-/**
- * Creates a test user in the database with a specific ID.
- *
- * @param id The ID to use for the user
- * @param email The email of the user
- * @param passwordHash The password hash of the user
- * @param displayName The display name of the user
- * @param googleId The Google ID of the user (optional)
- * @return The ID of the created user
- */
-fun createTestUserWithId(
-    id: String,
-    email: String = "test@example.com",
-    passwordHash: String = "hashed-password",
-    displayName: String = "Test User",
-    googleId: String? = null
-): String {
-    return transaction {
-        val user = UserDAOEntity.new(UUID.fromString(id)) {
-            this.email = email
-            this.passwordHash = passwordHash
-            this.displayName = displayName
-            this.googleId = googleId
-            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        }
-        user.id.value.toString()
-    }
-}

@@ -85,9 +85,8 @@ private fun Material3DatePickerModal(
 ) {
     // Convert LocalDateTime to milliseconds for Material3 DatePicker
     // Use UTC to avoid timezone conversion issues
-    val initialDateMillis = initialDate?.let { 
-        it.date.atTime(12, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
-    }
+    val initialDateMillis = initialDate?.date?.atTime(12, 0)?.toInstant(TimeZone.UTC)
+        ?.toEpochMilliseconds()
     
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialDateMillis

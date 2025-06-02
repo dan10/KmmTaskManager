@@ -53,9 +53,6 @@ class KtorClient(
     // Create a Kermit logger instance
     private val logger = Logger.withTag("KtorClient")
 
-    // Counter for consecutive 401 errors
-    private var consecutive401Count = 0
-
     // Create a JSON instance with lenient configuration
     val json = Json {
         ignoreUnknownKeys = true

@@ -1,58 +1,35 @@
 package com.danioliveira.taskmanager.ui.task.details
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.TaskPriority
 import com.danioliveira.taskmanager.domain.TaskStatus
-import com.danioliveira.taskmanager.domain.toTaskPriority
+import com.danioliveira.taskmanager.ui.components.TaskItEditDeleteButtons
+import com.danioliveira.taskmanager.ui.components.TaskItErrorState
+import com.danioliveira.taskmanager.ui.components.TaskItHeaderWithPriority
+import com.danioliveira.taskmanager.ui.components.TaskItInfoCard
+import com.danioliveira.taskmanager.ui.components.TaskItInfoRow
+import com.danioliveira.taskmanager.ui.components.TaskItLoadingState
+import com.danioliveira.taskmanager.ui.components.TaskItSectionTitle
+import com.danioliveira.taskmanager.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
-import com.danioliveira.taskmanager.utils.PriorityFormatter
 import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
-import kmmtaskmanager.composeapp.generated.resources.content_description_back
-import kmmtaskmanager.composeapp.generated.resources.content_description_delete_task
-import kmmtaskmanager.composeapp.generated.resources.content_description_edit_task
 import kmmtaskmanager.composeapp.generated.resources.task_actions
-import kmmtaskmanager.composeapp.generated.resources.task_delete_button
 import kmmtaskmanager.composeapp.generated.resources.task_details_title
 import kmmtaskmanager.composeapp.generated.resources.task_due_date
-import kmmtaskmanager.composeapp.generated.resources.task_edit_button
 import kmmtaskmanager.composeapp.generated.resources.task_no_due_date
 import kmmtaskmanager.composeapp.generated.resources.task_project
 import kmmtaskmanager.composeapp.generated.resources.task_status_label
@@ -86,92 +63,48 @@ private fun TasksDetailsScreenContent(
     Scaffold(
         backgroundColor = Color(0XFFF1F5F9),
         topBar = {
-            TaskDetailsTopBar(onAction)
+            TaskItTopAppBar(
+                title = stringResource(Res.string.task_details_title),
+                onNavigateBack = { onAction(TasksDetailsAction.NavigateBack) }
+            )
         }
     ) { paddingValues ->
-        TaskDetailsContent(state, paddingValues, onAction)
-    }
-}
-
-@Composable
-private fun TaskDetailsTopBar(onAction: (TasksDetailsAction) -> Unit) {
-    TopAppBar(
-        title = { Text(stringResource(Res.string.task_details_title)) },
-        navigationIcon = {
-            IconButton(onClick = { onAction(TasksDetailsAction.NavigateBack) }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(Res.string.content_description_back)
-                )
-            }
-        }
-    )
-}
-
-@Composable
-private fun TaskDetailsContent(
-    state: TasksDetailsState,
-    paddingValues: androidx.compose.foundation.layout.PaddingValues,
-    onAction: (TasksDetailsAction) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .padding(16.dp)
-    ) {
-        item {
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else if (state.errorMessage != null) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = state.errorMessage,
-                        style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.error
-                    )
-                }
-            } else if (state.task != null) {
-                TaskInfoCard(
-                    title = state.task.title,
-                    priority = state.task.priority.toTaskPriority(),
-                    description = state.task.description,
-                    status = state.task.status,
-                    dueDate = state.task.dueDate,
-                    projectName = state.task.projectName
-                )
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No task details available",
-                        style = MaterialTheme.typography.body1
-                    )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            item {
+                when {
+                    state.isLoading -> TaskItLoadingState()
+                    state.errorMessage != null -> TaskItErrorState(state.errorMessage)
+                    state.task != null -> {
+                        TaskInfoCard(
+                            title = state.task.title,
+                            priority = state.task.priority,
+                            description = state.task.description,
+                            status = state.task.status,
+                            dueDate = state.task.dueDate,
+                            projectName = state.task.projectName
+                        )
+                    }
+                    else -> TaskItErrorState("No task details available")
                 }
             }
-        }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-        // Action buttons section
-        item {
-            if (state.task != null) {
-                TaskActionButtons(
-                    isDeleting = state.isDeleting,
-                    onAction = onAction
-                )
+            // Action buttons section
+            item {
+                if (state.task != null) {
+                    TaskActionButtons(
+                        isDeleting = state.isDeleting,
+                        onAction = onAction
+                    )
+                }
             }
         }
     }
@@ -182,159 +115,66 @@ fun TaskActionButtons(
     isDeleting: Boolean,
     onAction: (TasksDetailsAction) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 2.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.task_actions),
-                style = MaterialTheme.typography.h6,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = { onAction(TasksDetailsAction.EditTask) },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isDeleting,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primary
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = stringResource(Res.string.content_description_edit_task),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.padding(4.dp))
-                    Text(stringResource(Res.string.task_edit_button))
-                }
-                
-                OutlinedButton(
-                    onClick = { onAction(TasksDetailsAction.DeleteTask) },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isDeleting,
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colors.error
-                    )
-                ) {
-                    if (isDeleting) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = MaterialTheme.colors.error,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(Res.string.content_description_delete_task),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.padding(4.dp))
-                    Text(stringResource(Res.string.task_delete_button))
-                }
-            }
-        }
+    TaskItInfoCard {
+        TaskItSectionTitle(stringResource(Res.string.task_actions))
+        
+        TaskItEditDeleteButtons(
+            onEdit = { onAction(TasksDetailsAction.EditTask) },
+            onDelete = { onAction(TasksDetailsAction.DeleteTask) },
+            isDeleting = isDeleting,
+            enabled = !isDeleting
+        )
     }
 }
 
 @Composable
 fun TaskInfoCard(
     title: String,
-    priority: TaskPriority,
+    priority: Priority,
     description: String,
     status: TaskStatus,
     dueDate: LocalDateTime?,
     projectName: String?
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 2.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.h6,
-                    fontWeight = FontWeight.Bold
-                )
-                PriorityBadge(priority = priority)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = description, style = MaterialTheme.typography.body2)
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Due date row
-            InfoRow(
-                label = stringResource(Res.string.task_due_date), 
-                value = if (dueDate != null) {
-                    DateFormatter.formatDate(dueDate)
-                } else {
-                    stringResource(Res.string.task_no_due_date)
-                }
-            )
-            
-            // Status row
-            InfoRow(
-                label = stringResource(Res.string.task_status_label),
-                value = TaskStatusFormatter.formatTaskStatus(status)
-            )
-            
-            // Project row - only show if task has a project
-            projectName?.let { project ->
-                InfoRow(
-                    label = stringResource(Res.string.task_project), 
-                    value = project
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun PriorityBadge(priority: TaskPriority) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(priority.backgroundColor)
-            .padding(horizontal = 8.dp, vertical = 2.dp)
-    ) {
-        Text(
-            text = when (priority) {
-                TaskPriority.HIGH -> PriorityFormatter.formatPriority(Priority.HIGH)
-                TaskPriority.MEDIUM -> PriorityFormatter.formatPriority(Priority.MEDIUM)
-                TaskPriority.LOW -> PriorityFormatter.formatPriority(Priority.LOW)
-            },
-            style = MaterialTheme.typography.caption,
-            color = priority.color
+    TaskItInfoCard {
+        // Header with title and priority
+        TaskItHeaderWithPriority(
+            title = title,
+            priority = priority
         )
-    }
-}
-
-@Composable
-fun InfoRow(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(text = label, style = MaterialTheme.typography.body2, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.padding(2.dp))
-        Text(text = value, style = MaterialTheme.typography.body2)
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Description
+        Text(
+            text = description,
+            style = MaterialTheme.typography.body2
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Task information rows
+        TaskItInfoRow(
+            label = stringResource(Res.string.task_due_date),
+            value = if (dueDate != null) {
+                DateFormatter.formatDate(dueDate)
+            } else {
+                stringResource(Res.string.task_no_due_date)
+            }
+        )
+        
+        TaskItInfoRow(
+            label = stringResource(Res.string.task_status_label),
+            value = TaskStatusFormatter.formatTaskStatus(status)
+        )
+        
+        // Project row - only show if task has a project
+        projectName?.let { project ->
+            TaskItInfoRow(
+                label = stringResource(Res.string.task_project),
+                value = project
+            )
+        }
     }
 }
 
