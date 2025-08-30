@@ -25,6 +25,7 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+
     }
 }
 
@@ -32,3 +33,4 @@ include(":composeApp")
 include(":server")
 include(":shared")
 include(":paging-compose")
+include(":appium")

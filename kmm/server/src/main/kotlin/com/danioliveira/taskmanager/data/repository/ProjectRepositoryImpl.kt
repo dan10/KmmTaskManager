@@ -9,19 +9,20 @@ import com.danioliveira.taskmanager.data.tables.ProjectsTable
 import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.SizedIterable
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.like
+import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.jdbc.SizedIterable
 import java.util.UUID
-import org.jetbrains.exposed.sql.lowerCase
-import org.jetbrains.exposed.sql.or
 import kotlin.math.ceil
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Implementation of the ProjectRepository interface.
@@ -33,6 +34,7 @@ import kotlin.math.ceil
  */
 class ProjectRepositoryImpl : ProjectRepository {
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun Transaction.create(name: String, description: String?, ownerId: UUID): ProjectResponse {
         val owner = UserDAOEntity.findById(ownerId) ?: throw IllegalArgumentException("Owner not found")
         val entity = ProjectDAOEntity.new {

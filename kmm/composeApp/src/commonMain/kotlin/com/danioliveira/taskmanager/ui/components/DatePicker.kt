@@ -25,13 +25,14 @@ import kmmtaskmanager.composeapp.generated.resources.date_picker_ok
 import kmmtaskmanager.composeapp.generated.resources.date_picker_placeholder
 import kmmtaskmanager.composeapp.generated.resources.date_picker_select_date
 import kmmtaskmanager.composeapp.generated.resources.task_due_date_label
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +77,7 @@ fun DatePickerFieldToModal(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 private fun Material3DatePickerModal(
     initialDate: LocalDateTime?,

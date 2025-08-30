@@ -6,15 +6,17 @@ import com.danioliveira.taskmanager.data.entity.UserDAOEntity
 import com.danioliveira.taskmanager.data.tables.ProjectAssignmentsTable
 import com.danioliveira.taskmanager.domain.ProjectAssignment
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.core.and
 import java.util.UUID
+import kotlin.time.ExperimentalTime
 
 class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun Transaction.assignUserToProject(projectId: UUID, userId: UUID): ProjectAssignment {
         // Check if project and user exist
         val project = ProjectDAOEntity.findById(projectId) ?: throw IllegalArgumentException("Project not found")

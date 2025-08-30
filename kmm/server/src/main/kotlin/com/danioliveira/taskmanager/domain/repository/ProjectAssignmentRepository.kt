@@ -1,8 +1,8 @@
 package com.danioliveira.taskmanager.domain.repository
 
 import com.danioliveira.taskmanager.domain.ProjectAssignment
-import org.jetbrains.exposed.sql.Transaction
-import java.util.*
+import org.jetbrains.exposed.v1.core.Transaction
+import java.util.UUID
 
 interface ProjectAssignmentRepository {
     /**

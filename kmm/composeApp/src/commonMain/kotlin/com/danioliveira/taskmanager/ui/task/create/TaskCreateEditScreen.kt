@@ -39,7 +39,7 @@ import kmmtaskmanager.composeapp.generated.resources.task_priority_label
 import kmmtaskmanager.composeapp.generated.resources.task_status_label
 import kmmtaskmanager.composeapp.generated.resources.task_title_error
 import kmmtaskmanager.composeapp.generated.resources.task_title_label
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -47,6 +47,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.days
+import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class)
@@ -211,6 +212,7 @@ private fun TaskFormFields(
     )
 }
 
+@OptIn(ExperimentalTime::class)
 @Preview
 @Composable
 fun TaskScreenPreview() {

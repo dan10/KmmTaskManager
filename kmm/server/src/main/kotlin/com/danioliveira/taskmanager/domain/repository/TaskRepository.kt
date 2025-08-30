@@ -6,7 +6,7 @@ import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import kotlinx.datetime.LocalDateTime
-import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.v1.core.Transaction
 
 internal interface TaskRepository {
     suspend fun Transaction.findAllByProjectId(

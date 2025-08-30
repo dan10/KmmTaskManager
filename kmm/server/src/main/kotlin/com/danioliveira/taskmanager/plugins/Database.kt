@@ -1,13 +1,20 @@
 package com.danioliveira.taskmanager.plugins
 
-import com.danioliveira.taskmanager.data.tables.*
+import com.danioliveira.taskmanager.data.tables.ProjectAssignmentsTable
+import com.danioliveira.taskmanager.data.tables.ProjectInvitationsTable
+import com.danioliveira.taskmanager.data.tables.ProjectsTable
+import com.danioliveira.taskmanager.data.tables.TasksTable
+import com.danioliveira.taskmanager.data.tables.UsersTable
 import com.danioliveira.taskmanager.domain.AppConfig
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.application.*
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.TransactionManager
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.DatabaseConfig
+import org.jetbrains.exposed.v1.core.Slf4jSqlDebugLogger
+import org.jetbrains.exposed.v1.core.StdOutSqlLogger
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.sql.Connection
 
 /**

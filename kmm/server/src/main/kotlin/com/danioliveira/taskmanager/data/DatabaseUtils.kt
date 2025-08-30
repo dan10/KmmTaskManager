@@ -1,8 +1,8 @@
 package com.danioliveira.taskmanager.data
 
 import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
 
 /**
  * Extension function to execute database operations in a suspended transaction with IO dispatcher.

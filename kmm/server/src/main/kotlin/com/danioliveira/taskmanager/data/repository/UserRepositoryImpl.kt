@@ -5,11 +5,12 @@ import com.danioliveira.taskmanager.data.tables.UsersTable
 import com.danioliveira.taskmanager.domain.User
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.v1.core.Transaction
 import java.util.UUID
+import kotlin.time.ExperimentalTime
 
 internal class UserRepositoryImpl : UserRepository {
 
@@ -19,6 +20,7 @@ internal class UserRepositoryImpl : UserRepository {
     override suspend fun Transaction.findById(id: String): UserWithPassword? =
         UserDAOEntity.findById(UUID.fromString(id))?.toDomain()
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun Transaction.create(
         email: String,
         passwordHash: String?,
