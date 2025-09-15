@@ -111,7 +111,7 @@ class TaskServiceTest : KoinTest {
         val task3 = taskService.create(request3, creatorId)
 
         // Find all tasks for the project
-        val projectTasks = taskService.findAll(projectId)
+        val projectTasks = taskService.findAllByProjectId(projectId)
 
         // Verify the correct tasks were returned
         assertEquals(2, projectTasks.total)
@@ -121,7 +121,7 @@ class TaskServiceTest : KoinTest {
         assertFalse(projectTasks.items.any { it.id == task3.id })
 
         // Find all tasks
-        val allTasks = taskService.findAll(null)
+        val allTasks = taskService.findAllByProjectId(null)
 
         // Verify all tasks were returned
         assertEquals(3, allTasks.total)

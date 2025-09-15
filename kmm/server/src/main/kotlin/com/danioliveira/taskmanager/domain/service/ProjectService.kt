@@ -7,6 +7,7 @@ import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.data.dbQuery2
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
+import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
@@ -36,7 +37,7 @@ class ProjectService(
             )
         }
 
-    suspend fun getProjectById(id: UUID): ProjectResponse = dbQuery2 {
+    suspend fun getProjectById(id: UUID, userId: UUID): ProjectResponse = dbQuery2 {
         repository.findById(
             id = id,
         ) ?: throw NotFoundException("Project", id.toString())
@@ -50,8 +51,39 @@ class ProjectService(
         )
     }
 
+    suspend fun updateProjectWithPermission(projectId: String, userId: UUID, request: ProjectUpdateRequest): Boolean = dbQuery2 {
+        val project = repository.findById(UUID.fromString(projectId))
+            ?: throw NotFoundException("Project", projectId)
+        
+        val isOwner = project.ownerId == userId.toString()
+        val isAssignedMember = assignmentRepository.isUserAssignedToProject(UUID.fromString(projectId), userId)
+        
+        if (!isOwner && !isAssignedMember) {
+            throw UnauthorizedException("You don't have permission to edit this project")
+        }
+        
+        repository.update(
+            id = UUID.fromString(projectId),
+            name = request.name,
+            description = request.description
+        )
+    }
+
     suspend fun deleteProject(id: UUID): Boolean = dbQuery2 {
         repository.delete(id)
+    }
+
+    suspend fun deleteProjectWithPermission(projectId: UUID, userId: UUID): Boolean = dbQuery2 {
+        val project = repository.findById(projectId)
+            ?: throw NotFoundException("Project", projectId.toString())
+        
+        val isOwner = project.ownerId == userId.toString()
+        
+        if (!isOwner) {
+            throw UnauthorizedException("Only project owners can delete projects")
+        }
+        
+        repository.delete(projectId)
     }
 
     suspend fun assignUserToProject(projectId: UUID, userId: UUID) = dbQuery2 {

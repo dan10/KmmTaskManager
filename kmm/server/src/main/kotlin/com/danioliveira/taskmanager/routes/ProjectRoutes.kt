@@ -1,6 +1,5 @@
 package com.danioliveira.taskmanager.routes
 
-import com.danioliveira.taskmanager.api.request.ProjectAssignRequest
 import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
 import com.danioliveira.taskmanager.api.routes.Projects
@@ -43,13 +42,14 @@ fun Route.projectRoutes() {
             val userId = userPrincipal()
             val projectUuid = UUID.fromString(it.projectId)
 
-            val project = service.getProjectById(id = projectUuid)
+            val project = service.getProjectById(id = projectUuid, userId)
             call.respond(project)
         }
 
-        put<Projects.Id> { projects ->
-            val req = call.receive<ProjectUpdateRequest>()
-            val updated = service.updateProject(projects.projectId, req)
+        put<Projects.Id> { res ->
+            val userId = userPrincipal()
+            val request = call.receive<ProjectUpdateRequest>()
+            val updated = service.updateProjectWithPermission(res.projectId, userId, request)
             if (updated) {
                 call.respond(HttpStatusCode.OK)
             } else {
@@ -67,7 +67,8 @@ fun Route.projectRoutes() {
 
         // Delete project by id: DELETE v1/projects/{projectId}
         delete<Projects.Id> { res ->
-            val deleted = service.deleteProject(res.projectId.toUUID())
+            val userId = userPrincipal()
+            val deleted = service.deleteProjectWithPermission(res.projectId.toUUID(), userId)
             if (deleted) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
@@ -75,31 +76,6 @@ fun Route.projectRoutes() {
             }
         }
 
-        // Assign user to project: POST v1/projects/{projectId}/assign
-        post<Projects.Id.Assign> { res ->
-            val req = call.receive<ProjectAssignRequest>()
-            val assignment = service.assignUserToProject(res.parent.projectId.toUUID(), req.userId.toUUID())
-            call.respond(assignment)
-        }
-
-        // Remove user from project: DELETE v1/projects/{projectId}/assign/{userId}
-        delete<Projects.Id.AssignUser> { res ->
-            val removed = service.removeUserFromProject(
-                projectId = res.parent.projectId.toUUID(),
-                userId = res.userId.toUUID()
-            )
-            if (removed) {
-                call.respond(HttpStatusCode.NoContent)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-
-        // Get users by project: GET v1/projects/{projectId}/users
-        get<Projects.Id.Users> { res ->
-            val users = service.getUsersByProject(res.parent.projectId)
-            call.respond(users)
-        }
     }
 }
 

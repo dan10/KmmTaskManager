@@ -11,11 +11,12 @@ import com.danioliveira.taskmanager.plugins.configureSerialization
 import com.danioliveira.taskmanager.plugins.configureStatusPages
 import com.danioliveira.taskmanager.routes.adminRoutes
 import com.danioliveira.taskmanager.routes.authRoutes
+import com.danioliveira.taskmanager.routes.projectMemberRoutes
 import com.danioliveira.taskmanager.routes.projectRoutes
+import com.danioliveira.taskmanager.routes.projectTaskRoutes
 import com.danioliveira.taskmanager.routes.taskRoutes
 import io.ktor.server.application.Application
 import io.ktor.server.netty.EngineMain
-import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import org.koin.ktor.ext.inject
 
@@ -28,7 +29,7 @@ fun Application.module() {
     // Get AppConfig from Koin
     val appConfig by inject<AppConfig>()
 
-    configureDatabase(appConfig)
+    configureDatabase()
     JwtConfig.init(appConfig)
     configureSerialization()
     configureSecurity()
@@ -37,11 +38,11 @@ fun Application.module() {
     configureMetrics()
 
     routing {
-        route("/api") {
-            authRoutes()
-            projectRoutes()
-            taskRoutes()
-            adminRoutes()
-        }
+        authRoutes()
+        projectRoutes()
+        projectTaskRoutes()
+        projectMemberRoutes()
+        taskRoutes()
+        adminRoutes()
     }
 }

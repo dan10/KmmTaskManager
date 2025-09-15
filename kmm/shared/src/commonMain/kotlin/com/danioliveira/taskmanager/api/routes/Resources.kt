@@ -41,7 +41,7 @@ class Projects {
 }
 
 // Resource para obter projetos de um usuário com paginação/search/sort
-@Resource(Routes.USER_PROJECTS)
+@Resource(Routes.ALL_PROJECTS)
 class UserProjects(val size: Int = 10, val page: Int = 0, val searchText: String? = null, val sort: String? = null)
 
 // Resource para obter tarefas de um usuário com paginação/search/sort
@@ -53,7 +53,28 @@ class TasksPaginated(val size: Int = 10, val page: Int? = null, val searchText: 
 class Tasks() {
 
     @Resource(Routes.BY_TASK_ID)
-    class Id(val parent: Tasks = Tasks(), val taskId: String)
+    class Id(val parent: Tasks = Tasks(), val taskId: String) {
+        
+        // POST /v1/tasks/{taskId}/assign - Assign task to user
+        @Resource(Routes.TASK_ASSIGN)
+        class Assign(val parent: Id)
+        
+        // POST /v1/tasks/{taskId}/status - Update task status
+        @Resource(Routes.TASK_STATUS)
+        class Status(val parent: Id)
+    }
+    
+    // GET /v1/tasks/owned - Get tasks owned by user
+    @Resource(Routes.TASKS_OWNED)
+    class Owned(val parent: Tasks = Tasks(), val page: Int = 0, val size: Int = 10)
+    
+    // GET /v1/tasks/assigned - Get tasks assigned to user  
+    @Resource(Routes.TASKS_ASSIGNED)
+    class Assigned(val parent: Tasks = Tasks(), val page: Int = 0, val size: Int = 10, val query: String? = null)
+    
+    // GET /v1/tasks/stats - Get task statistics (counts by status)
+    @Resource(Routes.TASKS_STATS)
+    class Stats(val parent: Tasks = Tasks())
 }
 
 @Resource(Routes.AUTH)

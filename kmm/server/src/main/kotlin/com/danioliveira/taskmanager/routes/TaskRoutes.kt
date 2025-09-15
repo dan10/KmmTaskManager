@@ -1,237 +1,125 @@
 package com.danioliveira.taskmanager.routes
 
-import com.danioliveira.taskmanager.api.request.ProjectTaskCreateRequest
-import com.danioliveira.taskmanager.api.request.ProjectTaskUpdateRequest
 import com.danioliveira.taskmanager.api.request.TaskAssignRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
-import com.danioliveira.taskmanager.api.routes.Projects
+import com.danioliveira.taskmanager.api.routes.Tasks
+import com.danioliveira.taskmanager.api.routes.TasksPaginated
 import com.danioliveira.taskmanager.domain.service.TaskService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.resources.get
+import io.ktor.server.resources.post
+import io.ktor.server.resources.put
+import io.ktor.server.resources.delete
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.put
-import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
-import java.util.UUID
 
+/**
+ * Routes for task management following Routes.md specification:
+ * 
+ * Basic Task Operations:
+ * GET /v1/tasks - Get all tasks for authenticated user
+ * POST /v1/tasks - Create new task
+ * GET /v1/tasks/{id} - Get specific task details
+ * PUT /v1/tasks/{id} - Update task
+ * DELETE /v1/tasks/{id} - Delete task
+ * PATCH /v1/tasks/{id}/status - Update task status (todo/doing/completed)
+ * 
+ * Task Filtering and Stats:
+ * GET /v1/tasks/owned - Get tasks owned by user
+ * GET /v1/tasks/assigned - Get tasks assigned to user
+ * GET /v1/tasks/stats - Get task statistics (counts by status)
+ * 
+ * Task Assignment:
+ * POST /v1/tasks/{id}/assign - Assign task to user
+ */
 fun Route.taskRoutes() {
-    val service by inject<TaskService>()
-    authenticate("auth-jwt") {
+    val taskService by inject<TaskService>()
 
-        get<Projects.Id.Tasks> { res ->
-            val projectId = UUID.fromString(res.parent.projectId)
-            val tasks = service.findAll(
-                projectId = projectId.toString(),
-                page = res.page,
-                size = res.size
-            )
+    authenticate("auth-jwt") {
+        
+        // Get tasks with pagination and filtering: GET /v1/tasks
+        get<TasksPaginated> { res ->
+            val userId = userPrincipal().toString()
+            val tasks = when {
+                res.searchText != null -> taskService.findAllByAssigneeId(userId, res.page ?: 0, res.size, res.searchText)
+                else -> taskService.findAllByAssigneeId(userId, res.page ?: 0, res.size, null)
+            }
             call.respond(tasks)
         }
 
-        post {  }
+        // Create new task: POST /v1/tasks
+        post<Tasks> {
+            val userId = userPrincipal().toString()
+            val request = call.receive<TaskCreateRequest>()
+            val task = taskService.create(request, userId)
+            call.respond(HttpStatusCode.Created, task)
+        }
 
-        // Project-specific task routes
-        route("/tasks/projects/{projectId}") {
-            // Get all tasks for a project
-            get {
-                val projectId = call.parameters["projectId"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
-                val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+        // Get specific task: GET /v1/tasks/{taskId}
+        get<Tasks.Id> { res ->
+            val task = taskService.findById(res.taskId)
+            call.respond(task)
+        }
 
-                val tasks = service.findAll(projectId, page, size)
-                call.respond(tasks)
-            }
+        // Update task: PUT /v1/tasks/{taskId}
+        put<Tasks.Id> { res ->
+            val request = call.receive<TaskUpdateRequest>()
+            val updated = taskService.update(res.taskId, request)
+            call.respond(updated)
+        }
 
-            // Create a new task for a project
-            post {
-                val projectId = call.parameters["projectId"] ?: return@post call.respond(HttpStatusCode.BadRequest)
-                val request = call.receive<ProjectTaskCreateRequest>()
-                val principal = call.principal<JWTPrincipal>()
-                val creatorId = principal?.payload?.getClaim("userId")?.asString() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized
-                )
-
-                // Convert ProjectTaskCreateRequest to TaskCreateRequest
-                val taskRequest = TaskCreateRequest(
-                    title = request.title,
-                    description = request.description,
-                    projectId = projectId,
-                    assigneeId = request.assigneeId,
-                    priority = request.priority,
-                    dueDate = request.dueDate
-                )
-
-                service.create(taskRequest, creatorId)
-                call.respond(HttpStatusCode.Created)
-            }
-
-            // Get a specific task from a project
-            get("/task/{taskId}") {
-                val taskId = call.parameters["taskId"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val projectId = call.parameters["projectId"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-
-                val task = service.findById(taskId)
-
-                // Verify that the task belongs to the specified project
-                if (task.projectId != projectId) {
-                    return@get call.respond(HttpStatusCode.NotFound)
-                }
-
-                call.respond(task)
-            }
-
-            // Update a specific task in a project
-            put("/task/{taskId}") {
-                val taskId = call.parameters["taskId"] ?: return@put call.respond(HttpStatusCode.BadRequest)
-                val projectId = call.parameters["projectId"] ?: return@put call.respond(HttpStatusCode.BadRequest)
-                val request = call.receive<ProjectTaskUpdateRequest>()
-
-                // First check if the task exists and belongs to the project
-                val existingTask = service.findById(taskId)
-
-                if (existingTask.projectId != projectId) {
-                    return@put call.respond(HttpStatusCode.NotFound)
-                }
-
-                // Convert ProjectTaskUpdateRequest to TaskUpdateRequest
-                val taskRequest = TaskUpdateRequest(
-                    title = request.title,
-                    description = request.description,
-                    status = request.status,
-                    dueDate = request.dueDate,
-                    assigneeId = request.assigneeId
-                )
-
-                val updated = service.update(taskId, taskRequest)
-                call.respond(updated)
+        // Delete task: DELETE /v1/tasks/{taskId}
+        delete<Tasks.Id> { res ->
+            val deleted = taskService.delete(res.taskId)
+            if (deleted) {
+                call.respond(HttpStatusCode.NoContent)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
             }
         }
 
-        route("/tasks") {
-            get {
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal?.payload?.getClaim("userId")?.asString() ?: return@get call.respond(
-                    HttpStatusCode.Unauthorized
-                )
-                val projectId = call.request.queryParameters["projectId"]
-                val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
-                val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-                val assigneeId = call.request.queryParameters["assigneeId"]
-                val query = call.request.queryParameters["query"]
+        // Task filtering and stats routes using Resources (following Routes.md)
+        
+        // Get tasks owned by current user: GET /v1/tasks/owned
+        get<Tasks.Owned> { res ->
+            val userId = userPrincipal().toString()
+            val tasks = taskService.findAllByOwnerId(userId, res.page, res.size)
+            call.respond(tasks)
+        }
 
-                val tasks = when {
-                    assigneeId != null -> service.findAllByAssigneeId(assigneeId, page, size, query)
-                    projectId != null -> service.findAll(
-                        projectId,
-                        page,
-                        size
-                    ) // Keep backward compatibility for project ID query parameter
-                    else -> service.findAllByAssigneeId(
-                        userId,
-                        page,
-                        size,
-                        query
-                    ) // Get all tasks where user is assignee
-                }
+        // Get tasks assigned to current user: GET /v1/tasks/assigned
+        get<Tasks.Assigned> { res ->
+            val userId = userPrincipal().toString()
+            val tasks = taskService.findAllByAssigneeId(userId, res.page, res.size, res.query)
+            call.respond(tasks)
+        }
 
-                call.respond(tasks)
-            }
+        // Get task statistics: GET /v1/tasks/stats
+        get<Tasks.Stats> {
+            val userId = userPrincipal().toString()
+            val stats = taskService.getUserTaskProgress(userId)
+            call.respond(stats)
+        }
 
-            // Get task progress for the current user
-            get("/progress") {
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal?.payload?.getClaim("userId")?.asString() ?: return@get call.respond(
-                    HttpStatusCode.Unauthorized
-                )
+        // Task action endpoints using Resources
+        
+        // Assign task to user: POST /v1/tasks/{taskId}/assign
+        post<Tasks.Id.Assign> { res ->
+            val request = call.receive<TaskAssignRequest>()
+            val updated = taskService.assign(res.parent.taskId, request.assigneeId)
+            call.respond(updated)
+        }
 
-                val progress = service.getUserTaskProgress(userId)
-                call.respond(progress)
-            }
-
-            get("/user") {
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal?.payload?.getClaim("userId")?.asString() ?: return@get call.respond(
-                    HttpStatusCode.Unauthorized
-                )
-                val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
-                val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-
-                val tasks = service.findAllByOwnerId(userId, page, size)
-                call.respond(tasks)
-            }
-
-            post("/user") {
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal?.payload?.getClaim("userId")?.asString() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized
-                )
-
-                // Receive the request but modify it to set the current user as assignee
-                val requestData = call.receive<TaskCreateRequest>()
-                val request = requestData.copy(assigneeId = userId)
-
-                val task = service.create(request, userId)
-                call.respond(task)
-            }
-            post {
-                val request = call.receive<TaskCreateRequest>()
-                val principal = call.principal<JWTPrincipal>()
-                val creatorId = principal?.payload?.getClaim("userId")?.asString() ?: return@post call.respond(
-                    HttpStatusCode.Unauthorized
-                )
-                val task = service.create(request, creatorId)
-                call.respond(task)
-            }
-            get("/{id}") {
-                val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val task = service.findById(id)
-                call.respond(task)
-            }
-            put("/{id}") {
-                val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
-                val request = call.receive<TaskUpdateRequest>()
-                val updated = service.update(id, request)
-                call.respond(updated)
-            }
-            delete("/{id}") {
-                val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-                val deleted = service.delete(id)
-                if (deleted) {
-                    call.respond(HttpStatusCode.NoContent)
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
-            post("/{id}/assign") {
-                val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest)
-                val request = call.receive<TaskAssignRequest>()
-                val updated = service.assign(id, request.assigneeId)
-                if (updated != null) {
-                    call.respond(updated)
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
-            post("/{id}/status") {
-                val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest)
-                val request = call.receive<TaskStatusChangeRequest>()
-                val updated = service.changeStatus(id, request.status)
-                if (updated != null) {
-                    call.respond(updated)
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
+        // Change task status: POST /v1/tasks/{taskId}/status
+        post<Tasks.Id.Status> { res ->
+            val request = call.receive<TaskStatusChangeRequest>()
+            val updated = taskService.changeStatus(res.parent.taskId, request.status)
+            call.respond(updated)
         }
     }
 }

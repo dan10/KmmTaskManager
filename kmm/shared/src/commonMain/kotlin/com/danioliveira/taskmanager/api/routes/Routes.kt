@@ -11,6 +11,15 @@ internal object Routes {
 
     const val ALL_TASKS = "v1/tasks"
     const val BY_TASK_ID = "{taskId}"
+    
+    // Task filtering and stats routes from Routes.md
+    const val TASKS_OWNED = "owned"
+    const val TASKS_ASSIGNED = "assigned" 
+    const val TASKS_STATS = "stats"
+    
+    // Task action routes
+    const val TASK_ASSIGN = "assign"
+    const val TASK_STATUS = "status"
 
     const val ALL_PROJECT_ASSIGNMENTS = "v1/assignments"
     const val BY_PROJECT_ASSIGNMENT_ID = "{assignmentId}"

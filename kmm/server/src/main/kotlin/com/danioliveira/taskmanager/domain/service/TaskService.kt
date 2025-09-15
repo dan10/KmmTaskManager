@@ -21,7 +21,7 @@ internal class TaskService(
     private val projectAssignmentRepository: ProjectAssignmentRepository,
     private val projectRepository: ProjectRepository
 ) {
-    suspend fun findAll(projectId: String, page: Int = 0, size: Int = 10): PaginatedResponse<TaskResponse> = dbQuery {
+    suspend fun findAllByProjectId(projectId: String, page: Int = 0, size: Int = 10): PaginatedResponse<TaskResponse> = dbQuery {
         val uuid = UUID.fromString(projectId)
         repository.findAllByProjectId(uuid, page, size)
     }
