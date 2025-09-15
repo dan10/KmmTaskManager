@@ -1,7 +1,6 @@
 package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.TestDatabase
-import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.Priority
@@ -69,7 +68,7 @@ class ProjectRepositoryImplTest {
         // Find the project by ID
         val foundProject = dbQuery {
             with(projectRepository) {
-                findById(UUID.fromString(project.id))
+                findById(UUID.fromString(project.id),)
             }
         }
 
@@ -112,7 +111,7 @@ class ProjectRepositoryImplTest {
         // Find projects by owner
         val projects = dbQuery {
             with(projectRepository) {
-                findByOwner(testUserId, 0, 10)
+                findAllByOwner(testUserId, 0, 10)
             }
         }
 
@@ -121,50 +120,6 @@ class ProjectRepositoryImplTest {
         assertEquals(2, projects.items.size)
         assertTrue(projects.items.any { it.id == project1.id })
         assertTrue(projects.items.any { it.id == project2.id })
-    }
-
-    @Test
-    fun `test find all projects with pagination`() = runBlocking {
-        // Create multiple projects
-        val projects = mutableListOf<ProjectResponse>()
-
-        // Create 15 projects (more than one page with size 10)
-        for (i in 1..15) {
-            val project = dbQuery {
-                with(projectRepository) {
-                    create("Project $i", "Description $i", testUserId)
-                }
-            }
-            projects.add(project)
-        }
-
-        // Get first page (10 items)
-        val page1 = dbQuery {
-            with(projectRepository) {
-                findAll(0, 10)
-            }
-        }
-
-        // Verify pagination works correctly
-        assertEquals(15, page1.total)
-        assertEquals(10, page1.items.size)
-        assertEquals(0, page1.page)
-        assertEquals(10, page1.size)
-        assertEquals(2, page1.totalPages)
-
-        // Get second page (5 items)
-        val page2 = dbQuery {
-            with(projectRepository) {
-                findAll(1, 10)
-            }
-        }
-
-        // Verify second page
-        assertEquals(15, page2.total)
-        assertEquals(5, page2.items.size)
-        assertEquals(1, page2.page)
-        assertEquals(10, page2.size)
-        assertEquals(2, page2.totalPages)
     }
 
     @Test
@@ -189,7 +144,7 @@ class ProjectRepositoryImplTest {
         // Find the project to verify the changes
         val updatedProject = dbQuery {
             with(projectRepository) {
-                findById(UUID.fromString(project.id))
+                findById(UUID.fromString(project.id),)
             }
         }
 
@@ -211,7 +166,7 @@ class ProjectRepositoryImplTest {
         // Verify the project exists
         val foundProject = dbQuery {
             with(projectRepository) {
-                findById(UUID.fromString(project.id))
+                findById(UUID.fromString(project.id),)
             }
         }
         assertNotNull(foundProject)
@@ -229,7 +184,7 @@ class ProjectRepositoryImplTest {
         // Verify the project no longer exists
         val deletedProject = dbQuery {
             with(projectRepository) {
-                findById(UUID.fromString(project.id))
+                findById(UUID.fromString(project.id),)
             }
         }
         assertNull(deletedProject)
@@ -330,13 +285,13 @@ class ProjectRepositoryImplTest {
         // Fetch the project to get the updated task counts
         val updatedProject = dbQuery {
             with(projectRepository) {
-                findById(projectId)
+                findById(projectId,)
             }
         }
 
         // Verify task counts
         assertNotNull(updatedProject)
-        assertEquals(9, updatedProject.total)
+        assertEquals(9, updatedProject.totalTasks)
         assertEquals(4, updatedProject.completed)
         assertEquals(3, updatedProject.inProgress)
     }

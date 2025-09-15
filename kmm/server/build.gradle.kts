@@ -20,6 +20,12 @@ ktor {
     }
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
+}
+
 // Custom Gatling tasks for different scenarios
 tasks.register("gatlingRunQuick") {
     group = "gatling"
@@ -61,8 +67,9 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.r2dc)
     implementation(libs.exposed.kotlin.datetime)
-    // PostgreSQL Driver
+    // PostgreSQL Driver (JDBC)
     implementation(libs.postgresql)
+    implementation(libs.postgresql.r2dbc)
     // HikariCP for connection pooling
     implementation(libs.hikaricp)
     // Ktor Content Negotiation (for JSON)
@@ -71,6 +78,7 @@ dependencies {
     // Ktor Status Pages for exception handling
     implementation(libs.ktor.server.status.pages)
     // Ktor Request Validation
+    implementation(libs.ktor.server.resources)
     implementation(libs.ktor.server.request.validation)
     // Google API Client for token verification
     implementation(libs.google.api)

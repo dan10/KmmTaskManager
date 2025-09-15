@@ -6,11 +6,13 @@ import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.dbQuery
+import com.danioliveira.taskmanager.data.dbQuery2
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
+import com.danioliveira.taskmanager.routes.toUUID
 import java.util.UUID
 
 internal class TaskService(
@@ -18,8 +20,9 @@ internal class TaskService(
     private val projectAssignmentRepository: ProjectAssignmentRepository,
     private val projectRepository: ProjectRepository
 ) {
-    suspend fun findAll(projectId: String?, page: Int = 0, size: Int = 10): PaginatedResponse<TaskResponse> = dbQuery {
-        with(repository) { findAllByProjectId(projectId, page, size) }
+    suspend fun findAll(projectId: String, page: Int = 0, size: Int = 10): PaginatedResponse<TaskResponse> = dbQuery {
+        val uuid = UUID.fromString(projectId)
+        repository.findAllByProjectId(uuid, page, size)
     }
 
     suspend fun findAllByOwnerId(ownerId: String, page: Int = 0, size: Int = 10): PaginatedResponse<TaskResponse> =
@@ -57,8 +60,8 @@ internal class TaskService(
         val projectUUID = request.projectId?.let { UUID.fromString(it) }
         if (projectUUID != null && assigneeUUID != null) {
             // Check if user is the project owner
-            val project = with(projectRepository) { findById(projectUUID) }
-            val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
+            val project = projectRepository.findById(projectUUID)
+            val isProjectOwner = project != null && project.creatorId == assigneeUUID.toString()
             
             // Check if user is assigned to the project
             val isAssigneeInProject = with(projectAssignmentRepository) {
@@ -96,7 +99,7 @@ internal class TaskService(
                 val projectUUID = UUID.fromString(current.projectId)
                 
                 // Check if user is the project owner
-                val project = with(projectRepository) { findById(projectUUID) }
+                val project = with(projectRepository) { findById(projectUUID,) }
                 val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
                 
                 // Check if user is assigned to the project
@@ -123,8 +126,8 @@ internal class TaskService(
         }
     }
 
-    suspend fun delete(id: String): Boolean = dbQuery {
-        with(repository) { delete(id) }
+    suspend fun delete(id: String): Boolean = dbQuery2 {
+        repository.delete(id.toUUID())
     }
 
     suspend fun assign(id: String, assigneeId: String): TaskResponse = dbQuery {
@@ -136,7 +139,7 @@ internal class TaskService(
             val projectUUID = UUID.fromString(current.projectId)
             
             // Check if user is the project owner
-            val project = with(projectRepository) { findById(projectUUID) }
+            val project = with(projectRepository) { findById(projectUUID,) }
             val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
             
             // Check if user is assigned to the project

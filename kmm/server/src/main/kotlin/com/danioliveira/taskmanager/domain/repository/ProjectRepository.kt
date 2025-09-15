@@ -15,7 +15,8 @@ interface ProjectRepository {
      * @param ownerId the owner of the project
      * @return the newly created project
      */
-    suspend fun Transaction.create(name: String, description: String?, ownerId: UUID): ProjectResponse
+    context(transaction: Transaction)
+    suspend fun create(name: String, description: String?, ownerId: UUID): ProjectResponse
 
     /**
      * Finds a project by id.
@@ -23,7 +24,10 @@ interface ProjectRepository {
      * @param id the id of the project
      * @return the project [ProjectResponse] with the given id, or null if no such project exists
      */
-    suspend fun Transaction.findById(id: UUID): ProjectResponse?
+    context(transaction: Transaction)
+    suspend fun findById(id: UUID): ProjectResponse?
+
+    suspend fun existsById(id: UUID): Boolean
 
     /**
      * Finds all projects owned by the given user with pagination.
@@ -34,22 +38,9 @@ interface ProjectRepository {
      * @param query optional query to filter projects by name
      * @return a paginated response of projects [ProjectResponse] owned by the user
      */
-    suspend fun Transaction.findByOwner(
+    context(transaction: Transaction)
+    suspend fun findAllByOwner(
         ownerId: UUID,
-        page: Int = 0,
-        size: Int = 10,
-        query: String? = null
-    ): PaginatedResponse<ProjectResponse>
-
-    /**
-     * Finds all projects with pagination.
-     *
-     * @param page the page number (0-based)
-     * @param size the page size
-     * @param query optional query to filter projects by name
-     * @return a paginated response of all projects [ProjectResponse]
-     */
-    suspend fun Transaction.findAll(
         page: Int = 0,
         size: Int = 10,
         query: String? = null
@@ -63,7 +54,8 @@ interface ProjectRepository {
      * @param description the new description of the project
      * @return true if the project was updated, false otherwise
      */
-    suspend fun Transaction.update(id: UUID, name: String, description: String?): Boolean
+    context(transaction: Transaction)
+    suspend fun update(id: UUID, name: String, description: String?): Boolean
 
     /**
      * Deletes a project by id.
@@ -71,5 +63,6 @@ interface ProjectRepository {
      * @param id the id of the project to delete
      * @return true if the project was deleted, false otherwise
      */
-    suspend fun Transaction.delete(id: UUID): Boolean
+    context(transaction: Transaction)
+    suspend fun delete(id: UUID): Boolean
 }

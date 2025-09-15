@@ -14,5 +14,5 @@ data class ProjectResponse(
     val createdAt: String,
     val completed: Int = 0,
     val inProgress: Int = 0,
-    val total: Int = 0
+    val totalTasks: Int = 0
 )

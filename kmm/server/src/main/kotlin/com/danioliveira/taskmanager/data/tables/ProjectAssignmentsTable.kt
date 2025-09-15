@@ -7,4 +7,8 @@ object ProjectAssignmentsTable : UUIDTable() {
     val project = reference(name = "project", ProjectsTable)
     val user = reference("user", UsersTable)
     val assignedAt = datetime("assigned_at")
+
+    init {
+        index(true, project, user)
+    }
 }

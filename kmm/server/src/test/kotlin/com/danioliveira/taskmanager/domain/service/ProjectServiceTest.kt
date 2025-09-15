@@ -74,40 +74,6 @@ class ProjectServiceTest : KoinTest {
         assertTrue(projects.items.any { it.id == project2.id })
     }
 
-    @Test
-    fun `test get all projects`() = runBlocking {
-        // Create some projects
-        val owner1Id = createTestUser(
-            email = "owner1@example.com",
-            displayName = "Owner 1"
-        )
-        val request1 = ProjectCreateRequest("Project 1", "Description 1")
-        val project1 = projectService.createProject(owner1Id, request1)
-
-        val owner2Id = createTestUser(
-            email = "owner2@example.com",
-            displayName = "Owner 2"
-        )
-        val request2 = ProjectCreateRequest("Project 2", "Description 2")
-        val project2 = projectService.createProject(owner2Id, request2)
-
-        val owner3Id = createTestUser(
-            email = "owner3@example.com",
-            displayName = "Owner 3"
-        )
-        val request3 = ProjectCreateRequest("Project 3", "Description 3")
-        val project3 = projectService.createProject(owner3Id, request3)
-
-        // Get all projects
-        val projects = projectService.getAllProjects()
-
-        // Verify all projects were returned
-        assertEquals(3, projects.total)
-        assertEquals(3, projects.items.size)
-        assertTrue(projects.items.any { it.id == project1.id })
-        assertTrue(projects.items.any { it.id == project2.id })
-        assertTrue(projects.items.any { it.id == project3.id })
-    }
 
     @Test
     fun `test create project`() = runBlocking {

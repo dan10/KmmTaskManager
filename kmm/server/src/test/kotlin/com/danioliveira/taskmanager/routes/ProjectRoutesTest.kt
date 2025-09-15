@@ -3,6 +3,7 @@ package com.danioliveira.taskmanager.routes
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
+import com.danioliveira.taskmanager.api.request.ProjectAssignRequest
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.createTestUser
 import com.danioliveira.taskmanager.domain.AppConfig

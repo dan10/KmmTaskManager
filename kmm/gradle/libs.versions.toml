@@ -6,32 +6,34 @@ android-targetSdk = "36"
 androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.1"
 androidx-constraintlayout = "2.2.1"
-androidx-core-ktx = "1.16.0"
+androidx-core-ktx = "1.17.0"
 androidx-datastore = "1.1.7"
 androidx-espresso-core = "3.7.0"
-androidx-lifecycle = "2.9.1"
+androidx-lifecycle = "2.9.3"
 androidx-material = "1.12.0"
-androidx-navigation = "2.9.0-beta04"
+androidx-navigation = "2.9.0-rc01"
 androidx-test-junit = "1.3.0"
 androidx-paging = "3.3.6"
 compose-multiplatform = "1.8.2"
-exposed = "1.0.0-beta-5"
-hikaricp = "7.0.0"
+exposed = "1.0.0-rc-1"
+hikaricp = "7.0.2"
 junit = "4.13.2"
-googleApi = "2.8.0"
+googleApi = "2.8.1"
 gatling = "3.14.3"
-koin = "4.1.0"
-kotlin = "2.2.0"
+koin = "4.1.1"
+kotlin = "2.2.10"
 kotlinxDatetime = "0.7.1"
 ktor = "3.2.3"
 logback = "1.5.18"
 materialIconsCore = "1.7.3"
-kermit = "2.0.6"
+kermit = "2.0.8"
 postgresql = "42.7.7"
-prometheus = "1.15.2"
+prometheus = "1.15.3"
 h2 = "2.3.232"
+r2dbc-h2 = "1.0.0.RELEASE"
 graalvm = "0.10.1"
 testcontainers = "1.21.3"
+r2dbcPostgresql = "1.0.7.RELEASE"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -63,13 +65,13 @@ koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
 koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 
+ktor-client-resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
-
 
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
@@ -82,6 +84,7 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"
 ktor-server-tests = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor" }
+ktor-server-resources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor" }
 
 exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
 exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
@@ -90,8 +93,12 @@ exposed-r2dc = { group = "org.jetbrains.exposed", name = "exposed-r2dbc", versio
 exposed-kotlin-datetime = { group = "org.jetbrains.exposed", name = "exposed-kotlin-datetime", version.ref = "exposed" }
 
 material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "materialIconsCore" }
+
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+postgresql-r2dbc = { group = "org.postgresql", name = "r2dbc-postgresql", version.ref = "r2dbcPostgresql" }
+
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+r2dbc-h2 = { group = "io.r2dbc", name = "r2dbc-h2", version.ref = "r2dbc-h2" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
 
 # TestContainers

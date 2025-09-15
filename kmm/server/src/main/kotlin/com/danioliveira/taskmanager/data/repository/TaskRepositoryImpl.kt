@@ -3,33 +3,43 @@ package com.danioliveira.taskmanager.data.repository
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
-import com.danioliveira.taskmanager.data.entity.ProjectDAOEntity
 import com.danioliveira.taskmanager.data.entity.TaskDAOEntity
-import com.danioliveira.taskmanager.data.entity.UserDAOEntity
+import com.danioliveira.taskmanager.data.tables.ProjectsTable
 import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
-import kotlin.time.Clock
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.singleOrNull
+import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.like
 import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.count
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.leftJoin
+import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.or
-import org.jetbrains.exposed.v1.jdbc.SizedIterable
+import org.jetbrains.exposed.v1.r2dbc.deleteWhere
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.update
 import java.util.UUID
 import kotlin.math.ceil
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 internal class TaskRepositoryImpl : TaskRepository {
 
-    override suspend fun Transaction.update(
+    context(transaction: Transaction)
+    override suspend fun update(
         id: String,
         title: String,
         description: String?,
@@ -38,61 +48,71 @@ internal class TaskRepositoryImpl : TaskRepository {
         dueDate: LocalDateTime?,
         assigneeId: String?
     ): TaskResponse? {
-        val uuid = UUID.fromString(id)
-        val entity = TaskDAOEntity.findById(uuid) ?: return null
-        entity.title = title
-        entity.description = description
-        entity.status = status
-        entity.priority = priority
-        entity.dueDate = dueDate
-        entity.assignee = assigneeId?.let { UUID.fromString(it) }?.let { UserDAOEntity.findById(it) }
-        return entity.toResponse()
-    }
-
-    override suspend fun Transaction.delete(id: String): Boolean {
-        val uuid = UUID.fromString(id)
-        return TaskDAOEntity.findById(uuid)?.let { it.delete(); true } ?: false
-    }
-
-    override suspend fun Transaction.findById(id: String): TaskResponse? {
-        val uuid = UUID.fromString(id)
-        return TaskDAOEntity.findById(uuid)?.toResponse()
-    }
-
-    override suspend fun Transaction.findAllByProjectId(
-        projectId: String?,
-        page: Int,
-        size: Int
-    ): PaginatedResponse<TaskResponse> {
-        val query = if (projectId != null) {
-            val uuid = UUID.fromString(projectId)
-            TaskDAOEntity.find { TasksTable.project eq uuid }
-        } else {
-            TaskDAOEntity.all()
+        val taskId = UUID.fromString(id)
+        // Perform update using Exposed DSL
+        TasksTable.update(where = { TasksTable.id eq taskId }) {
+            it[TasksTable.title] = title
+            it[TasksTable.description] = description
+            it[TasksTable.status] = status
+            it[TasksTable.priority] = priority
+            it[TasksTable.dueDate] = dueDate
+            it[TasksTable.assignee] = assigneeId?.let { UUID.fromString(it) }
         }
-
-        return query.toPaginatedResponse(page, size)
+        // Return the updated entity using DAO for mapping consistency
+        return TaskDAOEntity.findById(taskId)?.toResponse()
     }
 
-    override suspend fun Transaction.findAllByOwnerId(
-        ownerId: String,
+    context(transaction: Transaction)
+    override suspend fun delete(id: UUID): Boolean {
+        return TasksTable.deleteWhere { TasksTable.id eq id } > 0
+    }
+
+    context(transaction: Transaction)
+    override suspend fun findById(id: String): TaskResponse? {
+        val uuid = UUID.fromString(id)
+        return TasksTable
+            .leftJoin(ProjectsTable,
+                onColumn = { TasksTable.project },
+                otherColumn = { ProjectsTable.id }
+            )
+            .select(TasksTable.fields + ProjectsTable.name + ProjectsTable.id)
+            .where { TasksTable.id eq uuid }
+            .singleOrNull()
+            ?.toResponse()
+    }
+
+    context(transaction: Transaction)
+    override suspend fun findAllByProjectId(
+        projectId: UUID,
         page: Int,
         size: Int
     ): PaginatedResponse<TaskResponse> {
-        val uuid = UUID.fromString(ownerId)
-        val query = TaskDAOEntity.find { TasksTable.creator eq uuid }
-
-        return query.toPaginatedResponse(page, size)
+        return queryWithPagination(
+            limit = size,
+            offset = page * size
+        ) { TasksTable.project eq projectId }
     }
 
-    override suspend fun Transaction.findAllByAssigneeId(
+    context(transaction: Transaction)
+    override suspend fun findAllByOwnerId(
+        ownerId: UUID,
+        page: Int,
+        size: Int
+    ): PaginatedResponse<TaskResponse> {
+        return queryWithPagination(
+            limit = size,
+            offset = page * size
+        ) { TasksTable.creator eq ownerId }
+    }
+
+    context(transaction: Transaction)
+    override suspend fun findAllByAssigneeId(
         assigneeId: String,
         page: Int,
         size: Int,
         query: String?
     ): PaginatedResponse<TaskResponse> {
         val assigneeUuid = UUID.fromString(assigneeId)
-
         var condition: Op<Boolean> = TasksTable.assignee eq assigneeUuid
         if (!query.isNullOrBlank()) {
             val searchQuery = "%${query.lowercase()}%"
@@ -102,19 +122,24 @@ internal class TaskRepositoryImpl : TaskRepository {
             )
         }
 
-        val taskQuery = TaskDAOEntity.find { condition }
-        return taskQuery.toPaginatedResponse(page, size)
-
+        return queryWithPagination(
+            limit = size,
+            offset = page * size
+        ) {
+            condition
+        }
     }
 
-    override suspend fun Transaction.findAllTasksForUser(userId: String): PaginatedResponse<TaskResponse> {
-        val uuid = UUID.fromString(userId)
-        val query = TaskDAOEntity.find { (TasksTable.creator eq uuid) or (TasksTable.assignee eq uuid) }
-
-        return query.toPaginatedResponse(0, 100) // Default to first page with 100 items
+    context(transaction: Transaction)
+    override suspend fun findAllTasksForUser(userId: UUID, page: Int, size: Int): PaginatedResponse<TaskResponse> {
+        return queryWithPagination(
+            limit = size,
+            offset = page * size
+        ) { (TasksTable.creator eq userId) or (TasksTable.assignee eq userId) }
     }
 
-    override suspend fun Transaction.getUserTaskProgress(userId: String): TaskProgressResponse {
+    context(transaction: Transaction)
+    override suspend fun getUserTaskProgress(userId: String): TaskProgressResponse {
         val uuid = UUID.fromString(userId)
         val userTasks = TaskDAOEntity.find { (TasksTable.creator eq uuid) or (TasksTable.assignee eq uuid) }
 
@@ -127,28 +152,9 @@ internal class TaskRepositoryImpl : TaskRepository {
         )
     }
 
-    private fun SizedIterable<TaskDAOEntity>.toPaginatedResponse(
-        page: Int,
-        size: Int
-    ): PaginatedResponse<TaskResponse> {
-        val total = this.count()
-        val totalPages = if (size > 0) ceil(total.toDouble() / size).toInt() else 0
-        val items = this.orderBy(TasksTable.createdAt to SortOrder.DESC)
-            .limit(size)
-            .offset((page * size).toLong())
-            .map { it.toResponse() }
-
-        return PaginatedResponse(
-            items = items,
-            total = total,
-            page = page,
-            size = size,
-            totalPages = totalPages
-        )
-    }
-
     @OptIn(ExperimentalTime::class)
-    override suspend fun Transaction.create(
+    context(transaction: Transaction)
+    override suspend fun create(
         title: String,
         description: String?,
         projectId: UUID?,
@@ -158,20 +164,80 @@ internal class TaskRepositoryImpl : TaskRepository {
         priority: Priority,
         dueDate: LocalDateTime?
     ): TaskResponse {
-        val creator = UserDAOEntity.findById(creatorId) ?: throw IllegalArgumentException("Creator not found")
-        val entity = TaskDAOEntity.new(UUID.randomUUID()) {
-            this.title = title
-            this.description = description
-            this.project =
-                projectId?.let { ProjectDAOEntity.findById(it) ?: throw IllegalArgumentException("Project not found") }
-            this.assignee = assigneeId?.let { UserDAOEntity.findById(it) }
-            this.creator = creator
-            this.status = status
-            this.priority = priority
-            this.dueDate = dueDate
-            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val id = UUID.randomUUID()
+
+        TasksTable.insert {
+            it[TasksTable.id] = id
+            it[TasksTable.title] = title
+            it[TasksTable.description] = description
+            it[TasksTable.project] = projectId
+            it[TasksTable.assignee] = assigneeId
+            it[TasksTable.creator] = creatorId
+            it[TasksTable.status] = status
+            it[TasksTable.priority] = priority
+            it[TasksTable.dueDate] = dueDate
+            it[TasksTable.createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }
-        return entity.toResponse()
+
+
+        return TaskResponse(
+            id = id.toString(),
+            title = title,
+            description = description.orEmpty(),
+            status = status,
+            priority = priority,
+            dueDate = dueDate,
+            projectId = projectId?.toString(),
+            projectName = null,
+            assigneeId = assigneeId.toString(),
+            creatorId = creatorId.toString()
+        )
+    }
+
+    private fun ResultRow.toResponse(): TaskResponse {
+        return TaskResponse(
+            id = this[TasksTable.id].value.toString(),
+            title = this[TasksTable.title],
+            description = this[TasksTable.description].orEmpty(),
+            status = this[TasksTable.status],
+            priority = this[TasksTable.priority],
+            dueDate = this[TasksTable.dueDate],
+            projectId = this[TasksTable.project]?.value?.toString(),
+            projectName = this[ProjectsTable.name],
+            assigneeId = this[TasksTable.assignee]?.value?.toString(),
+            creatorId = this[TasksTable.creator].value.toString()
+        )
+    }
+
+    private suspend fun queryWithPagination(
+        limit: Int? = null,
+        offset: Int? = null,
+        predicate: () -> Op<Boolean>,
+    ): PaginatedResponse<TaskResponse> {
+        val tasksCount = TasksTable.id.count().over().partitionBy(TasksTable.id).alias("tasks_count")
+
+        val query =  TasksTable
+            .leftJoin(ProjectsTable,
+                onColumn = { TasksTable.project },
+                otherColumn = { ProjectsTable.id }
+            )
+            .select(TasksTable.fields + ProjectsTable.name + ProjectsTable.id + tasksCount)
+            .where(predicate)
+            .orderBy(TasksTable.dueDate, SortOrder.DESC)
+            .apply { if (limit != null) limit(limit) }
+            .apply { if (offset != null) offset(offset.toLong()) }
+
+        val items = query.map { row ->
+            row.toResponse()
+        }.toList()
+
+        return PaginatedResponse(
+            items = items,
+            total = items.size,
+            currentPage = if (limit != null && limit > 0) (offset ?: 0) / limit else 0,
+            pageSize = limit ?: items.size,
+            totalPages = if (limit != null && limit > 0) ceil(items.size.toDouble() / limit).toInt() else 1
+        )
     }
 
     private fun TaskDAOEntity.toResponse(): TaskResponse {

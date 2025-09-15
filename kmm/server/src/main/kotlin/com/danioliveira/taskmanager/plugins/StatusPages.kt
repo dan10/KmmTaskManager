@@ -50,6 +50,16 @@ fun Application.configureStatusPages() {
             }
         }
 
+        // Map IllegalArgumentException to BadRequest for invalid inputs (e.g., malformed UUID)
+        exception<IllegalArgumentException> { call, cause ->
+            val response = ErrorResponse(
+                status = HttpStatusCode.BadRequest.value,
+                code = "INVALID_ARGUMENT",
+                message = cause.message ?: "Invalid request"
+            )
+            call.respond(HttpStatusCode.BadRequest, response)
+        }
+
         // Handle general exceptions
         exception<Throwable> { call, cause ->
             logger.error("Unhandled exception: ${cause.message}", cause)

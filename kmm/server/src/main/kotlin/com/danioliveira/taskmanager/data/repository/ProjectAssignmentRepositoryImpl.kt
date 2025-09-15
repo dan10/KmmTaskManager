@@ -1,82 +1,89 @@
 package com.danioliveira.taskmanager.data.repository
 
-import com.danioliveira.taskmanager.data.entity.ProjectAssignmentDAOEntity
-import com.danioliveira.taskmanager.data.entity.ProjectDAOEntity
-import com.danioliveira.taskmanager.data.entity.UserDAOEntity
 import com.danioliveira.taskmanager.data.tables.ProjectAssignmentsTable
 import com.danioliveira.taskmanager.domain.ProjectAssignment
+import com.danioliveira.taskmanager.domain.exceptions.AlreadyAssignedException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
-import kotlin.time.Clock
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.deleteWhere
+import org.jetbrains.exposed.v1.r2dbc.insertReturning
+import org.jetbrains.exposed.v1.r2dbc.select
 import java.util.UUID
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun Transaction.assignUserToProject(projectId: UUID, userId: UUID): ProjectAssignment {
-        // Check if project and user exist
-        val project = ProjectDAOEntity.findById(projectId) ?: throw IllegalArgumentException("Project not found")
-        val user = UserDAOEntity.findById(userId) ?: throw IllegalArgumentException("User not found")
-
-        // Check if assignment already exists
-        val existingAssignment = ProjectAssignmentDAOEntity.find {
-            (ProjectAssignmentsTable.project eq projectId) and (ProjectAssignmentsTable.user eq userId)
-        }.firstOrNull()
-
-        if (existingAssignment != null) {
-            throw IllegalStateException("User is already assigned to this project")
-        }
-
-        // Create new assignment
+    context(transaction: Transaction)
+    override suspend fun assignUserToProject(projectId: UUID, userId: UUID): ProjectAssignment {
         val assignmentId = UUID.randomUUID()
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-        val assignment = ProjectAssignmentDAOEntity.new(assignmentId) {
-            this.project = project
-            this.user = user
-            this.assignedAt = now
+        return try {
+            ProjectAssignmentsTable.insertReturning {
+                it[id] = assignmentId
+                it[project] = projectId
+                it[user] = userId
+                it[assignedAt] = now
+            }
+                .map { it.toResponse() }
+                .single()
+        } catch (_: Exception) {
+            throw AlreadyAssignedException("User is already assigned to this project")
         }
-
-        return assignment.toDomain()
     }
 
-    override suspend fun Transaction.removeUserFromProject(projectId: UUID, userId: UUID): Boolean {
-        val assignment = ProjectAssignmentDAOEntity.find {
-            (ProjectAssignmentsTable.project eq projectId) and (ProjectAssignmentsTable.user eq userId)
-        }.firstOrNull() ?: return false
-
-        assignment.delete()
-        return true
+    context(transaction: Transaction)
+    override suspend fun removeUserFromProject(projectId: UUID, userId: UUID): Boolean {
+        return ProjectAssignmentsTable.deleteWhere {
+            ProjectAssignmentsTable.project eq projectId and
+                    (ProjectAssignmentsTable.user eq userId)
+        } > 0
     }
 
-    override suspend fun Transaction.findUsersByProject(projectId: UUID): List<UUID> {
-        return ProjectAssignmentDAOEntity.find {
-            ProjectAssignmentsTable.project eq projectId
-        }.map { it.user.id.value }
+    context(transaction: Transaction)
+    override suspend fun findUsersByProject(projectId: UUID): List<UUID> {
+        return ProjectAssignmentsTable
+            .select(ProjectAssignmentsTable.id)
+            .where { ProjectAssignmentsTable.project eq projectId }
+            .map { it[ProjectAssignmentsTable.user].value }
+            .toList()
     }
 
-    override suspend fun Transaction.findProjectsByUser(userId: UUID): List<UUID> {
-        return ProjectAssignmentDAOEntity.find {
-            ProjectAssignmentsTable.user eq userId
-        }.map { it.project.id.value }
+    context(transaction: Transaction)
+    override suspend fun findProjectsByUser(userId: UUID): List<UUID> {
+        return ProjectAssignmentsTable
+            .select(ProjectAssignmentsTable.id)
+            .where { ProjectAssignmentsTable.user eq userId }
+            .map { it[ProjectAssignmentsTable.project].value }
+            .toList()
     }
 
-    override suspend fun Transaction.isUserAssignedToProject(projectId: UUID, userId: UUID): Boolean {
-        return ProjectAssignmentDAOEntity.find {
-            (ProjectAssignmentsTable.project eq projectId) and (ProjectAssignmentsTable.user eq userId)
-        }.count() > 0
+    context(transaction: Transaction)
+    override suspend fun isUserAssignedToProject(projectId: UUID, userId: UUID): Boolean {
+        return ProjectAssignmentsTable
+            .select(ProjectAssignmentsTable.id)
+            .where {
+                (ProjectAssignmentsTable.project eq projectId) and
+                        (ProjectAssignmentsTable.user eq userId)
+            }
+            .toList()
+            .isNotEmpty()
     }
 
-    private fun ProjectAssignmentDAOEntity.toDomain(): ProjectAssignment {
-        return ProjectAssignment(
-            id = this.id.value.toString(),
-            projectId = this.project.id.value.toString(),
-            userId = this.user.id.value.toString(),
-            assignedAt = this.assignedAt.toString()
-        )
-    }
+    private fun ResultRow.toResponse() = ProjectAssignment(
+        id = this[ProjectAssignmentsTable.id].value.toString(),
+        projectId = this[ProjectAssignmentsTable.project].value.toString(),
+        userId = this[ProjectAssignmentsTable.user].value.toString(),
+        assignedAt = this[ProjectAssignmentsTable.assignedAt].toString()
+    )
 }

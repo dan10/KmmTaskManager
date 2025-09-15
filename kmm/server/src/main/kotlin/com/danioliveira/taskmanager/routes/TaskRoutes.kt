@@ -6,13 +6,14 @@ import com.danioliveira.taskmanager.api.request.TaskAssignRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
-import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.api.routes.Projects
 import com.danioliveira.taskmanager.domain.service.TaskService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
+import io.ktor.server.resources.get
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -21,10 +22,24 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
+import java.util.UUID
 
 fun Route.taskRoutes() {
     val service by inject<TaskService>()
     authenticate("auth-jwt") {
+
+        get<Projects.Id.Tasks> { res ->
+            val projectId = UUID.fromString(res.parent.projectId)
+            val tasks = service.findAll(
+                projectId = projectId.toString(),
+                page = res.page,
+                size = res.size
+            )
+            call.respond(tasks)
+        }
+
+        post {  }
+
         // Project-specific task routes
         route("/tasks/projects/{projectId}") {
             // Get all tasks for a project

@@ -12,7 +12,7 @@ fun ProjectResponse.toProject(): Project {
         name = name,
         completed = completed,
         inProgress = inProgress,
-        total = total,
+        total = totalTasks,
         description = description
     )
 }

@@ -8,6 +8,7 @@ import com.danioliveira.taskmanager.auth.GoogleTokenVerifier
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.auth.PasswordHasher
 import com.danioliveira.taskmanager.data.dbQuery
+import com.danioliveira.taskmanager.data.dbQuery2
 import com.danioliveira.taskmanager.domain.AppConfig
 import com.danioliveira.taskmanager.domain.User
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
@@ -15,24 +16,25 @@ import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
+import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingContext
+import java.util.UUID
 
 class UserService(
     private val repository: UserRepository,
     private val appConfig: AppConfig
 ) {
-    suspend fun findByEmail(email: String): UserWithPassword? = dbQuery {
-        with(repository) { findByEmail(email) }
+    suspend fun findByEmail(email: String): UserWithPassword? = dbQuery2 {
+        repository.findByEmail(email)
     }
 
-    suspend fun findById(id: String): UserWithPassword = dbQuery {
-        with(repository) {
-            findById(id) ?: throw NotFoundException("User", id)
-        }
+    suspend fun findById(id: UUID): UserWithPassword = dbQuery2 {
+        repository.findById(id) ?: throw NotFoundException("User", id.toString())
     }
 
     suspend fun create(email: String, passwordHash: String?, displayName: String, googleId: String?): UserWithPassword =
         dbQuery {
-            with(repository) { create(email, passwordHash, displayName, googleId) }
+            repository.create(email, passwordHash, displayName, googleId)
         }
 
     fun toSafeUser(user: UserWithPassword): User = repository.toSafeUser(user)
@@ -44,7 +46,8 @@ class UserService(
      * @return An AuthResponse containing the JWT token and the user object
      * @throws ValidationException if the email is already registered
      */
-    suspend fun register(request: RegisterRequest): AuthResponse {
+    context(context: RoutingContext)
+    suspend fun register(request: RegisterRequest) {
         val existingUser = findByEmail(request.email)
         if (existingUser != null) {
             throw ValidationException(
@@ -58,7 +61,7 @@ class UserService(
         val token = JwtConfig.generateToken(userWithPassword.id, userWithPassword.email)
         val safeUser = toSafeUser(userWithPassword)
 
-        return AuthResponse(token = token, user = safeUser)
+        context.call.respond(AuthResponse(token = token, user = safeUser))
     }
 
     /**

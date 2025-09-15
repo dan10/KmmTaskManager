@@ -12,7 +12,8 @@ interface ProjectAssignmentRepository {
      * @param userId the id of the user
      * @return the newly created project assignment
      */
-    suspend fun Transaction.assignUserToProject(projectId: UUID, userId: UUID): ProjectAssignment
+    context(transaction: Transaction)
+    suspend fun assignUserToProject(projectId: UUID, userId: UUID): ProjectAssignment
 
     /**
      * Removes a user from a project.
@@ -21,7 +22,8 @@ interface ProjectAssignmentRepository {
      * @param userId the id of the user
      * @return true if the user was removed, false otherwise
      */
-    suspend fun Transaction.removeUserFromProject(projectId: UUID, userId: UUID): Boolean
+    context(transaction: Transaction)
+    suspend fun removeUserFromProject(projectId: UUID, userId: UUID): Boolean
 
     /**
      * Finds all users assigned to a project.
@@ -29,7 +31,8 @@ interface ProjectAssignmentRepository {
      * @param projectId the id of the project
      * @return a list of user IDs assigned to the project
      */
-    suspend fun Transaction.findUsersByProject(projectId: UUID): List<UUID>
+    context(transaction: Transaction)
+    suspend fun findUsersByProject(projectId: UUID): List<UUID>
 
     /**
      * Finds all projects a user is assigned to.
@@ -37,7 +40,8 @@ interface ProjectAssignmentRepository {
      * @param userId the id of the user
      * @return a list of project IDs the user is assigned to
      */
-    suspend fun Transaction.findProjectsByUser(userId: UUID): List<UUID>
+    context(transaction: Transaction)
+    suspend fun findProjectsByUser(userId: UUID): List<UUID>
 
     /**
      * Checks if a user is assigned to a project.
@@ -46,5 +50,6 @@ interface ProjectAssignmentRepository {
      * @param userId the id of the user
      * @return true if the user is assigned to the project, false otherwise
      */
-    suspend fun Transaction.isUserAssignedToProject(projectId: UUID, userId: UUID): Boolean
+    context(transaction: Transaction)
+    suspend fun isUserAssignedToProject(projectId: UUID, userId: UUID): Boolean
 }

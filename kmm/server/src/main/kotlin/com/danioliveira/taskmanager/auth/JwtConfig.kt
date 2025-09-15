@@ -3,6 +3,7 @@ package com.danioliveira.taskmanager.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.danioliveira.taskmanager.domain.AppConfig
+import com.danioliveira.taskmanager.routes.toUUID
 import io.ktor.server.application.*
 import io.ktor.server.auth.jwt.*
 import java.util.*
@@ -59,9 +60,11 @@ object JwtConfig {
                 .build()
         )
         config.validate { credential ->
-            if (credential.payload.getClaim("userId").asString()
-                    .isNotEmpty()
-            ) JWTPrincipal(credential.payload) else null
+            val userID = credential.payload.getClaim("userId").asString()
+
+            if (userID.isNotEmpty())
+                UserPrincipal(userID.toUUID())
+            else null
         }
     }
 }

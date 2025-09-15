@@ -1,40 +1,64 @@
 package com.danioliveira.taskmanager.data.repository
 
-import com.danioliveira.taskmanager.data.entity.UserDAOEntity
 import com.danioliveira.taskmanager.data.tables.UsersTable
 import com.danioliveira.taskmanager.domain.User
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import kotlin.time.Clock
+import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.insertReturning
+import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.selectAll
 import java.util.UUID
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 internal class UserRepositoryImpl : UserRepository {
 
-    override suspend fun Transaction.findByEmail(email: String): UserWithPassword? =
-        UserDAOEntity.find { UsersTable.email eq email }.singleOrNull()?.toDomain()
+    context(transaction: Transaction)
+    override suspend fun findByEmail(email: String): UserWithPassword? =
+        UsersTable
+            .selectAll()
+            .where { UsersTable.email eq email }
+            .singleOrNull()
+            ?.toDomain()
 
-    override suspend fun Transaction.findById(id: String): UserWithPassword? =
-        UserDAOEntity.findById(UUID.fromString(id))?.toDomain()
+    context(transaction: Transaction)
+    override suspend fun findById(id: UUID): UserWithPassword? =
+        UsersTable
+            .selectAll()
+            .where { UsersTable.id eq id }
+            .singleOrNull()
+            ?.toDomain()
+
+    context(transaction: Transaction)
+    override suspend fun existsById(id: UUID): Boolean =
+        UsersTable
+            .select(UsersTable.id)
+            .where { UsersTable.id eq id }
+            .singleOrNull() != null
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun Transaction.create(
+    context(transaction: Transaction)
+    override suspend fun create(
         email: String,
         passwordHash: String?,
         displayName: String,
         googleId: String?
     ): UserWithPassword {
-        val entity = UserDAOEntity.new {
-            this.email = email
-            this.passwordHash = passwordHash
-            this.displayName = displayName
-            this.googleId = googleId
-            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        }
-        return entity.toDomain()
+        val row = UsersTable.insertReturning {
+            it[this.email] = email
+            it[this.passwordHash] = passwordHash
+            it[this.displayName] = displayName
+            it[this.googleId] = googleId
+            it[this.createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        }.single()
+        return row.toDomain()
     }
 
     override fun toSafeUser(user: UserWithPassword): User = User(
@@ -45,12 +69,14 @@ internal class UserRepositoryImpl : UserRepository {
         createdAt = user.createdAt
     )
 
-    private fun UserDAOEntity.toDomain() = UserWithPassword(
-        id = this.id.value.toString(),
-        email = this.email,
-        displayName = this.displayName,
-        googleId = this.googleId,
-        createdAt = this.createdAt.toString(),
-        passwordHash = this.passwordHash
+    context(_ : UserRepository)
+    private fun ResultRow.toDomain() = UserWithPassword(
+        id = this[UsersTable.id].value.toString(),
+        email = this[UsersTable.email],
+        displayName = this[UsersTable.displayName],
+        googleId = this[UsersTable.googleId],
+        createdAt = this[UsersTable.createdAt].toString(),
+        passwordHash = this[UsersTable.passwordHash]
     )
+
 }
