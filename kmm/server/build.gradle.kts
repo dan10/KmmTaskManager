@@ -22,7 +22,7 @@ ktor {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.addAll(listOf("-Xcontext-parameters", "-Xopt-in=kotlin.time.ExperimentalTime"))
     }
 }
 

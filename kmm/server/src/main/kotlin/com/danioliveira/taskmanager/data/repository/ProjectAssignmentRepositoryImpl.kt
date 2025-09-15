@@ -31,9 +31,10 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
         return try {
             ProjectAssignmentsTable.insertReturning {
                 it[id] = assignmentId
-                it[project] = projectId
-                it[user] = userId
+                it[ProjectAssignmentsTable.projectId] = projectId
+                it[ProjectAssignmentsTable.userId] = userId
                 it[assignedAt] = now
+                it[assignedBy] = userId // For now, user assigns themselves
             }
                 .map { it.toResponse() }
                 .single()
@@ -45,8 +46,8 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
     context(transaction: Transaction)
     override suspend fun removeUserFromProject(projectId: UUID, userId: UUID): Boolean {
         return ProjectAssignmentsTable.deleteWhere {
-            ProjectAssignmentsTable.project eq projectId and
-                    (ProjectAssignmentsTable.user eq userId)
+            ProjectAssignmentsTable.projectId eq projectId and
+                    (ProjectAssignmentsTable.userId eq userId)
         } > 0
     }
 
@@ -54,8 +55,8 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
     override suspend fun findUsersByProject(projectId: UUID): List<UUID> {
         return ProjectAssignmentsTable
             .select(ProjectAssignmentsTable.id)
-            .where { ProjectAssignmentsTable.project eq projectId }
-            .map { it[ProjectAssignmentsTable.user].value }
+            .where { ProjectAssignmentsTable.projectId eq projectId }
+            .map { it[ProjectAssignmentsTable.userId].value }
             .toList()
     }
 
@@ -63,8 +64,8 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
     override suspend fun findProjectsByUser(userId: UUID): List<UUID> {
         return ProjectAssignmentsTable
             .select(ProjectAssignmentsTable.id)
-            .where { ProjectAssignmentsTable.user eq userId }
-            .map { it[ProjectAssignmentsTable.project].value }
+            .where { ProjectAssignmentsTable.userId eq userId }
+            .map { it[ProjectAssignmentsTable.projectId].value }
             .toList()
     }
 
@@ -73,8 +74,8 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
         return ProjectAssignmentsTable
             .select(ProjectAssignmentsTable.id)
             .where {
-                (ProjectAssignmentsTable.project eq projectId) and
-                        (ProjectAssignmentsTable.user eq userId)
+                (ProjectAssignmentsTable.projectId eq projectId) and
+                        (ProjectAssignmentsTable.userId eq userId)
             }
             .toList()
             .isNotEmpty()
@@ -82,8 +83,8 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
 
     private fun ResultRow.toResponse() = ProjectAssignment(
         id = this[ProjectAssignmentsTable.id].value.toString(),
-        projectId = this[ProjectAssignmentsTable.project].value.toString(),
-        userId = this[ProjectAssignmentsTable.user].value.toString(),
+        projectId = this[ProjectAssignmentsTable.projectId].value.toString(),
+        userId = this[ProjectAssignmentsTable.userId].value.toString(),
         assignedAt = this[ProjectAssignmentsTable.assignedAt].toString()
     )
 }

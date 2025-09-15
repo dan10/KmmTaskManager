@@ -56,7 +56,6 @@ internal class UserRepositoryImpl : UserRepository {
             it[this.passwordHash] = passwordHash
             it[this.displayName] = displayName
             it[this.googleId] = googleId
-            it[this.createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }.single()
         return row.toDomain()
     }

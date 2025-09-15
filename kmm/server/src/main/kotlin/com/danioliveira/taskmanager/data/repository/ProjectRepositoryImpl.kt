@@ -11,15 +11,12 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toList
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.Case
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.alias
-import org.jetbrains.exposed.v1.core.andIfNotNull
 import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.intLiteral
@@ -51,8 +48,7 @@ class ProjectRepositoryImpl : ProjectRepository {
        return ProjectsTable.insertReturning {
             it[this.name] = name
             it[this.description] = description
-            it[this.owner] = ownerId
-            it[this.createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            it[this.ownerId] = ownerId
         }
            .map { it.toResponse() }
            .single()
@@ -97,6 +93,7 @@ class ProjectRepositoryImpl : ProjectRepository {
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun buildProjectQuery(
         ownerId: UUID?,
         subQuery: Op<Boolean>?,
@@ -123,7 +120,7 @@ class ProjectRepositoryImpl : ProjectRepository {
             .select(ProjectsTable.fields +
                     listOfNotNull(total, tasksCount, completed, inProgress)
             )
-            .apply { if (ownerId != null) andWhere { ProjectsTable.owner eq ownerId } }
+            .apply { if (ownerId != null) andWhere { ProjectsTable.ownerId eq ownerId } }
             .apply { if (subQuery != null) andWhere { subQuery } }
             .apply { if (page != null) groupBy(ProjectsTable.id) }
             .apply { orderBy(ProjectsTable.createdAt, SortOrder.DESC) }
@@ -146,11 +143,13 @@ class ProjectRepositoryImpl : ProjectRepository {
     }
     
 
+    @OptIn(ExperimentalTime::class)
     context(transaction: Transaction)
     override suspend fun update(id: UUID, name: String, description: String?): Boolean {
         return ProjectsTable.update({ ProjectsTable.id eq id }) {
             it[this.name] = name
             it[this.description] = description
+            it[this.updatedAt] = Clock.System.now()
         } > 0
     }
 
@@ -158,6 +157,7 @@ class ProjectRepositoryImpl : ProjectRepository {
     override suspend fun delete(id: UUID): Boolean =
         ProjectsTable.deleteWhere { ProjectsTable.id eq id } > 0
 
+    @OptIn(ExperimentalTime::class)
     private fun ResultRow.toResponse(
         totalTasks: Int = 0,
         completedTasks: Int = 0,
@@ -166,7 +166,7 @@ class ProjectRepositoryImpl : ProjectRepository {
         id = this[ProjectsTable.id].value.toString(),
         name = this[ProjectsTable.name],
         description = this[ProjectsTable.description],
-        ownerId = this[ProjectsTable.owner].toString(),
+        ownerId = this[ProjectsTable.ownerId].toString(),
         createdAt = this[ProjectsTable.createdAt].toString(),
         completed = completedTasks,
         inProgress = inProgressTasks,

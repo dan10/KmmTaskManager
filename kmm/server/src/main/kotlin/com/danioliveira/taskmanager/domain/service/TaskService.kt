@@ -7,6 +7,7 @@ import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.data.dbQuery2
+import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
@@ -48,44 +49,33 @@ internal class TaskService(
 
     suspend fun create(request: TaskCreateRequest, creatorId: String): TaskResponse = dbQuery {
         val creatorUUID = UUID.fromString(creatorId)
-
-        // Rule 1: If assigneeId is not provided, set it to the creator
-        val assigneeUUID = if (request.assigneeId == null) {
-            creatorUUID
-        } else {
-            UUID.fromString(request.assigneeId)
-        }
-
-        // Rule 2: If project is specified, validate that assignee is part of the project OR is the project owner
+        val assigneeUUID = request.assigneeId?.let { UUID.fromString(it) } ?: creatorUUID
         val projectUUID = request.projectId?.let { UUID.fromString(it) }
-        if (projectUUID != null && assigneeUUID != null) {
-            // Check if user is the project owner
-            val project = projectRepository.findById(projectUUID)
-            val isProjectOwner = project != null && project.creatorId == assigneeUUID.toString()
+
+        // Validate project access if project is specified
+        projectUUID?.let { projectId ->
+            val project = projectRepository.findById(projectId) 
+                ?: throw NotFoundException("Project", projectId.toString())
             
-            // Check if user is assigned to the project
-            val isAssigneeInProject = with(projectAssignmentRepository) {
-                isUserAssignedToProject(projectUUID, assigneeUUID)
-            }
+            // Check if assignee has access (is owner or assigned member)
+            val hasAccess = project.ownerId == assigneeUUID.toString() || 
+                projectAssignmentRepository.isUserAssignedToProject(projectId, assigneeUUID)
             
-            // User must be either the project owner OR a project member
-            if (!isProjectOwner && !isAssigneeInProject) {
+            if (!hasAccess) {
                 throw ValidationException("Assignee must be a member of the project or the project owner")
             }
         }
 
-        with(repository) {
-            create(
-                title = request.title,
-                description = request.description,
-                projectId = projectUUID,
-                assigneeId = assigneeUUID,
-                creatorId = creatorUUID,
-                status = com.danioliveira.taskmanager.domain.TaskStatus.TODO, // Default status for new tasks
-                priority = request.priority,
-                dueDate = request.dueDate
-            )
-        }
+        repository.create(
+            title = request.title,
+            description = request.description,
+            projectId = projectUUID,
+            assigneeId = assigneeUUID,
+            creatorId = creatorUUID,
+            status = TaskStatus.TODO,
+            priority = request.priority,
+            dueDate = request.dueDate
+        )
     }
 
     suspend fun update(id: String, request: TaskUpdateRequest): TaskResponse = dbQuery {
@@ -120,7 +110,7 @@ internal class TaskService(
                 status = request.status ?: current.status,
                 priority = request.priority ?: current.priority,
                 dueDate = request.dueDate ?: current.dueDate,
-                assigneeId = newAssigneeId ?: current.assigneeId
+                assigneeId = newAssigneeId?.toUUID() ?: current.assigneeId?.toUUID()
             )
             updated ?: throw NotFoundException("Task", id)
         }
@@ -161,7 +151,7 @@ internal class TaskService(
                 status = current.status,
                 priority = current.priority,
                 dueDate = current.dueDate,
-                assigneeId = assigneeId
+                assigneeId = assigneeId.toUUID()
             )
             updated ?: throw NotFoundException("Task", id)
         }
@@ -174,10 +164,10 @@ internal class TaskService(
                 id = id,
                 title = current.title,
                 description = current.description,
-                status = com.danioliveira.taskmanager.domain.TaskStatus.valueOf(status),
+                status = TaskStatus.valueOf(status),
                 priority = current.priority,
                 dueDate = current.dueDate,
-                assigneeId = current.assigneeId
+                assigneeId = current.assigneeId?.toUUID()
             )
             updated ?: throw NotFoundException("Task", id)
         }

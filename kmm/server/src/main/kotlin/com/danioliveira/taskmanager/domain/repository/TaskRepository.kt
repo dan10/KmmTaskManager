@@ -58,7 +58,7 @@ internal interface TaskRepository {
         status: TaskStatus,
         priority: Priority,
         dueDate: LocalDateTime?,
-        assigneeId: String?
+        assigneeId: UUID?
     ): TaskResponse?
 
     context(transaction: Transaction)
