@@ -1,3 +1,5 @@
+import io.gatling.plugin.SimulationSelector.simulations
+
 plugins {
     application
     alias(libs.plugins.kotlinJvm)
@@ -19,6 +21,7 @@ ktor {
         archiveFileName.set("fat.jar")
     }
 }
+
 
 kotlin {
     compilerOptions {

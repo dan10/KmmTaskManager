@@ -6,7 +6,7 @@ import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.dbQuery
-import com.danioliveira.taskmanager.data.dbQuery2
+import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
@@ -116,7 +116,7 @@ internal class TaskService(
         }
     }
 
-    suspend fun delete(id: String): Boolean = dbQuery2 {
+    suspend fun delete(id: String): Boolean = dbQuery {
         repository.delete(id.toUUID())
     }
 

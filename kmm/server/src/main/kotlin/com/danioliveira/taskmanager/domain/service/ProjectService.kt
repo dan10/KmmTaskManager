@@ -5,7 +5,7 @@ import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.data.dbQuery
-import com.danioliveira.taskmanager.data.dbQuery2
+import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
@@ -24,12 +24,12 @@ class ProjectService(
         size: Int = 10,
         query: String? = null
     ): PaginatedResponse<ProjectResponse> =
-        dbQuery2 {
+        dbQuery {
             repository.findAllByOwner(ownerId, page, size, query)
         }
 
     suspend fun createProject(ownerId: UUID, request: ProjectCreateRequest): ProjectResponse =
-        dbQuery2 {
+        dbQuery {
             repository.create(
                 name = request.name,
                 description = request.description,
@@ -37,13 +37,13 @@ class ProjectService(
             )
         }
 
-    suspend fun getProjectById(id: UUID, userId: UUID): ProjectResponse = dbQuery2 {
+    suspend fun getProjectById(id: UUID, userId: UUID): ProjectResponse = dbQuery {
         repository.findById(
             id = id,
         ) ?: throw NotFoundException("Project", id.toString())
     }
 
-    suspend fun updateProject(id: String, request: ProjectUpdateRequest): Boolean = dbQuery2 {
+    suspend fun updateProject(id: String, request: ProjectUpdateRequest): Boolean = dbQuery {
         repository.update(
             id = UUID.fromString(id),
             name = request.name,
@@ -51,7 +51,7 @@ class ProjectService(
         )
     }
 
-    suspend fun updateProjectWithPermission(projectId: String, userId: UUID, request: ProjectUpdateRequest): Boolean = dbQuery2 {
+    suspend fun updateProjectWithPermission(projectId: String, userId: UUID, request: ProjectUpdateRequest): Boolean = dbQuery {
         val project = repository.findById(UUID.fromString(projectId))
             ?: throw NotFoundException("Project", projectId)
         
@@ -69,11 +69,11 @@ class ProjectService(
         )
     }
 
-    suspend fun deleteProject(id: UUID): Boolean = dbQuery2 {
+    suspend fun deleteProject(id: UUID): Boolean = dbQuery {
         repository.delete(id)
     }
 
-    suspend fun deleteProjectWithPermission(projectId: UUID, userId: UUID): Boolean = dbQuery2 {
+    suspend fun deleteProjectWithPermission(projectId: UUID, userId: UUID): Boolean = dbQuery {
         val project = repository.findById(projectId)
             ?: throw NotFoundException("Project", projectId.toString())
         
@@ -86,7 +86,7 @@ class ProjectService(
         repository.delete(projectId)
     }
 
-    suspend fun assignUserToProject(projectId: UUID, userId: UUID) = dbQuery2 {
+    suspend fun assignUserToProject(projectId: UUID, userId: UUID) = dbQuery {
         val projectExists = repository.existsById(id = projectId)
         if (!projectExists) {
             throw NotFoundException("Project", projectId.toString())
@@ -100,7 +100,7 @@ class ProjectService(
         assignmentRepository.assignUserToProject(projectId, userId)
     }
 
-    suspend fun removeUserFromProject(projectId: UUID, userId: UUID): Boolean = dbQuery2 {
+    suspend fun removeUserFromProject(projectId: UUID, userId: UUID): Boolean = dbQuery {
         assignmentRepository.removeUserFromProject(projectId, userId)
     }
 

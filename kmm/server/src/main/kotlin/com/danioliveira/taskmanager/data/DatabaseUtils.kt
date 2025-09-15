@@ -14,10 +14,7 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
  * @param block The database operation to execute within the transaction.
  * @return The result of the database operation.
  */
-suspend fun <T> dbQuery(block: suspend Transaction.() -> T): T =
-    newSuspendedTransaction(Dispatchers.IO) { block() }
-
-suspend fun <T> dbQuery2 (
+suspend fun <T> dbQuery(
     block: suspend R2dbcTransaction.() -> T
 ): T = withContext(Dispatchers.IO) {
     suspendTransaction { block() }
