@@ -6,7 +6,7 @@ services:
     ports:
       - "8081:8081" # Assuming Ktor runs on 8081 internally
     environment:
-      - DATABASE_URL=jdbc:postgresql://db:5432/taskitdb
+      - DATABASE_URL=r2dbc:postgresql://db:5432/taskitdb
       - DATABASE_USER=taskituser
       - DATABASE_PASSWORD=password
       - JWT_SECRET=your_jwt_secret_here

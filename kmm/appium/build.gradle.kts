@@ -13,6 +13,6 @@ kotlin {
 }
 
 dependencies {
-    testImplementation("io.appium:java-client:9.5.0")
+    testImplementation("io.appium:java-client:10.0.0")
     testImplementation(kotlin("test"))
 }

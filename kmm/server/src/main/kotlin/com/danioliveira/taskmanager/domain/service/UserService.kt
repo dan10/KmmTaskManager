@@ -8,8 +8,7 @@ import com.danioliveira.taskmanager.auth.GoogleTokenVerifier
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.auth.PasswordHasher
 import com.danioliveira.taskmanager.data.dbQuery
-import com.danioliveira.taskmanager.data.dbQuery
-import com.danioliveira.taskmanager.domain.AppConfig
+import com.danioliveira.taskmanager.domain.GoogleConfig
 import com.danioliveira.taskmanager.domain.User
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
@@ -22,7 +21,7 @@ import java.util.UUID
 
 class UserService(
     private val repository: UserRepository,
-    private val appConfig: AppConfig
+    private val googleConfig: GoogleConfig
 ) {
     suspend fun findByEmail(email: String): UserWithPassword? = dbQuery {
         repository.findByEmail(email)
@@ -94,7 +93,7 @@ class UserService(
      * @throws UnauthorizedException if the Google ID token is invalid
      */
     suspend fun googleLogin(request: GoogleLoginRequest): AuthResponse {
-        val clientId = appConfig.google.clientId
+        val clientId = googleConfig.clientId
         val payload = GoogleTokenVerifier.verify(request.idToken, clientId)
         if (payload == null) {
             throw UnauthorizedException("Invalid Google ID token")

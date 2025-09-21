@@ -23,6 +23,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.resources.Resources
 import io.ktor.client.request.HttpRequest
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
@@ -67,6 +68,7 @@ class KtorClient(
         configureTimeouts(this)
         configureAuthentication(this)
         configureContentNegotiation(this)
+        configureResources(this)
         configureLogging(this)
         configureResponseValidation(this)
         configureDefaultRequest(this)
@@ -106,6 +108,13 @@ class KtorClient(
         config.install(ContentNegotiation) {
             json(json)
         }
+    }
+
+    /**
+     * Configures resources support for the HTTP client.
+     */
+    private fun configureResources(config: HttpClientConfig<*>) {
+        config.install(Resources)
     }
 
     /**

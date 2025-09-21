@@ -40,7 +40,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kotlinx.datetime)
 
-            implementation(libs.ktor.client.resources)
+            api(libs.ktor.client.resources)
             implementation(libs.ktor.serialization.kotlinx.json)
         }
     }

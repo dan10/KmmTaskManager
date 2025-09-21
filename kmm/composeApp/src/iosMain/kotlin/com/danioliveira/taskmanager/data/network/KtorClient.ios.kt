@@ -15,5 +15,5 @@ actual fun createPlatformEngine(): HttpClientEngine {
  * For iOS, localhost correctly refers to the host machine
  */
 actual fun getBaseUrl(): String {
-    return "http://192.168.68.52:8081"
+    return "http://192.168.68.62:8081"
 }

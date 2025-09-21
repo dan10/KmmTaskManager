@@ -10,7 +10,6 @@ import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.getTestModule
-import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -40,7 +39,7 @@ class TaskServiceTest : KoinTest {
 
         // Start Koin with the test module
         startKoin {
-            modules(getTestModule(ApplicationConfig("application_test.conf")))
+            modules(getTestModule())
         }
     }
 

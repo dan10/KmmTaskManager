@@ -2,11 +2,11 @@ package com.danioliveira.taskmanager.auth
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.danioliveira.taskmanager.domain.AppConfig
+import com.danioliveira.taskmanager.domain.JwtConfig
 import com.danioliveira.taskmanager.routes.toUUID
-import io.ktor.server.application.*
-import io.ktor.server.auth.jwt.*
-import java.util.*
+import io.ktor.server.application.ApplicationEnvironment
+import io.ktor.server.auth.jwt.JWTAuthenticationProvider
+import java.util.Date
 
 object JwtConfig {
     private lateinit var secret: String
@@ -33,12 +33,12 @@ object JwtConfig {
     /**
      * Initialize the JWT configuration using the AppConfig.
      */
-    fun init(appConfig: AppConfig) {
-        secret = appConfig.jwt.secret
-        issuer = appConfig.jwt.issuer
-        audience = appConfig.jwt.audience
-        realm = appConfig.jwt.realm
-        validityMs = appConfig.jwt.validityMs
+    fun init(jwtConfig: JwtConfig) {
+        secret = jwtConfig.secret
+        issuer = jwtConfig.issuer
+        audience = jwtConfig.audience
+        realm = jwtConfig.realm
+        validityMs = jwtConfig.validityMs
         algorithm = Algorithm.HMAC256(secret)
     }
 

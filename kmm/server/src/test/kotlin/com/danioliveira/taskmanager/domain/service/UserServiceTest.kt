@@ -35,12 +35,11 @@ class UserServiceTest : KoinTest {
 
         // Start Koin with the test module
         startKoin {
-            modules(getTestModule(ApplicationConfig("application_test.conf")))
+            modules(getTestModule())
         }
 
         // Initialize JwtConfig with appConfig from Koin
-        val appConfig = inject<AppConfig>().value
-        JwtConfig.init(appConfig)
+        //JwtConfig.init()
     }
 
     @After

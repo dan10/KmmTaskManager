@@ -1,17 +1,22 @@
 package com.danioliveira.taskmanager.data.network
 
+import com.danioliveira.taskmanager.api.request.TaskAssignRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
+import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
+import com.danioliveira.taskmanager.api.routes.Tasks
+import com.danioliveira.taskmanager.api.routes.TasksPaginated
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.delete
+import io.ktor.client.plugins.resources.delete
+import io.ktor.client.plugins.resources.get
+import io.ktor.client.plugins.resources.post
+import io.ktor.client.plugins.resources.put
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -32,13 +37,12 @@ class TaskApiService(
      * @return PaginatedResponse containing the tasks and task progress information
      */
     suspend fun getTasks(page: Int, size: Int, query: String? = null): PaginatedResponse<TaskResponse> {
-        return client.get("api/tasks") {
-            parameter("page", page)
-            parameter("size", size)
-            if (query != null && query.isNotBlank()) {
-                parameter("query", query)
-            }
-        }.body()
+        val resource = TasksPaginated(
+            size = size,
+            page = page,
+            searchText = query
+        )
+        return client.get(resource).body()
     }
 
     /**
@@ -48,7 +52,7 @@ class TaskApiService(
      * @return TaskResponse containing the task details
      */
     suspend fun getTask(taskId: String): TaskResponse {
-        return client.get("api/tasks/$taskId").body()
+        return client.get(Tasks.Id(taskId = taskId)).body()
     }
 
     /**
@@ -59,9 +63,11 @@ class TaskApiService(
      * @return TaskResponse containing the updated task details
      */
     suspend fun updateTaskStatus(taskId: String, status: String): TaskResponse {
-        return client.post("api/tasks/$taskId/status") {
+        val resource = Tasks.Id.Status(parent = Tasks.Id(taskId = taskId))
+        val request = TaskStatusChangeRequest(status = status)
+        return client.post(resource) {
             contentType(ContentType.Application.Json)
-            setBody(mapOf("status" to status))
+            setBody(request)
         }.body()
     }
 
@@ -72,11 +78,7 @@ class TaskApiService(
      * @return TaskProgressResponse containing the task progress information
      */
     suspend fun getTaskProgress(query: String? = null): TaskProgressResponse {
-        return client.get("api/tasks/progress") {
-            if (query != null && query.isNotBlank()) {
-                parameter("query", query)
-            }
-        }.body()
+        return client.get(Tasks.Stats()).body()
     }
 
     /**
@@ -86,7 +88,7 @@ class TaskApiService(
      * @return TaskResponse containing the created task details
      */
     suspend fun createTask(request: TaskCreateRequest): TaskResponse {
-        return client.post("api/tasks") {
+        return client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -100,7 +102,7 @@ class TaskApiService(
      * @return TaskResponse containing the updated task details
      */
     suspend fun updateTask(taskId: String, request: TaskUpdateRequest): TaskResponse {
-        return client.put("api/tasks/$taskId") {
+        return client.put(Tasks.Id(taskId = taskId)) {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -113,7 +115,7 @@ class TaskApiService(
      * @return True if the task was deleted successfully, false otherwise
      */
     suspend fun deleteTask(taskId: String): Boolean {
-        val response = client.delete("api/tasks/$taskId")
+        val response = client.delete(Tasks.Id(taskId = taskId))
         return response.status == HttpStatusCode.NoContent
     }
 
@@ -129,6 +131,45 @@ class TaskApiService(
         return client.get("api/tasks/projects/$projectId") {
             parameter("page", page)
             parameter("size", size)
+        }.body()
+    }
+
+    /**
+     * Fetches tasks owned by the current user.
+     *
+     * @param page The page number (0-based)
+     * @param size The page size
+     * @return PaginatedResponse containing the owned tasks
+     */
+    suspend fun getOwnedTasks(page: Int, size: Int): PaginatedResponse<TaskResponse> {
+        return client.get(Tasks.Owned(page = page, size = size)).body()
+    }
+
+    /**
+     * Fetches tasks assigned to the current user.
+     *
+     * @param page The page number (0-based)
+     * @param size The page size
+     * @param query Optional query to filter tasks
+     * @return PaginatedResponse containing the assigned tasks
+     */
+    suspend fun getAssignedTasks(page: Int, size: Int, query: String? = null): PaginatedResponse<TaskResponse> {
+        return client.get(Tasks.Assigned(page = page, size = size, query = query)).body()
+    }
+
+    /**
+     * Assigns a task to a user.
+     *
+     * @param taskId The ID of the task
+     * @param assigneeId The ID of the user to assign the task to
+     * @return TaskResponse containing the updated task details
+     */
+    suspend fun assignTask(taskId: String, assigneeId: String): TaskResponse {
+        val resource = Tasks.Id.Assign(parent = Tasks.Id(taskId = taskId))
+        val request = TaskAssignRequest(assigneeId = assigneeId)
+        return client.post(resource) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
         }.body()
     }
 }

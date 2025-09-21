@@ -7,6 +7,7 @@ import com.danioliveira.taskmanager.api.routes.Auth
 import com.danioliveira.taskmanager.domain.service.UserService
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.server.resources.post
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
@@ -18,7 +19,9 @@ fun Route.authRoutes() {
 
     post<Auth.Register> {
         val request = call.receive<RegisterRequest>()
-        userService.register(request)
+        with(this) {
+            userService.register(request)
+        }
     }
 
     post<Auth.Login> {

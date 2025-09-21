@@ -25,7 +25,7 @@ class ProjectPagingSource(
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Project> {
-        val page = params.key ?: 0
+        val page = params.key ?: 1
         val pageSize = params.loadSize
 
         return try {
@@ -35,7 +35,7 @@ class ProjectPagingSource(
 
             LoadResult.Page(
                 data = projects,
-                prevKey = if (page > 0) page - 1 else null,
+                prevKey = if (page > 1) page - 1 else null,
                 nextKey = if (page < response.totalPages - 1) page + 1 else null
             )
         } catch (e: Exception) {

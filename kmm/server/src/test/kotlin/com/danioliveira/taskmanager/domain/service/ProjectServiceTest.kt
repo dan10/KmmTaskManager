@@ -6,7 +6,6 @@ import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
 import com.danioliveira.taskmanager.createTestUser
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.getTestModule
-import io.ktor.server.config.*
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -28,7 +27,7 @@ class ProjectServiceTest : KoinTest {
 
         // Start Koin with the test module
         startKoin {
-            modules(getTestModule(ApplicationConfig("application_test.conf")))
+            modules(getTestModule())
         }
     }
 

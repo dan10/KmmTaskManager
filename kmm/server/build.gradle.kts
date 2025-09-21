@@ -67,7 +67,6 @@ dependencies {
     // Exposed ORM
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
-    implementation(libs.exposed.jdbc)
     implementation(libs.exposed.r2dc)
     implementation(libs.exposed.kotlin.datetime)
     // PostgreSQL Driver (JDBC)

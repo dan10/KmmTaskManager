@@ -40,8 +40,10 @@ data class JwtConfig(
  */
 @Serializable
 data class DatabaseConfig(
-    val url: String,
-    val driver: String,
+    val host: String,
+    val port: Int,
+    val driverClassName: String,
+    val databaseName: String,
     val user: String,
     val password: String
 )

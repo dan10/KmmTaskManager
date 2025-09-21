@@ -11,9 +11,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import org.jetbrains.exposed.v1.jdbc.deleteAll
-import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.r2dbc.deleteAll
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 /**
  * Admin routes for database management and testing support.
@@ -29,7 +29,7 @@ fun Route.adminRoutes() {
         // Database cleanup endpoint for testing
         delete("/cleanup") {
             try {
-                transaction {
+                suspendTransaction {
                     // Delete in order to respect foreign key constraints
                     ProjectAssignmentsTable.deleteAll()
                     ProjectInvitationsTable.deleteAll()
@@ -58,7 +58,7 @@ fun Route.adminRoutes() {
         // Database status endpoint
         get("/status") {
             try {
-                val counts = transaction {
+                val counts = suspendTransaction {
                     mapOf(
                         "users" to UsersTable.selectAll().count(),
                         "projects" to ProjectsTable.selectAll().count(),
