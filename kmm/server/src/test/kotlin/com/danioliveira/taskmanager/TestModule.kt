@@ -4,6 +4,7 @@ import com.danioliveira.taskmanager.data.repository.ProjectAssignmentRepositoryI
 import com.danioliveira.taskmanager.data.repository.ProjectRepositoryImpl
 import com.danioliveira.taskmanager.data.repository.TaskRepositoryImpl
 import com.danioliveira.taskmanager.data.repository.UserRepositoryImpl
+import com.danioliveira.taskmanager.domain.GoogleConfig
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import com.danioliveira.taskmanager.domain.service.ProjectService
 import com.danioliveira.taskmanager.domain.service.TaskService
@@ -27,7 +28,9 @@ fun getTestModule(): Module = module {
     single<DomainProjectAssignmentRepo> { ProjectAssignmentRepositoryImpl() }
 
     // Services
-    single { UserService(get(), get()) }
+    single { UserService(get(), GoogleConfig("test")) }
     single { ProjectService(get(), get(), get()) }
     single { TaskService(get(), get(), get()) }
 }
+
+

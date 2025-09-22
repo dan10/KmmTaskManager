@@ -154,7 +154,7 @@ internal class TaskRepositoryImpl : TaskRepository {
             .singleOrNull()
         
         val totalCount = result?.get(totalTasks)?.toInt() ?: 0
-        val completedCount = result?.get(completedTasks)?.toInt() ?: 0
+        val completedCount = result?.get(completedTasks) ?: 0
 
         return TaskProgressResponse(
             totalTasks = totalCount,
