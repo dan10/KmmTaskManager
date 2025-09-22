@@ -1,20 +1,13 @@
 package com.danioliveira.taskmanager.domain.service
 
-import com.danioliveira.taskmanager.TestDatabase
+import com.danioliveira.taskmanager.BaseServiceTest
 import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
 import com.danioliveira.taskmanager.createTestUser
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
-import com.danioliveira.taskmanager.getTestModule
 import com.danioliveira.taskmanager.routes.toUUID
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.test.KoinTest
 import org.koin.test.inject
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -23,29 +16,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class ProjectServiceTest : KoinTest {
+class ProjectServiceTest : BaseServiceTest() {
     private val projectService: ProjectService by inject()
-
-    @Before
-    fun setUp() = runBlocking {
-        // Initialize the H2 database
-        TestDatabase.init()
-
-        // Start Koin with the test module
-        startKoin {
-            modules(getTestModule())
-        }
-        Unit
-    }
-
-    @After
-    fun tearDown() = runBlocking {
-        // Clear the database
-        TestDatabase.clearDatabase()
-
-        // Stop Koin
-        stopKoin()
-    }
 
     @Test
     fun `test get projects by owner`() = runTest {

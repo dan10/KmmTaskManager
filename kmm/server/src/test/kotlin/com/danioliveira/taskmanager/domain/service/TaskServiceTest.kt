@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.domain.service
 
-import com.danioliveira.taskmanager.TestDatabase
+import com.danioliveira.taskmanager.BaseServiceTest
 import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
@@ -9,18 +9,11 @@ import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.ForbiddenException
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
-import com.danioliveira.taskmanager.getTestModule
 import com.danioliveira.taskmanager.routes.toUUID
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.test.KoinTest
 import org.koin.test.inject
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -31,30 +24,9 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Clock
 
-class TaskServiceTest : KoinTest {
+class TaskServiceTest : BaseServiceTest() {
     private val taskService: TaskService by inject()
     private val projectService: ProjectService by inject()
-
-    @Before
-    fun setUp() = runBlocking {
-        // Initialize the H2 database
-        TestDatabase.init()
-
-        // Start Koin with the test module
-        startKoin {
-            modules(getTestModule())
-        }
-        Unit
-    }
-
-    @After
-    fun tearDown() = runBlocking {
-        // Clear the database after each test
-        TestDatabase.clearDatabase()
-
-        // Stop Koin
-        stopKoin()
-    }
 
     @Test
     fun `test find all tasks by project`() = runTest {
