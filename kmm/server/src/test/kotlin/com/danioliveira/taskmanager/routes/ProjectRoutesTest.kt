@@ -4,6 +4,7 @@ import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.api.request.ProjectAssignRequest
 import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
+import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.api.routes.Projects
 import com.danioliveira.taskmanager.api.routes.UserProjects
@@ -20,7 +21,6 @@ import io.ktor.client.plugins.resources.get
 import io.ktor.client.plugins.resources.post
 import io.ktor.client.plugins.resources.put
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
@@ -29,9 +29,6 @@ import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.junit.After
 import org.junit.Before
 import org.koin.core.context.startKoin
@@ -118,14 +115,14 @@ class ProjectRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.OK, response.status)
 
         // Parse the response body
-        val responseBody = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-        val items = responseBody["items"]?.jsonArray
+        val responseBody = response.body<PaginatedResponse<ProjectResponse>>()
+        val items = responseBody.items
 
         // Verify the response contains the created project
         assertNotNull(items)
-        assertEquals(1, items!!.size)
-        assertEquals(projectName, items[0].jsonObject["name"]?.jsonPrimitive?.content)
-        assertEquals(projectDescription, items[0].jsonObject["description"]?.jsonPrimitive?.content)
+        assertEquals(1, items.size)
+        assertEquals(projectName, items[0].name)
+        assertEquals(projectDescription, items[0].description)
     }
 
     //
@@ -203,12 +200,12 @@ class ProjectRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.OK, response.status)
 
         // Parse the response body
-        val responseBody = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-        val items = responseBody["items"]?.jsonArray
+        val responseBody = response.body<PaginatedResponse<ProjectResponse>>()
+        val items = responseBody.items
 
         // Verify the response contains both projects
         assertNotNull(items)
-        assertEquals(2, items!!.size)
+        assertEquals(2, items.size)
     }
 
     //
@@ -246,12 +243,12 @@ class ProjectRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.OK, response.status)
 
         // Parse the response body
-        val responseBody = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val responseBody = response.body<ProjectResponse>()
 
         // Verify the response contains the created project
-        assertEquals(projectName, responseBody["name"]?.jsonPrimitive?.content)
-        assertEquals(projectDescription, responseBody["description"]?.jsonPrimitive?.content)
-        assertEquals(userId, responseBody["ownerId"]?.jsonPrimitive?.content)
+        assertEquals(projectName, responseBody.name)
+        assertEquals(projectDescription, responseBody.description)
+        assertEquals(userId, responseBody.ownerId)
     }
 
     @Test
@@ -338,6 +335,9 @@ class ProjectRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
 
         // Create a test user
@@ -365,6 +365,9 @@ class ProjectRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
 
         // Create a test user
@@ -381,14 +384,14 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Get the project ID from the response
-        val createResponseBody = Json.parseToJsonElement(createResponse.bodyAsText()).jsonObject
-        val projectId = createResponseBody["id"]?.jsonPrimitive?.content
+        val createResponseBody = createResponse.body<ProjectResponse>()
+        val projectId = createResponseBody.id
 
         // Verify the project ID is not null
         assertNotNull(projectId)
 
         // Update the project
-        val response = client.put(Projects.Id(projectId = projectId!!)) {
+        val response = client.put(Projects.Id(projectId = projectId)) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "owner@example.com"))
             setBody(ProjectUpdateRequest("Updated Name", "Updated Description"))
@@ -403,11 +406,11 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Parse the response body
-        val getResponseBody = Json.parseToJsonElement(getResponse.bodyAsText()).jsonObject
+        val getResponseBody = getResponse.body<ProjectResponse>()
 
         // Verify the project was updated
-        assertEquals("Updated Name", getResponseBody["name"]?.jsonPrimitive?.content)
-        assertEquals("Updated Description", getResponseBody["description"]?.jsonPrimitive?.content)
+        assertEquals("Updated Name", getResponseBody.name)
+        assertEquals("Updated Description", getResponseBody.description)
     }
 
     //
@@ -420,6 +423,9 @@ class ProjectRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
 
         // Create a test user
@@ -436,14 +442,14 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Get the project ID from the response
-        val createResponseBody = Json.parseToJsonElement(createResponse.bodyAsText()).jsonObject
-        val projectId = createResponseBody["id"]?.jsonPrimitive?.content
+        val createResponseBody = createResponse.body<ProjectResponse>()
+        val projectId = createResponseBody.id
 
         // Verify the project ID is not null
         assertNotNull(projectId)
 
         // Delete the project
-        val response = client.delete(Projects.Id(projectId = projectId!!)) {
+        val response = client.delete(Projects.Id(projectId = projectId)) {
             withAuth(generateTestToken(userId, "owner@example.com"))
         }
 
@@ -468,6 +474,9 @@ class ProjectRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
 
         // Create test users
@@ -489,14 +498,14 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Get the project ID from the response
-        val createResponseBody = Json.parseToJsonElement(createResponse.bodyAsText()).jsonObject
-        val projectId = createResponseBody["id"]?.jsonPrimitive?.content
+        val createResponseBody = createResponse.body<ProjectResponse>()
+        val projectId = createResponseBody.id
 
         // Verify the project ID is not null
         assertNotNull(projectId)
 
         // Assign the user to the project
-        val response = client.post(Projects.Id.Assign(Projects.Id(projectId = projectId!!))) {
+        val response = client.post(Projects.Id.Assign(Projects.Id(projectId = projectId))) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(ownerId, "owner@example.com"))
             setBody(ProjectAssignRequest(userId))
@@ -511,11 +520,11 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Parse the response body
-        val usersResponseBody = Json.parseToJsonElement(usersResponse.bodyAsText()).jsonArray
+        val usersResponseBody = usersResponse.body<List<String>>()
 
         // Verify the user is assigned to the project
         assertEquals(1, usersResponseBody.size)
-        assertEquals(userId, usersResponseBody[0].jsonPrimitive.content)
+        assertEquals(userId, usersResponseBody[0])
     }
 
     @Test
@@ -527,6 +536,9 @@ class ProjectRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
 
         // Create test users
@@ -548,14 +560,14 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Get the project ID from the response
-        val createResponseBody = Json.parseToJsonElement(createResponse.bodyAsText()).jsonObject
-        val projectId = createResponseBody["id"]?.jsonPrimitive?.content
+        val createResponseBody = createResponse.body<ProjectResponse>()
+        val projectId = createResponseBody.id
 
         // Verify the project ID is not null
         assertNotNull(projectId)
 
         // Assign the user to the project
-        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId!!))) {
+        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId))) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(ownerId, "owner@example.com"))
             setBody(ProjectAssignRequest(userId))
@@ -576,7 +588,7 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Parse the response body
-        val usersResponseBody = Json.parseToJsonElement(usersResponse.bodyAsText()).jsonArray
+        val usersResponseBody = usersResponse.body<List<String>>()
 
         // Verify the user is no longer assigned to the project
         assertEquals(0, usersResponseBody.size)
@@ -591,6 +603,9 @@ class ProjectRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
 
         // Create test users
@@ -617,14 +632,14 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Get the project ID from the response
-        val createResponseBody = Json.parseToJsonElement(createResponse.bodyAsText()).jsonObject
-        val projectId = createResponseBody["id"]?.jsonPrimitive?.content
+        val createResponseBody = createResponse.body<ProjectResponse>()
+        val projectId = createResponseBody.id
 
         // Verify the project ID is not null
         assertNotNull(projectId)
 
         // Assign users to the project
-        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId!!))) {
+        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId))) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(ownerId, "owner@example.com"))
             setBody(ProjectAssignRequest(user1Id))
@@ -645,12 +660,12 @@ class ProjectRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.OK, response.status)
 
         // Parse the response body
-        val responseBody = Json.parseToJsonElement(response.bodyAsText()).jsonArray
+        val responseBody = response.body<List<String>>()
 
         // Verify the response contains both users
         assertEquals(2, responseBody.size)
-        assertTrue(responseBody.any { it.jsonPrimitive.content == user1Id })
-        assertTrue(responseBody.any { it.jsonPrimitive.content == user2Id })
+        assertTrue(responseBody.any { it == user1Id })
+        assertTrue(responseBody.any { it == user2Id })
     }
 
     @Test
@@ -662,6 +677,9 @@ class ProjectRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
 
         // Create test users
@@ -689,24 +707,24 @@ class ProjectRoutesTest : KoinTest {
         }
 
         // Get the project IDs from the responses
-        val createResponseBody1 = Json.parseToJsonElement(createResponse1.bodyAsText()).jsonObject
-        val projectId1 = createResponseBody1["id"]?.jsonPrimitive?.content
+        val createResponseBody1 = createResponse1.body<ProjectResponse>()
+        val projectId1 = createResponseBody1.id
 
-        val createResponseBody2 = Json.parseToJsonElement(createResponse2.bodyAsText()).jsonObject
-        val projectId2 = createResponseBody2["id"]?.jsonPrimitive?.content
+        val createResponseBody2 = createResponse2.body<ProjectResponse>()
+        val projectId2 = createResponseBody2.id
 
         // Verify the project IDs are not null
         assertNotNull(projectId1)
         assertNotNull(projectId2)
 
         // Assign the user to the projects
-        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId1!!))) {
+        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId1))) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(ownerId, "owner@example.com"))
             setBody(ProjectAssignRequest(userId))
         }
 
-        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId2!!))) {
+        client.post(Projects.Id.Assign(Projects.Id(projectId = projectId2))) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(ownerId, "owner@example.com"))
             setBody(ProjectAssignRequest(userId))
@@ -715,14 +733,14 @@ class ProjectRoutesTest : KoinTest {
         val usersResp1 = client.get(Projects.Id.Users(Projects.Id(projectId = projectId1))) {
             withAuth(generateTestToken(ownerId, "owner@example.com"))
         }
-        val users1 = Json.parseToJsonElement(usersResp1.bodyAsText()).jsonArray
-        assertTrue(users1.any { it.jsonPrimitive.content == userId })
+        val users1 = usersResp1.body<List<String>>()
+        assertTrue(users1.any { it == userId })
 
         val usersResp2 = client.get(Projects.Id.Users(Projects.Id(projectId = projectId2))) {
             withAuth(generateTestToken(ownerId, "owner@example.com"))
         }
-        val users2 = Json.parseToJsonElement(usersResp2.bodyAsText()).jsonArray
-        assertTrue(users2.any { it.jsonPrimitive.content == userId })
+        val users2 = usersResp2.body<List<String>>()
+        assertTrue(users2.any { it == userId })
     }
 
     private fun assertNotNull(value: Any?) {
