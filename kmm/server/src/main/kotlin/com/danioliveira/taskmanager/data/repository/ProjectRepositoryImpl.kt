@@ -22,6 +22,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.intLiteral
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.sum
 import org.jetbrains.exposed.v1.r2dbc.andWhere
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
@@ -107,13 +108,13 @@ class ProjectRepositoryImpl : ProjectRepository {
         val completed = Case()
             .When(TasksTable.status eq TaskStatus.DONE, intLiteral(1))
             .Else(intLiteral(0))
-            .count()
+            .sum()
             .alias("completed_tasks")
 
         val inProgress = Case()
             .When(TasksTable.status eq TaskStatus.IN_PROGRESS, intLiteral(1))
             .Else(intLiteral(0))
-            .count()
+            .sum()
             .alias("in_progress_tasks")
 
         val list = listOfNotNull(total, tasksCount, completed, inProgress)
@@ -130,8 +131,8 @@ class ProjectRepositoryImpl : ProjectRepository {
            val items =  query.map { row ->
                row.toResponse(
                    totalTasks = row[tasksCount].toInt(),
-                   completedTasks = row[completed].toInt(),
-                   inProgressTasks = row[inProgress].toInt()
+                   completedTasks = row[completed] ?: 0 ,
+                   inProgressTasks = row[inProgress] ?: 0
                ) 
            }
 
