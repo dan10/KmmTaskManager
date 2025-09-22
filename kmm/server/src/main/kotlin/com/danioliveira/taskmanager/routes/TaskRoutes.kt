@@ -41,11 +41,14 @@ fun Route.taskRoutes() {
 
     authenticate("auth-jwt") {
 
-        // Create new task: POST /v1/tasks
+        // Create new task: POST /v1/tasks (assignee defaults to current user when null)
         post<Tasks> {
             val userId = userPrincipal().toString()
             val request = call.receive<TaskCreateRequest>()
-            val task = taskService.create(request, userId)
+            val task = taskService.create(
+                request.copy(assigneeId = request.assigneeId ?: userId),
+                userId
+            )
             call.respond(HttpStatusCode.Created, task)
         }
 
@@ -80,6 +83,8 @@ fun Route.taskRoutes() {
             val tasks = taskService.findAllByOwnerId(userId, res.page, res.size)
             call.respond(tasks)
         }
+
+        // Removed POST /v1/tasks/owned. Use POST /v1/tasks instead.
 
         // Get tasks assigned to current user: GET /v1/tasks/assigned
         get<Tasks.Assigned> { res ->
