@@ -89,6 +89,8 @@ dependencies {
     implementation(libs.micrometer.registry.prometheus)
 
     testImplementation(libs.ktor.server.tests)
+    testImplementation(libs.ktor.client.content.negotiation)
+    testImplementation(libs.ktor.serialization.kotlinx.json)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.koin.test)
     // H2 Database for testing

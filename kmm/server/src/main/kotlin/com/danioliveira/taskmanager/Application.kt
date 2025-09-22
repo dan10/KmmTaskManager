@@ -15,6 +15,7 @@ import com.danioliveira.taskmanager.routes.projectTaskRoutes
 import com.danioliveira.taskmanager.routes.taskRoutes
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.application.log
 import io.ktor.server.config.property
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.resources.Resources
@@ -26,17 +27,25 @@ fun Application.module() {
     // Configure plugins
     configureDI()
 
-    // Get AppConfig from Koin
+    // Skip DB configuration when running tests/development to avoid interfering with Testcontainers-managed DB
+    val isDevelopment = environment.config.propertyOrNull("ktor.development")?.getString()?.toBoolean() ?: false
+    if (!isDevelopment) {
+        configureDatabase()
+    } else {
+        log.info("Skipping configureDatabase in development mode (tests)")
+    }
 
-    configureDatabase()
     JwtConfig.init(property<com.danioliveira.taskmanager.domain.JwtConfig>("ktor.jwt"))
     configureSerialization()
     configureSecurity()
     configureStatusPages()
     configureRequestValidation()
     configureMetrics()
-    install(Resources)
+    configureRouting()
+}
 
+fun Application.configureRouting() {
+    install(Resources)
     routing {
         authRoutes()
         projectRoutes()

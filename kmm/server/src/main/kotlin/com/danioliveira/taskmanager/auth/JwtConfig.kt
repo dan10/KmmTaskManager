@@ -31,7 +31,7 @@ object JwtConfig {
     }
 
     /**
-     * Initialize the JWT configuration using the AppConfig.
+     * Initialize the JWT configuration using the provided configuration object.
      */
     fun init(jwtConfig: JwtConfig) {
         secret = jwtConfig.secret
