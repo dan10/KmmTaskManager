@@ -158,7 +158,7 @@ class ProjectServiceTest : KoinTest {
         )
 
         // Update the project
-        val updated = projectService.updateProjectWithPermission(project.id, ownerId, updateRequest)
+        val updated = projectService.updateProject(project.id.toUUID(), ownerId, updateRequest)
 
         // Verify the update was successful
         assertTrue(updated)
@@ -182,7 +182,7 @@ class ProjectServiceTest : KoinTest {
         val project = projectService.createProject(ownerId, request)
 
         // Delete the project
-        val deleted = projectService.deleteProjectWithPermission(project.id.toUUID(), ownerId)
+        val deleted = projectService.deleteProject(project.id.toUUID(), ownerId)
 
         // Verify the deletion was successful
         assertTrue(deleted)
@@ -216,7 +216,7 @@ class ProjectServiceTest : KoinTest {
         ))
 
         // Assign the user to the project
-        val assignment = projectService.assignUserToProject(project.id.toUUID(), userId)
+        val assignment = projectService.assignUserToProject(project.id.toUUID(), userId, ownerId)
 
         // Verify the assignment was created correctly
         assertNotNull(assignment)
@@ -246,13 +246,13 @@ class ProjectServiceTest : KoinTest {
         ))
 
         // Assign the user to the project
-        projectService.assignUserToProject(project.id.toUUID(), userId)
+        projectService.assignUserToProject(project.id.toUUID(), userId, ownerId)
 
         // Verify the user is assigned to the project
         assertTrue(projectService.isUserAssignedToProject(project.id, userId.toString()))
 
         // Remove the user from the project
-        val removed = projectService.removeUserFromProject(project.id.toUUID(), userId)
+        val removed = projectService.removeUserFromProject(project.id.toUUID(), userId, ownerId)
 
         // Verify the removal was successful
         assertTrue(removed)
@@ -284,11 +284,11 @@ class ProjectServiceTest : KoinTest {
         ))
 
         // Assign users to the project
-        projectService.assignUserToProject(project.id.toUUID(), user1Id)
-        projectService.assignUserToProject(project.id.toUUID(), user2Id)
+        projectService.assignUserToProject(project.id.toUUID(), user1Id, ownerId)
+        projectService.assignUserToProject(project.id.toUUID(), user2Id, ownerId)
 
         // Get users assigned to the project
-        val users = projectService.getUsersByProject(project.id)
+        val users = projectService.getUsersByProject(project.id.toUUID())
 
         // Verify the correct users were returned
         assertEquals(2, users.size)
@@ -322,11 +322,11 @@ class ProjectServiceTest : KoinTest {
         ))
 
         // Assign the user to the projects
-        projectService.assignUserToProject(project1.id.toUUID(), userId)
-        projectService.assignUserToProject(project2.id.toUUID(), userId)
+        projectService.assignUserToProject(project1.id.toUUID(), userId, owner1Id)
+        projectService.assignUserToProject(project2.id.toUUID(), userId, owner2Id)
 
         // Get projects the user is assigned to
-        val projects = projectService.getProjectsByUser(userId.toString())
+        val projects = projectService.getProjectsByUser(userId)
 
         // Verify the correct projects were returned
         assertEquals(2, projects.size)
@@ -353,7 +353,7 @@ class ProjectServiceTest : KoinTest {
         ))
 
         // Assign the user to the project
-        projectService.assignUserToProject(project.id.toUUID(), userId)
+        projectService.assignUserToProject(project.id.toUUID(), userId, ownerId)
 
         // Check if the user is assigned to the project
         val isAssigned = projectService.isUserAssignedToProject(project.id, userId.toString())

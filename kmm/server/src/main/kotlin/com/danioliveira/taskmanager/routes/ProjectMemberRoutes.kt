@@ -25,7 +25,7 @@ fun Route.projectMemberRoutes() {
     authenticate("auth-jwt") {
         // Get users by project: GET /v1/projects/{projectId}/users
         get<Projects.Id.Users> { res ->
-            val users = projectService.getUsersByProject(res.parent.projectId)
+            val users = projectService.getUsersByProject(res.parent.projectId.toUUID())
             call.respond(users)
         }
 
@@ -34,7 +34,8 @@ fun Route.projectMemberRoutes() {
             val request = call.receive<ProjectAssignRequest>()
             val assignment = projectService.assignUserToProject(
                 projectId = res.parent.projectId.toUUID(), 
-                userId = request.userId.toUUID()
+                userId = request.userId.toUUID(),
+                creatorId = userPrincipal()
             )
             call.respond(HttpStatusCode.Created, assignment)
         }
@@ -43,7 +44,8 @@ fun Route.projectMemberRoutes() {
         delete<Projects.Id.AssignUser> { res ->
             val removed = projectService.removeUserFromProject(
                 projectId = res.parent.projectId.toUUID(),
-                userId = res.userId.toUUID()
+                userId = res.userId.toUUID(),
+                creatorId = userPrincipal()
             )
             if (removed) {
                 call.respond(HttpStatusCode.NoContent)

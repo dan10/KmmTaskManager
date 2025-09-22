@@ -5,6 +5,7 @@ import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.data.tables.ProjectsTable
 import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -56,10 +57,10 @@ class ProjectRepositoryImpl : ProjectRepository {
     }
 
     context(transaction: Transaction)
-    override suspend fun findById(id: UUID): ProjectResponse? {
+    override suspend fun findById(id: UUID): ProjectResponse {
         val searchQuery = ProjectsTable.id eq id
         val query = buildProjectQuery(ownerId = null, searchQuery, null, null)
-        return query.first.firstOrNull()
+        return query.first.firstOrNull() ?: throw NotFoundException("Project", id.toString())
     }
 
     override suspend fun existsById(id: UUID): Boolean {

@@ -1,23 +1,15 @@
 package com.danioliveira.taskmanager.domain.service
 
-import com.danioliveira.taskmanager.TestDatabase
+import com.danioliveira.taskmanager.BaseServiceTest
 import com.danioliveira.taskmanager.api.request.GoogleLoginRequest
 import com.danioliveira.taskmanager.api.request.LoginRequest
-import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.auth.PasswordHasher
 import com.danioliveira.taskmanager.auth.TestGoogleTokenVerifier
 import com.danioliveira.taskmanager.createTestUser
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
-import com.danioliveira.taskmanager.getTestModule
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.test.KoinTest
 import org.koin.test.inject
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -26,39 +18,8 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class UserServiceTest : KoinTest {
+class UserServiceTest : BaseServiceTest() {
     private val userService: UserService by inject()
-
-    @Before
-    fun setUp() = runBlocking {
-        // Initialize the H2 database
-        TestDatabase.init()
-
-        // Start Koin with the test module
-        startKoin {
-            modules(getTestModule())
-        }
-
-        // Initialize JwtConfig with appConfig from Koin
-        JwtConfig.init(
-            com.danioliveira.taskmanager.domain.JwtConfig(
-                secret = "test-secret",
-                issuer = "test-issuer",
-                audience = "test-audience",
-                realm = "test-realm",
-                validityMs = 36_000_00 * 10 // 10 hours
-            )
-        )
-    }
-
-    @After
-    fun tearDown() = runBlocking {
-        // Clear the database after each test
-        TestDatabase.clearDatabase()
-
-        // Stop Koin
-        stopKoin()
-    }
 
     @Test
     fun `test find by email - existing user`() = runTest {

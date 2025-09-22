@@ -7,18 +7,19 @@ import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.domain.exceptions.ForbiddenException
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
-import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.routes.toUUID
+import org.jetbrains.exposed.v1.core.Transaction
 import java.util.UUID
 
 internal class TaskService(
     private val repository: TaskRepository,
     private val projectAssignmentRepository: ProjectAssignmentRepository,
-    private val projectRepository: ProjectRepository
+    private val projectRepository: ProjectRepository,
 ) {
     suspend fun findAllByProjectId(
         projectId: String,
@@ -53,6 +54,21 @@ internal class TaskService(
         }
     }
 
+    /**
+     * Validates that a user can be assigned to a project.
+     * A user can be assigned if they are either the project owner or already assigned to the project.
+     */
+    context(_: Transaction)
+    private suspend fun validateUserCanBeAssignedToProject(projectId: UUID, userId: UUID) {
+        val project = projectRepository.findById(projectId)
+        val isOwner = project.ownerId == userId.toString()
+        if (isOwner) return
+
+        if (!projectAssignmentRepository.isUserAssignedToProject(projectId, userId)) {
+            throw ForbiddenException(resourceType = "Project", resourceId = projectId.toString())
+        }
+    }
+
     suspend fun create(request: TaskCreateRequest, creatorId: String): TaskResponse = dbQuery {
         val creatorUUID = UUID.fromString(creatorId)
         val assigneeUUID = request.assigneeId?.toUUID() ?: creatorUUID
@@ -60,16 +76,7 @@ internal class TaskService(
 
         // Validate project access if project is specified
         projectUUID?.let { projectId ->
-            val project = projectRepository.findById(projectId)
-                ?: throw NotFoundException("Project", projectId.toString())
-
-            // Check if assignee has access (is owner or assigned member)
-            val hasAccess = project.ownerId == assigneeUUID.toString() ||
-                    projectAssignmentRepository.isUserAssignedToProject(projectId, assigneeUUID)
-
-            if (!hasAccess) {
-                throw ValidationException("Assignee must be a member of the project or the project owner")
-            }
+            validateUserCanBeAssignedToProject(projectId, assigneeUUID)
         }
 
         repository.create(
@@ -94,18 +101,7 @@ internal class TaskService(
                 val assigneeUUID = UUID.fromString(newAssigneeId)
                 val projectUUID = UUID.fromString(current.projectId)
 
-                // Check if user is the project owner
-                val project = projectRepository.findById(projectUUID)
-                val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
-
-                // Check if user is assigned to the project
-                val isAssigneeInProject =
-                    projectAssignmentRepository.isUserAssignedToProject(projectUUID, assigneeUUID)
-
-                // User must be either the project owner OR a project member
-                if (!isProjectOwner && !isAssigneeInProject) {
-                    throw ValidationException("Assignee must be a member of the project or the project owner")
-                }
+                validateUserCanBeAssignedToProject(projectUUID, assigneeUUID)
             }
 
             val updated = update(
@@ -133,19 +129,7 @@ internal class TaskService(
         if (current.projectId != null) {
             val projectUUID = UUID.fromString(current.projectId)
 
-            // Check if user is the project owner
-            val project = with(projectRepository) { findById(projectUUID) }
-            val isProjectOwner = project != null && project.ownerId == assigneeUUID.toString()
-
-            // Check if user is assigned to the project
-            val isAssigneeInProject = with(projectAssignmentRepository) {
-                isUserAssignedToProject(projectUUID, assigneeUUID)
-            }
-
-            // User must be either the project owner OR a project member
-            if (!isProjectOwner && !isAssigneeInProject) {
-                throw ValidationException("Assignee must be a member of the project or the project owner")
-            }
+            validateUserCanBeAssignedToProject(projectUUID, assigneeUUID)
         }
 
         with(repository) {

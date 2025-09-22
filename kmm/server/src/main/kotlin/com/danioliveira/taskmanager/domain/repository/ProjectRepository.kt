@@ -25,7 +25,7 @@ interface ProjectRepository {
      * @return the project [ProjectResponse] with the given id, or null if no such project exists
      */
     context(transaction: Transaction)
-    suspend fun findById(id: UUID): ProjectResponse?
+    suspend fun findById(id: UUID): ProjectResponse
 
     suspend fun existsById(id: UUID): Boolean
 

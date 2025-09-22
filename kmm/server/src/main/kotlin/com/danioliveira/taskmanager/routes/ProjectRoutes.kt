@@ -49,7 +49,7 @@ fun Route.projectRoutes() {
         put<Projects.Id> { res ->
             val userId = userPrincipal()
             val request = call.receive<ProjectUpdateRequest>()
-            val updated = service.updateProjectWithPermission(res.projectId, userId, request)
+            val updated = service.updateProject(res.projectId.toUUID(), userId, request)
             if (updated) {
                 call.respond(HttpStatusCode.OK)
             } else {
@@ -68,7 +68,7 @@ fun Route.projectRoutes() {
         // Delete project by id: DELETE v1/projects/{projectId}
         delete<Projects.Id> { res ->
             val userId = userPrincipal()
-            val deleted = service.deleteProjectWithPermission(res.projectId.toUUID(), userId)
+            val deleted = service.deleteProject(res.projectId.toUUID(), userId)
             if (deleted) {
                 call.respond(HttpStatusCode.NoContent)
             } else {

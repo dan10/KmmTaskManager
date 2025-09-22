@@ -7,13 +7,12 @@ import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.createTestUser
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.domain.exceptions.ForbiddenException
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
-import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.getTestModule
 import com.danioliveira.taskmanager.routes.toUUID
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.junit.After
@@ -25,10 +24,12 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Clock
 
 class TaskServiceTest : KoinTest {
     private val taskService: TaskService by inject()
@@ -77,7 +78,7 @@ class TaskServiceTest : KoinTest {
         val projectId = projectResponse.id
 
         // Assign the assignee to the project
-        projectService.assignUserToProject(projectId.toUUID(), assigneeId.toUUID())
+        projectService.assignUserToProject(projectId.toUUID(), assigneeId.toUUID(), creatorId.toUUID())
 
         // Create task 1
         val request1 = TaskCreateRequest(
@@ -301,7 +302,7 @@ class TaskServiceTest : KoinTest {
         val projectId = projectResponse.id
 
         // Assign the assignee to the project
-        projectService.assignUserToProject(projectId.toUUID(), assigneeId.toUUID())
+        projectService.assignUserToProject(projectId.toUUID(), assigneeId.toUUID(), creatorId.toUUID())
 
         val dueDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val request = TaskCreateRequest(
@@ -355,13 +356,10 @@ class TaskServiceTest : KoinTest {
             dueDate = dueDate
         )
 
-        // Try to create the task, which should fail
-        try {
-            taskService.create(request, creatorId)
-            fail("Expected ValidationException was not thrown")
-        } catch (e: ValidationException) {
-            // Expected exception
-            assertTrue(e.message.contains("Assignee must be a member of the project"))
+        assertFailsWith<ForbiddenException>(
+            message = "You don't have permission to access Project with ID '518c257b-8a55-4f9a-ba37-8e18b9143e73'"
+        ) {
+            taskService.create(request, assigneeId)
         }
     }
 
