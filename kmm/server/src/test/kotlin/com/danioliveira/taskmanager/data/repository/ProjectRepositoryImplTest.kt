@@ -2,12 +2,13 @@ package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
-import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -67,9 +68,7 @@ class ProjectRepositoryImplTest {
 
         // Find the project by ID
         val foundProject = dbQuery {
-            with(projectRepository) {
-                findById(UUID.fromString(project.id),)
-            }
+            projectRepository.findById(UUID.fromString(project.id))
         }
 
         // Verify the project was found
@@ -80,39 +79,29 @@ class ProjectRepositoryImplTest {
     }
 
     @Test
-    fun `test find projects by owner`() = runBlocking {
+    fun `test find projects by owner`() = runTest {
         // Create two projects for the test user
         val project1 = dbQuery {
-            with(projectRepository) {
-                create("Project 1", "Description 1", testUserId)
-            }
+            projectRepository.create("Project 1", "Description 1", testUserId)
         }
 
         val project2 = dbQuery {
-            with(projectRepository) {
-                create("Project 2", "Description 2", testUserId)
-            }
+            projectRepository.create("Project 2", "Description 2", testUserId)
         }
 
         // Create another user and a project for them
         val otherUser = dbQuery {
-            with(userRepository) {
-                create("other@example.com", "password", "Other User", null)
-            }
+            userRepository.create("other@example.com", "password", "Other User", null)
         }
         val otherUserId = UUID.fromString(otherUser.id)
 
         dbQuery {
-            with(projectRepository) {
-                create("Other Project", "Other Description", otherUserId)
-            }
+            projectRepository.create("Other Project", "Other Description", otherUserId)
         }
 
         // Find projects by owner
         val projects = dbQuery {
-            with(projectRepository) {
-                findAllByOwner(testUserId, 0, 10)
-            }
+            projectRepository.findAllByOwner(testUserId, 0, 10)
         }
 
         // Verify the correct projects were found
@@ -155,27 +144,25 @@ class ProjectRepositoryImplTest {
     }
 
     @Test
-    fun `test delete project`() = runBlocking {
+    fun `test delete project`() = runTest {
         // Create a project
         val project = dbQuery {
-            with(projectRepository) {
-                create("Project to Delete", "This project will be deleted", testUserId)
-            }
+            projectRepository.create(
+                "Project to Delete",
+                "This project will be deleted",
+                testUserId
+            )
         }
 
         // Verify the project exists
         val foundProject = dbQuery {
-            with(projectRepository) {
-                findById(UUID.fromString(project.id),)
-            }
+            projectRepository.findById(UUID.fromString(project.id))
         }
         assertNotNull(foundProject)
 
         // Delete the project
         val deleted = dbQuery {
-            with(projectRepository) {
-                delete(UUID.fromString(project.id))
-            }
+            projectRepository.delete(UUID.fromString(project.id))
         }
 
         // Verify the deletion was successful
@@ -184,19 +171,17 @@ class ProjectRepositoryImplTest {
         // Verify the project no longer exists
         val deletedProject = dbQuery {
             with(projectRepository) {
-                findById(UUID.fromString(project.id),)
+                findById(UUID.fromString(project.id))
             }
         }
         assertNull(deletedProject)
     }
 
     @Test
-    fun `test update non-existent project`() = runBlocking {
+    fun `test update non-existent project`() = runTest {
         // Try to update a project that doesn't exist
         val updated = dbQuery {
-            with(projectRepository) {
-                update(UUID.randomUUID(), "Updated Name", "Updated Description")
-            }
+            projectRepository.update(UUID.randomUUID(), "Updated Name", "Updated Description")
         }
 
         // Verify the update failed
@@ -204,25 +189,22 @@ class ProjectRepositoryImplTest {
     }
 
     @Test
-    fun `test delete non-existent project`() = runBlocking {
+    fun `test delete non-existent project`() = runTest {
         // Try to delete a project that doesn't exist
-        val deleted = dbQuery {
-            with(projectRepository) {
-                delete(UUID.randomUUID())
-            }
-        }
-
+        val deleted = dbQuery { projectRepository.delete(UUID.randomUUID()) }
         // Verify the deletion failed
         assertFalse(deleted)
     }
 
     @Test
-    fun `test project task counts`() = runBlocking {
+    fun `test project task counts`() = runTest {
         // Create a project
         val project = dbQuery {
-            with(projectRepository) {
-                create("Project with Tasks", "A project with tasks in different states", testUserId)
-            }
+            projectRepository.create(
+                "Project with Tasks",
+                "A project with tasks in different states",
+                testUserId
+            )
         }
 
         val projectId = UUID.fromString(project.id)
@@ -231,62 +213,54 @@ class ProjectRepositoryImplTest {
         // 2 TODO tasks
         repeat(2) { i ->
             dbQuery {
-                with(taskRepository) {
-                    create(
-                        "TODO Task $i",
-                        "Description for TODO task $i",
-                        projectId,
-                        testUserId,
-                        testUserId,
-                        TaskStatus.TODO,
-                        Priority.MEDIUM,
-                        null
-                    )
-                }
+                taskRepository.create(
+                    "TODO Task $i",
+                    "Description for TODO task $i",
+                    projectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
         // 3 IN_PROGRESS tasks
         repeat(3) { i ->
             dbQuery {
-                with(taskRepository) {
-                    create(
-                        "In Progress Task $i",
-                        "Description for in progress task $i",
-                        projectId,
-                        testUserId,
-                        testUserId,
-                        TaskStatus.IN_PROGRESS,
-                        Priority.HIGH,
-                        null
-                    )
-                }
+                taskRepository.create(
+                    "In Progress Task $i",
+                    "Description for in progress task $i",
+                    projectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.IN_PROGRESS,
+                    Priority.HIGH,
+                    null
+                )
             }
         }
 
         // 4 DONE tasks
         repeat(4) { i ->
             dbQuery {
-                with(taskRepository) {
-                    create(
-                        "Done Task $i",
-                        "Description for done task $i",
-                        projectId,
-                        testUserId,
-                        testUserId,
-                        TaskStatus.DONE,
-                        Priority.LOW,
-                        null
-                    )
-                }
+                taskRepository.create(
+                    "Done Task $i",
+                    "Description for done task $i",
+                    projectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.DONE,
+                    Priority.LOW,
+                    null
+                )
             }
         }
 
         // Fetch the project to get the updated task counts
         val updatedProject = dbQuery {
-            with(projectRepository) {
-                findById(projectId,)
-            }
+            projectRepository.findById(projectId)
         }
 
         // Verify task counts

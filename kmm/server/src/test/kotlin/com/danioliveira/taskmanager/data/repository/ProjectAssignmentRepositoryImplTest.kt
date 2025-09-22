@@ -41,7 +41,7 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Create a test project
         val project = dbQuery {
-          projectRepository.create("Test Project", "Test Project Description", testUserId)
+            projectRepository.create("Test Project", "Test Project Description", testUserId)
         }
         testProjectId = UUID.fromString(project.id)
     }
@@ -56,7 +56,7 @@ class ProjectAssignmentRepositoryImplTest {
     fun `test assign user to project`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-           userRepository.create("second@example.com", "password", "Second User", null)
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
@@ -91,7 +91,7 @@ class ProjectAssignmentRepositoryImplTest {
             assignmentRepository.assignUserToProject(testProjectId, secondUserId)
         }
 
-        assertFailsWith(AlreadyAssignedException::class)  {
+        assertFailsWith(AlreadyAssignedException::class) {
             dbQuery {
                 assignmentRepository.assignUserToProject(testProjectId, secondUserId)
             }
@@ -129,7 +129,7 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Verify the user is no longer assigned to the project
         val isStillAssigned = dbQuery {
-           assignmentRepository.isUserAssignedToProject(testProjectId, secondUserId)
+            assignmentRepository.isUserAssignedToProject(testProjectId, secondUserId)
         }
 
         assertFalse(isStillAssigned)
@@ -200,12 +200,12 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Create multiple projects
         val project1 = dbQuery {
-           projectRepository.create("Project 1", "Description 1", testUserId)
+            projectRepository.create("Project 1", "Description 1", testUserId)
         }
         val project1Id = UUID.fromString(project1.id)
 
         val project2 = dbQuery {
-           projectRepository.create("Project 2", "Description 2", testUserId)
+            projectRepository.create("Project 2", "Description 2", testUserId)
         }
         val project2Id = UUID.fromString(project2.id)
 

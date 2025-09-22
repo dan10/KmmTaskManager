@@ -49,19 +49,19 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Create a test user and project
 
-            val user = dbQuery {
-                with(userRepository) {
-                    create("test@example.com", "password", "Test User", null)
-                }
+        val user = dbQuery {
+            with(userRepository) {
+                create("test@example.com", "password", "Test User", null)
             }
-            testUserId = UUID.fromString(user.id)
+        }
+        testUserId = UUID.fromString(user.id)
 
-            val project = dbQuery {
-                with(projectRepository) {
-                    create("Test Project", "Test Description", testUserId)
-                }
+        val project = dbQuery {
+            with(projectRepository) {
+                create("Test Project", "Test Description", testUserId)
             }
-            testProjectId = UUID.fromString(project.id)
+        }
+        testProjectId = UUID.fromString(project.id)
     }
 
     @AfterEach
@@ -81,7 +81,16 @@ class TaskRepositoryImplTest : KoinTest {
         // Create a task
         val task = dbQuery {
             with(taskRepository) {
-                create(title, description, testProjectId, testUserId, testUserId, status, priority, dueDate)
+                create(
+                    title,
+                    description,
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    status,
+                    priority,
+                    dueDate
+                )
             }
         }
 
@@ -114,20 +123,47 @@ class TaskRepositoryImplTest : KoinTest {
         // Create tasks for the test project
         val task1 = dbQuery {
             with(taskRepository) {
-                create("Task 1", "Description 1", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.MEDIUM, null)
+                create(
+                    "Task 1",
+                    "Description 1",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
         val task2 = dbQuery {
             with(taskRepository) {
-                create("Task 2", "Description 2", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.HIGH, null)
+                create(
+                    "Task 2",
+                    "Description 2",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.HIGH,
+                    null
+                )
             }
         }
 
         // Create a task without a project
         val task3 = dbQuery {
             with(taskRepository) {
-                create("Task 3", "Description 3", null, testUserId, testUserId, TaskStatus.TODO, Priority.LOW, null)
+                create(
+                    "Task 3",
+                    "Description 3",
+                    null,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.LOW,
+                    null
+                )
             }
         }
 
@@ -159,19 +195,46 @@ class TaskRepositoryImplTest : KoinTest {
         // Create tasks with different creators
         val task1 = dbQuery {
             with(taskRepository) {
-                create("Task 1", "Description 1", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.MEDIUM, null)
+                create(
+                    "Task 1",
+                    "Description 1",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
         val task2 = dbQuery {
             with(taskRepository) {
-                create("Task 2", "Description 2", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.HIGH, null)
+                create(
+                    "Task 2",
+                    "Description 2",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.HIGH,
+                    null
+                )
             }
         }
 
         val task3 = dbQuery {
             with(taskRepository) {
-                create("Task 3", "Description 3", testProjectId, testUserId, secondUserId, TaskStatus.TODO, Priority.LOW, null)
+                create(
+                    "Task 3",
+                    "Description 3",
+                    testProjectId,
+                    testUserId,
+                    secondUserId,
+                    TaskStatus.TODO,
+                    Priority.LOW,
+                    null
+                )
             }
         }
 
@@ -215,19 +278,46 @@ class TaskRepositoryImplTest : KoinTest {
         // Create tasks with different assignees
         val task1 = dbQuery {
             with(taskRepository) {
-                create("Task 1", "Description 1", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.MEDIUM, null)
+                create(
+                    "Task 1",
+                    "Description 1",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
         val task2 = dbQuery {
             with(taskRepository) {
-                create("Task 2", "Description 2", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.HIGH, null)
+                create(
+                    "Task 2",
+                    "Description 2",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.HIGH,
+                    null
+                )
             }
         }
 
         val task3 = dbQuery {
             with(taskRepository) {
-                create("Task 3", "Description 3", testProjectId, secondUserId, testUserId, TaskStatus.TODO, Priority.LOW, null)
+                create(
+                    "Task 3",
+                    "Description 3",
+                    testProjectId,
+                    secondUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.LOW,
+                    null
+                )
             }
         }
 
@@ -263,7 +353,16 @@ class TaskRepositoryImplTest : KoinTest {
         // Create a task
         val task = dbQuery {
             with(taskRepository) {
-                create("Original Task", "Original Description", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.LOW, null)
+                create(
+                    "Original Task",
+                    "Original Description",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.LOW,
+                    null
+                )
             }
         }
 
@@ -295,7 +394,16 @@ class TaskRepositoryImplTest : KoinTest {
         // Create a task
         val task = dbQuery {
             with(taskRepository) {
-                create("Task to Delete", "This task will be deleted", testProjectId, testUserId, testUserId, TaskStatus.TODO, Priority.MEDIUM, null)
+                create(
+                    "Task to Delete",
+                    "This task will be deleted",
+                    testProjectId,
+                    testUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
@@ -361,7 +469,16 @@ class TaskRepositoryImplTest : KoinTest {
 
         val task2 = dbQuery {
             with(taskRepository) {
-                create("Regular Task", "Description 2", testProjectId, secondUserId, testUserId, TaskStatus.TODO, Priority.MEDIUM, null)
+                create(
+                    "Regular Task",
+                    "Description 2",
+                    testProjectId,
+                    secondUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
