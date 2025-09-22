@@ -26,6 +26,7 @@ import org.jetbrains.exposed.v1.core.leftJoin
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.core.sum
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.select
@@ -145,7 +146,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         val completedTasks = Case()
             .When(TasksTable.status eq TaskStatus.DONE, intLiteral(1))
             .Else(intLiteral(0))
-            .count()
+            .sum()
         
         val result = TasksTable
             .select(totalTasks, completedTasks)
