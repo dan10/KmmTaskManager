@@ -11,9 +11,9 @@ import com.danioliveira.taskmanager.routes.toUUID
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -34,7 +34,7 @@ class TaskRepositoryImplTest : KoinTest {
     private lateinit var testUserId: UUID
     private lateinit var testProjectId: UUID
 
-    @BeforeEach
+    @Before
     fun setUp() = runTest {
         TestDatabase.init()
         startKoin {
@@ -64,14 +64,14 @@ class TaskRepositoryImplTest : KoinTest {
         testProjectId = UUID.fromString(project.id)
     }
 
-    @AfterEach
+    @After
     fun tearDown() = runTest {
         TestDatabase.clearDatabase()
         stopKoin()
     }
 
     @Test
-    fun `test create and find task by id`() = runBlocking {
+    fun `test create and find task by id`() = runTest {
         val title = "Test Task"
         val description = "Test Description"
         val status = TaskStatus.TODO
@@ -80,18 +80,16 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Create a task
         val task = dbQuery {
-            with(taskRepository) {
-                create(
-                    title,
-                    description,
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    status,
-                    priority,
-                    dueDate
-                )
-            }
+            taskRepository.create(
+                title,
+                description,
+                testProjectId,
+                testUserId,
+                testUserId,
+                status,
+                priority,
+                dueDate
+            )
         }
 
         // Verify the task was created correctly
@@ -104,11 +102,7 @@ class TaskRepositoryImplTest : KoinTest {
         assertEquals(testUserId.toString(), task.creatorId)
 
         // Find the task by ID
-        val foundTask = dbQuery {
-            with(taskRepository) {
-                findById(task.id)
-            }
-        }
+        val foundTask = dbQuery { taskRepository.findById(task.id) }
 
         // Verify the task was found
         assertNotNull(foundTask)
@@ -119,59 +113,51 @@ class TaskRepositoryImplTest : KoinTest {
     }
 
     @Test
-    fun `test find tasks by project id`() = runBlocking {
+    fun `test find tasks by project id`() = runTest {
         // Create tasks for the test project
         val task1 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 1",
-                    "Description 1",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.MEDIUM,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 1",
+                "Description 1",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.MEDIUM,
+                null
+            )
         }
 
         val task2 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 2",
-                    "Description 2",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.HIGH,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 2",
+                "Description 2",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.HIGH,
+                null
+            )
         }
 
         // Create a task without a project
         val task3 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 3",
-                    "Description 3",
-                    null,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.LOW,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 3",
+                "Description 3",
+                null,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.LOW,
+                null
+            )
         }
 
         // Find tasks by project ID
         val projectTasks = dbQuery {
-            with(taskRepository) {
-                findAllByProjectId(testProjectId, 0, 10)
-            }
+            taskRepository.findAllByProjectId(testProjectId, 0, 10)
         }
 
         // Verify the correct tasks were found
@@ -183,66 +169,56 @@ class TaskRepositoryImplTest : KoinTest {
     }
 
     @Test
-    fun `test find tasks by owner id`() = runBlocking {
+    fun `test find tasks by owner id`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Create tasks with different creators
         val task1 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 1",
-                    "Description 1",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.MEDIUM,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 1",
+                "Description 1",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.MEDIUM,
+                null
+            )
         }
 
         val task2 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 2",
-                    "Description 2",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.HIGH,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 2",
+                "Description 2",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.HIGH,
+                null
+            )
         }
 
         val task3 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 3",
-                    "Description 3",
-                    testProjectId,
-                    testUserId,
-                    secondUserId,
-                    TaskStatus.TODO,
-                    Priority.LOW,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 3",
+                "Description 3",
+                testProjectId,
+                testUserId,
+                secondUserId,
+                TaskStatus.TODO,
+                Priority.LOW,
+                null
+            )
         }
 
         // Find tasks by owner ID (first user)
         val ownerTasks = dbQuery {
-            with(taskRepository) {
-                findAllByOwnerId(testUserId, 0, 10)
-            }
+            taskRepository.findAllByOwnerId(testUserId, 0, 10)
         }
 
         // Verify the correct tasks were found
@@ -254,9 +230,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Find tasks by owner ID (second user)
         val secondOwnerTasks = dbQuery {
-            with(taskRepository) {
-                findAllByOwnerId(secondUserId, 0, 10)
-            }
+            taskRepository.findAllByOwnerId(secondUserId, 0, 10)
         }
 
         // Verify the correct tasks were found
@@ -266,66 +240,56 @@ class TaskRepositoryImplTest : KoinTest {
     }
 
     @Test
-    fun `test find tasks by assignee id`() = runBlocking {
+    fun `test find tasks by assignee id`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Create tasks with different assignees
         val task1 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 1",
-                    "Description 1",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.MEDIUM,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 1",
+                "Description 1",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.MEDIUM,
+                null
+            )
         }
 
         val task2 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 2",
-                    "Description 2",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.HIGH,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 2",
+                "Description 2",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.HIGH,
+                null
+            )
         }
 
         val task3 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task 3",
-                    "Description 3",
-                    testProjectId,
-                    secondUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.LOW,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task 3",
+                "Description 3",
+                testProjectId,
+                secondUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.LOW,
+                null
+            )
         }
 
         // Find tasks by assignee ID (first user)
         val assigneeTasks = dbQuery {
-            with(taskRepository) {
-                findAllByAssigneeId(testUserId.toString(), 0, 10)
-            }
+            taskRepository.findAllByAssigneeId(testUserId.toString(), 0, 10)
         }
 
         // Verify the correct tasks were found
@@ -337,9 +301,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Find tasks by assignee ID (second user)
         val secondAssigneeTasks = dbQuery {
-            with(taskRepository) {
-                findAllByAssigneeId(secondUserId.toString(), 0, 10)
-            }
+            taskRepository.findAllByAssigneeId(secondUserId.toString(), 0, 10)
         }
 
         // Verify the correct tasks were found
@@ -352,33 +314,29 @@ class TaskRepositoryImplTest : KoinTest {
     fun `test update task`() = runBlocking {
         // Create a task
         val task = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Original Task",
-                    "Original Description",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.LOW,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Original Task",
+                "Original Description",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.LOW,
+                null
+            )
         }
 
         // Update the task
         val updatedTask = dbQuery {
-            with(taskRepository) {
-                update(
-                    task.id,
-                    "Updated Task",
-                    "Updated Description",
-                    TaskStatus.IN_PROGRESS,
-                    Priority.HIGH,
-                    LocalDateTime.parse("2024-12-31T23:59:59"),
-                    testUserId
-                )
-            }
+            taskRepository.update(
+                task.id,
+                "Updated Task",
+                "Updated Description",
+                TaskStatus.IN_PROGRESS,
+                Priority.HIGH,
+                LocalDateTime.parse("2024-12-31T23:59:59"),
+                testUserId
+            )
         }
 
         // Verify the task was updated
@@ -393,25 +351,21 @@ class TaskRepositoryImplTest : KoinTest {
     fun `test delete task`() = runBlocking {
         // Create a task
         val task = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Task to Delete",
-                    "This task will be deleted",
-                    testProjectId,
-                    testUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.MEDIUM,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Task to Delete",
+                "This task will be deleted",
+                testProjectId,
+                testUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.MEDIUM,
+                null
+            )
         }
 
         // Delete the task
         val deleted = dbQuery {
-            with(taskRepository) {
-                delete(task.id.toUUID())
-            }
+            taskRepository.delete(task.id.toUUID())
         }
 
         // Verify the task was deleted
@@ -419,9 +373,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Try to find the deleted task
         val foundTask = dbQuery {
-            with(taskRepository) {
-                findById(task.id)
-            }
+            taskRepository.findById(task.id)
         }
 
         // Verify the task was not found
@@ -432,9 +384,7 @@ class TaskRepositoryImplTest : KoinTest {
     fun `test delete non-existent task`() = runBlocking {
         // Try to delete a task that doesn't exist
         val deleted = dbQuery {
-            with(taskRepository) {
-                delete(UUID.randomUUID())
-            }
+            taskRepository.delete(UUID.randomUUID())
         }
 
         // Verify the deletion failed
@@ -442,29 +392,25 @@ class TaskRepositoryImplTest : KoinTest {
     }
 
     @Test
-    fun `test find tasks by assignee id with query filter`() = runBlocking {
+    fun `test find tasks by assignee id with query filter`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Create tasks with different titles
         val task1 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Important Task",
-                    "Description 1",
-                    testProjectId,
-                    secondUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.HIGH,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Important Task",
+                "Description 1",
+                testProjectId,
+                secondUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.HIGH,
+                null
+            )
         }
 
         val task2 = dbQuery {
@@ -483,25 +429,21 @@ class TaskRepositoryImplTest : KoinTest {
         }
 
         val task3 = dbQuery {
-            with(taskRepository) {
-                create(
-                    "Another Important Task",
-                    "Description 3",
-                    testProjectId,
-                    secondUserId,
-                    testUserId,
-                    TaskStatus.TODO,
-                    Priority.LOW,
-                    null
-                )
-            }
+            taskRepository.create(
+                "Another Important Task",
+                "Description 3",
+                testProjectId,
+                secondUserId,
+                testUserId,
+                TaskStatus.TODO,
+                Priority.LOW,
+                null
+            )
         }
 
         // Find tasks by assignee ID with query filter "Important"
         val filteredTasks = dbQuery {
-            with(taskRepository) {
-                findAllByAssigneeId(secondUserId.toString(), 0, 10, "Important")
-            }
+            taskRepository.findAllByAssigneeId(secondUserId.toString(), 0, 10, "Important")
         }
 
         // Verify the correct tasks were found
@@ -513,12 +455,15 @@ class TaskRepositoryImplTest : KoinTest {
     }
 
     @Test
-    fun `test get user task progress`() = runBlocking {
+    fun `test get user task progress`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create(
+                email = "second@example.com",
+                passwordHash = "password",
+                displayName = "Second User",
+                googleId = null
+            )
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
@@ -526,44 +471,38 @@ class TaskRepositoryImplTest : KoinTest {
         // 2 TODO tasks
         repeat(2) {
             dbQuery {
-                with(taskRepository) {
-                    create(
-                        "TODO Task $it",
-                        "Description for TODO task $it",
-                        testProjectId,
-                        secondUserId,
-                        testUserId,
-                        TaskStatus.TODO,
-                        Priority.MEDIUM,
-                        null
-                    )
-                }
+                taskRepository.create(
+                    "TODO Task $it",
+                    "Description for TODO task $it",
+                    testProjectId,
+                    secondUserId,
+                    testUserId,
+                    TaskStatus.TODO,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
         // 3 DONE tasks
         repeat(3) {
             dbQuery {
-                with(taskRepository) {
-                    create(
-                        "Done Task $it",
-                        "Description for done task $it",
-                        testProjectId,
-                        secondUserId,
-                        testUserId,
-                        TaskStatus.DONE,
-                        Priority.MEDIUM,
-                        null
-                    )
-                }
+                taskRepository.create(
+                    "Done Task $it",
+                    "Description for done task $it",
+                    testProjectId,
+                    secondUserId,
+                    testUserId,
+                    TaskStatus.DONE,
+                    Priority.MEDIUM,
+                    null
+                )
             }
         }
 
         // Get task progress for the second user
         val progress = dbQuery {
-            with(taskRepository) {
-                getUserTaskProgress(secondUserId.toString())
-            }
+            taskRepository.getUserTaskProgress(secondUserId.toString())
         }
 
         // Verify the task progress
