@@ -146,7 +146,6 @@ class TaskRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
-    //
     @Test
     fun `test get tasks by project id`() = testApplication {
         // Set up the test environment

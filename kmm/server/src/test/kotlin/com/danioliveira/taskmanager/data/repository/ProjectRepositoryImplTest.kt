@@ -4,6 +4,7 @@ import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
@@ -14,9 +15,9 @@ import org.junit.Before
 import org.junit.Test
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ProjectRepositoryImplTest {
@@ -169,12 +170,12 @@ class ProjectRepositoryImplTest {
         assertTrue(deleted)
 
         // Verify the project no longer exists
-        val deletedProject = dbQuery {
-            with(projectRepository) {
-                findById(UUID.fromString(project.id))
+
+        assertFailsWith<NotFoundException> {
+            dbQuery {
+                projectRepository.findById(UUID.fromString(project.id))
             }
         }
-        assertNull(deletedProject)
     }
 
     @Test

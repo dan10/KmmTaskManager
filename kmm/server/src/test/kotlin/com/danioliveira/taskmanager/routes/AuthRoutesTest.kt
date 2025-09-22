@@ -6,6 +6,8 @@ import com.danioliveira.taskmanager.api.request.LoginRequest
 import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.api.routes.Auth
 import com.danioliveira.taskmanager.auth.TestGoogleTokenVerifier
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.client.plugins.resources.post
 import io.ktor.client.request.setBody
@@ -13,10 +15,10 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 import kotlin.test.AfterTest
@@ -49,6 +51,7 @@ class AuthRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) { json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true }) }
         }
 
         // Prepare registration request
@@ -60,13 +63,13 @@ class AuthRoutesTest : KoinTest {
 
         val response = client.post(Auth.Register()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(registerRequest))
+            setBody(registerRequest)
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        val responseBody = response.bodyAsText()
-        assertTrue(responseBody.contains("token"))
-        assertTrue(responseBody.contains("New User"))
+        val responseBody = response.body<com.danioliveira.taskmanager.api.response.AuthResponse>()
+        assertTrue(responseBody.token.isNotBlank())
+        assertEquals("New User", responseBody.user.displayName)
     }
 
     @Test
@@ -78,6 +81,7 @@ class AuthRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) { json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true }) }
         }
 
         // First, register a user
@@ -89,7 +93,7 @@ class AuthRoutesTest : KoinTest {
 
         val firstResponse = client.post(Auth.Register()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(firstRegisterRequest))
+            setBody(firstRegisterRequest)
         }
 
         // Verify the first registration was successful
@@ -104,7 +108,7 @@ class AuthRoutesTest : KoinTest {
 
         val secondResponse = client.post(Auth.Register()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(secondRegisterRequest))
+            setBody(secondRegisterRequest)
         }
 
         // Verify the second registration failed with a Bad Request status
@@ -125,6 +129,7 @@ class AuthRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) { json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true }) }
         }
 
         // First, register a user
@@ -136,7 +141,7 @@ class AuthRoutesTest : KoinTest {
 
         val registerResponse = client.post(Auth.Register()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(registerRequest))
+            setBody(registerRequest)
         }
 
         // Verify the registration was successful
@@ -150,16 +155,16 @@ class AuthRoutesTest : KoinTest {
 
         val loginResponse = client.post(Auth.Login()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(loginRequest))
+            setBody(loginRequest)
         }
 
         // Verify the login was successful
         assertEquals(HttpStatusCode.OK, loginResponse.status)
 
         // Verify the response contains a token and user information
-        val responseBody = loginResponse.bodyAsText()
-        assertTrue(responseBody.contains("token"))
-        assertTrue(responseBody.contains("Login Test User"))
+        val responseBody = loginResponse.body<com.danioliveira.taskmanager.api.response.AuthResponse>()
+        assertTrue(responseBody.token.isNotBlank())
+        assertEquals("Login Test User", responseBody.user.displayName)
     }
 
     @Test
@@ -171,6 +176,7 @@ class AuthRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) { json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true }) }
         }
 
         // First, register a user
@@ -182,7 +188,7 @@ class AuthRoutesTest : KoinTest {
 
         val registerResponse = client.post(Auth.Register()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(registerRequest))
+            setBody(registerRequest)
         }
 
         // Verify the registration was successful
@@ -196,7 +202,7 @@ class AuthRoutesTest : KoinTest {
 
         val loginResponse = client.post(Auth.Login()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(loginRequest))
+            setBody(loginRequest)
         }
 
         // Verify the login failed with Unauthorized status
@@ -216,6 +222,7 @@ class AuthRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) { json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true }) }
         }
 
         // Try to register with an invalid email format
@@ -229,7 +236,7 @@ class AuthRoutesTest : KoinTest {
         // The StatusPages plugin should handle this and return a 400 Bad Request
         val response = client.post(Auth.Register()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(registerRequest))
+            setBody(registerRequest)
         }
 
         // Verify the registration failed with a Bad Request status
@@ -249,6 +256,7 @@ class AuthRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) { json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true }) }
         }
 
         // Try to login with an invalid Google ID token
@@ -258,7 +266,7 @@ class AuthRoutesTest : KoinTest {
 
         val response = client.post(Auth.Google()) {
             contentType(ContentType.Application.Json)
-            setBody(Json.encodeToString(googleLoginRequest))
+            setBody(googleLoginRequest)
         }
 
         // Verify the login failed with an Internal Server Error status
@@ -282,6 +290,7 @@ class AuthRoutesTest : KoinTest {
 
         val client = createClient {
             install(Resources)
+            install(ContentNegotiation) { json(kotlinx.serialization.json.Json { ignoreUnknownKeys = true }) }
         }
 
         try {
@@ -296,16 +305,16 @@ class AuthRoutesTest : KoinTest {
             // Make the request
             val response = client.post(Auth.Google()) {
                 contentType(ContentType.Application.Json)
-                setBody(Json.encodeToString(googleLoginRequest))
+                setBody(googleLoginRequest)
             }
 
             // Verify the login was successful
             assertEquals(HttpStatusCode.OK, response.status)
 
             // Verify the response contains a token and user information
-            val responseBody = response.bodyAsText()
-            assertTrue(responseBody.contains("token"))
-            assertTrue(responseBody.contains("Test User"))
+            val responseBody = response.body<com.danioliveira.taskmanager.api.response.AuthResponse>()
+            assertTrue(responseBody.token.isNotBlank())
+            assertEquals("Test User", responseBody.user.displayName)
         } finally {
             // Reset the Google token verifier to its original state
             TestGoogleTokenVerifier.reset()
