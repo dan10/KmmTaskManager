@@ -6,24 +6,26 @@ import com.danioliveira.taskmanager.api.request.TaskAssignRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
+import com.danioliveira.taskmanager.api.routes.Projects
+import com.danioliveira.taskmanager.api.routes.Tasks
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.createTestUser
-import com.danioliveira.taskmanager.domain.AppConfig
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.generateTestToken
-import com.danioliveira.taskmanager.getTestModule
 import com.danioliveira.taskmanager.jsonBody
 import com.danioliveira.taskmanager.withAuth
-import io.ktor.client.request.delete
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.put
+import io.ktor.client.plugins.resources.Resources
+import io.ktor.client.plugins.resources.delete
+import io.ktor.client.plugins.resources.get
+import io.ktor.client.plugins.resources.post
+import io.ktor.client.plugins.resources.put
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.config.property
 import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
@@ -33,14 +35,13 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.After
 import org.junit.Before
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
-import org.koin.test.inject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import com.danioliveira.taskmanager.domain.JwtConfig as DomainJwtConfig
 
 class TaskRoutesTest : KoinTest {
 
@@ -48,15 +49,6 @@ class TaskRoutesTest : KoinTest {
     fun setUp() = runBlocking {
         // Initialize the H2 database
         TestDatabase.init()
-
-        // Start Koin with the test module
-        startKoin {
-            modules(getTestModule())
-        }
-
-        // Initialize JwtConfig with appConfig from Koin
-        val appConfig = inject<AppConfig>().value
-        JwtConfig.init(appConfig.jwt)
     }
 
     @After
@@ -67,12 +59,19 @@ class TaskRoutesTest : KoinTest {
         // Stop Koin
         stopKoin()
     }
-//
+
+    //
     @Test
-    fun `test get tasks - authenticated`() = testApplication {
+    fun `test get tasks owned by user - authenticated`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create a test user
@@ -86,7 +85,7 @@ class TaskRoutesTest : KoinTest {
         val taskDescription = "Test Description"
 
         // Create a task using the API
-        val createResponse = client.post("/api/tasks") {
+        val createResponse = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -102,10 +101,10 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Verify the task was created successfully
-        assertEquals(HttpStatusCode.OK, createResponse.status)
+        assertEquals(HttpStatusCode.Created, createResponse.status)
 
         // Get tasks
-        val response = client.get("/api/tasks") {
+        val response = client.get(Tasks.Owned()) {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -122,26 +121,40 @@ class TaskRoutesTest : KoinTest {
         assertEquals(taskTitle, items[0].jsonObject["title"]?.jsonPrimitive?.content)
         assertEquals(taskDescription, items[0].jsonObject["description"]?.jsonPrimitive?.content)
     }
-//
+
+    //
     @Test
-    fun `test get tasks - unauthenticated`() = testApplication {
+    fun `test get tasks owned by user - unauthenticated`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
         }
 
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
+        }
+
         // Get tasks without authentication
-        val response = client.get("/api/tasks")
+        val response = client.get(Tasks.Owned())
 
         // Verify the response is unauthorized
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
-//
+
+    //
     @Test
     fun `test get tasks by project id`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create a test user
@@ -151,7 +164,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a project
-        val projectResponse = client.post("/api/projects") {
+        val projectResponse = client.post(Projects()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(ProjectCreateRequest("Test Project", "Test Description"))
@@ -165,14 +178,15 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(projectId)
 
         // Assign the user to the project (needed for the assignee validation)
-        client.post("/api/projects/$projectId/assign") {
+        val projectResource = Projects.Id(projectId = projectId!!)
+        client.post(Projects.Id.Assign(projectResource)) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(mapOf("userId" to userId))
         }
 
         // Create a task for the project
-        client.post("/api/tasks") {
+        client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -188,7 +202,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Create a task without a project
-        client.post("/api/tasks") {
+        client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -204,7 +218,8 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Get tasks for the project
-        val response = client.get("/api/tasks?projectId=$projectId") {
+        val projectTasksResource = Projects.Id(projectId = projectId)
+        val response = client.get(Projects.Id.Tasks(projectTasksResource)) {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -220,13 +235,20 @@ class TaskRoutesTest : KoinTest {
         assertEquals(1, items!!.size)
         assertEquals("Project Task", items[0].jsonObject["title"]?.jsonPrimitive?.content)
     }
-//
+
+    //
     @Test
     fun `test get tasks by assignee id`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
         }
+
+        val client = createClient {
+            install(Resources)
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
 
         // Create test users
         val user1Id = createTestUser(
@@ -240,7 +262,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task assigned to user1
-        client.post("/api/tasks") {
+        client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -256,7 +278,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Create a task assigned to user2
-        client.post("/api/tasks") {
+        client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -272,7 +294,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Get tasks assigned to user1
-        val response = client.get("/api/tasks?assigneeId=$user1Id") {
+        val response = client.get(Tasks.Assigned(query = user1Id)) {
             withAuth(generateTestToken(user1Id, "user1@example.com"))
         }
 
@@ -288,12 +310,19 @@ class TaskRoutesTest : KoinTest {
         assertEquals(1, items!!.size)
         assertEquals("User 1 Task", items[0].jsonObject["title"]?.jsonPrimitive?.content)
     }
-//
+
+    //
     @Test
     fun `test get tasks by user`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create test users
@@ -308,7 +337,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create tasks created by user1
-        client.post("/api/tasks") {
+        client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -323,7 +352,7 @@ class TaskRoutesTest : KoinTest {
             )
         }
 
-        client.post("/api/tasks") {
+        client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -339,7 +368,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Create a task created by user2
-        client.post("/api/tasks") {
+        client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user2Id, "user2@example.com"))
             jsonBody(
@@ -355,7 +384,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Get tasks created by user1
-        val response = client.get("/api/tasks/user") {
+        val response = client.get(Tasks.Owned()) {
             withAuth(generateTestToken(user1Id, "user1@example.com"))
         }
 
@@ -373,12 +402,19 @@ class TaskRoutesTest : KoinTest {
         assertTrue(items.any { it.jsonObject["title"]?.jsonPrimitive?.content == "Task 2" })
         assertFalse(items.any { it.jsonObject["title"]?.jsonPrimitive?.content == "Task 3" })
     }
-//
+
+    //
     @Test
     fun `test create task - authenticated`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create a test user
@@ -391,7 +427,7 @@ class TaskRoutesTest : KoinTest {
         val taskTitle = "New Task"
         val taskDescription = "New Description"
 
-        val response = client.post("api/tasks") {
+        val response = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -407,7 +443,7 @@ class TaskRoutesTest : KoinTest {
         }
 
         // Verify the response
-        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(HttpStatusCode.Created, response.status)
 
         // Parse the response body
         val responseBody = Json.parseToJsonElement(response.bodyAsText()).jsonObject
@@ -427,6 +463,12 @@ class TaskRoutesTest : KoinTest {
             config = ApplicationConfig("application_test.conf")
         }
 
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
+        }
+
         // Create a test user
         val userId = createTestUser(
             email = "user@example.com",
@@ -434,7 +476,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Try to create a task without authentication
-        val response = client.post("/api/tasks") {
+        val response = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             jsonBody(
                 TaskCreateRequest(
@@ -451,12 +493,19 @@ class TaskRoutesTest : KoinTest {
         // Verify the response is unauthorized
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
-//
+
+    //
     @Test
     fun `test create task for current user`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create a test user
@@ -469,7 +518,7 @@ class TaskRoutesTest : KoinTest {
         val taskTitle = "User Task"
         val taskDescription = "Task for the current user"
 
-        val response = client.post("/api/tasks/user") {
+        val response = client.post(Tasks.Owned()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -493,15 +542,25 @@ class TaskRoutesTest : KoinTest {
         // Verify the response contains the created task with the current user as assignee
         assertEquals(taskTitle, responseBody["title"]?.jsonPrimitive?.content)
         assertEquals(taskDescription, responseBody["description"]?.jsonPrimitive?.content)
-        assertEquals(userId, responseBody["assigneeId"]?.jsonPrimitive?.content) // Should be the current user ID
+        assertEquals(
+            userId,
+            responseBody["assigneeId"]?.jsonPrimitive?.content
+        ) // Should be the current user ID
         assertEquals(userId, responseBody["creatorId"]?.jsonPrimitive?.content)
     }
-//
+
+    //
     @Test
     fun `test get task by id`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create a test user
@@ -511,7 +570,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("api/tasks") {
+        val createResponse = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -534,7 +593,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Get the task by ID
-        val response = client.get("/api/tasks/$taskId") {
+        val response = client.get(Tasks.Id(taskId = taskId!!)) {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -557,6 +616,12 @@ class TaskRoutesTest : KoinTest {
             config = ApplicationConfig("application_test.conf")
         }
 
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
+        }
+
         // Create a test user
         val userId = createTestUser(
             email = "user@example.com",
@@ -564,19 +629,26 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Get a non-existent task
-        val response = client.get("/api/tasks/00000000-0000-0000-0000-000000000000") {
+        val response = client.get(Tasks.Id(taskId = "00000000-0000-0000-0000-000000000000")) {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
         // Verify the response is not found
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
-//
+
+    //
     @Test
     fun `test update task`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create a test user
@@ -586,7 +658,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("api/tasks") {
+        val createResponse = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -609,7 +681,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Update the task
-        val response = client.put("/api/tasks/$taskId") {
+        val response = client.put(Tasks.Id(taskId = taskId!!)) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -635,12 +707,19 @@ class TaskRoutesTest : KoinTest {
         assertEquals("Updated Description", responseBody["description"]?.jsonPrimitive?.content)
         assertEquals(TaskStatus.IN_PROGRESS.name, responseBody["status"]?.jsonPrimitive?.content)
     }
-//
+
+    //
     @Test
     fun `test delete task`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create a test user
@@ -650,7 +729,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("api/tasks") {
+        val createResponse = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -673,7 +752,7 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Delete the task
-        val response = client.delete("/api/tasks/$taskId") {
+        val response = client.delete(Tasks.Id(taskId = taskId!!)) {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
@@ -681,19 +760,25 @@ class TaskRoutesTest : KoinTest {
         assertEquals(HttpStatusCode.NoContent, response.status)
 
         // Try to get the deleted task
-        val getResponse = client.get("/api/tasks/$taskId") {
+        val getResponse = client.get(Tasks.Id(taskId = taskId)) {
             withAuth(generateTestToken(userId, "user@example.com"))
         }
 
         // Verify the task is not found
         assertEquals(HttpStatusCode.NotFound, getResponse.status)
     }
-//
+
     @Test
     fun `test assign task`() = testApplication {
         // Set up the test environment
         environment {
             config = ApplicationConfig("application_test.conf")
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        val client = createClient {
+            install(Resources)
         }
 
         // Create test users
@@ -708,7 +793,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task assigned to user1
-        val createResponse = client.post("api/tasks") {
+        val createResponse = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
@@ -731,7 +816,8 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Assign the task to user2
-        val response = client.post("/api/tasks/$taskId/assign") {
+        val taskIdResource = Tasks.Id(taskId = taskId!!)
+        val response = client.post(Tasks.Id.Assign(taskIdResource)) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(TaskAssignRequest(user2Id))
@@ -754,6 +840,12 @@ class TaskRoutesTest : KoinTest {
             config = ApplicationConfig("application_test.conf")
         }
 
+        val client = createClient {
+            install(Resources)
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
         // Create a test user
         val userId = createTestUser(
             email = "user@example.com",
@@ -761,7 +853,7 @@ class TaskRoutesTest : KoinTest {
         )
 
         // Create a task
-        val createResponse = client.post("api/tasks") {
+        val createResponse = client.post(Tasks()) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(
@@ -784,7 +876,8 @@ class TaskRoutesTest : KoinTest {
         assertNotNull(taskId)
 
         // Change the task status
-        val response = client.post("/api/tasks/$taskId/status") {
+        val taskStatusResource = Tasks.Id(taskId = taskId!!)
+        val response = client.post(Tasks.Id.Status(taskStatusResource)) {
             contentType(ContentType.Application.Json)
             withAuth(generateTestToken(userId, "user@example.com"))
             jsonBody(TaskStatusChangeRequest(TaskStatus.DONE.name))
@@ -799,7 +892,8 @@ class TaskRoutesTest : KoinTest {
         // Verify the task status was changed
         assertEquals(TaskStatus.DONE.name, responseBody["status"]?.jsonPrimitive?.content)
     }
-//
+
+    //
     private fun assertNotNull(value: Any?) {
         assertTrue(value != null)
     }
