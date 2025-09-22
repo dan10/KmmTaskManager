@@ -108,13 +108,12 @@ internal class TaskRepositoryImpl : TaskRepository {
 
     context(transaction: Transaction)
     override suspend fun findAllByAssigneeId(
-        assigneeId: String,
+        assigneeId: UUID,
         page: Int,
         size: Int,
         query: String?
     ): PaginatedResponse<TaskResponse> {
-        val assigneeUuid = UUID.fromString(assigneeId)
-        var condition: Op<Boolean> = TasksTable.assigneeId eq assigneeUuid
+        var condition: Op<Boolean> = TasksTable.assigneeId eq assigneeId
         if (!query.isNullOrBlank()) {
             val searchQuery = "%${query.lowercase()}%"
             condition = condition and (
@@ -140,25 +139,23 @@ internal class TaskRepositoryImpl : TaskRepository {
     }
 
     context(transaction: Transaction)
-    override suspend fun getUserTaskProgress(userId: String): TaskProgressResponse {
-        val uuid = UUID.fromString(userId)
-        val totalTasks = TasksTable.id.count()
+    override suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse {
+        val totalTasks = TasksTable.id.count().alias("total_tasks")
         val completedTasks = Case()
             .When(TasksTable.status eq TaskStatus.DONE, intLiteral(1))
             .Else(intLiteral(0))
             .sum()
+            .alias("completed_tasks")
         
         val result = TasksTable
             .select(totalTasks, completedTasks)
-            .where { (TasksTable.creatorId eq uuid) or (TasksTable.assigneeId eq uuid) }
+            .where { (TasksTable.creatorId eq userId) or (TasksTable.assigneeId eq userId) }
             .singleOrNull()
-        
-        val totalCount = result?.get(totalTasks)?.toInt() ?: 0
-        val completedCount = result?.get(completedTasks) ?: 0
+
 
         return TaskProgressResponse(
-            totalTasks = totalCount,
-            completedTasks = completedCount,
+            totalTasks = result?.get(totalTasks)?.toInt() ?: 0 ,
+            completedTasks = result?.get(completedTasks) ?: 0,
         )
     }
 
@@ -222,7 +219,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         offset: Int? = null,
         predicate: () -> Op<Boolean>,
     ): PaginatedResponse<TaskResponse> {
-        val tasksCount = TasksTable.id.count().over().partitionBy(TasksTable.id).alias("tasks_count")
+        val tasksCount = TasksTable.id.count().alias("tasks_count")
 
         val query =  TasksTable
             .leftJoin(ProjectsTable,
@@ -232,6 +229,7 @@ internal class TaskRepositoryImpl : TaskRepository {
             .select(TasksTable.fields + ProjectsTable.name + ProjectsTable.id + tasksCount)
             .where(predicate)
             .orderBy(TasksTable.dueDate, SortOrder.DESC)
+            .groupBy(TasksTable.id, ProjectsTable.name, ProjectsTable.id)
             .apply { if (limit != null) limit(limit) }
             .apply { if (offset != null) offset(offset.toLong()) }
 

@@ -15,8 +15,6 @@ import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import io.ktor.server.response.respond
-import io.ktor.server.routing.RoutingContext
 import java.util.UUID
 
 class UserService(
@@ -45,8 +43,8 @@ class UserService(
      * @return An AuthResponse containing the JWT token and the user object
      * @throws ValidationException if the email is already registered
      */
-    context(context: RoutingContext)
-    suspend fun register(request: RegisterRequest) {
+
+    suspend fun register(request: RegisterRequest): AuthResponse {
         val existingUser = findByEmail(request.email)
         if (existingUser != null) {
             throw ValidationException(
@@ -60,7 +58,7 @@ class UserService(
         val token = JwtConfig.generateToken(userWithPassword.id, userWithPassword.email)
         val safeUser = toSafeUser(userWithPassword)
 
-        context.call.respond(AuthResponse(token = token, user = safeUser))
+       return AuthResponse(token = token, user = safeUser)
     }
 
     /**

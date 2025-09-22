@@ -26,7 +26,7 @@ internal interface TaskRepository {
 
     context(transaction: Transaction)
     suspend fun findAllByAssigneeId(
-        assigneeId: String,
+        assigneeId: UUID,
         page: Int = 0,
         size: Int = 10,
         query: String? = null
@@ -73,5 +73,5 @@ internal interface TaskRepository {
      * @return The task progress for the user.
      */
     context(transaction: Transaction)
-    suspend fun getUserTaskProgress(userId: String): TaskProgressResponse
+    suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse
 }

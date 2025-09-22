@@ -8,7 +8,6 @@ import com.danioliveira.taskmanager.plugins.configureRequestValidation
 import com.danioliveira.taskmanager.plugins.configureSecurity
 import com.danioliveira.taskmanager.plugins.configureSerialization
 import com.danioliveira.taskmanager.plugins.configureStatusPages
-import com.danioliveira.taskmanager.routes.adminRoutes
 import com.danioliveira.taskmanager.routes.authRoutes
 import com.danioliveira.taskmanager.routes.projectMemberRoutes
 import com.danioliveira.taskmanager.routes.projectRoutes
@@ -44,6 +43,5 @@ fun Application.module() {
         projectTaskRoutes()
         projectMemberRoutes()
         taskRoutes()
-        adminRoutes()
     }
 }

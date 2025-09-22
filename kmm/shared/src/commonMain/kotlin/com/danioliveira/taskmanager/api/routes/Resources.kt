@@ -44,11 +44,6 @@ class Projects {
 @Resource(Routes.ALL_PROJECTS)
 class UserProjects(val size: Int = 10, val page: Int = 0, val searchText: String? = null, val sort: String? = null)
 
-// Resource para obter tarefas de um usuário com paginação/search/sort
-@Resource(Routes.ALL_TASKS)
-class TasksPaginated(val size: Int = 10, val page: Int? = null, val searchText: String? = null, val sort: String? = null)
-
-
 @Resource(Routes.ALL_TASKS)
 class Tasks() {
 
@@ -70,7 +65,7 @@ class Tasks() {
     
     // GET /v1/tasks/assigned - Get tasks assigned to user  
     @Resource(Routes.TASKS_ASSIGNED)
-    class Assigned(val parent: Tasks = Tasks(), val page: Int = 0, val size: Int = 10, val query: String? = null)
+    class Assigned(val parent: Tasks = Tasks(), val page: Int = 1, val size: Int = 10, val query: String? = null)
     
     // GET /v1/tasks/stats - Get task statistics (counts by status)
     @Resource(Routes.TASKS_STATS)

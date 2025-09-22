@@ -8,7 +8,6 @@ import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.api.routes.Tasks
-import com.danioliveira.taskmanager.api.routes.TasksPaginated
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.delete
@@ -37,10 +36,10 @@ class TaskApiService(
      * @return PaginatedResponse containing the tasks and task progress information
      */
     suspend fun getTasks(page: Int, size: Int, query: String? = null): PaginatedResponse<TaskResponse> {
-        val resource = TasksPaginated(
+        val resource = Tasks.Assigned(
             size = size,
             page = page,
-            searchText = query
+            query = query
         )
         return client.get(resource).body()
     }

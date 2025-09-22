@@ -5,15 +5,14 @@ import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskStatusChangeRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.api.routes.Tasks
-import com.danioliveira.taskmanager.api.routes.TasksPaginated
 import com.danioliveira.taskmanager.domain.service.TaskService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
+import io.ktor.server.resources.delete
 import io.ktor.server.resources.get
 import io.ktor.server.resources.post
 import io.ktor.server.resources.put
-import io.ktor.server.resources.delete
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
@@ -41,16 +40,6 @@ fun Route.taskRoutes() {
     val taskService by inject<TaskService>()
 
     authenticate("auth-jwt") {
-        
-        // Get tasks with pagination and filtering: GET /v1/tasks
-        get<TasksPaginated> { res ->
-            val userId = userPrincipal().toString()
-            val tasks = when {
-                res.searchText != null -> taskService.findAllByAssigneeId(userId, res.page ?: 0, res.size, res.searchText)
-                else -> taskService.findAllByAssigneeId(userId, res.page ?: 0, res.size, null)
-            }
-            call.respond(tasks)
-        }
 
         // Create new task: POST /v1/tasks
         post<Tasks> {
@@ -94,14 +83,14 @@ fun Route.taskRoutes() {
 
         // Get tasks assigned to current user: GET /v1/tasks/assigned
         get<Tasks.Assigned> { res ->
-            val userId = userPrincipal().toString()
+            val userId = userPrincipal()
             val tasks = taskService.findAllByAssigneeId(userId, res.page, res.size, res.query)
             call.respond(tasks)
         }
 
         // Get task statistics: GET /v1/tasks/stats
         get<Tasks.Stats> {
-            val userId = userPrincipal().toString()
+            val userId = userPrincipal()
             val stats = taskService.getUserTaskProgress(userId)
             call.respond(stats)
         }

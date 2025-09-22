@@ -19,9 +19,8 @@ fun Route.authRoutes() {
 
     post<Auth.Register> {
         val request = call.receive<RegisterRequest>()
-        with(this) {
-            userService.register(request)
-        }
+        val authResponse = userService.register(request)
+        call.respond(authResponse)
     }
 
     post<Auth.Login> {

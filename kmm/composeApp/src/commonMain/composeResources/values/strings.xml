@@ -49,7 +49,7 @@
     <string name="tasks_search_placeholder">Search tasks...</string>
     <string name="tasks_progress_title">Your Progress</string>
     <string name="tasks_progress_percentage">%1$d%</string>
-    <string name="tasks_progress_completed">%d of %d tasks completed</string>
+    <string name="tasks_progress_completed">%1$d of %2$d tasks completed</string>
     <string name="tasks_empty_title">Ready to Get Started?</string>
     <string name="tasks_empty_subtitle">Here are some ideas to help you begin:</string>
 

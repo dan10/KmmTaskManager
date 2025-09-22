@@ -199,7 +199,7 @@ class TaskServiceTest : BaseServiceTest() {
         val task3 = taskService.create(request3, creatorId)
 
         // Find tasks by assignee1
-        val assignee1Tasks = taskService.findAllByAssigneeId(assignee1Id)
+        val assignee1Tasks = taskService.findAllByAssigneeId(assignee1Id.toUUID())
 
         // Verify the correct tasks were returned
         assertEquals(2, assignee1Tasks.total)
@@ -209,7 +209,7 @@ class TaskServiceTest : BaseServiceTest() {
         assertFalse(assignee1Tasks.items.any { it.id == task3.id })
 
         // Find tasks by assignee2
-        val assignee2Tasks = taskService.findAllByAssigneeId(assignee2Id)
+        val assignee2Tasks = taskService.findAllByAssigneeId(assignee2Id.toUUID())
 
         // Verify the correct tasks were returned
         assertEquals(1, assignee2Tasks.total)
@@ -547,5 +547,90 @@ class TaskServiceTest : BaseServiceTest() {
             // Expected exception
             assertTrue(e.message.contains("Task"))
         }
+    }
+
+    @Test
+    fun `test get user task progress`() = runTest {
+        // Create actual users in the database
+        val userId = createTestUser(email = "progress_user@example.com", displayName = "Progress User")
+        val assigneeId = createTestUser(email = "assignee_progress@example.com", displayName = "Assignee Progress")
+
+        // Create tasks with different statuses
+        val todoTask = taskService.create(
+            TaskCreateRequest(
+                title = "TODO Task",
+                description = "Task in TODO status",
+                projectId = null,
+                assigneeId = userId,
+                priority = Priority.MEDIUM,
+                dueDate = null
+            ),
+            userId
+        )
+
+        val inProgressTask = taskService.create(
+            TaskCreateRequest(
+                title = "In Progress Task",
+                description = "Task in progress",
+                projectId = null,
+                assigneeId = userId,
+                priority = Priority.HIGH,
+                dueDate = null
+            ),
+            userId
+        )
+
+        val completedTask = taskService.create(
+            TaskCreateRequest(
+                title = "Completed Task",
+                description = "Task completed",
+                projectId = null,
+                assigneeId = userId,
+                priority = Priority.LOW,
+                dueDate = null
+            ),
+            userId
+        )
+
+        // Change statuses
+        taskService.changeStatus(inProgressTask.id, TaskStatus.IN_PROGRESS.name)
+        taskService.changeStatus(completedTask.id, TaskStatus.DONE.name)
+
+        // Create a task for another user to ensure it's not counted
+        taskService.create(
+            TaskCreateRequest(
+                title = "Other User Task",
+                description = "Task for another user",
+                projectId = null,
+                assigneeId = assigneeId,
+                priority = Priority.MEDIUM,
+                dueDate = null
+            ), assigneeId
+        )
+
+        // Wait before getting progress to ensure all transactions are complete
+        kotlinx.coroutines.delay(10)
+
+        // Get task progress for the user
+        val progress = taskService.getUserTaskProgress(userId.toUUID())
+
+        // Verify the progress counts
+        assertNotNull(progress)
+        assertEquals(1, progress.completedTasks)
+        assertEquals(3, progress.totalTasks)
+    }
+
+    @Test
+    fun `test get user task progress - no tasks`() = runTest {
+        // Create a user with no tasks
+        val userId = createTestUser(email = "no_tasks_user@example.com", displayName = "No Tasks User")
+
+        // Get task progress for the user
+        val progress = taskService.getUserTaskProgress(userId.toUUID())
+
+        // Verify all counts are zero
+        assertNotNull(progress)
+        assertEquals(0, progress.completedTasks)
+        assertEquals(0, progress.totalTasks)
     }
 }

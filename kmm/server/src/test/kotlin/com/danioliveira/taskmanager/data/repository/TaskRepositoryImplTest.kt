@@ -289,7 +289,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Find tasks by assignee ID (first user)
         val assigneeTasks = dbQuery {
-            taskRepository.findAllByAssigneeId(testUserId.toString(), 0, 10)
+            taskRepository.findAllByAssigneeId(testUserId, 0, 10)
         }
 
         // Verify the correct tasks were found
@@ -301,7 +301,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Find tasks by assignee ID (second user)
         val secondAssigneeTasks = dbQuery {
-            taskRepository.findAllByAssigneeId(secondUserId.toString(), 0, 10)
+            taskRepository.findAllByAssigneeId(secondUserId, 0, 10)
         }
 
         // Verify the correct tasks were found
@@ -443,7 +443,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Find tasks by assignee ID with query filter "Important"
         val filteredTasks = dbQuery {
-            taskRepository.findAllByAssigneeId(secondUserId.toString(), 0, 10, "Important")
+            taskRepository.findAllByAssigneeId(secondUserId, 0, 10, "Important")
         }
 
         // Verify the correct tasks were found
@@ -502,7 +502,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Get task progress for the second user
         val progress = dbQuery {
-            taskRepository.getUserTaskProgress(secondUserId.toString())
+            taskRepository.getUserTaskProgress(secondUserId)
         }
 
         // Verify the task progress

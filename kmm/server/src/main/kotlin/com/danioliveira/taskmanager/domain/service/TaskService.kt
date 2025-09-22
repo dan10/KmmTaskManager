@@ -13,6 +13,7 @@ import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepositor
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.routes.toUUID
+import org.jetbrains.exposed.v1.core.Slf4jSqlDebugLogger
 import org.jetbrains.exposed.v1.core.Transaction
 import java.util.UUID
 
@@ -39,13 +40,15 @@ internal class TaskService(
     }
 
     suspend fun findAllByAssigneeId(
-        assigneeId: String,
-        page: Int = 0,
+        assigneeId: UUID,
+        page: Int = 1,
         size: Int = 10,
         query: String? = null
     ): PaginatedResponse<TaskResponse> = dbQuery {
-        // The repository now handles filtering by query and including progress information
-        with(repository) { findAllByAssigneeId(assigneeId, page, size, query) }
+        addLogger(Slf4jSqlDebugLogger)
+        with(this) {
+            repository.findAllByAssigneeId(assigneeId, page, size, query)
+        }
     }
 
     suspend fun findById(id: String): TaskResponse = dbQuery {
@@ -118,6 +121,7 @@ internal class TaskService(
     }
 
     suspend fun delete(id: String): Boolean = dbQuery {
+        // TODO: Validate that the user has permission to delete the task (e.g., is the creator or participant in the project of the task)
         repository.delete(id.toUUID())
     }
 
@@ -128,7 +132,6 @@ internal class TaskService(
         val assigneeUUID = UUID.fromString(assigneeId)
         if (current.projectId != null) {
             val projectUUID = UUID.fromString(current.projectId)
-
             validateUserCanBeAssignedToProject(projectUUID, assigneeUUID)
         }
 
@@ -164,7 +167,9 @@ internal class TaskService(
      * @param userId The ID of the user.
      * @return The task progress for the user.
      */
-    suspend fun getUserTaskProgress(userId: String): TaskProgressResponse = dbQuery {
-        repository.getUserTaskProgress(userId)
+    suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse = dbQuery {
+        with(this) {
+            repository.getUserTaskProgress(userId)
+        }
     }
 }
