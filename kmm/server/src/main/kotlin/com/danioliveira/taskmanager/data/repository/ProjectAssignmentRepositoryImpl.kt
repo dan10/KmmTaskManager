@@ -54,7 +54,7 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
     context(transaction: Transaction)
     override suspend fun findUsersByProject(projectId: UUID): List<UUID> {
         return ProjectAssignmentsTable
-            .select(ProjectAssignmentsTable.id)
+            .select(ProjectAssignmentsTable.userId)
             .where { ProjectAssignmentsTable.projectId eq projectId }
             .map { it[ProjectAssignmentsTable.userId].value }
             .toList()
@@ -63,7 +63,7 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
     context(transaction: Transaction)
     override suspend fun findProjectsByUser(userId: UUID): List<UUID> {
         return ProjectAssignmentsTable
-            .select(ProjectAssignmentsTable.id)
+            .select(ProjectAssignmentsTable.projectId)
             .where { ProjectAssignmentsTable.userId eq userId }
             .map { it[ProjectAssignmentsTable.projectId].value }
             .toList()

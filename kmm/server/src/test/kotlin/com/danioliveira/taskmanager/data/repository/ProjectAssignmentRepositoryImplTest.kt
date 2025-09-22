@@ -2,12 +2,21 @@ package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
+import com.danioliveira.taskmanager.domain.exceptions.AlreadyAssignedException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import kotlinx.coroutines.runBlocking
-import java.util.*
-import kotlin.test.*
+import kotlinx.coroutines.test.runTest
+import java.util.UUID
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class ProjectAssignmentRepositoryImplTest {
     private lateinit var assignmentRepository: ProjectAssignmentRepository
@@ -26,42 +35,34 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Create a test user
         val user = dbQuery {
-            with(userRepository) {
-                create("test_assign@example.com", "password", "Test User", null)
-            }
+            userRepository.create("test_assign@example.com", "password", "Test User", null)
         }
         testUserId = UUID.fromString(user.id)
 
         // Create a test project
         val project = dbQuery {
-            with(projectRepository) {
-                create("Test Project", "Test Project Description", testUserId)
-            }
+          projectRepository.create("Test Project", "Test Project Description", testUserId)
         }
         testProjectId = UUID.fromString(project.id)
     }
 
     @AfterTest
-    fun tearDown() {
+    fun tearDown() = runBlocking {
         // Clear the database after each test
         TestDatabase.clearDatabase()
     }
 
     @Test
-    fun `test assign user to project`() = runBlocking {
+    fun `test assign user to project`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+           userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Assign the second user to the project
         val assignment = dbQuery {
-            with(assignmentRepository) {
-                assignUserToProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.assignUserToProject(testProjectId, secondUserId)
         }
 
         // Verify the assignment was created correctly
@@ -71,75 +72,56 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Verify the user is now assigned to the project
         val isAssigned = dbQuery {
-            with(assignmentRepository) {
-                isUserAssignedToProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.isUserAssignedToProject(testProjectId, secondUserId)
         }
+
         assertTrue(isAssigned)
     }
 
     @Test
-    fun `test assign user to project - already assigned`() = runBlocking {
+    fun `test assign user to project - already assigned`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second4@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second4@example.com", "password", "Second User", null)
         }
+
         val secondUserId = UUID.fromString(secondUser.id)
 
-        // Assign the second user to the project
         dbQuery {
-            with(assignmentRepository) {
-                assignUserToProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.assignUserToProject(testProjectId, secondUserId)
         }
 
-        // Try to assign the user to the same project again
-        // This should throw an IllegalStateException
-        try {
+        assertFailsWith(AlreadyAssignedException::class)  {
             dbQuery {
-                with(assignmentRepository) {
-                    assignUserToProject(testProjectId, secondUserId)
-                }
+                assignmentRepository.assignUserToProject(testProjectId, secondUserId)
             }
-            fail("Expected IllegalStateException was not thrown")
-        } catch (e: IllegalStateException) {
-            // Expected exception
-            assertTrue(e.message?.contains("already assigned") == true)
         }
     }
 
     @Test
-    fun `test remove user from project`() = runBlocking {
+    fun `test remove user from project`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
+
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Assign the second user to the project
         dbQuery {
-            with(assignmentRepository) {
-                assignUserToProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.assignUserToProject(testProjectId, secondUserId)
         }
 
         // Verify the user is assigned to the project
         val isAssigned = dbQuery {
-            with(assignmentRepository) {
-                isUserAssignedToProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.isUserAssignedToProject(testProjectId, secondUserId)
         }
+
         assertTrue(isAssigned)
 
         // Remove the user from the project
         val removed = dbQuery {
-            with(assignmentRepository) {
-                removeUserFromProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.removeUserFromProject(testProjectId, secondUserId)
         }
 
         // Verify the user was removed
@@ -147,28 +129,23 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Verify the user is no longer assigned to the project
         val isStillAssigned = dbQuery {
-            with(assignmentRepository) {
-                isUserAssignedToProject(testProjectId, secondUserId)
-            }
+           assignmentRepository.isUserAssignedToProject(testProjectId, secondUserId)
         }
+
         assertFalse(isStillAssigned)
     }
 
     @Test
-    fun `test remove user from project - not assigned`() = runBlocking {
+    fun `test remove user from project - not assigned`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Try to remove a user that is not assigned to the project
         val removed = dbQuery {
-            with(assignmentRepository) {
-                removeUserFromProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.removeUserFromProject(testProjectId, secondUserId)
         }
 
         // Verify the removal failed
@@ -176,26 +153,20 @@ class ProjectAssignmentRepositoryImplTest {
     }
 
     @Test
-    fun `test find users by project`() = runBlocking {
+    fun `test find users by project`() = runTest {
         // Create multiple users
         val user1 = dbQuery {
-            with(userRepository) {
-                create("user1@example.com", "password", "User 1", null)
-            }
+            userRepository.create("user1@example.com", "password", "User 1", null)
         }
         val user1Id = UUID.fromString(user1.id)
 
         val user2 = dbQuery {
-            with(userRepository) {
-                create("user2@example.com", "password", "User 2", null)
-            }
+            userRepository.create("user2@example.com", "password", "User 2", null)
         }
         val user2Id = UUID.fromString(user2.id)
 
         val user3 = dbQuery {
-            with(userRepository) {
-                create("user3@example.com", "password", "User 3", null)
-            }
+            userRepository.create("user3@example.com", "password", "User 3", null)
         }
         val user3Id = UUID.fromString(user3.id)
 
@@ -209,9 +180,7 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Find users assigned to the project
         val users = dbQuery {
-            with(assignmentRepository) {
-                findUsersByProject(testProjectId)
-            }
+            assignmentRepository.findUsersByProject(testProjectId)
         }
 
         // Verify the correct users were found
@@ -222,27 +191,21 @@ class ProjectAssignmentRepositoryImplTest {
     }
 
     @Test
-    fun `test find projects by user`() = runBlocking {
+    fun `test find projects by user`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Create multiple projects
         val project1 = dbQuery {
-            with(projectRepository) {
-                create("Project 1", "Description 1", testUserId)
-            }
+           projectRepository.create("Project 1", "Description 1", testUserId)
         }
         val project1Id = UUID.fromString(project1.id)
 
         val project2 = dbQuery {
-            with(projectRepository) {
-                create("Project 2", "Description 2", testUserId)
-            }
+           projectRepository.create("Project 2", "Description 2", testUserId)
         }
         val project2Id = UUID.fromString(project2.id)
 
@@ -256,9 +219,7 @@ class ProjectAssignmentRepositoryImplTest {
 
         // Find projects the second user is assigned to
         val projects = dbQuery {
-            with(assignmentRepository) {
-                findProjectsByUser(secondUserId)
-            }
+            assignmentRepository.findProjectsByUser(secondUserId)
         }
 
         // Verify the correct projects were found
@@ -268,36 +229,28 @@ class ProjectAssignmentRepositoryImplTest {
     }
 
     @Test
-    fun `test is user assigned to project`() = runBlocking {
+    fun `test is user assigned to project`() = runTest {
         // Create a second user
         val secondUser = dbQuery {
-            with(userRepository) {
-                create("second@example.com", "password", "Second User", null)
-            }
+            userRepository.create("second@example.com", "password", "Second User", null)
         }
         val secondUserId = UUID.fromString(secondUser.id)
 
         // Check if the user is assigned to the project (should be false)
         val isAssignedBefore = dbQuery {
-            with(assignmentRepository) {
-                isUserAssignedToProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.isUserAssignedToProject(testProjectId, secondUserId)
         }
+
         assertFalse(isAssignedBefore)
 
         // Assign the user to the project
-        dbQuery {
-            with(assignmentRepository) {
-                assignUserToProject(testProjectId, secondUserId)
-            }
-        }
+        dbQuery { assignmentRepository.assignUserToProject(testProjectId, secondUserId) }
 
         // Check if the user is assigned to the project (should be true)
         val isAssignedAfter = dbQuery {
-            with(assignmentRepository) {
-                isUserAssignedToProject(testProjectId, secondUserId)
-            }
+            assignmentRepository.isUserAssignedToProject(testProjectId, secondUserId)
         }
+
         assertTrue(isAssignedAfter)
     }
 }

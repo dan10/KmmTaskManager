@@ -116,14 +116,14 @@ class ProjectRepositoryImpl : ProjectRepository {
             .count()
             .alias("in_progress_tasks")
 
+        val list = listOfNotNull(total, tasksCount, completed, inProgress)
+
         val query = (ProjectsTable leftJoin TasksTable)
-            .select(ProjectsTable.fields +
-                    listOfNotNull(total, tasksCount, completed, inProgress)
-            )
+            .select(ProjectsTable.fields + list)
             .apply { if (ownerId != null) andWhere { ProjectsTable.ownerId eq ownerId } }
             .apply { if (subQuery != null) andWhere { subQuery } }
-            .apply { if (page != null) groupBy(ProjectsTable.id) }
-            .apply { orderBy(ProjectsTable.createdAt, SortOrder.DESC) }
+            .apply { groupBy(ProjectsTable.id) }
+            .apply { if (page != null) orderBy(ProjectsTable.createdAt, SortOrder.DESC) }
             .apply { if (size != null) limit(size) }
             .apply { if (page != null && size != null) offset((page * size).toLong()) }
         

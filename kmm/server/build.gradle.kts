@@ -1,5 +1,3 @@
-import io.gatling.plugin.SimulationSelector.simulations
-
 plugins {
     application
     alias(libs.plugins.kotlinJvm)
@@ -99,6 +97,15 @@ dependencies {
     testImplementation(libs.testcontainers.core)
     testImplementation(libs.testcontainers.junit)
     testImplementation(libs.testcontainers.postgresql)
+    // Exposed ORM for testing
+    testImplementation(libs.exposed.core)
+    testImplementation(libs.exposed.dao)
+    testImplementation(libs.exposed.jdbc)
+    testImplementation(libs.r2dbc.h2)
+    testImplementation("org.testcontainers:testcontainers:1.21.3")
+    testImplementation("org.testcontainers:postgresql:1.21.3")
+    testImplementation("org.testcontainers:r2dbc:1.21.3")
+    testImplementation(libs.exposed.kotlin.datetime)
 
     // Load testing with Gatling
     // Required for Java DSL

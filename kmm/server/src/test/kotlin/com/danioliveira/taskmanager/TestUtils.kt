@@ -1,19 +1,17 @@
 package com.danioliveira.taskmanager
 
 import com.danioliveira.taskmanager.auth.JwtConfig
-import com.danioliveira.taskmanager.data.entity.UserDAOEntity
+import com.danioliveira.taskmanager.data.tables.UsersTable
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.UUID
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 
 /**
@@ -56,20 +54,19 @@ inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {
  * @param googleId The Google ID of the user (optional)
  * @return The ID of the created user
  */
-fun createTestUser(
+suspend fun createTestUser(
     email: String = "test@example.com",
     passwordHash: String = "hashed-password",
     displayName: String = "Test User",
     googleId: String? = null
 ): String {
-    return transaction {
-        val user = UserDAOEntity.new {
-            this.email = email
-            this.passwordHash = passwordHash
-            this.displayName = displayName
-            this.googleId = googleId
-            this.createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        }
-        user.id.value.toString()
+    return suspendTransaction {
+        UsersTable.insert { row ->
+            row[UsersTable.email] = email
+            row[UsersTable.passwordHash] = passwordHash
+            row[UsersTable.displayName] = displayName
+            row[UsersTable.googleId] = googleId
+            row[UsersTable.createdAt] = Clock.System.now()
+        }.resultedValues?.first()?.get(UsersTable.id)?.toString() ?: throw IllegalStateException("Failed to create test user")
     }
 }

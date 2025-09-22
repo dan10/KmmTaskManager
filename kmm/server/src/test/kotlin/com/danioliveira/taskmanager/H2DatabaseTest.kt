@@ -2,15 +2,17 @@ package com.danioliveira.taskmanager
 
 import com.danioliveira.taskmanager.data.tables.UsersTable
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.r2dbc.SchemaUtils
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.junit.Before
 import org.junit.Test
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -22,16 +24,13 @@ class H2DatabaseTest {
     @Before
     fun setup() {
         // Connect to H2 in-memory database
-        Database.connect(
-            url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;",
-            driver = "org.h2.Driver",
-            user = "sa",
-            password = ""
-        )
+        val h2db = R2dbcDatabase.connect("r2dbc:h2:mem:///test")
 
         // Create tables
-        transaction {
-            SchemaUtils.create(UsersTable)
+        runBlocking {
+            suspendTransaction(h2db) {
+                SchemaUtils.create(UsersTable)
+            }
         }
     }
 
@@ -39,10 +38,12 @@ class H2DatabaseTest {
     fun `test H2 database connection`() {
         // This test verifies that we can connect to the H2 database
         // and create tables
-        transaction {
-            // If we get here, the connection was successful
-            // and the tables were created
-            assertNotNull(UsersTable)
+        runBlocking {
+            suspendTransaction {
+                // If we get here, the connection was successful
+                // and the tables were created
+                assertNotNull(UsersTable)
+            }
         }
     }
 
@@ -55,30 +56,28 @@ class H2DatabaseTest {
         TestDatabase.init()
 
         // Create a user directly in the database
-        val userId = transaction {
-            val userEntity = com.danioliveira.taskmanager.data.entity.UserDAOEntity.new {
-                email = "test@example.com"
-                passwordHash = "hashed-password"
-                displayName = "Test User"
-                createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-            }
-            userEntity.id.value.toString()
+        val userId = suspendTransaction {
+            UsersTable.insert { row ->
+                row[UsersTable.email] = "test@example.com"
+                row[UsersTable.passwordHash] = "hashed-password"
+                row[UsersTable.displayName] = "Test User"
+                row[UsersTable.createdAt] = kotlin.time.Clock.System.now()
+            }.resultedValues?.first()?.get(UsersTable.id)?.toString() ?: throw IllegalStateException("Failed to create test user")
         }
 
         // Verify the user was created
-        val user = transaction {
-            val entity =
-                com.danioliveira.taskmanager.data.entity.UserDAOEntity.findById(java.util.UUID.fromString(userId))
-            assertNotNull(entity)
+        val user = suspendTransaction {
+            val row = UsersTable.selectAll().where { UsersTable.id eq UUID.fromString(userId) }.singleOrNull()
+            assertNotNull(row)
 
             // Convert to domain model
             UserWithPassword(
-                id = entity.id.value.toString(),
-                email = entity.email,
-                displayName = entity.displayName,
-                googleId = entity.googleId,
-                createdAt = entity.createdAt.toString(),
-                passwordHash = entity.passwordHash
+                id = row[UsersTable.id].toString(),
+                email = row[UsersTable.email],
+                displayName = row[UsersTable.displayName],
+                googleId = row[UsersTable.googleId],
+                createdAt = row[UsersTable.createdAt].toString(),
+                passwordHash = row[UsersTable.passwordHash]
             )
         }
 

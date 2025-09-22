@@ -1,33 +1,38 @@
 package com.danioliveira.taskmanager
 
-import com.danioliveira.taskmanager.data.tables.*
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.TransactionManager
-import org.jetbrains.exposed.sql.transactions.transaction
-import java.sql.Connection
+import com.danioliveira.taskmanager.data.tables.ProjectAssignmentsTable
+import com.danioliveira.taskmanager.data.tables.ProjectInvitationsTable
+import com.danioliveira.taskmanager.data.tables.ProjectsTable
+import com.danioliveira.taskmanager.data.tables.TasksTable
+import com.danioliveira.taskmanager.data.tables.UsersTable
+import org.jetbrains.exposed.v1.core.StdOutSqlLogger
+import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.r2dbc.SchemaUtils
+import org.jetbrains.exposed.v1.r2dbc.deleteAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.containers.PostgreSQLR2DBCDatabaseContainer
 
 /**
- * Configures an H2 in-memory database for testing.
- * This allows tests to run without requiring a PostgreSQL instance.
+ * Test database helper backed by Testcontainers (PostgreSQL) for Exposed R2DBC.
  */
 object TestDatabase {
-    /**
-     * Initializes the H2 in-memory database for testing.
-     * Creates all necessary tables and sets up the database connection.
-     */
-    fun init() {
-        // Connect to H2 in-memory database
-        Database.connect(
-            url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;",
-            driver = "org.h2.Driver",
-            user = "sa",
-            password = "",
-            databaseConfig = DatabaseConfig { defaultIsolationLevel = Connection.TRANSACTION_REPEATABLE_READ }
-        )
-        TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_REPEATABLE_READ
+    private var container: PostgreSQLContainer<Nothing>? = null
 
-        // Create tables
-        transaction {
+    /**
+     * Start PostgreSQL Testcontainer and create schema.
+     */
+    suspend fun init() {
+        // Start a lightweight PostgreSQL container
+        container = PostgreSQLContainer<Nothing>("postgres:17-alpine").apply {
+            start()
+        }
+
+        val r2dbcDb = R2dbcDatabase.connect {
+            connectionFactoryOptions = PostgreSQLR2DBCDatabaseContainer.getOptions(container)
+        }
+
+        suspendTransaction(db = r2dbcDb) {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(
                 UsersTable,
@@ -40,16 +45,17 @@ object TestDatabase {
     }
 
     /**
-     * Clears all data from the database tables.
-     * This is useful for ensuring tests start with a clean state.
+     * Truncate all tables to keep tests isolated.
      */
-    fun clearDatabase() {
-        transaction {
+    suspend fun clearDatabase() {
+        suspendTransaction {
             ProjectAssignmentsTable.deleteAll()
             ProjectInvitationsTable.deleteAll()
             TasksTable.deleteAll()
             ProjectsTable.deleteAll()
             UsersTable.deleteAll()
         }
+
+        container?.stop()
     }
 }

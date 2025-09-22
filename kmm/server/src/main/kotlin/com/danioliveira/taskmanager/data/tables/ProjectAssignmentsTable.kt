@@ -5,8 +5,11 @@ import org.jetbrains.exposed.v1.datetime.CurrentDateTime
 import org.jetbrains.exposed.v1.datetime.datetime
 
 object ProjectAssignmentsTable : UUIDTable("project_assignments") {
-    val projectId = reference("project_id", ProjectsTable)
+
+    val projectId = reference("project_id",ProjectsTable)
+
     val userId = reference("user_id", UsersTable)
+
     val assignedAt = datetime("assigned_at").defaultExpression(CurrentDateTime)
     val assignedBy = reference("assigned_by", UsersTable)
 

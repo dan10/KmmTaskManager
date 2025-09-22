@@ -3,7 +3,9 @@ package com.danioliveira.taskmanager.data.repository
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.repository.UserRepository
+import com.danioliveira.taskmanager.routes.toUUID
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -16,15 +18,13 @@ class UserRepositoryImplTest {
     private lateinit var repository: UserRepository
 
     @Before
-    fun setUp() {
-        // Initialize the H2 database
+    fun setUp() = runBlocking {
         TestDatabase.init()
         repository = UserRepositoryImpl()
     }
 
     @After
-    fun tearDown() {
-        // Clear the database after each test
+    fun tearDown() = runBlocking {
         TestDatabase.clearDatabase()
     }
 
@@ -36,9 +36,7 @@ class UserRepositoryImplTest {
         val passwordHash = "hashed-password"
 
         val user = dbQuery {
-            with(repository) {
-                create(email, passwordHash, displayName, null)
-            }
+            repository.create(email, passwordHash, displayName, null)
         }
 
         // Verify the user was created correctly
@@ -49,9 +47,7 @@ class UserRepositoryImplTest {
 
         // Find the user by email
         val foundUser = dbQuery {
-            with(repository) {
-                findByEmail(email)
-            }
+            repository.findByEmail(email)
         }
 
         // Verify the user was found
@@ -61,23 +57,19 @@ class UserRepositoryImplTest {
     }
 
     @Test
-    fun `test find user by id`() = runBlocking {
+    fun `test find user by id`() = runTest {
         // Create a user
         val email = "test@example.com"
         val displayName = "Test User"
         val passwordHash = "hashed-password"
 
         val user = dbQuery {
-            with(repository) {
-                create(email, passwordHash, displayName, null)
-            }
+            repository.create(email, passwordHash, displayName, null)
         }
 
         // Find the user by ID
         val foundUser = dbQuery {
-            with(repository) {
-                findById(user.id)
-            }
+            repository.findById(user.id.toUUID())
         }
 
         // Verify the user was found
@@ -91,9 +83,7 @@ class UserRepositoryImplTest {
     fun `test find non-existent user`() = runBlocking {
         // Try to find a user that doesn't exist by email
         val user = dbQuery {
-            with(repository) {
-                findByEmail("nonexistent@example.com")
-            }
+            repository.findByEmail("nonexistent@example.com")
         }
 
         // Verify the user was not found
@@ -101,9 +91,7 @@ class UserRepositoryImplTest {
 
         // Try to find a user that doesn't exist by ID
         val userById = dbQuery {
-            with(repository) {
-                findById(UUID.randomUUID().toString())
-            }
+            repository.findById(UUID.randomUUID())
         }
 
         // Verify the user was not found
@@ -118,9 +106,7 @@ class UserRepositoryImplTest {
         val googleId = "google-123456"
 
         val user = dbQuery {
-            with(repository) {
-                create(email, null, displayName, googleId)
-            }
+            repository.create(email, null, displayName, googleId)
         }
 
         // Verify the user was created correctly
@@ -132,9 +118,7 @@ class UserRepositoryImplTest {
 
         // Find the user by email
         val foundUser = dbQuery {
-            with(repository) {
-                findByEmail(email)
-            }
+            repository.findByEmail(email)
         }
 
         // Verify the user was found with the correct Google ID
@@ -150,9 +134,7 @@ class UserRepositoryImplTest {
         val passwordHash = "hashed-password"
 
         val user = dbQuery {
-            with(repository) {
-                create(email, passwordHash, displayName, null)
-            }
+            repository.create(email, passwordHash, displayName, null)
         }
 
         // Convert to safe user

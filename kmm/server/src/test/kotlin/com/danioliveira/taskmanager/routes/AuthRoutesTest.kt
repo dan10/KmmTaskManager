@@ -13,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.testing.testApplication
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
@@ -25,13 +26,13 @@ import kotlin.test.assertTrue
 class AuthRoutesTest : KoinTest {
 
     @BeforeTest
-    fun setUp() {
+    fun setUp() = runBlocking {
         // Clear the database before each test
         TestDatabase.init()
     }
 
     @AfterTest
-    fun tearDown() {
+    fun tearDown() = runBlocking {
         // Clear the database after each test
         TestDatabase.clearDatabase()
         stopKoin()

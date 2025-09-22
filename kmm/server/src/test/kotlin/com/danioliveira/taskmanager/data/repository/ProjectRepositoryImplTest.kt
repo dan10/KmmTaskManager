@@ -42,7 +42,7 @@ class ProjectRepositoryImplTest {
     }
 
     @After
-    fun tearDown() {
+    fun tearDown() = runBlocking {
         // Clear the database after each test
         TestDatabase.clearDatabase()
     }
@@ -144,7 +144,7 @@ class ProjectRepositoryImplTest {
         // Find the project to verify the changes
         val updatedProject = dbQuery {
             with(projectRepository) {
-                findById(UUID.fromString(project.id),)
+                findById(UUID.fromString(project.id))
             }
         }
 
