@@ -27,7 +27,7 @@ class ProjectTaskPagingSource(
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Task> {
-        val page = params.key ?: 1
+        val page = params.key ?: 0
         val pageSize = params.loadSize
 
         return try {

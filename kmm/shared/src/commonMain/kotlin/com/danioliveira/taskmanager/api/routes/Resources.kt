@@ -65,7 +65,7 @@ class Tasks() {
     
     // GET /v1/tasks/assigned - Get tasks assigned to user  
     @Resource(Routes.TASKS_ASSIGNED)
-    class Assigned(val parent: Tasks = Tasks(), val page: Int = 1, val size: Int = 10, val query: String? = null)
+    class Assigned(val parent: Tasks = Tasks(), val page: Int = 0, val size: Int = 10, val query: String? = null)
     
     // GET /v1/tasks/stats - Get task statistics (counts by status)
     @Resource(Routes.TASKS_STATS)

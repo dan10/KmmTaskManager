@@ -25,7 +25,7 @@ class ProjectPagingSource(
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Project> {
-        val page = params.key ?: 1
+        val page = params.key ?: 0
         val pageSize = params.loadSize
 
         return try {

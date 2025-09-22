@@ -41,7 +41,7 @@ internal class TaskService(
 
     suspend fun findAllByAssigneeId(
         assigneeId: UUID,
-        page: Int = 1,
+        page: Int = 0,
         size: Int = 10,
         query: String? = null
     ): PaginatedResponse<TaskResponse> = dbQuery {

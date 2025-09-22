@@ -283,8 +283,8 @@ class TaskRoutesTest : KoinTest {
             withAuth(generateTestToken(user1Id, "user1@example.com"))
             jsonBody(
                 TaskCreateRequest(
-                    title = "User 2 Task",
-                    description = "Task for User 2",
+                    title = "Assigned Task",
+                    description = "Task assigned to user",
                     projectId = null,
                     assigneeId = user2Id,
                     priority = Priority.MEDIUM,
@@ -293,8 +293,8 @@ class TaskRoutesTest : KoinTest {
             )
         }
 
-        // Get tasks assigned to user1
-        val response = client.get(Tasks.Assigned(query = user1Id)) {
+        // Get tasks assigned to current user (user1)
+        val response = client.get(Tasks.Assigned()) {
             withAuth(generateTestToken(user1Id, "user1@example.com"))
         }
 
@@ -305,7 +305,7 @@ class TaskRoutesTest : KoinTest {
         val responseBody = Json.parseToJsonElement(response.bodyAsText()).jsonObject
         val items = responseBody["items"]?.jsonArray
 
-        // Verify the response contains only the task assigned to user1
+        // Verify the response contains only tasks assigned to user1
         assertNotNull(items)
         assertEquals(1, items!!.size)
         assertEquals("User 1 Task", items[0].jsonObject["title"]?.jsonPrimitive?.content)
