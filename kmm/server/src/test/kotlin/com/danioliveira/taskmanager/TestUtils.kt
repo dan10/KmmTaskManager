@@ -8,10 +8,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import kotlin.time.Clock
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.insertAndGetId
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import kotlin.time.Clock
 
 
 /**
@@ -61,12 +61,12 @@ suspend fun createTestUser(
     googleId: String? = null
 ): String {
     return suspendTransaction {
-        UsersTable.insert { row ->
+        UsersTable.insertAndGetId { row ->
             row[UsersTable.email] = email
             row[UsersTable.passwordHash] = passwordHash
             row[UsersTable.displayName] = displayName
             row[UsersTable.googleId] = googleId
             row[UsersTable.createdAt] = Clock.System.now()
-        }.resultedValues?.first()?.get(UsersTable.id)?.toString() ?: throw IllegalStateException("Failed to create test user")
+        }.value.toString()
     }
 }
