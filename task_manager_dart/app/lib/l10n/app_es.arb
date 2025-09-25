@@ -1,0 +1,212 @@
+{
+  "@@locale": "es",
+  "appName": "TaskIt",
+
+  "contentDescriptionShowPassword": "Mostrar contraseña",
+  "contentDescriptionHidePassword": "Ocultar contraseña",
+  "contentDescriptionBack": "Volver",
+  "contentDescriptionDelete": "Eliminar",
+  "contentDescriptionAddTask": "Añadir Tarea",
+  "contentDescriptionSearch": "Buscar",
+
+  "titleWithoutAccount": "¿No tienes una cuenta?",
+  "buttonSignUp": "Registrarse",
+
+  "titleEmail": "Email",
+  "titlePassword": "Contraseña",
+  "titleLoginButton": "Iniciar Sesión",
+  "titleEmailError": "Por favor, introduce una dirección de email válida",
+  "titlePasswordError": "La contraseña debe tener al menos 8 caracteres",
+
+  "titleName": "Nombre",
+  "titleNameError": "Por favor, introduce un nombre",
+  "titleRegisterButton": "Registrar",
+  "titleConfirmPassword": "Confirmar Contraseña",
+  "titleConfirmPasswordError": "Las contraseñas no coinciden",
+  "titleAlreadyHaveAccount": "¿Ya tienes una cuenta?",
+  "buttonSignIn": "Iniciar Sesión",
+
+  "navTasks": "Tareas",
+  "navProjects": "Proyectos",
+  "navProfile": "Perfil",
+
+  "tasksTitle": "Mis Tareas",
+  "tasksSearchPlaceholder": "Buscar tareas...",
+  "tasksProgressTitle": "Tu Progreso",
+  "tasksProgressPercentage": "{percentage}%",
+  "tasksProgressCompleted": "{completed} de {total} tareas completadas",
+  "tasksEmptyTitle": "¿Listo para Empezar?",
+  "tasksEmptySubtitle": "Aquí hay algunas ideas para ayudarte a comenzar:",
+
+  "taskDetailsTitle": "Detalles de la Tarea",
+  "taskDueDate": "Vencimiento:",
+  "taskNoDueDate": "Sin fecha de vencimiento",
+  "taskProject": "Proyecto:",
+  "taskAssignedTo": "Asignado a:",
+
+  "projectsTitle": "Proyectos",
+  "projectsSearchPlaceholder": "Buscar proyectos...",
+  "projectsAll": "Todos los Proyectos",
+  "projectsAdd": "Añadir Proyecto",
+  "projectsEmptyTitle": "No se encontraron Proyectos",
+  "projectsEmptySubtitle": "Crea tu primer proyecto para comenzar",
+  "projectCompleted": "{count} completadas",
+  "projectInProgress": "{count} en progreso",
+  "projectTotal": "{count} total",
+
+  "profileComingSoon": "Pantalla de Perfil - Próximamente",
+
+  "createTask": "Crear Tarea",
+  "editTask": "Editar Tarea",
+  "taskTitleLabel": "Título",
+  "taskTitleError": "El título es obligatorio",
+  "taskDescriptionLabel": "Descripción",
+  "taskPriorityLabel": "Prioridad",
+  "taskDueDateLabel": "Fecha de Vencimiento",
+  "taskDueDatePlaceholder": "DD/MM/AAAA",
+  "taskTitlePlaceholder": "Introduce el título de la tarea",
+  "taskDescriptionPlaceholder": "Introduce la descripción de la tarea (opcional)",
+  "taskProjectLabel": "Proyecto",
+  "taskProjectPlaceholder": "Selecciona un proyecto",
+  "taskProjectRequired": "Por favor, selecciona un proyecto",
+  "taskLoadError": "Error al cargar tarea: {error}",
+  "taskCreateError": "Error al crear tarea: {error}",
+  "taskUpdateError": "Error al actualizar tarea: {error}",
+  "taskDeleteTitle": "Eliminar Tarea",
+  "taskDeleteMessage": "¿Estás seguro de que quieres eliminar esta tarea? Esta acción no se puede deshacer.",
+  "taskDeleteButton": "Eliminar",
+  "taskDeleteError": "Error al eliminar tarea: {error}",
+
+  "createProject": "Crear Proyecto",
+  "editProject": "Editar Proyecto",
+  "projectNameLabel": "Nombre del Proyecto",
+  "projectNameError": "El nombre del proyecto no puede estar vacío",
+  "projectDescriptionLabel": "Descripción (opcional)",
+  "projectDescriptionPlaceholder": "Introduce la descripción del proyecto (opcional)",
+  "projectCancelButton": "Cancelar",
+  "projectCreateButton": "Crear",
+  "projectUpdateButton": "Actualizar",
+  "projectNamePlaceholder": "Introduce el nombre del proyecto",
+  "projectLoadError": "Error al cargar proyecto: {error}",
+  "projectCreateError": "Error al crear proyecto: {error}",
+  "projectUpdateError": "Error al actualizar proyecto: {error}",
+
+  "authAppName": "Task Manager",
+  "authWithoutAccount": "¿No tienes una cuenta?",
+  "authSignUp": "Registrarse",
+  "authEmail": "Email",
+  "authPassword": "Contraseña",
+  "authLoginButton": "Iniciar Sesión",
+  "authEmailError": "Por favor, introduce una dirección de email válida",
+  "authPasswordError": "La contraseña debe tener al menos 8 caracteres",
+  "authName": "Nombre",
+  "authNameError": "Por favor, introduce un nombre",
+  "authRegisterButton": "Registrar",
+  "authConfirmPassword": "Confirmar Contraseña",
+  "authConfirmPasswordError": "Las contraseñas no coinciden",
+  "authAlreadyHaveAccount": "¿Ya tienes una cuenta?",
+  "authSignIn": "Iniciar Sesión",
+  "authDemoCredentials": "Credenciales Demo",
+  "authDemoCredentialsText": "Email: test@example.com\nContraseña: password",
+
+  "accessibilityShowPassword": "Mostrar contraseña",
+  "accessibilityHidePassword": "Ocultar contraseña",
+
+  "taskCreateButton": "Crear",
+  "taskUpdateButton": "Guardar Cambios",
+  "taskCancelButton": "Cancelar",
+  "@taskCancelButton": {
+    "description": "Cancel task button text"
+  },
+
+  "validationEmailRequired": "El correo electrónico es obligatorio",
+  "@validationEmailRequired": {
+    "description": "Error message when email field is empty"
+  },
+  "validationEmailInvalid": "Por favor ingrese una dirección de correo electrónico válida",
+  "@validationEmailInvalid": {
+    "description": "Error message when email format is invalid"
+  },
+  "validationPasswordRequired": "La contraseña es obligatoria",
+  "@validationPasswordRequired": {
+    "description": "Error message when password field is empty"
+  },
+  "validationPasswordTooShort": "La contraseña debe tener al menos 8 caracteres",
+  "@validationPasswordTooShort": {
+    "description": "Error message when password is too short"
+  },
+  "validationPasswordTooLong": "La contraseña debe tener menos de 128 caracteres",
+  "@validationPasswordTooLong": {
+    "description": "Error message when password is too long"
+  },
+  "validationPasswordNeedsLowercase": "La contraseña debe contener al menos una letra minúscula",
+  "@validationPasswordNeedsLowercase": {
+    "description": "Error message when password lacks lowercase letters"
+  },
+  "validationPasswordNeedsUppercase": "La contraseña debe contener al menos una letra mayúscula",
+  "@validationPasswordNeedsUppercase": {
+    "description": "Error message when password lacks uppercase letters"
+  },
+  "validationPasswordNeedsNumber": "La contraseña debe contener al menos un número",
+  "@validationPasswordNeedsNumber": {
+    "description": "Error message when password lacks numbers"
+  },
+  "validationPasswordNeedsSpecialChar": "La contraseña debe contener al menos un carácter especial",
+  "@validationPasswordNeedsSpecialChar": {
+    "description": "Error message when password lacks special characters"
+  },
+  "validationConfirmPasswordRequired": "Por favor confirme su contraseña",
+  "@validationConfirmPasswordRequired": {
+    "description": "Error message when confirm password field is empty"
+  },
+  "validationPasswordsDoNotMatch": "Las contraseñas no coinciden",
+  "@validationPasswordsDoNotMatch": {
+    "description": "Error message when passwords don't match"
+  },
+  "validationNameRequired": "El nombre es obligatorio",
+  "@validationNameRequired": {
+    "description": "Error message when name field is empty"
+  },
+  "validationNameTooShort": "El nombre debe tener al menos 2 caracteres",
+  "@validationNameTooShort": {
+    "description": "Error message when name is too short"
+  },
+  "validationNameTooLong": "El nombre debe tener menos de 50 caracteres",
+  "@validationNameTooLong": {
+    "description": "Error message when name is too long"
+  },
+  "validationNameInvalidCharacters": "El nombre solo puede contener letras, espacios, guiones y apostrofes",
+  "@validationNameInvalidCharacters": {
+    "description": "Error message when name contains invalid characters"
+  },
+  "validationFieldRequired": "{fieldName} es obligatorio",
+  "@validationFieldRequired": {
+    "description": "Generic error message for required fields",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Correo electrónico"
+      }
+    }
+  },
+  "passwordStrengthVeryWeak": "Muy Débil",
+  "@passwordStrengthVeryWeak": {
+    "description": "Password strength indicator for very weak passwords"
+  },
+  "passwordStrengthWeak": "Débil",
+  "@passwordStrengthWeak": {
+    "description": "Password strength indicator for weak passwords"
+  },
+  "passwordStrengthMedium": "Medio",
+  "@passwordStrengthMedium": {
+    "description": "Password strength indicator for medium passwords"
+  },
+  "passwordStrengthStrong": "Fuerte",
+  "@passwordStrengthStrong": {
+    "description": "Password strength indicator for strong passwords"
+  },
+  "passwordStrengthVeryStrong": "Muy Fuerte",
+  "@passwordStrengthVeryStrong": {
+    "description": "Password strength indicator for very strong passwords"
+  }
+} 

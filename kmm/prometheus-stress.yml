@@ -1,0 +1,68 @@
+global:
+  scrape_interval: 5s  # More frequent scraping for stress testing
+  evaluation_interval: 5s
+  external_labels:
+    monitor: 'stress-test-monitor'
+
+rule_files:
+# - "first_rules.yml"
+# - "second_rules.yml"
+
+scrape_configs:
+  # Kotlin JVM Application
+  - job_name: 'ktor-jvm'
+    static_configs:
+      - targets: [ 'app-jvm:8081' ]
+    metrics_path: '/metrics'
+    scrape_interval: 2s
+    scrape_timeout: 10s
+    params:
+      format: [ 'prometheus' ]
+
+  # Kotlin Native Application (GraalVM)
+  - job_name: 'ktor-native'
+    static_configs:
+      - targets: [ 'app-native:8081' ]
+    metrics_path: '/metrics'
+    scrape_interval: 2s
+    scrape_timeout: 10s
+    params:
+      format: [ 'prometheus' ]
+
+  # Dart Application
+  - job_name: 'dart-server'
+    static_configs:
+      - targets: [ 'app-dart:8080' ]
+    metrics_path: '/metrics'
+    scrape_interval: 2s
+    scrape_timeout: 10s
+    params:
+      format: [ 'prometheus' ]
+
+  # Container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: [ 'cadvisor-stress:8080' ]
+    scrape_interval: 5s
+    scrape_timeout: 10s
+
+  # Host metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: [ 'node-exporter-stress:9100' ]
+    scrape_interval: 5s
+    scrape_timeout: 10s
+
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: [ 'localhost:9090' ]
+    scrape_interval: 10s
+
+  # PostgreSQL metrics (if available)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: [ 'db:5432' ]
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    metrics_path: '/metrics' 

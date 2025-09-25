@@ -1,0 +1,40 @@
+# Build artifacts
+.dart_tool/
+build/
+.packages
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+README*
+
+# Git
+.git/
+.gitignore
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+
+# Test files
+test/
+
+# Analysis files
+analysis_options.yaml
+
+# Exception: Allow the compiled binary for fast builds
+!server/bin/server 
