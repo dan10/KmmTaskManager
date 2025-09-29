@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.ui.theme
 
-import androidx.compose.material.Typography
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -12,7 +12,6 @@ import kmmtaskmanager.composeapp.generated.resources.poppins_semibold
 import kmmtaskmanager.composeapp.generated.resources.inter_medium
 import kmmtaskmanager.composeapp.generated.resources.inter_regular
 import org.jetbrains.compose.resources.Font
-
 
 val bodyFontFamily
     @Composable
@@ -39,17 +38,19 @@ val AppTypography
     @Composable
     get() =
         Typography(
-            h1 = baseline.h1.copy(fontFamily = displayFontFamily),
-            h2 = baseline.h2.copy(fontFamily = displayFontFamily),
-            h3 = baseline.h3.copy(fontFamily = displayFontFamily),
-            h4 = baseline.h4.copy(fontFamily = displayFontFamily),
-            h5 = baseline.h5.copy(fontFamily = displayFontFamily),
-            h6 = baseline.h6.copy(fontFamily = displayFontFamily),
-            subtitle1 = baseline.subtitle1.copy(fontFamily = displayFontFamily),
-            subtitle2 = baseline.subtitle2.copy(fontFamily = displayFontFamily),
-            body1 = baseline.body1.copy(fontFamily = bodyFontFamily),
-            body2 = baseline.body2.copy(fontFamily = bodyFontFamily),
-            button = baseline.button.copy(fontFamily = displayFontFamily),
-            caption = baseline.caption.copy(fontFamily = bodyFontFamily),
-            overline = baseline.overline.copy(fontFamily = bodyFontFamily)
+            displayLarge = baseline.displayLarge.copy(fontFamily = displayFontFamily),
+            displayMedium = baseline.displayMedium.copy(fontFamily = displayFontFamily),
+            displaySmall = baseline.displaySmall.copy(fontFamily = displayFontFamily),
+            headlineLarge = baseline.headlineLarge.copy(fontFamily = displayFontFamily),
+            headlineMedium = baseline.headlineMedium.copy(fontFamily = displayFontFamily),
+            headlineSmall = baseline.headlineSmall.copy(fontFamily = displayFontFamily),
+            titleLarge = baseline.titleLarge.copy(fontFamily = displayFontFamily),
+            titleMedium = baseline.titleMedium.copy(fontFamily = displayFontFamily),
+            titleSmall = baseline.titleSmall.copy(fontFamily = displayFontFamily),
+            bodyLarge = baseline.bodyLarge.copy(fontFamily = bodyFontFamily),
+            bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFontFamily),
+            bodySmall = baseline.bodySmall.copy(fontFamily = bodyFontFamily),
+            labelLarge = baseline.labelLarge.copy(fontFamily = displayFontFamily),
+            labelMedium = baseline.labelMedium.copy(fontFamily = bodyFontFamily),
+            labelSmall = baseline.labelSmall.copy(fontFamily = bodyFontFamily)
         )

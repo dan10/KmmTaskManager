@@ -2,15 +2,16 @@ package com.danioliveira.taskmanager.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,8 +51,8 @@ fun DatePickerFieldToModal(
     OutlinedTextField(
         value = formattedDate,
         onValueChange = { },
-        label = { Text(label) },
-        placeholder = { Text(placeholder) },
+        label = { Text(label, style = MaterialTheme.typography.labelMedium) },
+        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium) },
         trailingIcon = {
             Icon(
                 Icons.Default.DateRange,
@@ -103,12 +104,12 @@ private fun Material3DatePickerModal(
                     }
                 }
             ) {
-                androidx.compose.material3.Text(stringResource(Res.string.date_picker_ok))
+                Text(stringResource(Res.string.date_picker_ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                androidx.compose.material3.Text(stringResource(Res.string.date_picker_cancel))
+                Text(stringResource(Res.string.date_picker_cancel))
             }
         }
     ) {

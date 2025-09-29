@@ -7,12 +7,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -25,7 +24,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.danioliveira.taskmanager.domain.manager.AuthManager
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
@@ -35,17 +33,15 @@ import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectScreen
 import com.danioliveira.taskmanager.ui.project.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
- import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditScreen
+import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditScreen
 import com.danioliveira.taskmanager.ui.task.details.TasksDetailsScreen
 import com.danioliveira.taskmanager.ui.tasks.TasksScreen
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 
 @Composable
-@Preview
 fun TaskItApp() {
     TaskItTheme {
         val authManager = koinInject<AuthManager>()
@@ -66,7 +62,6 @@ fun TaskItApp() {
                 navController = appState.navController,
                 modifier = Modifier
                     .padding(innerPadding)
-                    .statusBarsPadding()
             )
         }
     }
@@ -93,9 +88,9 @@ fun TaskItBottomBar(
         enter = fadeIn() + expandVertically(),
         exit = fadeOut() + shrinkVertically()
     ) {
-        BottomNavigation(modifier = Modifier.navigationBarsPadding()) {
+        NavigationBar(modifier = Modifier.navigationBarsPadding()) {
             topLevelRoutes.forEach { topLevelRoute ->
-                BottomNavigationItem(
+                NavigationBarItem(
                     icon = {
                         when (val icon = topLevelRoute.icon) {
                             is NavIcon.ImageVectorIcon -> Icon(

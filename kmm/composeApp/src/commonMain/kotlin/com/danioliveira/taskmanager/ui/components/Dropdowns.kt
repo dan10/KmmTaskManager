@@ -2,11 +2,11 @@ package com.danioliveira.taskmanager.ui.components
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
@@ -41,13 +41,12 @@ fun TaskItPriorityDropdown(
         ) {
             Priority.entries.forEach { priorityOption ->
                 DropdownMenuItem(
+                    text = { Text(PriorityFormatter.formatPriority(priorityOption)) },
                     onClick = {
                         onPrioritySelected(priorityOption)
                         onExpandedChange(false)
                     }
-                ) {
-                    Text(PriorityFormatter.formatPriority(priorityOption))
-                }
+                )
             }
         }
     }
@@ -78,13 +77,12 @@ fun TaskItStatusDropdown(
         ) {
             TaskStatus.entries.forEach { statusOption ->
                 DropdownMenuItem(
+                    text = { Text(TaskStatusFormatter.formatTaskStatus(statusOption)) },
                     onClick = {
                         onStatusSelected(statusOption)
                         onExpandedChange(false)
                     }
-                ) {
-                    Text(TaskStatusFormatter.formatTaskStatus(statusOption))
-                }
+                )
             }
         }
     }

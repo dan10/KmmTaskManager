@@ -6,19 +6,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.TextObfuscationMode
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedSecureTextField
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_hide_password_icon
@@ -42,24 +42,21 @@ fun TrackItInputField(
     Column(modifier = modifier) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            state = state,
-            label = {
-                Text(
-                    text = label,
-                    color = MaterialTheme.colors.onSurface
-                )
-            },
-            lineLimits = lineLimits,
-            enabled = enabled,
+            value = state.text.toString(),
+            onValueChange = { value -> state.setText(value) },
+            singleLine = lineLimits == TextFieldLineLimits.SingleLine,
+            label = { Text(text = label) },
             isError = isError,
-            trailingIcon = trailingIcon
+            enabled = enabled,
+            trailingIcon = trailingIcon,
         )
+
         AnimatedVisibility(visible = isError) {
             Text(
                 modifier = Modifier.padding(start = 8.dp),
                 text = errorMessage,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
@@ -72,38 +69,44 @@ fun TrackItPasswordField(
     isError: Boolean,
     errorMessage: String,
     enabled: Boolean,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
+
     Column(modifier = modifier) {
-        OutlinedSecureTextField(
+        OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            state = state,
-            label = {
-                Text(
-                    text = label,
-                    color = MaterialTheme.colors.onSurface
-                )
-            },
+            value = state.text.toString(),
+            onValueChange = { value -> state.setText(value) },
+            label = { Text(text = label) },
             enabled = enabled,
             isError = isError,
-            textObfuscationMode = if (passwordVisible) TextObfuscationMode.Visible
-            else TextObfuscationMode.RevealLastTyped,
+            singleLine = true,
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 PasswordIcon(
                     passwordVisible = passwordVisible,
                     onClick = { passwordVisible = !passwordVisible }
                 )
-            }
+            },
         )
+
         AnimatedVisibility(visible = isError) {
             Text(
                 modifier = Modifier.padding(start = 8.dp),
                 text = errorMessage,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelMedium
             )
         }
+    }
+}
+
+private fun TextFieldState.setText(value: String) {
+    if (text.toString() == value) return
+    // reset to the new value by replacing all content
+    edit {
+        replace(0, length, value)
     }
 }
 
@@ -113,15 +116,17 @@ private fun PasswordIcon(
     onClick: () -> Unit
 ) {
     IconButton(onClick = onClick) {
-        val icon = if (passwordVisible) Res.drawable.ic_visibility_off
-        else Res.drawable.ic_visibility
-        val description = if (passwordVisible)
+        val iconRes = if (passwordVisible) Res.drawable.ic_visibility_off else Res.drawable.ic_visibility
+        val description = if (passwordVisible) {
             stringResource(Res.string.content_description_hide_password_icon)
-        else stringResource(Res.string.content_description_show_password_icon)
+        } else {
+            stringResource(Res.string.content_description_show_password_icon)
+        }
+
         Icon(
-            painter = painterResource(icon),
+            painter = painterResource(iconRes),
             contentDescription = description,
-            tint = MaterialTheme.colors.onSurface
+            tint = MaterialTheme.colorScheme.onSurface
         )
     }
 }

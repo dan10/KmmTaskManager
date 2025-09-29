@@ -19,17 +19,19 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.Card
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -116,7 +118,7 @@ private fun ProjectsScreen(
     onAction: (ProjectsAction) -> Unit
 ) {
     Scaffold(
-        backgroundColor = Color(0xFFF1F5F9),
+        containerColor = Color(0xFFF1F5F9),
         floatingActionButton = {
             ProjectsFloatingActionButton(onAction)
         }
@@ -134,12 +136,12 @@ private fun ProjectsScreen(
 private fun ProjectsFloatingActionButton(onAction: (ProjectsAction) -> Unit) {
     FloatingActionButton(
         onClick = { onAction(ProjectsAction.OpenCreateProject) },
-        backgroundColor = MaterialTheme.colors.primary
+        containerColor = MaterialTheme.colorScheme.primary
     ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = stringResource(Res.string.projects_add),
-            tint = MaterialTheme.colors.onPrimary
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -180,7 +182,7 @@ private fun ProjectsContent(
 private fun ProjectsHeader() {
     Text(
         text = stringResource(Res.string.projects_title),
-        style = MaterialTheme.typography.h4,
+        style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 16.dp)
     )
@@ -212,7 +214,7 @@ private fun ProjectsSearchField(
 private fun ProjectsSubheader() {
     Text(
         text = stringResource(Res.string.projects_all),
-        style = MaterialTheme.typography.h6,
+        style = MaterialTheme.typography.titleLarge,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(bottom = 8.dp)
     )
@@ -259,7 +261,7 @@ private fun ProjectsList(
                     content = {
                         Image(
                             painter = painterResource(Res.drawable.ic_folder),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(120.dp)
@@ -286,8 +288,9 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        elevation = 4.dp,
-        shape = RoundedCornerShape(8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -308,16 +311,17 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = project.name,
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = if (project.total > 0) project.completed.toFloat() / project.total else 0f,
-                color = randomColor,
-                strokeCap = StrokeCap.Round,
-                modifier = Modifier.fillMaxWidth()
+            progress = { if (project.total > 0) project.completed.toFloat() / project.total else 0f },
+            modifier = Modifier.fillMaxWidth(),
+            color = randomColor,
+            trackColor = ProgressIndicatorDefaults.linearTrackColor,
+            strokeCap = StrokeCap.Round,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -326,15 +330,15 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
             ) {
                 Text(
                     text = stringResource(Res.string.project_completed, project.completed),
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.labelMedium
                 )
                 Text(
                     text = stringResource(Res.string.project_in_progress, project.inProgress),
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.labelMedium
                 )
                 Text(
                     text = stringResource(Res.string.project_total, project.total),
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
         }

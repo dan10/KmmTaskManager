@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -76,7 +76,7 @@ private fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.primaryVariant),
+            .background(MaterialTheme.colorScheme.primaryContainer),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -84,7 +84,8 @@ private fun RegisterScreen(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(8.dp),
-            elevation = 8.dp
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -126,7 +127,7 @@ private fun RegisterHeader() {
 
     Text(
         text = "Create Account",
-        style = MaterialTheme.typography.h4
+            style = MaterialTheme.typography.headlineMedium
     )
 }
 
@@ -198,14 +199,14 @@ private fun LoginNavigation(navigateToLogin: () -> Unit) {
     ) {
         Text(
             text = stringResource(Res.string.title_already_have_account),
-            style = MaterialTheme.typography.body2,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         TextButton(onClick = { navigateToLogin() }) {
             Text(
                 text = stringResource(Res.string.button_sign_in),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.button
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelLarge
             )
         }
     }

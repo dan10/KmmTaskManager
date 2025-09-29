@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,7 +61,6 @@ private fun TasksDetailsScreenContent(
     onAction: (TasksDetailsAction) -> Unit
 ) {
     Scaffold(
-        backgroundColor = Color(0XFFF1F5F9),
         topBar = {
             TaskItTopAppBar(
                 title = stringResource(Res.string.task_details_title),
@@ -148,7 +147,7 @@ fun TaskInfoCard(
         // Description
         Text(
             text = description,
-            style = MaterialTheme.typography.body2
+            style = MaterialTheme.typography.bodyLarge
         )
         
         Spacer(modifier = Modifier.height(8.dp))

@@ -6,16 +6,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.Task
@@ -48,7 +47,6 @@ fun TaskItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.small,
-        elevation = 1.dp,
     ) {
         Row(
             modifier = Modifier
@@ -71,26 +69,21 @@ fun TaskItem(
                 ) {
                     Text(
                         text = task.title,
-                        style = MaterialTheme.typography.subtitle1.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
+                        style = MaterialTheme.typography.titleMedium,
                         color = if (task.status == TaskStatus.DONE)
-                            MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         else
-                            MaterialTheme.colors.onSurface,
+                            MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f)
                     )
 
                     Surface(
                         color = priority.backgroundColor,
-                        shape = MaterialTheme.shapes.small,
-                        elevation = 0.dp
+                        shape = MaterialTheme.shapes.small
                     ) {
                         Text(
                             text = PriorityFormatter.formatPriority(task.priority),
-                            style = MaterialTheme.typography.caption.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
+                            style = MaterialTheme.typography.labelMedium,
                             color = priority.color,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
@@ -99,29 +92,29 @@ fun TaskItem(
 
                 Text(
                     text = task.description,
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 task.dueDate?.let {
                     Text(
                         text = "${stringResource(Res.string.task_due_date)} ${DateFormatter.formatDate(it)}",
-                        style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.primary
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
                 Text(
                     text = "${stringResource(Res.string.task_status_label)}: ${TaskStatusFormatter.formatTaskStatus(task.status)}",
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.colors.secondary
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary
                 )
 
                 if (showProjectName && task.projectName != null) {
                     Text(
                         text = "${stringResource(Res.string.task_project)} ${task.projectName}",
-                        style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.primary
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

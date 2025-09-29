@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,6 +66,7 @@ fun TaskCreateEditScreen(
     TaskCreateEditScreen(state, onBack, viewModel::handleActions)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TaskCreateEditScreen(
     state: TaskCreateEditState,

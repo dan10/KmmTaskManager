@@ -1,12 +1,14 @@
 package com.danioliveira.taskmanager.ui.components
 
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -17,13 +19,19 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Standard top app bar with back navigation and title.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskItTopAppBar(
     title: String,
     onNavigateBack: () -> Unit
 ) {
-    TopAppBar(
-        title = { Text(title) },
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
                 Icon(
@@ -38,14 +46,20 @@ fun TaskItTopAppBar(
 /**
  * Top app bar with back navigation, title, and optional action buttons.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskItTopAppBar(
     title: String,
     onNavigateBack: () -> Unit,
     actions: @Composable () -> Unit = {}
 ) {
-    TopAppBar(
-        title = { Text(title) },
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
                 Icon(
@@ -61,6 +75,7 @@ fun TaskItTopAppBar(
 /**
  * Top app bar for create/edit screens with optional delete action.
  */
+@ExperimentalMaterial3Api
 @Composable
 fun TaskItCreateEditTopAppBar(
     title: String,
@@ -68,8 +83,13 @@ fun TaskItCreateEditTopAppBar(
     showDeleteAction: Boolean = false,
     onDelete: () -> Unit = {}
 ) {
-    TopAppBar(
-        title = { Text(title) },
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
                 Icon(
@@ -94,6 +114,7 @@ fun TaskItCreateEditTopAppBar(
 /**
  * Top app bar with a single action icon.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskItTopAppBar(
     title: String,
@@ -102,8 +123,13 @@ fun TaskItTopAppBar(
     actionContentDescription: String,
     onActionClick: () -> Unit
 ) {
-    TopAppBar(
-        title = { Text(title) },
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
                 Icon(

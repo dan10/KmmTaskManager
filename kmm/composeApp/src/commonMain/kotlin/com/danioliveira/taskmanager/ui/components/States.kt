@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,8 +45,8 @@ fun TaskItErrorState(
     ) {
         Text(
             text = errorMessage,
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.error,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(16.dp)
         )
@@ -72,16 +72,16 @@ fun TaskItEmptyState(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.h6,
-            color = MaterialTheme.colors.onSurface,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Text(
             text = message,
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 

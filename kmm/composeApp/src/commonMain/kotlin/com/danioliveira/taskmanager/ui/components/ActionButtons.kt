@@ -6,15 +6,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults
-// TaskItSmallLoadingIndicator is expected to be available from another components file (e.g., States.kt)
-// import androidx.compose.material.CircularProgressIndicator // Only if TaskItSmallLoadingIndicator is defined here
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -57,7 +54,7 @@ fun TaskItPrimaryActionButton(
     isLoading: Boolean = false,
     icon: ImageVector? = null,
     iconContentDescription: String? = null,
-    colors: ButtonColors = ButtonDefaults.buttonColors()
+    colors: androidx.compose.material3.ButtonColors = ButtonDefaults.buttonColors()
 ) {
     Button(
         onClick = onClick,
@@ -90,7 +87,7 @@ fun TaskItSecondaryActionButton(
     isLoading: Boolean = false,
     icon: ImageVector? = null,
     iconContentDescription: String? = null,
-    colors: ButtonColors = ButtonDefaults.outlinedButtonColors()
+    colors: androidx.compose.material3.ButtonColors = ButtonDefaults.outlinedButtonColors()
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -204,7 +201,7 @@ fun TaskItEditDeleteButtons(
             enabled = deleteEnabled,
             isLoading = isDeleting,
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colors.error
+                contentColor = MaterialTheme.colorScheme.error
             )
         )
     }

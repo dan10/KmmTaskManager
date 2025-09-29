@@ -10,15 +10,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -37,13 +38,13 @@ import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.itemContentType
 import com.danioliveira.taskmanager.paging.compose.itemKey
-import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.components.TaskItEmptyState
 import com.danioliveira.taskmanager.ui.components.TaskItErrorState
 import com.danioliveira.taskmanager.ui.components.TaskItInfoCard
 import com.danioliveira.taskmanager.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.ui.components.TaskItSmallLoadingIndicator
 import com.danioliveira.taskmanager.ui.components.TaskItTopAppBar
+import com.danioliveira.taskmanager.ui.components.TaskItem
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
@@ -100,7 +101,7 @@ private fun ProjectDetailsScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
     actions: (ProjectDetailsAction) -> Unit
 ) {
-    Surface(color = MaterialTheme.colors.background) {
+    Surface(color = MaterialTheme.colorScheme.background) {
         Scaffold(
             modifier = Modifier.fillMaxSize()
                 .navigationBarsPadding(),
@@ -147,12 +148,12 @@ private fun ProjectDetailsScreen(
 private fun CreateTaskFAB(onClick: () -> Unit) {
     FloatingActionButton(
         onClick = onClick,
-        backgroundColor = MaterialTheme.colors.primary
+        containerColor = MaterialTheme.colorScheme.primary
     ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = stringResource(Res.string.content_description_create_task),
-            tint = MaterialTheme.colors.onPrimary
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -176,7 +177,7 @@ private fun ProjectDetailsContent(
 
         Text(
             text = stringResource(Res.string.project_tasks_title),
-            style = MaterialTheme.typography.h6
+            style = MaterialTheme.typography.titleLarge
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -210,7 +211,8 @@ private fun ProjectTasksList(
                     task = task,
                     onClick = { navigateToTaskDetail(task.id) },
                     onCheckedChange = { isChecked ->
-                        val newStatus = if (isChecked) TaskStatus.DONE.name else TaskStatus.TODO.name
+                        val newStatus =
+                            if (isChecked) TaskStatus.DONE.name else TaskStatus.TODO.name
                         onTaskStatusChange(task.id.toString(), newStatus)
                     },
                     showProjectName = false
@@ -232,7 +234,7 @@ private fun ProjectTasksList(
             item {
                 TaskItEmptyState(
                     title = stringResource(Res.string.project_tasks_empty),
-                    message = "Get started by creating your first task!"
+                    message = stringResource(Res.string.project_tasks_empty)
                 )
             }
         }
@@ -246,12 +248,24 @@ fun ProjectHeader(project: Project) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            ProjectStatus(label = stringResource(Res.string.project_status_total_tasks), value = project.total)
-            ProjectStatus(label = stringResource(Res.string.project_status_in_progress), value = project.inProgress)
-            ProjectStatus(label = stringResource(Res.string.project_status_completed), value = project.completed)
+            ProjectStatus(
+                label = stringResource(Res.string.project_status_total_tasks),
+                value = project.total
+            )
+            ProjectStatus(
+                label = stringResource(Res.string.project_status_in_progress),
+                value = project.inProgress
+            )
+            ProjectStatus(
+                label = stringResource(Res.string.project_status_completed),
+                value = project.completed
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = stringResource(Res.string.project_progress_title), style = MaterialTheme.typography.caption)
+        Text(
+            text = stringResource(Res.string.project_progress_title),
+            style = MaterialTheme.typography.labelMedium
+        )
         Spacer(modifier = Modifier.height(4.dp))
 
         val progressPercentage = if (project.total > 0) {
@@ -261,9 +275,11 @@ fun ProjectHeader(project: Project) {
         }
 
         LinearProgressIndicator(
-            progress = progressPercentage / 100f,
+            progress = { progressPercentage / 100f },
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colors.primary
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = ProgressIndicatorDefaults.linearTrackColor,
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Row(
@@ -272,7 +288,7 @@ fun ProjectHeader(project: Project) {
         ) {
             Text(
                 text = "$progressPercentage%",
-                style = MaterialTheme.typography.caption
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
@@ -281,8 +297,12 @@ fun ProjectHeader(project: Project) {
 @Composable
 fun ProjectStatus(label: String, value: Int) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = value.toString(), style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold)
-        Text(text = label, style = MaterialTheme.typography.caption)
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Text(text = label, style = MaterialTheme.typography.labelMedium)
     }
 }
 

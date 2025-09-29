@@ -16,20 +16,22 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,9 +119,7 @@ private fun TasksScreen(
     pagingItems: LazyPagingItems<Task>,
     onAction: (TasksAction) -> Unit
 ) {
-
     Scaffold(
-        backgroundColor = Color(0xFFF1F5F9),
         topBar = {
             TasksTopBar(
                 completedTasks = state.completedTasks,
@@ -141,7 +141,7 @@ private fun TasksScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -195,7 +195,7 @@ private fun TasksTopBar(
     ) {
         Text(
             text = stringResource(Res.string.tasks_title),
-            style = MaterialTheme.typography.h5,
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -221,7 +221,7 @@ private fun TasksSearchField(
             )
         },
         placeholder = { Text(stringResource(Res.string.tasks_search_placeholder)) },
-        colors = TextFieldDefaults.outlinedTextFieldColors(backgroundColor = MaterialTheme.colors.surface)
+        colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor =  MaterialTheme.colorScheme.surface)
     )
 }
 
@@ -230,7 +230,8 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
     val progress = if (totalTasks > 0) (completedTasks.toFloat() / totalTasks) else 0f
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.small
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -245,7 +246,7 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
             ) {
                 Text(
                     text = stringResource(Res.string.tasks_progress_title),
-                    style = MaterialTheme.typography.subtitle1,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
@@ -254,15 +255,16 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
                         Res.string.tasks_progress_percentage,
                         (progress * 100).toInt()
                     ),
-                    style = MaterialTheme.typography.subtitle1,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(8.dp),
-                color = MaterialTheme.colors.primary,
-                strokeCap = StrokeCap.Round
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = ProgressIndicatorDefaults.linearTrackColor,
+                strokeCap = StrokeCap.Round,
             )
             Text(
                 text = stringResource(
@@ -270,7 +272,7 @@ fun YourProgressSection(completedTasks: Int, totalTasks: Int) {
                     completedTasks,
                     totalTasks
                 ),
-                style = MaterialTheme.typography.caption
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
@@ -297,8 +299,8 @@ fun EmptyTasksList() {
         // Title
         Text(
             text = stringResource(Res.string.tasks_empty_title),
-            style = MaterialTheme.typography.h6,
-            color = MaterialTheme.colors.onSurface,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -306,8 +308,8 @@ fun EmptyTasksList() {
         // Message
         Text(
             text = stringResource(Res.string.tasks_empty_subtitle),
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
@@ -320,8 +322,8 @@ fun EmptyTasksList() {
             stringArrayResource(Res.array.empty_task_list).forEach { suggestion ->
                 Text(
                     text = suggestion,
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
             }
@@ -345,12 +347,12 @@ fun AddTaskButton(
 ) {
     FloatingActionButton(
         onClick = { onAction(TasksAction.OpenCreateTask) },
-        backgroundColor = MaterialTheme.colors.primary
+        containerColor = MaterialTheme.colorScheme.primary
     ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Add Task",
-            tint = MaterialTheme.colors.onPrimary
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }

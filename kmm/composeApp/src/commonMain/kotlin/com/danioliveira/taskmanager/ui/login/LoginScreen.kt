@@ -11,17 +11,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -84,7 +82,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.primaryVariant),
+            .background(MaterialTheme.colorScheme.primaryContainer),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -92,7 +90,10 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(16.dp),
-            elevation = 8.dp
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -109,8 +110,8 @@ fun LoginScreen(
 
                 Text(
                     text = stringResource(Res.string.app_name),
-                    color = MaterialTheme.colors.onSurface,
-                    style = MaterialTheme.typography.h3
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.headlineLarge
                 )
 
                 TrackItInputField(
@@ -161,14 +162,14 @@ fun LoginAccountLink(
     ) {
         Text(
             stringResource(Res.string.title_without_account),
-            style = MaterialTheme.typography.body2,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         TextButton(onClick = onLinkClick) {
             Text(
                 stringResource(Res.string.button_sign_up),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.button
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelLarge
             )
         }
     }
