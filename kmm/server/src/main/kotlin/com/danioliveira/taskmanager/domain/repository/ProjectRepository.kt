@@ -2,7 +2,7 @@ package com.danioliveira.taskmanager.domain.repository
 
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.ProjectResponse
-import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import java.util.UUID
 
 interface ProjectRepository {
@@ -15,7 +15,7 @@ interface ProjectRepository {
      * @param ownerId the owner of the project
      * @return the newly created project
      */
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     suspend fun create(name: String, description: String?, ownerId: UUID): ProjectResponse
 
     /**
@@ -24,7 +24,7 @@ interface ProjectRepository {
      * @param id the id of the project
      * @return the project [ProjectResponse] with the given id, or null if no such project exists
      */
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     suspend fun findById(id: UUID): ProjectResponse
 
     suspend fun existsById(id: UUID): Boolean
@@ -38,7 +38,7 @@ interface ProjectRepository {
      * @param query optional query to filter projects by name
      * @return a paginated response of projects [ProjectResponse] owned by the user
      */
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     suspend fun findAllByOwner(
         ownerId: UUID,
         page: Int = 0,
@@ -54,7 +54,7 @@ interface ProjectRepository {
      * @param description the new description of the project
      * @return true if the project was updated, false otherwise
      */
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     suspend fun update(id: UUID, name: String, description: String?): Boolean
 
     /**
@@ -63,6 +63,6 @@ interface ProjectRepository {
      * @param id the id of the project to delete
      * @return true if the project was deleted, false otherwise
      */
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     suspend fun delete(id: UUID): Boolean
 }

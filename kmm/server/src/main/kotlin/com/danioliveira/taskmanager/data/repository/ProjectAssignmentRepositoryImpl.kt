@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
-import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
@@ -23,8 +23,8 @@ import kotlin.time.ExperimentalTime
 class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
 
     @OptIn(ExperimentalTime::class)
-    context(transaction: Transaction)
-    override suspend fun assignUserToProject(projectId: UUID, userId: UUID): ProjectAssignment {
+    context(transaction: R2dbcTransaction)
+    override suspend fun assignUserToProject(projectId: UUID, userId: UUID): ProjectAssignment = with(transaction) {
         val assignmentId = UUID.randomUUID()
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
@@ -43,16 +43,16 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
         }
     }
 
-    context(transaction: Transaction)
-    override suspend fun removeUserFromProject(projectId: UUID, userId: UUID): Boolean {
+    context(transaction: R2dbcTransaction)
+    override suspend fun removeUserFromProject(projectId: UUID, userId: UUID): Boolean = with(transaction) {
         return ProjectAssignmentsTable.deleteWhere {
             ProjectAssignmentsTable.projectId eq projectId and
                     (ProjectAssignmentsTable.userId eq userId)
         } > 0
     }
 
-    context(transaction: Transaction)
-    override suspend fun findUsersByProject(projectId: UUID): List<UUID> {
+    context(transaction: R2dbcTransaction)
+    override suspend fun findUsersByProject(projectId: UUID): List<UUID> = with(transaction) {
         return ProjectAssignmentsTable
             .select(ProjectAssignmentsTable.userId)
             .where { ProjectAssignmentsTable.projectId eq projectId }
@@ -60,8 +60,8 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
             .toList()
     }
 
-    context(transaction: Transaction)
-    override suspend fun findProjectsByUser(userId: UUID): List<UUID> {
+    context(transaction: R2dbcTransaction)
+    override suspend fun findProjectsByUser(userId: UUID): List<UUID> = with(transaction) {
         return ProjectAssignmentsTable
             .select(ProjectAssignmentsTable.projectId)
             .where { ProjectAssignmentsTable.userId eq userId }
@@ -69,8 +69,8 @@ class ProjectAssignmentRepositoryImpl : ProjectAssignmentRepository {
             .toList()
     }
 
-    context(transaction: Transaction)
-    override suspend fun isUserAssignedToProject(projectId: UUID, userId: UUID): Boolean {
+    context(transaction: R2dbcTransaction)
+    override suspend fun isUserAssignedToProject(projectId: UUID, userId: UUID): Boolean = with(transaction) {
         return ProjectAssignmentsTable
             .select(ProjectAssignmentsTable.id)
             .where {

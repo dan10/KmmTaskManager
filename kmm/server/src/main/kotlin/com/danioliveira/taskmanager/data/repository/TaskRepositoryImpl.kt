@@ -16,7 +16,6 @@ import org.jetbrains.exposed.v1.core.Case
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
-import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.count
@@ -27,6 +26,7 @@ import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.core.sum
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.select
@@ -38,7 +38,7 @@ import kotlin.time.ExperimentalTime
 
 internal class TaskRepositoryImpl : TaskRepository {
 
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     override suspend fun update(
         id: String,
         title: String,
@@ -47,7 +47,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         priority: Priority,
         dueDate: LocalDateTime?,
         assigneeId: UUID?
-    ): TaskResponse? {
+    ): TaskResponse? = with(transaction) {
         val taskId = UUID.fromString(id)
         // Perform update using Exposed DSL
         TasksTable.update(where = { TasksTable.id eq taskId }) {
@@ -63,13 +63,13 @@ internal class TaskRepositoryImpl : TaskRepository {
         return findById(id)
     }
 
-    context(transaction: Transaction)
-    override suspend fun delete(id: UUID): Boolean {
+    context(transaction: R2dbcTransaction)
+    override suspend fun delete(id: UUID): Boolean = with(transaction) {
         return TasksTable.deleteWhere { TasksTable.id eq id } > 0
     }
 
-    context(transaction: Transaction)
-    override suspend fun findById(id: String): TaskResponse? {
+    context(transaction: R2dbcTransaction)
+    override suspend fun findById(id: String): TaskResponse? = with(transaction) {
         val uuid = UUID.fromString(id)
         return TasksTable
             .leftJoin(ProjectsTable,
@@ -82,37 +82,37 @@ internal class TaskRepositoryImpl : TaskRepository {
             ?.toResponse()
     }
 
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     override suspend fun findAllByProjectId(
         projectId: UUID,
         page: Int,
         size: Int
-    ): PaginatedResponse<TaskResponse> {
+    ): PaginatedResponse<TaskResponse> = with(transaction) {
         return queryWithPagination(
             limit = size,
             offset = page * size
         ) { TasksTable.projectId eq projectId }
     }
 
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     override suspend fun findAllByOwnerId(
         ownerId: UUID,
         page: Int,
         size: Int
-    ): PaginatedResponse<TaskResponse> {
+    ): PaginatedResponse<TaskResponse> = with(transaction) {
         return queryWithPagination(
             limit = size,
             offset = page * size
         ) { TasksTable.creatorId eq ownerId }
     }
 
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     override suspend fun findAllByAssigneeId(
         assigneeId: UUID,
         page: Int,
         size: Int,
         query: String?
-    ): PaginatedResponse<TaskResponse> {
+    ): PaginatedResponse<TaskResponse> = with(transaction) {
         var condition: Op<Boolean> = TasksTable.assigneeId eq assigneeId
         if (!query.isNullOrBlank()) {
             val searchQuery = "%${query.lowercase()}%"
@@ -130,16 +130,16 @@ internal class TaskRepositoryImpl : TaskRepository {
         }
     }
 
-    context(transaction: Transaction)
-    override suspend fun findAllTasksForUser(userId: UUID, page: Int, size: Int): PaginatedResponse<TaskResponse> {
+    context(transaction: R2dbcTransaction)
+    override suspend fun findAllTasksForUser(userId: UUID, page: Int, size: Int): PaginatedResponse<TaskResponse> = with(transaction) {
         return queryWithPagination(
             limit = size,
             offset = page * size
         ) { (TasksTable.creatorId eq userId) or (TasksTable.assigneeId eq userId) }
     }
 
-    context(transaction: Transaction)
-    override suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse {
+    context(transaction: R2dbcTransaction)
+    override suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse = with(transaction) {
         val totalTasks = TasksTable.id.count().alias("total_tasks")
         val completedTasks = Case()
             .When(TasksTable.status eq TaskStatus.DONE, intLiteral(1))
@@ -160,7 +160,7 @@ internal class TaskRepositoryImpl : TaskRepository {
     }
 
     @OptIn(ExperimentalTime::class)
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     override suspend fun create(
         title: String,
         description: String?,
@@ -170,7 +170,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         status: TaskStatus,
         priority: Priority,
         dueDate: LocalDateTime?
-    ): TaskResponse {
+    ): TaskResponse = with(transaction) {
         val id = UUID.randomUUID()
 
         TasksTable.insert {
@@ -219,30 +219,34 @@ internal class TaskRepositoryImpl : TaskRepository {
         offset: Int? = null,
         predicate: () -> Op<Boolean>,
     ): PaginatedResponse<TaskResponse> {
-        val tasksCount = TasksTable.id.count().alias("tasks_count")
+        // Collect total count first
+        val totalCount = TasksTable
+            .select(TasksTable.id.count())
+            .where(predicate)
+            .map { it[TasksTable.id.count()] }
+            .toList()
+            .firstOrNull()?.toInt() ?: 0
 
-        val query =  TasksTable
+        // Get paginated tasks with project info
+        val items =  TasksTable
             .leftJoin(ProjectsTable,
                 onColumn = { TasksTable.projectId },
                 otherColumn = { ProjectsTable.id }
             )
-            .select(TasksTable.fields + ProjectsTable.name + ProjectsTable.id + tasksCount)
+            .select(TasksTable.fields + ProjectsTable.name + ProjectsTable.id)
             .where(predicate)
             .orderBy(TasksTable.dueDate, SortOrder.DESC)
-            .groupBy(TasksTable.id, ProjectsTable.name, ProjectsTable.id)
             .apply { if (limit != null) limit(limit) }
             .apply { if (offset != null) offset(offset.toLong()) }
-
-        val items = query.map { row ->
-            row.toResponse()
-        }.toList()
+            .map { row -> row.toResponse() }
+            .toList()
 
         return PaginatedResponse(
             items = items,
-            total = items.size,
+            total = totalCount,
             currentPage = if (limit != null && limit > 0) (offset ?: 0) / limit else 0,
-            pageSize = limit ?: items.size,
-            totalPages = if (limit != null && limit > 0) ceil(items.size.toDouble() / limit).toInt() else 1
+            pageSize = items.size,
+            totalPages = if (limit != null && limit > 0) ceil(totalCount.toDouble() / limit).toInt() else 1
         )
     }
 

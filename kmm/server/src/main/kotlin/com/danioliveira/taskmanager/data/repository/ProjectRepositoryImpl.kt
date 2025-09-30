@@ -16,8 +16,8 @@ import org.jetbrains.exposed.v1.core.Case
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
-import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.alias
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.intLiteral
@@ -45,8 +45,8 @@ import kotlin.time.ExperimentalTime
 class ProjectRepositoryImpl : ProjectRepository {
 
     @OptIn(ExperimentalTime::class)
-    context(transaction: Transaction)
-    override suspend fun create(name: String, description: String?, ownerId: UUID): ProjectResponse {
+    context(transaction: R2dbcTransaction)
+    override suspend fun create(name: String, description: String?, ownerId: UUID): ProjectResponse = with(transaction) {
        return ProjectsTable.insertReturning {
             it[this.name] = name
             it[this.description] = description
@@ -56,8 +56,8 @@ class ProjectRepositoryImpl : ProjectRepository {
            .single()
     }
 
-    context(transaction: Transaction)
-    override suspend fun findById(id: UUID): ProjectResponse {
+    context(transaction: R2dbcTransaction)
+    override suspend fun findById(id: UUID): ProjectResponse = with(transaction) {
         val searchQuery = ProjectsTable.id eq id
         val query = buildProjectQuery(ownerId = null, searchQuery, null, null)
         return query.first.firstOrNull() ?: throw NotFoundException("Project", id.toString())
@@ -70,13 +70,13 @@ class ProjectRepositoryImpl : ProjectRepository {
             .firstOrNull() != null
     }
 
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     override suspend fun findAllByOwner(
         ownerId: UUID,
         page: Int,
         size: Int,
         query: String?
-    ): PaginatedResponse<ProjectResponse> {
+    ): PaginatedResponse<ProjectResponse> = with(transaction) {
         val searchQuery: Op<Boolean>? = if (!query.isNullOrBlank()) {
             val q = "%${query.lowercase()}%"
             (ProjectsTable.name.lowerCase() like q)
@@ -146,8 +146,8 @@ class ProjectRepositoryImpl : ProjectRepository {
     
 
     @OptIn(ExperimentalTime::class)
-    context(transaction: Transaction)
-    override suspend fun update(id: UUID, name: String, description: String?): Boolean {
+    context(transaction: R2dbcTransaction)
+    override suspend fun update(id: UUID, name: String, description: String?): Boolean = with(transaction) {
         return ProjectsTable.update({ ProjectsTable.id eq id }) {
             it[this.name] = name
             it[this.description] = description
@@ -155,9 +155,10 @@ class ProjectRepositoryImpl : ProjectRepository {
         } > 0
     }
 
-    context(transaction: Transaction)
-    override suspend fun delete(id: UUID): Boolean =
-        ProjectsTable.deleteWhere { ProjectsTable.id eq id } > 0
+    context(transaction: R2dbcTransaction)
+    override suspend fun delete(id: UUID): Boolean = with(transaction) {
+        return ProjectsTable.deleteWhere { ProjectsTable.id eq id } > 0
+    }
 
     @OptIn(ExperimentalTime::class)
     private fun ResultRow.toResponse(

@@ -10,7 +10,7 @@ import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import java.util.UUID
 
 class ProjectService(
@@ -37,8 +37,8 @@ class ProjectService(
             )
         }
 
-    context(_: Transaction)
-    private suspend fun validateProjectAccess(projectId: UUID, userId: UUID) {
+    context(_: R2dbcTransaction)
+    private suspend fun validateProjectAccess(projectId: UUID, userId: UUID) = with(this) {
         val project = repository.findById(projectId)
 
         val isOwner = project.ownerId == userId.toString()

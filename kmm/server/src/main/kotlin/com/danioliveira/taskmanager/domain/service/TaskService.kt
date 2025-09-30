@@ -14,7 +14,7 @@ import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.routes.toUUID
 import org.jetbrains.exposed.v1.core.Slf4jSqlDebugLogger
-import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import java.util.UUID
 
 internal class TaskService(
@@ -61,11 +61,11 @@ internal class TaskService(
      * Validates that a user can be assigned to a project.
      * A user can be assigned if they are either the project owner or already assigned to the project.
      */
-    context(_: Transaction)
-    private suspend fun validateUserCanBeAssignedToProject(projectId: UUID, userId: UUID) {
+    context(_: R2dbcTransaction)
+    private suspend fun validateUserCanBeAssignedToProject(projectId: UUID, userId: UUID) = with(this) {
         val project = projectRepository.findById(projectId)
         val isOwner = project.ownerId == userId.toString()
-        if (isOwner) return
+        if (isOwner) return@with
 
         if (!projectAssignmentRepository.isUserAssignedToProject(projectId, userId)) {
             throw ForbiddenException(resourceType = "Project", resourceId = projectId.toString())

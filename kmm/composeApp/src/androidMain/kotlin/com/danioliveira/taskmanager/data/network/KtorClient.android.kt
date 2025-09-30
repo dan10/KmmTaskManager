@@ -21,7 +21,7 @@ actual fun createPlatformEngine(): HttpClientEngine {
  */
 actual fun getBaseUrl(): String {
 
-    val physicalDeviceUrl = "http://192.168.68.61:8081"
+    val physicalDeviceUrl = "http://192.168.68.59:8081"
 
     // Use physicalDeviceUrl when testing on a physical device
     return physicalDeviceUrl

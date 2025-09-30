@@ -6,51 +6,51 @@ import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.singleOrNull
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
-import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import java.util.UUID
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 internal class UserRepositoryImpl : UserRepository {
 
-    context(transaction: Transaction)
-    override suspend fun findByEmail(email: String): UserWithPassword? =
-        UsersTable
+    context(transaction: R2dbcTransaction)
+    override suspend fun findByEmail(email: String): UserWithPassword? = with(transaction) {
+        return UsersTable
             .selectAll()
             .where { UsersTable.email eq email }
             .singleOrNull()
             ?.toDomain()
+    }
 
-    context(transaction: Transaction)
-    override suspend fun findById(id: UUID): UserWithPassword? =
-        UsersTable
+    context(transaction: R2dbcTransaction)
+    override suspend fun findById(id: UUID): UserWithPassword? = with(transaction) {
+        return UsersTable
             .selectAll()
             .where { UsersTable.id eq id }
             .singleOrNull()
             ?.toDomain()
+    }
 
-    context(transaction: Transaction)
-    override suspend fun existsById(id: UUID): Boolean =
-        UsersTable
+    context(transaction: R2dbcTransaction)
+    override suspend fun existsById(id: UUID): Boolean = with(transaction) {
+        return UsersTable
             .select(UsersTable.id)
             .where { UsersTable.id eq id }
             .singleOrNull() != null
+    }
 
     @OptIn(ExperimentalTime::class)
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     override suspend fun create(
         email: String,
         passwordHash: String?,
         displayName: String,
         googleId: String?
-    ): UserWithPassword {
+    ): UserWithPassword = with(transaction) {
         val row = UsersTable.insertReturning {
             it[this.email] = email
             it[this.passwordHash] = passwordHash
