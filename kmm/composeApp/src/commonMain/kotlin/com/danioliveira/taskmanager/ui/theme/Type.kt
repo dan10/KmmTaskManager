@@ -5,12 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.inter_medium
+import kmmtaskmanager.composeapp.generated.resources.inter_regular
 import kmmtaskmanager.composeapp.generated.resources.poppins_bold
 import kmmtaskmanager.composeapp.generated.resources.poppins_medium
 import kmmtaskmanager.composeapp.generated.resources.poppins_regular
 import kmmtaskmanager.composeapp.generated.resources.poppins_semibold
-import kmmtaskmanager.composeapp.generated.resources.inter_medium
-import kmmtaskmanager.composeapp.generated.resources.inter_regular
 import org.jetbrains.compose.resources.Font
 
 val bodyFontFamily

@@ -40,7 +40,7 @@ class TasksViewModel(
         // Trigger initial load
         refreshTrigger.tryEmit(Unit)
         loadTaskProgress()
-        
+
         // Watch for search text changes
         viewModelScope.launch {
             snapshotFlow { state.searchFieldState.text }
@@ -96,7 +96,7 @@ class TasksViewModel(
     private fun updateTaskStatus(taskId: Uuid, status: TaskStatus) {
         viewModelScope.launch {
             updateTaskStatusUseCase(taskId.toString(), status)
-                .onSuccess { 
+                .onSuccess {
                     // Refresh the task list and progress after successful status update
                     refreshTasks()
                 }
@@ -108,7 +108,7 @@ class TasksViewModel(
     }
 
     fun handleActions(action: TasksAction) {
-        when(action) {
+        when (action) {
             is TasksAction.LoadTasks -> loadTasks()
             is TasksAction.RefreshTasks -> refreshTasks()
             is TasksAction.UpdateTaskStatus -> updateTaskStatus(action.taskId, action.status)

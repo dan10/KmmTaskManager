@@ -141,7 +141,7 @@ fun TaskItNavHost(
 ) {
     val authManager = koinInject<AuthManager>()
     var startDestination by remember { mutableStateOf<Screen?>(null) }
-    
+
     // Check authentication state on startup
     LaunchedEffect(Unit) {
         val isAuthenticated = authManager.checkAuthState()
@@ -149,7 +149,7 @@ fun TaskItNavHost(
         // Signal that the app is ready (hide native splash screen)
         onAppReady()
     }
-    
+
     // Show nothing until we determine the start destination
     startDestination?.let { destination ->
         NavHost(
@@ -159,94 +159,100 @@ fun TaskItNavHost(
         ) {
             // Authentication
             composable<Screen.Login> {
-            LoginScreen(
-                navigateToRegister = {
-                    navController.navigate(Screen.Register)
-                },
-                navigateToHome = {
-                    navController.navigate(Screen.Tasks) {
-                        popUpTo(Screen.Login) {
-                            inclusive = true
+                LoginScreen(
+                    navigateToRegister = {
+                        navController.navigate(Screen.Register)
+                    },
+                    navigateToHome = {
+                        navController.navigate(Screen.Tasks) {
+                            popUpTo(Screen.Login) {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        composable<Screen.Register> {
-            RegisterScreen(
-                navigateToLogin = {
-                    navController.popBackStack()
-                },
-                navigateToHome = {
-                    navController.navigate(Screen.Tasks) {
-                        popUpTo(Screen.Login) {
-                            inclusive = true
+            composable<Screen.Register> {
+                RegisterScreen(
+                    navigateToLogin = {
+                        navController.popBackStack()
+                    },
+                    navigateToHome = {
+                        navController.navigate(Screen.Tasks) {
+                            popUpTo(Screen.Login) {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        // Top level destinations
-        composable<Screen.Tasks> {
-            TasksScreen(
-                navigateToTaskDetail = { taskId -> navController.navigate(Screen.TasksDetails(taskId.toString())) },
-                navigateToCreateTask = { navController.navigate(Screen.CreateEditTask(null)) }
-            )
-        }
-
-        composable<Screen.Projects> {
-            ProjectsScreen(
-                navigateToCreateProject = {
-                    navController.navigate(Screen.CreateEditProject(null))
-                },
-                navigateToProjectDetail = { projectId ->
-                    navController.navigate(
-                        Screen.ProjectDetails(
-                            projectId
+            // Top level destinations
+            composable<Screen.Tasks> {
+                TasksScreen(
+                    navigateToTaskDetail = { taskId ->
+                        navController.navigate(
+                            Screen.TasksDetails(
+                                taskId.toString()
+                            )
                         )
-                    )
-                }
-            )
-        }
+                    },
+                    navigateToCreateTask = { navController.navigate(Screen.CreateEditTask(null)) }
+                )
+            }
 
-        composable<Screen.Profile> {
-            Text("Profile Screen - Coming Soon")
-        }
+            composable<Screen.Projects> {
+                ProjectsScreen(
+                    navigateToCreateProject = {
+                        navController.navigate(Screen.CreateEditProject(null))
+                    },
+                    navigateToProjectDetail = { projectId ->
+                        navController.navigate(
+                            Screen.ProjectDetails(
+                                projectId
+                            )
+                        )
+                    }
+                )
+            }
 
-        composable<Screen.CreateEditProject> { backStackEntry ->
-            CreateEditProjectScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
+            composable<Screen.Profile> {
+                Text("Profile Screen - Coming Soon")
+            }
 
-        composable<Screen.CreateEditTask> {
-            TaskCreateEditScreen(
-                onBack = { navController.popBackStack() },
-            )
-        }
+            composable<Screen.CreateEditProject> { backStackEntry ->
+                CreateEditProjectScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
 
-        composable<Screen.TasksDetails> { backStackEntry ->
-            TasksDetailsScreen(
-                onBack = { navController.popBackStack() },
-                onEditTask = { taskId ->
-                    navController.navigate(Screen.CreateEditTask(taskId))
-                }
-            )
-        }
+            composable<Screen.CreateEditTask> {
+                TaskCreateEditScreen(
+                    onBack = { navController.popBackStack() },
+                )
+            }
 
-        composable<Screen.ProjectDetails> { backStackEntry ->
-            ProjectDetailsScreen(
-                onBack = { navController.popBackStack() },
-                navigateToCreateTask = {
-                    navController.navigate(Screen.CreateEditTask(taskId = null, projectId = it))
-                },
-                navigateToTaskDetail = { taskId ->
-                    navController.navigate(Screen.TasksDetails(taskId.toString()))
-                }
-            )
-        }
+            composable<Screen.TasksDetails> { backStackEntry ->
+                TasksDetailsScreen(
+                    onBack = { navController.popBackStack() },
+                    onEditTask = { taskId ->
+                        navController.navigate(Screen.CreateEditTask(taskId))
+                    }
+                )
+            }
+
+            composable<Screen.ProjectDetails> { backStackEntry ->
+                ProjectDetailsScreen(
+                    onBack = { navController.popBackStack() },
+                    navigateToCreateTask = {
+                        navController.navigate(Screen.CreateEditTask(taskId = null, projectId = it))
+                    },
+                    navigateToTaskDetail = { taskId ->
+                        navController.navigate(Screen.TasksDetails(taskId.toString()))
+                    }
+                )
+            }
         }
     }
 }

@@ -98,14 +98,22 @@ fun TaskItem(
 
                 task.dueDate?.let {
                     Text(
-                        text = "${stringResource(Res.string.task_due_date)} ${DateFormatter.formatDate(it)}",
+                        text = "${stringResource(Res.string.task_due_date)} ${
+                            DateFormatter.formatDate(
+                                it
+                            )
+                        }",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
 
                 Text(
-                    text = "${stringResource(Res.string.task_status_label)}: ${TaskStatusFormatter.formatTaskStatus(task.status)}",
+                    text = "${stringResource(Res.string.task_status_label)}: ${
+                        TaskStatusFormatter.formatTaskStatus(
+                            task.status
+                        )
+                    }",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )

@@ -22,9 +22,18 @@ data class TopLevelRoute<T : Any>(val name: StringResource, val route: T, val ic
 
 val topLevelRoutes = listOf(
     TopLevelRoute(Res.string.nav_tasks, Screen.Tasks, NavIcon.ImageVectorIcon(Icons.Default.Check)),
-    TopLevelRoute(Res.string.nav_projects, Screen.Projects, NavIcon.DrawableResourceIcon(Res.drawable.ic_folder)),
-    TopLevelRoute(Res.string.nav_profile, Screen.Profile, NavIcon.ImageVectorIcon(Icons.Default.Person))
+    TopLevelRoute(
+        Res.string.nav_projects,
+        Screen.Projects,
+        NavIcon.DrawableResourceIcon(Res.drawable.ic_folder)
+    ),
+    TopLevelRoute(
+        Res.string.nav_profile,
+        Screen.Profile,
+        NavIcon.ImageVectorIcon(Icons.Default.Person)
+    )
 )
+
 sealed interface Screen {
     // Authentication
     @Serializable

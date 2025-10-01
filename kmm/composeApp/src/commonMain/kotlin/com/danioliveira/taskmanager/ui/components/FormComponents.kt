@@ -32,7 +32,7 @@ fun TaskItFieldLabel(
 ) {
     Text(
         text = text,
-            style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.labelSmall,
         modifier = modifier.padding(start = 4.dp, bottom = 4.dp)
     )
 }
@@ -46,7 +46,7 @@ fun TaskItPriorityBadge(
     modifier: Modifier = Modifier
 ) {
     val taskPriority = priority.toTaskPriority()
-    
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
@@ -164,7 +164,7 @@ fun TaskItSectionTitle(
 ) {
     Text(
         text = title,
-            style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.titleLarge,
         fontWeight = FontWeight.Bold,
         modifier = modifier.padding(bottom = 12.dp)
     )

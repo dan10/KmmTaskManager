@@ -19,8 +19,13 @@ class RegisterUseCase(private val authRepository: AuthRepository) {
      * @param displayName The user's display name
      * @return Result containing AuthResponse on success or an exception on failure
      */
-    suspend operator fun invoke(email: String, password: String, displayName: String): Result<AuthResponse> {
-        val registerRequest = RegisterRequest(email = email, password = password, displayName = displayName)
+    suspend operator fun invoke(
+        email: String,
+        password: String,
+        displayName: String
+    ): Result<AuthResponse> {
+        val registerRequest =
+            RegisterRequest(email = email, password = password, displayName = displayName)
         val result = authRepository.register(registerRequest)
 
         result.onSuccess { authResponse ->

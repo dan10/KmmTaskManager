@@ -7,8 +7,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.danioliveira.taskmanager.data.mapper.toTask
-import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskDetailsUseCase
 import com.danioliveira.taskmanager.domain.usecase.tasks.DeleteTaskUseCase
+import com.danioliveira.taskmanager.domain.usecase.tasks.GetTaskDetailsUseCase
 import kotlinx.coroutines.launch
 
 class TasksDetailsViewModel(

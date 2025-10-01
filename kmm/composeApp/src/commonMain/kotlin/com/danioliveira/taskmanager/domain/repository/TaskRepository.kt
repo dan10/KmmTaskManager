@@ -39,7 +39,11 @@ interface TaskRepository {
      * @param query Optional query to filter tasks by title
      * @return Result containing paginated tasks with task progress information
      */
-    suspend fun getTasks(page: Int, size: Int, query: String? = null): Result<PaginatedResponse<TaskResponse>>
+    suspend fun getTasks(
+        page: Int,
+        size: Int,
+        query: String? = null
+    ): Result<PaginatedResponse<TaskResponse>>
 
     /**
      * Gets paginated tasks for a specific project.
@@ -49,7 +53,11 @@ interface TaskRepository {
      * @param size The page size
      * @return Result containing paginated tasks for the project
      */
-    suspend fun getTasksByProjectId(projectId: String, page: Int, size: Int): Result<PaginatedResponse<TaskResponse>>
+    suspend fun getTasksByProjectId(
+        projectId: String,
+        page: Int,
+        size: Int
+    ): Result<PaginatedResponse<TaskResponse>>
 
     /**
      * Gets a specific task by ID.

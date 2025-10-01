@@ -34,7 +34,11 @@ class ProjectRepositoryImpl(
         ).flow
     }
 
-    override suspend fun getProjects(page: Int, size: Int, query: String?): Result<PaginatedResponse<ProjectResponse>> {
+    override suspend fun getProjects(
+        page: Int,
+        size: Int,
+        query: String?
+    ): Result<PaginatedResponse<ProjectResponse>> {
         return try {
             val response = apiService.getProjects(page, size, query)
             Result.success(response)
@@ -82,7 +86,10 @@ class ProjectRepositoryImpl(
         }
     }
 
-    override suspend fun updateProject(projectId: String, request: ProjectUpdateRequest): Result<Boolean> {
+    override suspend fun updateProject(
+        projectId: String,
+        request: ProjectUpdateRequest
+    ): Result<Boolean> {
         return try {
             val success = apiService.updateProject(projectId, request)
             Result.success(success)

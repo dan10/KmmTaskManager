@@ -12,10 +12,10 @@ import org.jetbrains.compose.resources.stringResource
  * Utility object for formatting Priority values with localized strings.
  */
 object PriorityFormatter {
-    
+
     /**
      * Returns the localized string for the given priority.
-     * 
+     *
      * @param priority The priority to format
      * @return The localized priority string
      */

@@ -78,7 +78,7 @@ class LoginViewModel(
     }
 
     fun handleActions(action: LoginAction) {
-        when(action) {
+        when (action) {
             is LoginAction.Login -> login()
         }
     }

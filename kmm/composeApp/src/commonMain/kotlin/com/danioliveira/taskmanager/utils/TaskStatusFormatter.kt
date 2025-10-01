@@ -3,19 +3,19 @@ package com.danioliveira.taskmanager.utils
 import androidx.compose.runtime.Composable
 import com.danioliveira.taskmanager.domain.TaskStatus
 import kmmtaskmanager.composeapp.generated.resources.Res
-import kmmtaskmanager.composeapp.generated.resources.task_status_todo
-import kmmtaskmanager.composeapp.generated.resources.task_status_in_progress
 import kmmtaskmanager.composeapp.generated.resources.task_status_done
+import kmmtaskmanager.composeapp.generated.resources.task_status_in_progress
+import kmmtaskmanager.composeapp.generated.resources.task_status_todo
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * Utility object for formatting TaskStatus values with localized strings.
  */
 object TaskStatusFormatter {
-    
+
     /**
      * Returns the localized string for the given task status.
-     * 
+     *
      * @param status The task status to format
      * @return The localized task status string
      */

@@ -99,44 +99,44 @@ private fun ProjectDetailsScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
     actions: (ProjectDetailsAction) -> Unit
 ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TaskItTopAppBar(
-                    title = state.project?.name ?: stringResource(Res.string.project_details_title),
-                    onNavigateBack = onBack
-                )
-            },
-            floatingActionButton = {
-                CreateTaskFAB(
-                    onClick = { actions(ProjectDetailsAction.CreateTask) }
-                )
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                when {
-                    state.isLoading -> TaskItLoadingState()
-                    state.errorMessage != null -> TaskItErrorState(state.errorMessage)
-                    else -> ProjectDetailsContent(
-                        project = state.project,
-                        pagingItems = pagingItems,
-                        navigateToTaskDetail = navigateToTaskDetail,
-                        onTaskStatusChange = { taskId, status ->
-                            actions(
-                                ProjectDetailsAction.UpdateTaskStatus(
-                                    taskId = taskId,
-                                    status = status
-                                )
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TaskItTopAppBar(
+                title = state.project?.name ?: stringResource(Res.string.project_details_title),
+                onNavigateBack = onBack
+            )
+        },
+        floatingActionButton = {
+            CreateTaskFAB(
+                onClick = { actions(ProjectDetailsAction.CreateTask) }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                state.isLoading -> TaskItLoadingState()
+                state.errorMessage != null -> TaskItErrorState(state.errorMessage)
+                else -> ProjectDetailsContent(
+                    project = state.project,
+                    pagingItems = pagingItems,
+                    navigateToTaskDetail = navigateToTaskDetail,
+                    onTaskStatusChange = { taskId, status ->
+                        actions(
+                            ProjectDetailsAction.UpdateTaskStatus(
+                                taskId = taskId,
+                                status = status
                             )
-                        }
-                    )
-                }
+                        )
+                    }
+                )
             }
         }
+    }
 }
 
 @Composable

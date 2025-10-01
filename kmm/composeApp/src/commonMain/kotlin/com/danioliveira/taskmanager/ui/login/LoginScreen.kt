@@ -162,8 +162,8 @@ fun LoginAccountLink(
     ) {
         Text(
             stringResource(Res.string.title_without_account),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         TextButton(onClick = onLinkClick) {
             Text(

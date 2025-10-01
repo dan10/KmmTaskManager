@@ -127,7 +127,7 @@ private fun RegisterHeader() {
 
     Text(
         text = "Create Account",
-            style = MaterialTheme.typography.headlineMedium
+        style = MaterialTheme.typography.headlineMedium
     )
 }
 

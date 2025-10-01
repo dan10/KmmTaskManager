@@ -35,7 +35,7 @@ class ProjectsViewModel(
         // Trigger initial load
         refreshTrigger.tryEmit(Unit)
         loadProjects()
-        
+
         // Watch for search text changes
         viewModelScope.launch {
             snapshotFlow { state.searchFieldState.text }

@@ -48,7 +48,7 @@ class DataStoreTokenStorage(
     override suspend fun getUser(): User? {
         return try {
             dataStore.data
-                .map { preferences -> 
+                .map { preferences ->
                     preferences[userKey]?.let { Json.decodeFromString<User>(it) }
                 }
                 .firstOrNull()

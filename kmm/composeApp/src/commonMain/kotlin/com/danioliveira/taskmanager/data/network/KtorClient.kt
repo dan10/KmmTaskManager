@@ -160,7 +160,10 @@ class KtorClient(
     /**
      * Handles client exceptions (4xx errors).
      */
-    private fun handleClientException(clientException: ClientRequestException, request: HttpRequest) {
+    private fun handleClientException(
+        clientException: ClientRequestException,
+        request: HttpRequest
+    ) {
         val exceptionResponse = clientException.response
         val statusCode = exceptionResponse.status.value
 
@@ -187,7 +190,11 @@ class KtorClient(
 
             404 -> {
                 logger.w { "Page not found: ${request.url}" }
-                throw NotFoundException(exceptionResponse, "Page not found: ${request.url}", errorBody)
+                throw NotFoundException(
+                    exceptionResponse,
+                    "Page not found: ${request.url}",
+                    errorBody
+                )
             }
 
             else -> {

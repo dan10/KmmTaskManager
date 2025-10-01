@@ -5,11 +5,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.danioliveira.taskmanager.data.mapper.toProject
 import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
-import com.danioliveira.taskmanager.domain.usecase.tasks.CreateEditTaskUseCase
 import com.danioliveira.taskmanager.domain.usecase.projects.GetProjectDetailsUseCase
-import com.danioliveira.taskmanager.data.mapper.toProject
+import com.danioliveira.taskmanager.domain.usecase.tasks.CreateEditTaskUseCase
 import com.danioliveira.taskmanager.navigation.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,8 +54,13 @@ class TaskCreateEditViewModel(
             }
         } else {
             // Editing an existing task
-            _uiState.update { 
-                it.copy(isCreating = false, taskId = taskId, projectId = projectId, isLoading = true) 
+            _uiState.update {
+                it.copy(
+                    isCreating = false,
+                    taskId = taskId,
+                    projectId = projectId,
+                    isLoading = true
+                )
             }
             loadTask(taskId)
             if (projectId != null) {

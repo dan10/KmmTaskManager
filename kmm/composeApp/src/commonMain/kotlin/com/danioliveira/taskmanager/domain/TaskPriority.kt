@@ -21,7 +21,7 @@ enum class TaskPriority(
 }
 
 fun Priority.toTaskPriority(): TaskPriority {
-    return when(this) {
+    return when (this) {
         Priority.HIGH -> TaskPriority.HIGH
         Priority.MEDIUM -> TaskPriority.MEDIUM
         Priority.LOW -> TaskPriority.LOW

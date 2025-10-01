@@ -46,7 +46,11 @@ class TaskRepositoryImpl(
         ).flow
     }
 
-    override suspend fun getTasks(page: Int, size: Int, query: String?): Result<PaginatedResponse<TaskResponse>> {
+    override suspend fun getTasks(
+        page: Int,
+        size: Int,
+        query: String?
+    ): Result<PaginatedResponse<TaskResponse>> {
         return try {
             val response = apiService.getTasks(page, size, query)
             Result.success(response)
@@ -126,7 +130,10 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun updateTask(taskId: String, request: TaskUpdateRequest): Result<TaskResponse> {
+    override suspend fun updateTask(
+        taskId: String,
+        request: TaskUpdateRequest
+    ): Result<TaskResponse> {
         return try {
             val response = apiService.updateTask(taskId, request)
             Result.success(response)

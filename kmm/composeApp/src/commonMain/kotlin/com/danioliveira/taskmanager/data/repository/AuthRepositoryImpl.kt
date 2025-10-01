@@ -5,8 +5,8 @@ import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.api.response.AuthResponse
 import com.danioliveira.taskmanager.data.network.AuthApiService
 import com.danioliveira.taskmanager.data.storage.TokenStorage
-import com.danioliveira.taskmanager.domain.repository.AuthRepository
 import com.danioliveira.taskmanager.domain.User
+import com.danioliveira.taskmanager.domain.repository.AuthRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext

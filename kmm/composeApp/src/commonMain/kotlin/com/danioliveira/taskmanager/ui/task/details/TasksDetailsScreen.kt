@@ -88,6 +88,7 @@ private fun TasksDetailsScreenContent(
                             projectName = state.task.projectName
                         )
                     }
+
                     else -> TaskItErrorState("No task details available")
                 }
             }
@@ -116,7 +117,7 @@ fun TaskActionButtons(
 ) {
     TaskItInfoCard {
         TaskItSectionTitle(stringResource(Res.string.task_actions))
-        
+
         TaskItEditDeleteButtons(
             onEdit = { onAction(TasksDetailsAction.EditTask) },
             onDelete = { onAction(TasksDetailsAction.DeleteTask) },
@@ -141,17 +142,17 @@ fun TaskInfoCard(
             title = title,
             priority = priority
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Description
         Text(
             text = description,
             style = MaterialTheme.typography.bodyLarge
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Task information rows
         TaskItInfoRow(
             label = stringResource(Res.string.task_due_date),
@@ -161,12 +162,12 @@ fun TaskInfoCard(
                 stringResource(Res.string.task_no_due_date)
             }
         )
-        
+
         TaskItInfoRow(
             label = stringResource(Res.string.task_status_label),
             value = TaskStatusFormatter.formatTaskStatus(status)
         )
-        
+
         // Project row - only show if task has a project
         projectName?.let { project ->
             TaskItInfoRow(

@@ -116,7 +116,8 @@ private fun PasswordIcon(
     onClick: () -> Unit
 ) {
     IconButton(onClick = onClick) {
-        val iconRes = if (passwordVisible) Res.drawable.ic_visibility_off else Res.drawable.ic_visibility
+        val iconRes =
+            if (passwordVisible) Res.drawable.ic_visibility_off else Res.drawable.ic_visibility
         val description = if (passwordVisible) {
             stringResource(Res.string.content_description_hide_password_icon)
         } else {

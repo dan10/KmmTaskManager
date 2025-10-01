@@ -317,11 +317,11 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-            progress = { if (project.total > 0) project.completed.toFloat() / project.total else 0f },
-            modifier = Modifier.fillMaxWidth(),
-            color = randomColor,
-            trackColor = ProgressIndicatorDefaults.linearTrackColor,
-            strokeCap = StrokeCap.Round,
+                progress = { if (project.total > 0) project.completed.toFloat() / project.total else 0f },
+                modifier = Modifier.fillMaxWidth(),
+                color = randomColor,
+                trackColor = ProgressIndicatorDefaults.linearTrackColor,
+                strokeCap = StrokeCap.Round,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(

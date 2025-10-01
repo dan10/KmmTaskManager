@@ -222,7 +222,7 @@ private fun TasksSearchField(
             )
         },
         placeholder = { Text(stringResource(Res.string.tasks_search_placeholder)) },
-        colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor =  MaterialTheme.colorScheme.surface)
+        colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = MaterialTheme.colorScheme.surface)
     )
 }
 

@@ -94,7 +94,11 @@ class ProjectDetailsViewModel(
     fun handleActions(action: ProjectDetailsAction) {
         when (action) {
             is ProjectDetailsAction.RefreshTasks -> refreshTasks()
-            is ProjectDetailsAction.UpdateTaskStatus -> updateTaskStatus(action.taskId, action.status)
+            is ProjectDetailsAction.UpdateTaskStatus -> updateTaskStatus(
+                action.taskId,
+                action.status
+            )
+
             is ProjectDetailsAction.CreateTask -> createTask()
         }
     }

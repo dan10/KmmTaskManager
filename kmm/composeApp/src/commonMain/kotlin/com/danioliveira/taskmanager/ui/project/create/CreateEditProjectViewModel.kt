@@ -47,8 +47,8 @@ class CreateEditProjectViewModel(
     private fun initialize(projectId: String?) {
         if (projectId == null) {
             // Creating a new project
-            _uiState.update { 
-                it.copy(isCreating = true) 
+            _uiState.update {
+                it.copy(isCreating = true)
             }
         } else {
             // Editing an existing project
@@ -76,7 +76,8 @@ class CreateEditProjectViewModel(
                 },
                 onFailure = { error ->
                     viewModelScope.launch {
-                        val errorMessage = getString(Res.string.project_load_error, error.message ?: "")
+                        val errorMessage =
+                            getString(Res.string.project_load_error, error.message ?: "")
                         _uiState.update {
                             it.copy(
                                 errorMessage = errorMessage,
@@ -131,7 +132,8 @@ class CreateEditProjectViewModel(
                 },
                 onFailure = { error ->
                     viewModelScope.launch {
-                        val errorMessage = getString(Res.string.project_create_error, error.message ?: "")
+                        val errorMessage =
+                            getString(Res.string.project_create_error, error.message ?: "")
                         _uiState.update {
                             it.copy(
                                 errorMessage = errorMessage,
@@ -178,7 +180,8 @@ class CreateEditProjectViewModel(
                 },
                 onFailure = { error ->
                     viewModelScope.launch {
-                        val errorMessage = getString(Res.string.project_update_error, error.message ?: "")
+                        val errorMessage =
+                            getString(Res.string.project_update_error, error.message ?: "")
                         _uiState.update {
                             it.copy(
                                 errorMessage = errorMessage,

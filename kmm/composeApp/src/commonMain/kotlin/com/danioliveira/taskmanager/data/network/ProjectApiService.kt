@@ -31,7 +31,11 @@ class ProjectApiService(
      * @param query Optional query to filter projects by name
      * @return PaginatedResponse containing the projects
      */
-    suspend fun getProjects(page: Int, size: Int, query: String? = null): PaginatedResponse<ProjectResponse> {
+    suspend fun getProjects(
+        page: Int,
+        size: Int,
+        query: String? = null
+    ): PaginatedResponse<ProjectResponse> {
         val resource = UserProjects(
             size = size,
             page = page,
@@ -99,9 +103,9 @@ class ProjectApiService(
      * @return PaginatedResponse containing the project tasks
      */
     suspend fun getProjectTasks(
-        projectId: String, 
-        page: Int, 
-        size: Int, 
+        projectId: String,
+        page: Int,
+        size: Int,
         query: String? = null
     ): PaginatedResponse<com.danioliveira.taskmanager.api.response.TaskResponse> {
         val resource = Projects.Id.Tasks(

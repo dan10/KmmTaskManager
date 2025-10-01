@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.data.network
 
-import io.ktor.client.engine.*
-import io.ktor.client.engine.okhttp.*
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.okhttp.OkHttp
 
 /**
  * Creates an OkHttp engine for Android platform with timeout configuration

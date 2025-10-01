@@ -35,7 +35,11 @@ class TaskApiService(
      * @param query Optional query to filter tasks by title
      * @return PaginatedResponse containing the tasks and task progress information
      */
-    suspend fun getTasks(page: Int, size: Int, query: String? = null): PaginatedResponse<TaskResponse> {
+    suspend fun getTasks(
+        page: Int,
+        size: Int,
+        query: String? = null
+    ): PaginatedResponse<TaskResponse> {
         val resource = Tasks.Assigned(
             size = size,
             page = page,
@@ -126,7 +130,11 @@ class TaskApiService(
      * @param size The page size
      * @return PaginatedResponse containing the tasks for the project
      */
-    suspend fun getTasksByProjectId(projectId: String, page: Int, size: Int): PaginatedResponse<TaskResponse> {
+    suspend fun getTasksByProjectId(
+        projectId: String,
+        page: Int,
+        size: Int
+    ): PaginatedResponse<TaskResponse> {
         return client.get("api/tasks/projects/$projectId") {
             parameter("page", page)
             parameter("size", size)
@@ -152,7 +160,11 @@ class TaskApiService(
      * @param query Optional query to filter tasks
      * @return PaginatedResponse containing the assigned tasks
      */
-    suspend fun getAssignedTasks(page: Int, size: Int, query: String? = null): PaginatedResponse<TaskResponse> {
+    suspend fun getAssignedTasks(
+        page: Int,
+        size: Int,
+        query: String? = null
+    ): PaginatedResponse<TaskResponse> {
         return client.get(Tasks.Assigned(page = page, size = size, query = query)).body()
     }
 

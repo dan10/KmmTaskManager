@@ -155,7 +155,7 @@ private fun TaskFormFields(
     // Project field (if project is associated)
     if (state.projectName != null) {
         TaskItFieldLabel(stringResource(Res.string.project_name_label))
-        
+
         OutlinedTextField(
             value = state.projectName,
             onValueChange = { /* Read-only field */ },
@@ -236,7 +236,8 @@ fun TaskScreenPreview() {
                 title = TextFieldState("Title"),
                 description = TextFieldState("Description"),
                 priority = Priority.LOW,
-                dueDate = Clock.System.now().plus(1.days).toLocalDateTime(TimeZone.currentSystemDefault()),
+                dueDate = Clock.System.now().plus(1.days)
+                    .toLocalDateTime(TimeZone.currentSystemDefault()),
                 isLoading = false
             ),
             onBack = {},

@@ -29,7 +29,11 @@ interface ProjectRepository {
      * @param query Optional query to filter projects by name
      * @return Result containing paginated projects
      */
-    suspend fun getProjects(page: Int, size: Int, query: String? = null): Result<PaginatedResponse<ProjectResponse>>
+    suspend fun getProjects(
+        page: Int,
+        size: Int,
+        query: String? = null
+    ): Result<PaginatedResponse<ProjectResponse>>
 
     /**
      * Gets a specific project by ID.
