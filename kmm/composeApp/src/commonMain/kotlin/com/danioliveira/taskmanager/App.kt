@@ -19,10 +19,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -48,7 +51,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
-fun TaskItApp() {
+fun TaskItApp(
+    onAppReady: () -> Unit = {}
+) {
     TaskItTheme {
         val authManager = koinInject<AuthManager>()
         val navController = rememberNavController()
@@ -66,6 +71,7 @@ fun TaskItApp() {
         ) { innerPadding ->
             TaskItNavHost(
                 navController = appState.navController,
+                onAppReady = onAppReady,
                 modifier = Modifier
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding)
@@ -130,15 +136,29 @@ fun TaskItBottomBar(
 @Composable
 fun TaskItNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAppReady: () -> Unit = {},
 ) {
-    NavHost(
-        modifier = modifier,
-        navController = navController,
-        startDestination = Screen.Login
-    ) {
-        // Authentication
-        composable<Screen.Login> {
+    val authManager = koinInject<AuthManager>()
+    var startDestination by remember { mutableStateOf<Screen?>(null) }
+    
+    // Check authentication state on startup
+    LaunchedEffect(Unit) {
+        val isAuthenticated = authManager.checkAuthState()
+        startDestination = if (isAuthenticated) Screen.Tasks else Screen.Login
+        // Signal that the app is ready (hide native splash screen)
+        onAppReady()
+    }
+    
+    // Show nothing until we determine the start destination
+    startDestination?.let { destination ->
+        NavHost(
+            modifier = modifier,
+            navController = navController,
+            startDestination = destination
+        ) {
+            // Authentication
+            composable<Screen.Login> {
             LoginScreen(
                 navigateToRegister = {
                     navController.navigate(Screen.Register)
@@ -226,6 +246,7 @@ fun TaskItNavHost(
                     navController.navigate(Screen.TasksDetails(taskId.toString()))
                 }
             )
+        }
         }
     }
 }

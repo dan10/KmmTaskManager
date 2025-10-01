@@ -40,11 +40,6 @@ class TasksItAppState(
 
     init {
         coroutineScope.launch {
-            authManager.checkAuthState()
-            handleAuthNavigation()
-        }
-
-        coroutineScope.launch {
             navController.currentBackStackEntryFlow.collectLatest { currentEntry ->
                 currentEntry.destination.also { destination ->
                     showBottomBar = shouldShowBottomBar2(destination)
