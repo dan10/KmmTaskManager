@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -18,7 +17,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -101,10 +99,8 @@ private fun ProjectDetailsScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
     actions: (ProjectDetailsAction) -> Unit
 ) {
-    Surface(color = MaterialTheme.colorScheme.background) {
         Scaffold(
-            modifier = Modifier.fillMaxSize()
-                .navigationBarsPadding(),
+            modifier = Modifier.fillMaxSize(),
             topBar = {
                 TaskItTopAppBar(
                     title = state.project?.name ?: stringResource(Res.string.project_details_title),
@@ -141,7 +137,6 @@ private fun ProjectDetailsScreen(
                 }
             }
         }
-    }
 }
 
 @Composable
