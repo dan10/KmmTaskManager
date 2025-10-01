@@ -2,9 +2,10 @@ package com.danioliveira.taskmanager.ui.project.create
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -53,10 +54,12 @@ private fun CreateEditProjectScreen(
     actions: (CreateEditProjectAction) -> Unit
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets.ime,
         topBar = {
             TaskItTopAppBar(
                 title = stringResource(
-                    if (state.isCreating) Res.string.create_project else Res.string.edit_project
+                    if (state.isCreating) Res.string.create_project
+                    else Res.string.edit_project
                 ),
                 onNavigateBack = onBack
             )
@@ -66,8 +69,7 @@ private fun CreateEditProjectScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .navigationBarsPadding()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
             TaskItErrorMessage(errorMessage = state.errorMessage)
 

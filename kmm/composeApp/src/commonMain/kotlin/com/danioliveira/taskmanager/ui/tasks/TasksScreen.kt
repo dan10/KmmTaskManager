@@ -152,6 +152,7 @@ private fun TasksScreen(
                     val task = pagingItems[index]
                     if (task != null) {
                         TaskItem(
+                            modifier = Modifier.animateItem(),
                             task = task,
                             onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
                             onCheckedChange = { isChecked ->

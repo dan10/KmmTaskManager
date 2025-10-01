@@ -5,8 +5,14 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -62,6 +68,8 @@ fun TaskItApp() {
                 navController = appState.navController,
                 modifier = Modifier
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
             )
         }
     }
@@ -105,7 +113,11 @@ fun TaskItBottomBar(
                         }
                     },
                     label = { Text(stringResource(topLevelRoute.name)) },
-                    selected = appState.currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true,
+                    selected = appState.currentDestination?.hierarchy?.any {
+                        it.hasRoute(
+                            topLevelRoute.route::class
+                        )
+                    } == true,
                     onClick = {
                         appState.navigateToTopLevelDestination(topLevelRoute)
                     }
@@ -166,8 +178,16 @@ fun TaskItNavHost(
 
         composable<Screen.Projects> {
             ProjectsScreen(
-                navigateToCreateProject = { navController.navigate(Screen.CreateEditProject(null)) },
-                navigateToProjectDetail = { projectId -> navController.navigate(Screen.ProjectDetails(projectId)) }
+                navigateToCreateProject = {
+                    navController.navigate(Screen.CreateEditProject(null))
+                },
+                navigateToProjectDetail = { projectId ->
+                    navController.navigate(
+                        Screen.ProjectDetails(
+                            projectId
+                        )
+                    )
+                }
             )
         }
 
@@ -190,7 +210,7 @@ fun TaskItNavHost(
         composable<Screen.TasksDetails> { backStackEntry ->
             TasksDetailsScreen(
                 onBack = { navController.popBackStack() },
-                onEditTask = { taskId -> 
+                onEditTask = { taskId ->
                     navController.navigate(Screen.CreateEditTask(taskId))
                 }
             )
@@ -202,8 +222,8 @@ fun TaskItNavHost(
                 navigateToCreateTask = {
                     navController.navigate(Screen.CreateEditTask(taskId = null, projectId = it))
                 },
-                navigateToTaskDetail = { taskId -> 
-                    navController.navigate(Screen.TasksDetails(taskId.toString())) 
+                navigateToTaskDetail = { taskId ->
+                    navController.navigate(Screen.TasksDetails(taskId.toString()))
                 }
             )
         }

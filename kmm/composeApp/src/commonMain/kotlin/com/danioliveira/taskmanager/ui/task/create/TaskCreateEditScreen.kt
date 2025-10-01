@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -24,14 +27,15 @@ import com.danioliveira.taskmanager.domain.Priority
 import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.ui.components.DatePickerFieldToModal
 import com.danioliveira.taskmanager.ui.components.TaskItCreateEditButtons
-import com.danioliveira.taskmanager.ui.components.TaskItCreateEditTopAppBar
 import com.danioliveira.taskmanager.ui.components.TaskItErrorMessage
 import com.danioliveira.taskmanager.ui.components.TaskItFieldLabel
 import com.danioliveira.taskmanager.ui.components.TaskItPriorityDropdown
 import com.danioliveira.taskmanager.ui.components.TaskItStatusDropdown
+import com.danioliveira.taskmanager.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.ui.components.TrackItInputField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.content_description_delete
 import kmmtaskmanager.composeapp.generated.resources.create_task
 import kmmtaskmanager.composeapp.generated.resources.edit_task
 import kmmtaskmanager.composeapp.generated.resources.project_name_label
@@ -40,13 +44,13 @@ import kmmtaskmanager.composeapp.generated.resources.task_priority_label
 import kmmtaskmanager.composeapp.generated.resources.task_status_label
 import kmmtaskmanager.composeapp.generated.resources.task_title_error
 import kmmtaskmanager.composeapp.generated.resources.task_title_label
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
@@ -78,13 +82,21 @@ private fun TaskCreateEditScreen(
 
     Scaffold(
         topBar = {
-            TaskItCreateEditTopAppBar(
+            TaskItTopAppBar(
                 title = stringResource(
                     if (state.isCreating) Res.string.create_task else Res.string.edit_task
                 ),
                 onNavigateBack = onBack,
-                showDeleteAction = !state.isCreating,
-                onDelete = { actions(TaskCreateEditAction.DeleteTask) }
+                actions = {
+                    if (!state.isCreating) {
+                        IconButton(onClick = { actions(TaskCreateEditAction.DeleteTask) }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(Res.string.content_description_delete)
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -92,8 +104,7 @@ private fun TaskCreateEditScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .navigationBarsPadding()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
             // Error message
             TaskItErrorMessage(errorMessage = state.errorMessage)
