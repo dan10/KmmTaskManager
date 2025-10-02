@@ -31,21 +31,34 @@ class TaskCreateEditViewModel(
 
     private val _uiState = MutableStateFlow(TaskCreateEditState())
     val uiState: StateFlow<TaskCreateEditState> = _uiState.asStateFlow()
+    
+    private var isInitialized = false
 
     init {
-        val route = savedStateHandle.toRoute<Screen.CreateEditTask>()
-        val taskId = route.taskId
-        val projectId = route.projectId
-        initialize(taskId, projectId)
+        // Try to initialize from SavedStateHandle (when navigated via route)
+        // If it fails, initialize will be called manually from the composable
+        try {
+            val route = savedStateHandle.toRoute<Screen.CreateEditTask>()
+            val taskId = route.taskId
+            val projectId = route.projectId
+            initialize(taskId, projectId)
+        } catch (e: Exception) {
+            // No route data available - will be initialized manually
+            // This happens when using the BottomSheet approach
+        }
     }
 
     /**
      * Initializes the ViewModel with an existing task if editing and project if specified.
+     * Can be called multiple times, but will only initialize once.
      *
      * @param taskId The ID of the task to edit, or null if creating a new task
      * @param projectId The ID of the project to associate the task with, or null if no project
      */
     fun initialize(taskId: String?, projectId: String?) {
+        // Prevent re-initialization
+        if (isInitialized) return
+        isInitialized = true
         if (taskId == null) {
             // Creating a new task
             _uiState.update { it.copy(isCreating = true, projectId = projectId) }

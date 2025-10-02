@@ -1,26 +1,33 @@
 package com.danioliveira.taskmanager.ui.task.create
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.domain.Priority
@@ -54,6 +61,113 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
+
+/**
+ * BottomSheet version of task creation/editing screen
+ */
+@OptIn(ExperimentalUuidApi::class)
+@Composable
+fun TaskCreateEditBottomSheet(
+    taskId: String?,
+    projectId: String?,
+    onDismiss: () -> Unit = {},
+    viewModel: TaskCreateEditViewModel = koinViewModel(key = "bottomsheet_${taskId}_${projectId}")
+) {
+    // Initialize the ViewModel with the taskId and projectId
+    LaunchedEffect(taskId, projectId) {
+        viewModel.initialize(taskId, projectId)
+    }
+    
+    viewModel.onTaskCreated = onDismiss
+    viewModel.onTaskUpdated = onDismiss
+    viewModel.onTaskDeleted = onDismiss
+
+    val state by viewModel.uiState.collectAsState()
+    TaskCreateEditBottomSheetContent(state, onDismiss, viewModel::handleActions)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TaskCreateEditBottomSheetContent(
+    state: TaskCreateEditState,
+    onDismiss: () -> Unit,
+    actions: (TaskCreateEditAction) -> Unit
+) {
+    var priorityDropdownExpanded by remember { mutableStateOf(false) }
+    var statusDropdownExpanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        // Header with title and delete button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(
+                    if (state.isCreating) Res.string.create_task else Res.string.edit_task
+                ),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f)
+            )
+            
+            if (!state.isCreating) {
+                IconButton(onClick = { actions(TaskCreateEditAction.DeleteTask) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(Res.string.content_description_delete)
+                    )
+                }
+            }
+        }
+        
+        // Scrollable content
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Error message
+            TaskItErrorMessage(errorMessage = state.errorMessage)
+
+            // Form fields
+            TaskFormFields(
+                state = state,
+                priorityDropdownExpanded = priorityDropdownExpanded,
+                onPriorityDropdownExpandedChange = { priorityDropdownExpanded = it },
+                onPrioritySelected = { actions(TaskCreateEditAction.SetPriority(it)) },
+                statusDropdownExpanded = statusDropdownExpanded,
+                onStatusDropdownExpandedChange = { statusDropdownExpanded = it },
+                onStatusSelected = { actions(TaskCreateEditAction.SetStatus(it)) },
+                onDateSelected = { actions(TaskCreateEditAction.SetDate(it)) }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Buttons
+            TaskItCreateEditButtons(
+                isCreating = state.isCreating,
+                isLoading = state.isLoading,
+                isButtonEnabled = state.isButtonEnabled,
+                onCancel = onDismiss,
+                onCreateOrUpdate = {
+                    if (state.isCreating) {
+                        actions(TaskCreateEditAction.CreateTask)
+                    } else {
+                        actions(TaskCreateEditAction.UpdateTask)
+                    }
+                }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
 
 @OptIn(ExperimentalUuidApi::class)
 @Composable

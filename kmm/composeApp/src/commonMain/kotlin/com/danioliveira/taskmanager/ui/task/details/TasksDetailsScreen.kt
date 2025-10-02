@@ -5,11 +5,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -23,6 +30,7 @@ import com.danioliveira.taskmanager.ui.components.TaskItInfoRow
 import com.danioliveira.taskmanager.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.ui.components.TaskItSectionTitle
 import com.danioliveira.taskmanager.ui.components.TaskItTopAppBar
+import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditBottomSheet
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
 import com.danioliveira.taskmanager.utils.TaskStatusFormatter
@@ -38,20 +46,47 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksDetailsScreen(
     viewModel: TasksDetailsViewModel = koinViewModel(),
-    onBack: () -> Unit,
-    onEditTask: (String) -> Unit = {}
+    onBack: () -> Unit
 ) {
+    var showEditTaskBottomSheet by remember { mutableStateOf(false) }
+    var taskIdToEdit by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
     viewModel.onBack = onBack
-    viewModel.onEditTask = onEditTask
+    viewModel.onEditTask = { taskId ->
+        taskIdToEdit = taskId
+        showEditTaskBottomSheet = true
+    }
 
     Surface(color = Color(0XFFF1F5F9)) {
         TasksDetailsScreenContent(
             state = viewModel.state,
             onAction = viewModel::handleActions
         )
+        
+        // Task Edit BottomSheet
+        if (showEditTaskBottomSheet && taskIdToEdit != null) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showEditTaskBottomSheet = false
+                    taskIdToEdit = null
+                },
+                sheetState = sheetState
+            ) {
+                TaskCreateEditBottomSheet(
+                    taskId = taskIdToEdit,
+                    projectId = null,
+                    onDismiss = {
+                        showEditTaskBottomSheet = false
+                        taskIdToEdit = null
+                    }
+                )
+            }
+        }
     }
 }
 

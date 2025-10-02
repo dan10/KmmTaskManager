@@ -11,15 +11,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +50,7 @@ import com.danioliveira.taskmanager.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.ui.components.TaskItSmallLoadingIndicator
 import com.danioliveira.taskmanager.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.ui.components.TaskItem
+import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditBottomSheet
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
@@ -61,21 +69,26 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectDetailsScreen(
     onBack: () -> Unit,
-    navigateToCreateTask: (String) -> Unit,
     navigateToTaskDetail: (Uuid) -> Unit,
     viewModel: ProjectDetailsViewModel = koinViewModel()
 ) {
+    var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
+    var projectIdForTask by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
     LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         viewModel.checkAndRefresh()
     }
 
     LaunchedEffect(viewModel) {
         viewModel.onBack = onBack
-        viewModel.onCreateTask = {
-            navigateToCreateTask(it)
+        viewModel.onCreateTask = { projectId ->
+            projectIdForTask = projectId
+            showCreateTaskBottomSheet = true
         }
     }
 
@@ -89,6 +102,26 @@ fun ProjectDetailsScreen(
         navigateToTaskDetail = navigateToTaskDetail,
         actions = viewModel::handleActions
     )
+    
+    // Task Create BottomSheet for this project
+    if (showCreateTaskBottomSheet && projectIdForTask != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showCreateTaskBottomSheet = false
+                projectIdForTask = null
+            },
+            sheetState = sheetState
+        ) {
+            TaskCreateEditBottomSheet(
+                taskId = null,
+                projectId = projectIdForTask,
+                onDismiss = {
+                    showCreateTaskBottomSheet = false
+                    projectIdForTask = null
+                }
+            )
+        }
+    }
 }
 
 @Composable

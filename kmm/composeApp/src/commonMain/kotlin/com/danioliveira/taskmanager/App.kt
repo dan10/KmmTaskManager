@@ -42,7 +42,6 @@ import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectScreen
 import com.danioliveira.taskmanager.ui.project.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
 import com.danioliveira.taskmanager.ui.register.RegisterScreen
-import com.danioliveira.taskmanager.ui.task.create.TaskCreateEditScreen
 import com.danioliveira.taskmanager.ui.task.details.TasksDetailsScreen
 import com.danioliveira.taskmanager.ui.tasks.TasksScreen
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
@@ -197,8 +196,7 @@ fun TaskItNavHost(
                                 taskId.toString()
                             )
                         )
-                    },
-                    navigateToCreateTask = { navController.navigate(Screen.CreateEditTask(null)) }
+                    }
                 )
             }
 
@@ -227,27 +225,15 @@ fun TaskItNavHost(
                 )
             }
 
-            composable<Screen.CreateEditTask> {
-                TaskCreateEditScreen(
-                    onBack = { navController.popBackStack() },
-                )
-            }
-
             composable<Screen.TasksDetails> { backStackEntry ->
                 TasksDetailsScreen(
-                    onBack = { navController.popBackStack() },
-                    onEditTask = { taskId ->
-                        navController.navigate(Screen.CreateEditTask(taskId))
-                    }
+                    onBack = { navController.popBackStack() }
                 )
             }
 
             composable<Screen.ProjectDetails> { backStackEntry ->
                 ProjectDetailsScreen(
                     onBack = { navController.popBackStack() },
-                    navigateToCreateTask = {
-                        navController.navigate(Screen.CreateEditTask(taskId = null, projectId = it))
-                    },
                     navigateToTaskDetail = { taskId ->
                         navController.navigate(Screen.TasksDetails(taskId.toString()))
                     }
