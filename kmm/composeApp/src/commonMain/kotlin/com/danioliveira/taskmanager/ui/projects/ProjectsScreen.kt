@@ -24,16 +24,22 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +61,7 @@ import com.danioliveira.taskmanager.ui.components.TaskItEmptyState
 import com.danioliveira.taskmanager.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.ui.components.TaskItSmallLoadingIndicator
 import com.danioliveira.taskmanager.ui.components.TrackItInputField
+import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectBottomSheet
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_search
@@ -76,12 +83,15 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.random.Random
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
     viewModel: ProjectsViewModel = koinViewModel(),
-    navigateToProjectDetail: (String) -> Unit,
-    navigateToCreateProject: () -> Unit
+    navigateToProjectDetail: (String) -> Unit
 ) {
+    var showCreateProjectBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
     LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         viewModel.checkAndRefresh()
     }
@@ -94,7 +104,8 @@ fun ProjectsScreen(
                 }
 
                 is ProjectsAction.OpenCreateProject -> {
-                    navigateToCreateProject()
+                    // Show the BottomSheet instead of navigating
+                    showCreateProjectBottomSheet = true
                 }
 
                 else -> {
@@ -108,6 +119,23 @@ fun ProjectsScreen(
             pagingItems = viewModel.projectFlow.collectAsLazyPagingItems(),
             onAction = onAction
         )
+        
+        // Project Create BottomSheet
+        if (showCreateProjectBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showCreateProjectBottomSheet = false
+                },
+                sheetState = sheetState
+            ) {
+                CreateEditProjectBottomSheet(
+                    projectId = null,
+                    onDismiss = {
+                        showCreateProjectBottomSheet = false
+                    }
+                )
+            }
+        }
     }
 }
 

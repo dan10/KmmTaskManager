@@ -33,18 +33,31 @@ class CreateEditProjectViewModel(
 
     var onProjectCreated: () -> Unit = {}
     var onProjectUpdated: () -> Unit = {}
+    
+    private var isInitialized = false
 
     init {
-        val projectId = savedStateHandle.toRoute<Screen.CreateEditProject>().projectId
-        initialize(projectId)
+        // Try to initialize from SavedStateHandle (when navigated via route)
+        // If it fails, initialize will be called manually from the composable
+        try {
+            val projectId = savedStateHandle.toRoute<Screen.CreateEditProject>().projectId
+            initialize(projectId)
+        } catch (e: Exception) {
+            // No route data available - will be initialized manually
+            // This happens when using the BottomSheet approach
+        }
     }
 
     /**
      * Initializes the ViewModel with an existing project if editing.
+     * Can be called multiple times, but will only initialize once.
      *
      * @param projectId The ID of the project to edit, or null if creating a new project
      */
-    private fun initialize(projectId: String?) {
+    fun initialize(projectId: String?) {
+        // Prevent re-initialization
+        if (isInitialized) return
+        isInitialized = true
         if (projectId == null) {
             // Creating a new project
             _uiState.update {
