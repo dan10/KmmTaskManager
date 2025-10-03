@@ -24,6 +24,14 @@ import kotlinx.coroutines.launch
 /**
  * App state holder for the TasksIt application.
  * Handles navigation state and authentication logic.
+ * 
+ * **Automatic Logout Flow:**
+ * 1. 401 error occurs (e.g., token expired, invalid token)
+ * 2. KtorClient retries request up to 3 times
+ * 3. After 3 failed attempts, KtorClient calls authManager.logout()
+ * 4. AuthManager updates isAuthenticated flow to false
+ * 5. This class detects the state change and automatically navigates to login
+ * 6. Back stack is cleared to prevent returning to authenticated screens
  */
 @Stable
 class TasksItAppState(
@@ -33,17 +41,32 @@ class TasksItAppState(
 ) {
 
     private val previousDestination = mutableStateOf<NavDestination?>(null)
+    private var previousAuthState by mutableStateOf<Boolean?>(null)
 
     var showBottomBar by mutableStateOf(false)
         private set
 
 
     init {
+        // Listen to navigation changes for bottom bar visibility
         coroutineScope.launch {
             navController.currentBackStackEntryFlow.collectLatest { currentEntry ->
                 currentEntry.destination.also { destination ->
                     showBottomBar = shouldShowBottomBar2(destination)
                 }
+            }
+        }
+        
+        // Listen to authentication state changes for automatic logout navigation
+        // This ensures the app automatically redirects to login when user is logged out
+        // (e.g., from 401 error after retries, manual logout, etc.)
+        coroutineScope.launch {
+            authManager.isAuthenticated.collectLatest { isAuthenticated ->
+                // Only handle logout navigation (authenticated -> not authenticated)
+                if (previousAuthState == true && !isAuthenticated) {
+                    handleLogout()
+                }
+                previousAuthState = isAuthenticated
             }
         }
     }
@@ -84,9 +107,26 @@ class TasksItAppState(
     }
 
     /**
+     * Handles logout by navigating to login screen and clearing the back stack.
+     */
+    private fun handleLogout() {
+        // Check if we're not already on login/register screen
+        val currentDest = navController.currentDestination
+        if (currentDest != null && !isLoginOrRegisterScreen(currentDest)) {
+            navController.navigate(Screen.Login) {
+                // Clear entire back stack
+                popUpTo(0) {
+                    inclusive = true
+                }
+                // Single instance of login screen
+                launchSingleTop = true
+            }
+        }
+    }
+
+    /**
      * Handles navigation based on authentication state.
      */
-
     fun handleAuthNavigation() {
         coroutineScope.launch {
             if (isAuthenticated.value) {
@@ -98,16 +138,7 @@ class TasksItAppState(
                 }
             } else {
                 // If not authenticated, navigate to login
-                // Check if current route is not login or register
-                if (navController.currentDestination?.route != null &&
-                    !isLoginOrRegisterScreen(navController.currentDestination!!)
-                ) {
-                    navController.navigate(Screen.Login) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
-                        }
-                    }
-                }
+                handleLogout()
             }
         }
     }

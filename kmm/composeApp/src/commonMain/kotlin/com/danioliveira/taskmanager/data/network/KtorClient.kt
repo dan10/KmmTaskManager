@@ -13,6 +13,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.ServerResponseException
@@ -28,6 +29,7 @@ import io.ktor.client.request.HttpRequest
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -66,6 +68,7 @@ class KtorClient(
         expectSuccess = true
 
         configureTimeouts(this)
+        configureRetry(this)
         configureAuthentication(this)
         configureContentNegotiation(this)
         configureResources(this)
@@ -85,6 +88,29 @@ class KtorClient(
             requestTimeoutMillis = 30.seconds.inWholeMilliseconds
             // Set socket timeout to 30 seconds
             socketTimeoutMillis = 30.seconds.inWholeMilliseconds
+        }
+    }
+
+    /**
+     * Configures retry logic for 401 (Unauthorized) errors.
+     * Retries up to 3 times with exponential backoff before allowing the error handler to log out the user.
+     */
+    private fun configureRetry(config: HttpClientConfig<*>) {
+        config.install(HttpRequestRetry) {
+            // Maximum number of retry attempts
+            maxRetries = 3
+
+            // Retry on 401 Unauthorized responses
+            retryOnException(maxRetries = 3, retryOnTimeout = false)
+            retryOnServerErrors(maxRetries = 0)
+            
+            retryIf { request, response ->
+                val shouldRetry = response.status == HttpStatusCode.Unauthorized
+                shouldRetry
+            }
+            
+            // Exponential backoff: 500ms, 1000ms, 1500ms
+            exponentialDelay(base = 500.0, maxDelayMs = 1500L)
         }
     }
 
