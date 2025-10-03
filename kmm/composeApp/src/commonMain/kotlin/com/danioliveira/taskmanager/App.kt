@@ -1,10 +1,15 @@
 package com.danioliveira.taskmanager
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -33,6 +38,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.danioliveira.taskmanager.domain.manager.AuthManager
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
@@ -131,6 +137,7 @@ fun TaskItBottomBar(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun TaskItNavHost(
     navController: NavHostController,
@@ -150,11 +157,12 @@ fun TaskItNavHost(
 
     // Show nothing until we determine the start destination
     startDestination?.let { destination ->
-        NavHost(
-            modifier = modifier,
-            navController = navController,
-            startDestination = destination
-        ) {
+        SharedTransitionLayout {
+            NavHost(
+                modifier = modifier,
+                navController = navController,
+                startDestination = destination
+            ) {
             // Authentication
             composable<Screen.Login> {
                 LoginScreen(
@@ -186,9 +194,24 @@ fun TaskItNavHost(
                 )
             }
 
-            // Top level destinations
-            composable<Screen.Tasks> {
+            // Top level destinations with slide animations
+            composable<Screen.Tasks>(
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 TasksScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@composable,
                     navigateToTaskDetail = { taskId ->
                         navController.navigate(
                             Screen.TasksDetails(
@@ -199,7 +222,22 @@ fun TaskItNavHost(
                 )
             }
 
-            composable<Screen.Projects> {
+            composable<Screen.Projects>(
+                enterTransition = {
+                    val isComingFromTasks = initialState.destination.hasRoute(Screen.Tasks::class)
+                    slideInHorizontally(
+                        initialOffsetX = { if (isComingFromTasks) it else -it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    val isGoingToTasks = targetState.destination.hasRoute(Screen.Tasks::class)
+                    slideOutHorizontally(
+                        targetOffsetX = { if (isGoingToTasks) it else -it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 ProjectsScreen(
                     navigateToProjectDetail = { projectId ->
                         navController.navigate(
@@ -211,7 +249,20 @@ fun TaskItNavHost(
                 )
             }
 
-            composable<Screen.Profile> {
+            composable<Screen.Profile>(
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 Text("Profile Screen - Coming Soon")
             }
 
@@ -228,6 +279,7 @@ fun TaskItNavHost(
                         navController.navigate(Screen.TasksDetails(taskId.toString()))
                     }
                 )
+            }
             }
         }
     }
