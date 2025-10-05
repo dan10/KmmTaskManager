@@ -2,11 +2,9 @@ package com.danioliveira.taskmanager.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.ic_folder
-import kmmtaskmanager.composeapp.generated.resources.nav_profile
 import kmmtaskmanager.composeapp.generated.resources.nav_projects
 import kmmtaskmanager.composeapp.generated.resources.nav_tasks
 import kotlinx.serialization.Serializable
@@ -26,11 +24,6 @@ val topLevelRoutes = listOf(
         Res.string.nav_projects,
         Screen.Projects,
         NavIcon.DrawableResourceIcon(Res.drawable.ic_folder)
-    ),
-    TopLevelRoute(
-        Res.string.nav_profile,
-        Screen.Profile,
-        NavIcon.ImageVectorIcon(Icons.Default.Person)
     )
 )
 

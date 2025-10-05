@@ -82,7 +82,6 @@
 
     <!-- ProjectsScreen strings -->
     <string name="projects_title">Projects</string>
-    <string name="projects_search_placeholder">Search projects...</string>
     <string name="projects_all">All Projects</string>
     <string name="projects_add">Add Project</string>
     <string name="projects_empty_title">No Projects Found</string>
@@ -158,4 +157,9 @@
     <string name="task_no_due_date">No due date</string>
     <string name="content_description_edit_task">Edit Task</string>
     <string name="content_description_delete_task">Delete Task</string>
+    
+    <!-- Edit Task Screen strings -->
+    <string name="task_edit_title">Edit Task</string>
+    <string name="task_edit_save">Save Changes</string>
+    <string name="task_edit_cancel">Cancel</string>
 </resources>

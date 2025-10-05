@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.api.request
 
-import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.core.domain.model.Priority
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 

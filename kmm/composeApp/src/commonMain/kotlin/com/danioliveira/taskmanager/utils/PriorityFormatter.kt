@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.utils
 
 import androidx.compose.runtime.Composable
-import com.danioliveira.taskmanager.domain.Priority
+import com.danioliveira.taskmanager.core.domain.model.Priority
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.priority_high
 import kmmtaskmanager.composeapp.generated.resources.priority_low

@@ -38,17 +38,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import com.danioliveira.taskmanager.core.ui.TasksItAppState
+import com.danioliveira.taskmanager.core.ui.rememberTasksItAppState
 import com.danioliveira.taskmanager.domain.manager.AuthManager
+import com.danioliveira.taskmanager.feature.auth.ui.login.LoginScreen
+import com.danioliveira.taskmanager.feature.auth.ui.register.RegisterScreen
+import com.danioliveira.taskmanager.feature.projects.ui.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
-import com.danioliveira.taskmanager.ui.login.LoginScreen
-import com.danioliveira.taskmanager.ui.project.details.ProjectDetailsScreen
-import com.danioliveira.taskmanager.ui.projects.ProjectsScreen
-import com.danioliveira.taskmanager.ui.register.RegisterScreen
-import com.danioliveira.taskmanager.ui.task.details.TasksDetailsScreen
-import com.danioliveira.taskmanager.ui.tasks.TasksScreen
+import com.danioliveira.taskmanager.feature.projects.ui.list.ProjectsScreen
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -209,17 +208,17 @@ fun TaskItNavHost(
                     ) + fadeOut(animationSpec = tween(300))
                 }
             ) {
-                TasksScreen(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@composable,
-                    navigateToTaskDetail = { taskId ->
-                        navController.navigate(
-                            Screen.TasksDetails(
-                                taskId.toString()
-                            )
-                        )
-                    }
-                )
+//                TasksScreen(
+//                    sharedTransitionScope = this@SharedTransitionLayout,
+//                    animatedContentScope = this@composable,
+//                    navigateToTaskDetail = { taskId ->
+//                        navController.navigate(
+//                            Screen.TasksDetails(
+//                                taskId.toString()
+//                            )
+//                        )
+//                    }
+//                )
             }
 
             composable<Screen.Projects>(
@@ -267,9 +266,9 @@ fun TaskItNavHost(
             }
 
             composable<Screen.TasksDetails> { backStackEntry ->
-                TasksDetailsScreen(
-                    onBack = { navController.popBackStack() }
-                )
+//                TasksDetailsScreen(
+//                    onBack = { navController.popBackStack() }
+//                )
             }
 
             composable<Screen.ProjectDetails> { backStackEntry ->

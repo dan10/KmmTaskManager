@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.utils
 
 import androidx.compose.runtime.Composable
-import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.task_status_done
 import kmmtaskmanager.composeapp.generated.resources.task_status_in_progress
