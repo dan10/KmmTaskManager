@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.data.network.exceptions
+package com.danioliveira.taskmanager.core.network.exceptions
 
 import co.touchlab.kermit.Logger
 import io.ktor.client.statement.HttpResponse

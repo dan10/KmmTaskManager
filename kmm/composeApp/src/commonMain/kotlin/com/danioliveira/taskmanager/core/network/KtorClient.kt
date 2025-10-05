@@ -1,14 +1,14 @@
-package com.danioliveira.taskmanager.data.network
+package com.danioliveira.taskmanager.core.network
 
 import co.touchlab.kermit.Logger
-import com.danioliveira.taskmanager.data.network.exceptions.ClientErrorException
-import com.danioliveira.taskmanager.data.network.exceptions.ErrorResponseParser
-import com.danioliveira.taskmanager.data.network.exceptions.ForbiddenException
-import com.danioliveira.taskmanager.data.network.exceptions.NotFoundException
-import com.danioliveira.taskmanager.data.network.exceptions.ServerErrorException
-import com.danioliveira.taskmanager.data.network.exceptions.UnauthorizedException
-import com.danioliveira.taskmanager.data.storage.TokenStorage
-import com.danioliveira.taskmanager.domain.manager.AuthManager
+import com.danioliveira.taskmanager.core.data.storage.TokenStorage
+import com.danioliveira.taskmanager.core.network.exceptions.ClientErrorException
+import com.danioliveira.taskmanager.core.network.exceptions.ErrorResponseParser
+import com.danioliveira.taskmanager.core.network.exceptions.ForbiddenException
+import com.danioliveira.taskmanager.core.network.exceptions.NotFoundException
+import com.danioliveira.taskmanager.core.network.exceptions.ServerErrorException
+import com.danioliveira.taskmanager.core.network.exceptions.UnauthorizedException
+import com.danioliveira.taskmanager.core.domain.manager.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine

@@ -1,9 +1,8 @@
-package com.danioliveira.taskmanager.data.storage
+package com.danioliveira.taskmanager.core.data.storage
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.danioliveira.taskmanager.core.data.storage.DataStorePreferencesFactory
 import com.danioliveira.taskmanager.domain.User
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -13,8 +12,6 @@ import okio.Path.Companion.toPath
 class DataStoreTokenStorage(
     private val factory: DataStorePreferencesFactory
 ) : TokenStorage {
-
-    // Define the keys for token and user
     private val tokenKey = stringPreferencesKey("auth_token")
     private val userKey = stringPreferencesKey("auth_user")
 
@@ -47,15 +44,13 @@ class DataStoreTokenStorage(
     }
 
     override suspend fun getUser(): User? {
-        return try {
+        return runCatching {
             dataStore.data
                 .map { preferences ->
                     preferences[userKey]?.let { Json.decodeFromString<User>(it) }
                 }
                 .firstOrNull()
-        } catch (e: Exception) {
-            null
-        }
+        }.getOrNull()
     }
 
     override suspend fun clearUser() {

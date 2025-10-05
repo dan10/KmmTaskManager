@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.data.network
+package com.danioliveira.taskmanager.feature.auth.data.network
 
 import com.danioliveira.taskmanager.api.request.LoginRequest
 import com.danioliveira.taskmanager.api.request.RegisterRequest

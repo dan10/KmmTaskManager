@@ -7,9 +7,9 @@ import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.ProjectResponse
-import com.danioliveira.taskmanager.data.network.ProjectApiService
-import com.danioliveira.taskmanager.data.paging.ProjectPagingSource
 import com.danioliveira.taskmanager.core.domain.model.Project
+import com.danioliveira.taskmanager.feature.projects.data.network.ProjectApiService
+import com.danioliveira.taskmanager.feature.projects.data.paging.ProjectPagingSource
 import com.danioliveira.taskmanager.feature.projects.domain.repository.ProjectRepository
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException

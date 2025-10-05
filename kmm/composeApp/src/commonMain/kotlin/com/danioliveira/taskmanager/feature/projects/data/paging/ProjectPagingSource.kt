@@ -1,10 +1,10 @@
-package com.danioliveira.taskmanager.data.paging
+package com.danioliveira.taskmanager.feature.projects.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.danioliveira.taskmanager.data.mapper.toProject
-import com.danioliveira.taskmanager.data.network.ProjectApiService
 import com.danioliveira.taskmanager.core.domain.model.Project
+import com.danioliveira.taskmanager.feature.projects.data.mapper.toProject
+import com.danioliveira.taskmanager.feature.projects.data.network.ProjectApiService
 
 /**
  * PagingSource implementation for projects.

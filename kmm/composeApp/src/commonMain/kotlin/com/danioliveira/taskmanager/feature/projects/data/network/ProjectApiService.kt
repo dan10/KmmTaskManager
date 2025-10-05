@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.data.network
+package com.danioliveira.taskmanager.feature.projects.data.network
 
 import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.ProjectUpdateRequest

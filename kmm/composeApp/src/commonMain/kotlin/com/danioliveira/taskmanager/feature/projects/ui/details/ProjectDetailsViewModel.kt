@@ -10,7 +10,7 @@ import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.danioliveira.taskmanager.core.domain.model.Task
-import com.danioliveira.taskmanager.data.mapper.toProject
+import com.danioliveira.taskmanager.feature.projects.data.mapper.toProject
 import com.danioliveira.taskmanager.feature.projects.domain.usecase.GetProjectDetailsUseCase
 import com.danioliveira.taskmanager.feature.projects.domain.usecase.GetProjectTasksUseCase
 import com.danioliveira.taskmanager.navigation.Screen

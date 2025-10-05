@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.data.storage
+package com.danioliveira.taskmanager.core.data.storage
 
 import com.danioliveira.taskmanager.domain.User
 

@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.data.mapper
+package com.danioliveira.taskmanager.feature.projects.data.mapper
 
 import com.danioliveira.taskmanager.api.response.ProjectResponse
 import com.danioliveira.taskmanager.core.domain.model.Project

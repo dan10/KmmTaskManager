@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
-import com.danioliveira.taskmanager.data.mapper.toProject
+import com.danioliveira.taskmanager.feature.projects.data.mapper.toProject
 import com.danioliveira.taskmanager.feature.projects.domain.usecase.GetProjectDetailsUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.CreateEditTaskUseCase
 import com.danioliveira.taskmanager.navigation.Screen

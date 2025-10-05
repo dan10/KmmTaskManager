@@ -3,9 +3,9 @@ package com.danioliveira.taskmanager.feature.auth.data.repository
 import com.danioliveira.taskmanager.api.request.LoginRequest
 import com.danioliveira.taskmanager.api.request.RegisterRequest
 import com.danioliveira.taskmanager.api.response.AuthResponse
-import com.danioliveira.taskmanager.data.network.AuthApiService
-import com.danioliveira.taskmanager.data.storage.TokenStorage
+import com.danioliveira.taskmanager.core.data.storage.TokenStorage
 import com.danioliveira.taskmanager.domain.User
+import com.danioliveira.taskmanager.feature.auth.data.network.AuthApiService
 import com.danioliveira.taskmanager.feature.auth.domain.repository.AuthRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

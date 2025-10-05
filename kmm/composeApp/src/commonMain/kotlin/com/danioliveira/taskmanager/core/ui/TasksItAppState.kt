@@ -12,7 +12,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.danioliveira.taskmanager.domain.manager.AuthManager
+import com.danioliveira.taskmanager.core.domain.manager.AuthManager
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.TopLevelRoute
 import kotlinx.coroutines.CoroutineScope

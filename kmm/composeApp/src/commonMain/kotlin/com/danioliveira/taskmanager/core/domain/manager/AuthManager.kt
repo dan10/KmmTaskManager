@@ -1,6 +1,6 @@
-package com.danioliveira.taskmanager.domain.manager
+package com.danioliveira.taskmanager.core.domain.manager
 
-import com.danioliveira.taskmanager.data.storage.TokenStorage
+import com.danioliveira.taskmanager.core.data.storage.TokenStorage
 import com.danioliveira.taskmanager.domain.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
