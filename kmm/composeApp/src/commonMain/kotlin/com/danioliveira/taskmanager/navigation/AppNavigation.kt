@@ -2,15 +2,16 @@ package com.danioliveira.taskmanager.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.List
 import androidx.compose.ui.graphics.vector.ImageVector
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.ic_folder
+import kmmtaskmanager.composeapp.generated.resources.nav_calendar
 import kmmtaskmanager.composeapp.generated.resources.nav_projects
 import kmmtaskmanager.composeapp.generated.resources.nav_tasks
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
-import kotlin.uuid.Uuid
 
 sealed class NavIcon {
     data class ImageVectorIcon(val imageVector: ImageVector) : NavIcon()
@@ -21,6 +22,7 @@ data class TopLevelRoute<T : Any>(val name: StringResource, val route: T, val ic
 
 val topLevelRoutes = listOf(
     TopLevelRoute(Res.string.nav_tasks, Screen.Tasks, NavIcon.ImageVectorIcon(Icons.Default.Check)),
+    TopLevelRoute(Res.string.nav_calendar, Screen.Calendar, NavIcon.ImageVectorIcon(Icons.Default.List)),
     TopLevelRoute(
         Res.string.nav_projects,
         Screen.Projects,
@@ -38,6 +40,9 @@ sealed interface Screen {
 
     @Serializable
     data object Tasks : Screen
+
+    @Serializable
+    data object Calendar : Screen
 
     @Serializable
     data object Projects : Screen

@@ -40,26 +40,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.danioliveira.taskmanager.core.domain.manager.AuthManager
 import com.danioliveira.taskmanager.core.ui.TasksItAppState
+import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.rememberTasksItAppState
 import com.danioliveira.taskmanager.feature.auth.ui.login.LoginScreen
 import com.danioliveira.taskmanager.feature.auth.ui.register.RegisterScreen
 import com.danioliveira.taskmanager.feature.projects.ui.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.feature.projects.ui.list.ProjectsScreen
-import com.danioliveira.taskmanager.feature.tasks.navigation.EditTaskRoute
-import com.danioliveira.taskmanager.feature.tasks.navigation.TaskDetailRoute
 import com.danioliveira.taskmanager.feature.tasks.navigation.editTaskScreen
 import com.danioliveira.taskmanager.feature.tasks.navigation.taskDetailsScreen
-import com.danioliveira.taskmanager.feature.tasks.navigation.tasksSection
 import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksScreen
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
-import com.danioliveira.taskmanager.navigation.uuidTypeMap
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import kotlin.uuid.Uuid
 
 @Composable
 fun TaskItApp(
@@ -76,6 +72,12 @@ fun TaskItApp(
 
         Scaffold(
             modifier = Modifier,
+            topBar = {
+                PrincipalTaskItTopAppBar(
+                    title = "Tasks",
+                    onSearch = {}
+                )
+            },
             bottomBar = {
                 TaskItBottomBar(appState = appState)
             }
@@ -109,7 +111,6 @@ fun TaskItBottomBar(
     }
 
     AnimatedVisibility(
-
         visible = showBottomBar,
         enter = fadeIn() + expandVertically(),
         exit = fadeOut() + shrinkVertically()
@@ -262,8 +263,6 @@ fun TaskItNavHost(
                     }
                 )
             }
-
-
 
                 composable<Screen.Profile>(
                     enterTransition = {

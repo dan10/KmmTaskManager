@@ -41,7 +41,15 @@
 
     <!-- Bottom Navigation strings -->
     <string name="nav_tasks">Tasks</string>
+    <string name="nav_calendar">Calendar</string>
     <string name="nav_projects">Projects</string>
+
+    <!-- Global search -->
+    <string name="global_search_placeholder">Search…</string>
+    <string name="search_scope_all">All</string>
+    <string name="search_scope_tasks">Tasks</string>
+    <string name="search_scope_calendar">Calendar</string>
+    <string name="search_scope_projects">Projects</string>
     <string name="nav_profile">Profile</string>
 
     <!-- TasksScreen strings -->
