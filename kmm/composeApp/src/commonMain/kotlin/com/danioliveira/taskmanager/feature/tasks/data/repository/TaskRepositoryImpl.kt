@@ -16,6 +16,7 @@ import com.danioliveira.taskmanager.feature.tasks.domain.repository.TaskReposito
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.flow.Flow
+import kotlin.uuid.Uuid
 
 /**
  * Implementation of TaskRepository that uses TaskApiService.
@@ -70,9 +71,9 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun getTask(taskId: String): Result<TaskResponse> {
+    override suspend fun getTask(taskId: Uuid): Result<TaskResponse> {
         return try {
-            val response = apiService.getTask(taskId)
+            val response = apiService.getTask(taskId.toString())
             Result.success(response)
         } catch (e: ClientRequestException) {
             // Handle client errors (4xx)

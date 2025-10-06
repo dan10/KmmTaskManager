@@ -1,7 +1,11 @@
 package com.danioliveira.taskmanager.feature.tasks.ui.list
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -78,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.TaskItem
@@ -85,6 +90,7 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditBottomSheet
 import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
+import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.HapticFeedbackType
 import com.danioliveira.taskmanager.util.rememberHapticFeedback
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -99,6 +105,7 @@ import kmmtaskmanager.composeapp.generated.resources.tasks_progress_title
 import kmmtaskmanager.composeapp.generated.resources.tasks_search_placeholder
 import kmmtaskmanager.composeapp.generated.resources.tasks_title
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
@@ -106,6 +113,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -115,7 +123,6 @@ fun TasksScreen(
     animatedContentScope: AnimatedContentScope,
     viewModel: TasksViewModel = koinViewModel(),
     navigateToTaskDetail: (Uuid) -> Unit,
-    navigateToEditTask: (Uuid) -> Unit
 ) {
     var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -129,8 +136,6 @@ fun TasksScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.checkAndRefresh()
     }
-
-    Surface(color = Color(0XFFF1F5F9)) {
         // Create a wrapper for the onAction function that handles navigation
         val onAction: (TasksAction) -> Unit = { action ->
             when (action) {
@@ -177,7 +182,6 @@ fun TasksScreen(
             snackbarHostState = snackbarHostState,
             pagingItems = viewModel.taskFlow.collectAsLazyPagingItems(),
             onAction = onAction,
-            onEditTask = navigateToEditTask
         )
         
         // Task Create BottomSheet
@@ -197,7 +201,6 @@ fun TasksScreen(
                 )
             }
         }
-    }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
@@ -209,7 +212,6 @@ private fun TasksScreen(
     snackbarHostState: SnackbarHostState,
     pagingItems: LazyPagingItems<Task>,
     onAction: (TasksAction) -> Unit,
-    onEditTask: (Uuid) -> Unit
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -294,7 +296,6 @@ private fun TasksScreen(
                         task = task,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedContentScope = animatedContentScope,
-                        onEditTask = onEditTask,
                         onToggleStatusRequest = { toggledTask, newStatus ->
                             coroutineScope.launch {
                                 pendingChanges[toggledTask.id] = toggledTask.status
@@ -495,7 +496,7 @@ private fun FilterAndSortSection(
                         }
                     }
                 )
-                
+
                 androidx.compose.material3.DropdownMenu(
                     expanded = sortExpanded,
                     onDismissRequest = { sortExpanded = false }
@@ -872,7 +873,6 @@ private fun SwipeActionTaskItem(
     task: Task,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    onEditTask: (Uuid) -> Unit,
     onToggleStatusRequest: (Task, TaskStatus) -> Unit,
     onDeleteRequest: (Task) -> Unit
 ) {
@@ -926,9 +926,8 @@ private fun SwipeActionTaskItem(
                             resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
                         ),
                     task = task,
-                    onClick = { onEditTask(task.id) },
+                    onClick = { onDeleteRequest(task) },
                     onCheckedChange = { },
-                    onDelete = { onDeleteRequest(task) }
                 )
             }
         }
@@ -1012,32 +1011,34 @@ private fun SwipeBackground(
  * The preview function should be responsible for creating the fake data and passing it to the
  * function that displays it.
  */
-//@OptIn(ExperimentalUuidApi::class, ExperimentalSharedTransitionApi::class)
-//@Preview
-//@Composable
-//fun EmptyTasksScreenPreview() {
-//    // create list of fake data for preview
-//    val fakeData = emptyList<Task>()
-//    // create pagingData from a list of fake data
-//    val pagingData = PagingData.from(fakeData)
-//    // pass pagingData containing fake data to a MutableStateFlow
-//    val fakeDataFlow = MutableStateFlow(pagingData)
-//
-//    TaskItTheme {
-//        SharedTransitionLayout {
-//            TasksScreen(
-//                sharedTransitionScope = this@SharedTransitionLayout,
-//                animatedContentScope = this@SharedTransitionLayout,
-//                state = TasksState(
-//                    completedTasks = 0,
-//                    totalTasks = 0,
-//                    isLoading = false,
-//                ),
-//                // pass flow to composable
-//                pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-//                onAction = {},
-//                onEditTask = {}
-//            )
-//        }
-//    }
-//}
+@OptIn(ExperimentalUuidApi::class, ExperimentalSharedTransitionApi::class)
+@Preview
+@Composable
+fun EmptyTasksScreenPreview() {
+    // create list of fake data for preview
+    val fakeData = emptyList<Task>()
+    // create pagingData from a list of fake data
+    val pagingData = PagingData.from(fakeData)
+    // pass pagingData containing fake data to a MutableStateFlow
+    val fakeDataFlow = MutableStateFlow(pagingData)
+
+    TaskItTheme {
+        SharedTransitionLayout {
+            AnimatedContent(targetState = Unit) {
+                TasksScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@AnimatedContent,
+                    state = TasksState(
+                        completedTasks = 0,
+                        totalTasks = 0,
+                        isLoading = false,
+                    ),
+                    snackbarHostState = SnackbarHostState(),
+                    // pass flow to composable
+                    pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
+                    onAction = {},
+                )
+            }
+        }
+    }
+}

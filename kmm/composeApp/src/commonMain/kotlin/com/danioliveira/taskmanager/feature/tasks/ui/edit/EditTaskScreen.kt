@@ -51,7 +51,7 @@ fun EditTaskScreen(
     
     // Initialize the ViewModel with the task ID
     LaunchedEffect(taskId) {
-        viewModel.initialize(taskId, null)
+        viewModel.initialize(null)
     }
 
     viewModel.onTaskUpdated = {

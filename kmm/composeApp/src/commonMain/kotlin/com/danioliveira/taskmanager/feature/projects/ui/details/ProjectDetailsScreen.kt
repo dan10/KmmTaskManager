@@ -245,7 +245,6 @@ private fun ProjectTasksList(
                             if (isChecked) TaskStatus.DONE.name else TaskStatus.TODO.name
                         onTaskStatusChange(task.id.toString(), newStatus)
                     },
-                    onDelete = {},
                     showProjectName = false
                 )
             } else {

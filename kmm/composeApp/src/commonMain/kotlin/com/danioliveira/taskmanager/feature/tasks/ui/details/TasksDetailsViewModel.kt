@@ -10,6 +10,7 @@ import com.danioliveira.taskmanager.feature.tasks.data.mapper.toTask
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.DeleteTaskUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTaskDetailsUseCase
 import kotlinx.coroutines.launch
+import kotlin.uuid.Uuid
 
 class TasksDetailsViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -21,14 +22,14 @@ class TasksDetailsViewModel(
         private set
 
     var onBack: () -> Unit = {}
-    var onEditTask: (String) -> Unit = {}
+    var onEditTask: (Uuid) -> Unit = {}
 
     init {
         loadTaskDetails()
     }
 
     private fun loadTaskDetails() {
-        val taskId = savedStateHandle.get<String>("taskId")
+        val taskId = savedStateHandle.get<Uuid>("taskId")
         if (taskId != null) {
             state = state.copy(isLoading = true, errorMessage = null)
             viewModelScope.launch {
@@ -70,7 +71,7 @@ class TasksDetailsViewModel(
 
     private fun editTask() {
         state.task?.let { task ->
-            onEditTask(task.id.toString())
+            onEditTask(task.id)
         }
     }
 

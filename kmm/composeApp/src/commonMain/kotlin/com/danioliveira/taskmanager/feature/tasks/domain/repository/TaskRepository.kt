@@ -8,6 +8,7 @@ import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.core.domain.model.Task
 import kotlinx.coroutines.flow.Flow
+import kotlin.uuid.Uuid
 
 /**
  * Repository interface for task operations.
@@ -65,7 +66,7 @@ interface TaskRepository {
      * @param taskId The ID of the task
      * @return Result containing the task details
      */
-    suspend fun getTask(taskId: String): Result<TaskResponse>
+    suspend fun getTask(taskId: Uuid): Result<TaskResponse>
 
     /**
      * Updates the status of a task.

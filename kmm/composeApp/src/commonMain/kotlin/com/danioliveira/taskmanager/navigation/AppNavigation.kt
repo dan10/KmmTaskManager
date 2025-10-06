@@ -10,6 +10,7 @@ import kmmtaskmanager.composeapp.generated.resources.nav_tasks
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
+import kotlin.uuid.Uuid
 
 sealed class NavIcon {
     data class ImageVectorIcon(val imageVector: ImageVector) : NavIcon()

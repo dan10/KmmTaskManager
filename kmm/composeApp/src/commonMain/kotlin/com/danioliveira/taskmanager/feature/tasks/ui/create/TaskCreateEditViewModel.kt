@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import kotlin.uuid.Uuid
 
 class TaskCreateEditViewModel(
     savedStateHandle: SavedStateHandle,
@@ -47,7 +48,7 @@ class TaskCreateEditViewModel(
             val route = savedStateHandle.toRoute<Screen.CreateEditTask>()
             val taskId = route.taskId
             val projectId = route.projectId
-            initialize(taskId, projectId)
+            initialize(projectId)
         } catch (e: Exception) {
             // No route data available - will be initialized manually
             // This happens when using the BottomSheet approach
@@ -61,31 +62,16 @@ class TaskCreateEditViewModel(
      * @param taskId The ID of the task to edit, or null if creating a new task
      * @param projectId The ID of the project to associate the task with, or null if no project
      */
-    fun initialize(taskId: String?, projectId: String?) {
+    fun initialize(projectId: String?) {
         // Prevent re-initialization
         if (isInitialized) return
         isInitialized = true
-        if (taskId == null) {
+
             // Creating a new task
             _uiState.update { it.copy(isCreating = true, projectId = projectId) }
             if (projectId != null) {
                 loadProjectDetails(projectId)
             }
-        } else {
-            // Editing an existing task
-            _uiState.update {
-                it.copy(
-                    isCreating = false,
-                    taskId = taskId,
-                    projectId = projectId,
-                    isLoading = true
-                )
-            }
-            loadTask(taskId)
-            if (projectId != null) {
-                loadProjectDetails(projectId)
-            }
-        }
     }
 
     /**
@@ -116,7 +102,7 @@ class TaskCreateEditViewModel(
      *
      * @param taskId The ID of the task to load
      */
-    private fun loadTask(taskId: String) {
+    private fun loadTask(taskId: Uuid) {
         viewModelScope.launch {
             val result = createEditTaskUseCase.getTask(taskId)
 

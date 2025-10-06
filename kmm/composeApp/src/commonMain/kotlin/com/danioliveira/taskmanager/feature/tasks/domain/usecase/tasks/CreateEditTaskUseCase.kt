@@ -7,6 +7,7 @@ import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.feature.tasks.domain.repository.TaskRepository
 import kotlinx.datetime.LocalDateTime
+import kotlin.uuid.Uuid
 
 /**
  * Use case for creating and editing tasks.
@@ -92,7 +93,7 @@ class CreateEditTaskUseCase(private val taskRepository: TaskRepository) {
      * @param taskId The ID of the task
      * @return Result containing the task details
      */
-    suspend fun getTask(taskId: String): Result<TaskResponse> {
+    suspend fun getTask(taskId: Uuid): Result<TaskResponse> {
         return taskRepository.getTask(taskId)
     }
 }

@@ -45,13 +45,21 @@ import com.danioliveira.taskmanager.feature.auth.ui.login.LoginScreen
 import com.danioliveira.taskmanager.feature.auth.ui.register.RegisterScreen
 import com.danioliveira.taskmanager.feature.projects.ui.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.feature.projects.ui.list.ProjectsScreen
+import com.danioliveira.taskmanager.feature.tasks.navigation.EditTaskRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.TaskDetailRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.editTaskScreen
+import com.danioliveira.taskmanager.feature.tasks.navigation.taskDetailsScreen
+import com.danioliveira.taskmanager.feature.tasks.navigation.tasksSection
+import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksScreen
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
+import com.danioliveira.taskmanager.navigation.uuidTypeMap
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import kotlin.uuid.Uuid
 
 @Composable
 fun TaskItApp(
@@ -101,6 +109,7 @@ fun TaskItBottomBar(
     }
 
     AnimatedVisibility(
+
         visible = showBottomBar,
         enter = fadeIn() + expandVertically(),
         exit = fadeOut() + shrinkVertically()
@@ -208,19 +217,25 @@ fun TaskItNavHost(
                     ) + fadeOut(animationSpec = tween(300))
                 }
             ) {
-//                TasksScreen(
-//                    sharedTransitionScope = this@SharedTransitionLayout,
-//                    animatedContentScope = this@composable,
-//                    navigateToTaskDetail = { taskId ->
-//                        navController.navigate(
-//                            Screen.TasksDetails(
-//                                taskId.toString()
-//                            )
-//                        )
-//                    }
-//                )
+                TasksScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@composable,
+                    navigateToTaskDetail = { taskId ->
+                        navController.navigate(Screen.TasksDetails(taskId.toString()))
+                    }
+                )
             }
+                taskDetailsScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onEditTask = { taskId ->
+                        navController.navigate(Screen.EditTask(taskId.toString()))
+                    }
+                )
 
+                editTaskScreen(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    onBackClick = { navController.popBackStack() }
+                )
             composable<Screen.Projects>(
                 enterTransition = {
                     val isComingFromTasks = initialState.destination.hasRoute(Screen.Tasks::class)
@@ -248,37 +263,34 @@ fun TaskItNavHost(
                 )
             }
 
-            composable<Screen.Profile>(
-                enterTransition = {
-                    slideInHorizontally(
-                        initialOffsetX = { it },
-                        animationSpec = tween(300)
-                    ) + fadeIn(animationSpec = tween(300))
-                },
-                exitTransition = {
-                    slideOutHorizontally(
-                        targetOffsetX = { it },
-                        animationSpec = tween(300)
-                    ) + fadeOut(animationSpec = tween(300))
-                }
-            ) {
-                Text("Profile Screen - Coming Soon")
-            }
 
-            composable<Screen.TasksDetails> { backStackEntry ->
-//                TasksDetailsScreen(
-//                    onBack = { navController.popBackStack() }
-//                )
-            }
 
-            composable<Screen.ProjectDetails> { backStackEntry ->
-                ProjectDetailsScreen(
-                    onBack = { navController.popBackStack() },
-                    navigateToTaskDetail = { taskId ->
-                        navController.navigate(Screen.TasksDetails(taskId.toString()))
+                composable<Screen.Profile>(
+                    enterTransition = {
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+                    },
+                    exitTransition = {
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
                     }
-                )
-            }
+                ) {
+                    Text("Profile Screen - Coming Soon")
+                }
+
+
+                composable<Screen.ProjectDetails> { backStackEntry ->
+                    ProjectDetailsScreen(
+                        onBack = { navController.popBackStack() },
+                        navigateToTaskDetail = { taskId ->
+                            navController.navigate(Screen.TasksDetails(taskId.toString()))
+                        }
+                    )
+                }
             }
         }
     }

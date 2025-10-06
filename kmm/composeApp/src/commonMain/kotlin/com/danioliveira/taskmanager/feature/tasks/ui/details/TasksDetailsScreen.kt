@@ -38,13 +38,14 @@ import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TasksDetailsScreen(
+fun TaskDetailsScreen(
     viewModel: TasksDetailsViewModel = koinViewModel(),
     onBack: () -> Unit,
-    onEditTask: (String) -> Unit
+    onEditTask: (Uuid) -> Unit
 ) {
     viewModel.onBack = onBack
     viewModel.onEditTask = onEditTask

@@ -57,7 +57,6 @@ fun TaskItem(
     task: Task,
     onClick: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
-    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     showProjectName: Boolean = true
 ) {
@@ -274,8 +273,7 @@ fun TaskItemPreview() {
                     projectName = "Website Redesign"
                 ),
                 onClick = {},
-                    onCheckedChange = {},
-                    onDelete = {}
+                    onCheckedChange = {}
             )
 
             TaskItem(
@@ -289,8 +287,7 @@ fun TaskItemPreview() {
                     projectName = "Website Redesign"
                 ),
                 onClick = {},
-                    onCheckedChange = {},
-                    onDelete = {}
+                    onCheckedChange = {}
             )
 
             TaskItem(
@@ -304,8 +301,7 @@ fun TaskItemPreview() {
                     projectName = null
                 ),
                 onClick = {},
-                    onCheckedChange = {},
-                    onDelete = {}
+                    onCheckedChange = {}
             )
         }
     }

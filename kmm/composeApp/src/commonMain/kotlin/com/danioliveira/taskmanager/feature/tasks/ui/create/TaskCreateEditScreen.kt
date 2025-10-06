@@ -71,7 +71,7 @@ fun TaskCreateEditBottomSheet(
 ) {
     // Initialize the ViewModel with the taskId and projectId
     LaunchedEffect(taskId, projectId) {
-        viewModel.initialize(taskId, projectId)
+        viewModel.initialize(projectId)
     }
     
     viewModel.onTaskCreated = onDismiss
