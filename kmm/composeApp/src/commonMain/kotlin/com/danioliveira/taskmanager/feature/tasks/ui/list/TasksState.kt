@@ -28,8 +28,12 @@ data class TasksState(
     val selectedStatusFilters: Set<TaskStatus> = emptySet(),
     val selectedPriorityFilters: Set<Priority> = emptySet(),
     val sortOption: TaskSortOption = TaskSortOption.DATE_DESC,
+    val isRefreshing: Boolean = false,
     val isFilterExpanded: Boolean = false
-)
+) {
+    val hasActiveFilters: Boolean
+        get() = selectedStatusFilters.isNotEmpty() || selectedPriorityFilters.isNotEmpty()
+}
 
 /**
  * Actions that can be performed on the Tasks screen.
@@ -51,4 +55,5 @@ sealed interface TasksAction {
     data class ChangeSortOption(val sortOption: TaskSortOption) : TasksAction
     data object ClearAllFilters : TasksAction
     data object ToggleFilterExpanded : TasksAction
+    data object Refresh : TasksAction
 }
