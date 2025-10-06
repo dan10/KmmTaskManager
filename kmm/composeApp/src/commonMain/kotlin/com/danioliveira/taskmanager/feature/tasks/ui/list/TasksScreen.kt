@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -120,10 +121,44 @@ fun TasksScreen(
             }
         }
 
+        LaunchedEffect(viewModel) {
+            viewModel.sideEffects.collect { sideEffect ->
+                when (sideEffect) {
+                    is TasksViewModel.TaskSideEffect.ShowConfirmationSnackbar -> {
+                        val result = snackbarHostState.showSnackbar(
+                            message = sideEffect.message,
+                            actionLabel = sideEffect.actionLabel,
+                            duration = SnackbarDuration.Long
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            sideEffect.onAction.invoke()
+                        }
+                    }
+                    is TasksViewModel.TaskSideEffect.ShowErrorSnackbar -> {
+                        val result = snackbarHostState.showSnackbar(
+                            message = sideEffect.message,
+                            actionLabel = sideEffect.actionLabel,
+                            duration = SnackbarDuration.Long
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            sideEffect.onAction?.invoke()
+                        }
+                    }
+                    is TasksViewModel.TaskSideEffect.ShowSuccessSnackbar -> {
+                        snackbarHostState.showSnackbar(
+                            message = sideEffect.message,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+            }
+        }
+
         TasksScreen(
             pagingItems = viewModel.taskFlow.collectAsLazyPagingItems(),
             state = viewModel.state,
-            onAction = onAction
+            onAction = onAction,
+            snackbarHostState = snackbarHostState
         )
         
         // Task Create BottomSheet
@@ -150,9 +185,11 @@ fun TasksScreen(
     pagingItems: LazyPagingItems<Task>,
     state: TasksState,
     onAction: (TasksAction) -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     Scaffold(
-        floatingActionButton = { AddTaskButton(onAction) }
+        floatingActionButton = { AddTaskButton(onAction) },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
@@ -194,13 +231,7 @@ private fun TaskList(
                 TaskItemWithSwipe(
                     task = task,
                     onClick = { onAction(TasksAction.OpenTaskDetails(it.id)) },
-                    onComplete = { toggledTask ->
-                        val newStatus = if (toggledTask.status == TaskStatus.DONE) TaskStatus.TODO else TaskStatus.DONE
-                        onAction(TasksAction.UpdateTaskStatus(toggledTask.id, newStatus))
-                    },
-                    onDelete = { deletedTask ->
-                        onAction(TasksAction.DeleteTask(deletedTask.id))
-                    }
+                    onAction = onAction
                 )
             } else {
                 TaskItemSkeleton()

@@ -20,15 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.domain.model.Task
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.TaskItem
 
 
 @Composable
 fun TaskItemWithSwipe(
     task: Task,
-    onComplete: (Task) -> Unit,
     onClick: (Task) -> Unit,
-    onDelete: (Task) -> Unit,
+    onAction: (TasksAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val swipeToDismissState = rememberSwipeToDismissBoxState()
@@ -49,8 +49,13 @@ fun TaskItemWithSwipe(
         },
         onDismiss = { direction ->
             when (direction) {
-                SwipeToDismissBoxValue.StartToEnd -> onComplete(task)
-                SwipeToDismissBoxValue.EndToStart -> onDelete(task)
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    val newStatus = if (task.status == TaskStatus.DONE) TaskStatus.TODO else TaskStatus.DONE
+                    onAction(TasksAction.ConfirmTaskCompletion(task.id, newStatus))
+                }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onAction(TasksAction.ConfirmTaskDeletion(task.id))
+                }
                 else -> Unit
             }
         }

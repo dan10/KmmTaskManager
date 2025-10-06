@@ -34,4 +34,6 @@ sealed interface TasksAction {
     data class OpenTaskDetails(val taskId: Uuid) : TasksAction
     data class UpdateTaskStatus(val taskId: Uuid, val status: TaskStatus) : TasksAction
     data class DeleteTask(val taskId: Uuid) : TasksAction
+    data class ConfirmTaskCompletion(val taskId: Uuid, val status: TaskStatus) : TasksAction
+    data class ConfirmTaskDeletion(val taskId: Uuid) : TasksAction
 }
