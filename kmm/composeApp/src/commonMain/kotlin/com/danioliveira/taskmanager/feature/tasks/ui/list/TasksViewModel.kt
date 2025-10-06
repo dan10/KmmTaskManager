@@ -1,6 +1,5 @@
 package com.danioliveira.taskmanager.feature.tasks.ui.list
 
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,7 +7,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.DeleteTaskUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTaskProgressUseCase
@@ -142,58 +140,12 @@ class TasksViewModel(
         }
     }
 
-    private fun clearSearch() {
-        state = state.copy(searchFieldState = TextFieldState())
-    }
-
-    fun updateSearchQuery(query: String) {
-        state = state.copy(searchFieldState = TextFieldState(query))
-    }
-    
-    private fun toggleStatusFilter(status: TaskStatus) {
-        state = if (state.selectedStatusFilters.contains(status)) {
-            state.copy(selectedStatusFilters = state.selectedStatusFilters - status)
-        } else {
-            state.copy(selectedStatusFilters = state.selectedStatusFilters + status)
-        }
-    }
-    
-    private fun togglePriorityFilter(priority: Priority) {
-        state = if (state.selectedPriorityFilters.contains(priority)) {
-            state.copy(selectedPriorityFilters = state.selectedPriorityFilters - priority)
-        } else {
-            state.copy(selectedPriorityFilters = state.selectedPriorityFilters + priority)
-        }
-    }
-    
-    private fun changeSortOption(sortOption: TaskSortOption) {
-        state = state.copy(sortOption = sortOption)
-    }
-    
-    private fun clearAllFilters() {
-        state = state.copy(
-            selectedStatusFilters = emptySet(),
-            selectedPriorityFilters = emptySet()
-        )
-    }
-    
-    private fun toggleFilterExpanded() {
-        state = state.copy(isFilterExpanded = !state.isFilterExpanded)
-    }
-
     fun handleActions(action: TasksAction) {
         when (action) {
             is TasksAction.LoadTasks -> loadTasks()
             is TasksAction.RefreshTasks -> refreshTasks()
             is TasksAction.UpdateTaskStatus -> updateTaskStatus(action.taskId, action.status)
             is TasksAction.DeleteTask -> deleteTask(action.taskId)
-            is TasksAction.ClearSearch -> clearSearch()
-            is TasksAction.ToggleStatusFilter -> toggleStatusFilter(action.status)
-            is TasksAction.TogglePriorityFilter -> togglePriorityFilter(action.priority)
-            is TasksAction.ChangeSortOption -> changeSortOption(action.sortOption)
-            is TasksAction.ClearAllFilters -> clearAllFilters()
-            is TasksAction.ToggleFilterExpanded -> toggleFilterExpanded()
-            is TasksAction.SetSearchQuery -> updateSearchQuery(action.query)
             else -> Unit
         }
     }
