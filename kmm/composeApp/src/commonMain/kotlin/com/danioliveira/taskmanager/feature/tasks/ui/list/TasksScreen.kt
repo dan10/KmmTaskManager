@@ -97,7 +97,8 @@ fun TasksScreen(
 
     if (showCreateTaskBottomSheet) {
         TaskCreateBottomSheet(
-            onDismiss = { showCreateTaskBottomSheet = false }
+            onDismiss = { showCreateTaskBottomSheet = false },
+            onTaskCreated = { viewModel.refresh() }
         )
     }
 }
@@ -105,7 +106,8 @@ fun TasksScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TaskCreateBottomSheet(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onTaskCreated: () -> Unit
 ) {
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -114,7 +116,10 @@ private fun TaskCreateBottomSheet(
         TaskCreateEditBottomSheet(
             taskId = null,
             projectId = null,
-            onDismiss = onDismiss
+            onDismiss = {
+                onTaskCreated()
+                onDismiss()
+            }
         )
     }
 }
