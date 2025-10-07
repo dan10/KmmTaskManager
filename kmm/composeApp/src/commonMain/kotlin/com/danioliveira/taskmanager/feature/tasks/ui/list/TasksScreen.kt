@@ -45,7 +45,7 @@ import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
-import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditBottomSheet
+import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
 import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.itemKey
@@ -81,7 +81,7 @@ fun TasksScreen(
         viewModel.checkAndRefresh()
     }
 
-    TasksSideEffectHandler(
+    TasksEffectHandler(
         viewModel = viewModel,
         snackbarHostState = snackbarHostState,
         onNavigateToTaskDetail = navigateToTaskDetail,
@@ -103,26 +103,6 @@ fun TasksScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TaskCreateBottomSheet(
-    onDismiss: () -> Unit,
-    onTaskCreated: () -> Unit
-) {
-    ModalBottomSheet(
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        onDismissRequest = onDismiss
-    ) {
-        TaskCreateEditBottomSheet(
-            taskId = null,
-            projectId = null,
-            onDismiss = {
-                onTaskCreated()
-                onDismiss()
-            }
-        )
-    }
-}
 
 @Composable
 fun TasksContent(
@@ -173,6 +153,7 @@ private fun TaskList(
             val task = pagingItems[index]
             if (task != null) {
                 TaskItemWithSwipe(
+                    modifier = Modifier.animateItem(),
                     task = task,
                     onClick = { onAction(TasksAction.OpenTaskDetails(it.id)) },
                     onAction = onAction

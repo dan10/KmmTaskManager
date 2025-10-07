@@ -33,11 +33,8 @@ class TasksViewModel(
     // Use a SharedFlow to trigger refresh of the paging data
     private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1)
 
-    private val _events = MutableSharedFlow<TaskUiEvent>()
-    val events: SharedFlow<TaskUiEvent> = _events.asSharedFlow()
-
-    private val _sideEffects = MutableSharedFlow<TaskSideEffect>()
-    val sideEffects: SharedFlow<TaskSideEffect> = _sideEffects.asSharedFlow()
+    private val _effects = MutableSharedFlow<TasksEffect>()
+    val effects: SharedFlow<TasksEffect> = _effects.asSharedFlow()
 
     val taskFlow = refreshTrigger
         .flatMapLatest {
@@ -109,12 +106,12 @@ class TasksViewModel(
                 .onSuccess {
                     refreshTasks()
                     val message = if (status == TaskStatus.DONE) "Task completed!" else "Task marked as incomplete"
-                    _sideEffects.emit(TaskSideEffect.ShowSuccessSnackbar(message))
+                    _effects.emit(TasksEffect.ShowSuccessSnackbar(message))
                 }
                 .onFailure {
                     refreshTasks()
-                    _sideEffects.emit(
-                        TaskSideEffect.ShowErrorSnackbar(
+                    _effects.emit(
+                        TasksEffect.ShowErrorSnackbar(
                             message = "Failed to update task",
                             actionLabel = "Retry"
                         ) {
@@ -130,12 +127,12 @@ class TasksViewModel(
             deleteTaskUseCase(taskId.toString())
                 .onSuccess {
                     refreshTasks()
-                    _sideEffects.emit(TaskSideEffect.ShowSuccessSnackbar("Task deleted successfully"))
+                    _effects.emit(TasksEffect.ShowSuccessSnackbar("Task deleted successfully"))
                 }
                 .onFailure {
                     refreshTasks()
-                    _sideEffects.emit(
-                        TaskSideEffect.ShowErrorSnackbar(
+                    _effects.emit(
+                        TasksEffect.ShowErrorSnackbar(
                             message = "Failed to delete task",
                             actionLabel = "Retry"
                         ) {
@@ -149,8 +146,8 @@ class TasksViewModel(
     private fun confirmTaskCompletion(taskId: Uuid, status: TaskStatus) {
         viewModelScope.launch {
             val actionText = if (status == TaskStatus.DONE) "complete" else "mark as incomplete"
-            _sideEffects.emit(
-                TaskSideEffect.ShowConfirmationSnackbar(
+            _effects.emit(
+                TasksEffect.ShowConfirmationSnackbar(
                     message = "Are you sure you want to $actionText this task?",
                     actionLabel = "Confirm"
                 ) {
@@ -162,8 +159,8 @@ class TasksViewModel(
 
     private fun confirmTaskDeletion(taskId: Uuid) {
         viewModelScope.launch {
-            _sideEffects.emit(
-                TaskSideEffect.ShowConfirmationSnackbar(
+            _effects.emit(
+                TasksEffect.ShowConfirmationSnackbar(
                     message = "Are you sure you want to delete this task?",
                     actionLabel = "Delete"
                 ) {
@@ -188,43 +185,13 @@ class TasksViewModel(
 
     private fun navigateToTaskDetail(taskId: Uuid) {
         viewModelScope.launch {
-            _sideEffects.emit(TaskSideEffect.NavigateToTaskDetail(taskId))
+            _effects.emit(TasksEffect.NavigateToTaskDetail(taskId))
         }
     }
 
     private fun showCreateTaskBottomSheet() {
         viewModelScope.launch {
-            _sideEffects.emit(TaskSideEffect.ShowCreateTaskBottomSheet)
+            _effects.emit(TasksEffect.ShowCreateTaskBottomSheet)
         }
-    }
-
-    sealed class TaskUiEvent {
-        data class ShowSnackbar(
-            val message: String,
-            val actionLabel: String? = null,
-            val onAction: (() -> Unit)? = null
-        ) : TaskUiEvent()
-    }
-
-    sealed class TaskSideEffect {
-        data class ShowConfirmationSnackbar(
-            val message: String,
-            val actionLabel: String,
-            val onAction: () -> Unit
-        ) : TaskSideEffect()
-
-        data class ShowErrorSnackbar(
-            val message: String,
-            val actionLabel: String? = null,
-            val onAction: (() -> Unit)? = null
-        ) : TaskSideEffect()
-
-        data class ShowSuccessSnackbar(
-            val message: String
-        ) : TaskSideEffect()
-
-        data class NavigateToTaskDetail(val taskId: Uuid) : TaskSideEffect()
-
-        data object ShowCreateTaskBottomSheet : TaskSideEffect()
     }
 }

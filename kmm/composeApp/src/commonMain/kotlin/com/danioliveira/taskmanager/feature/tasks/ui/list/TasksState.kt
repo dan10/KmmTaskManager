@@ -37,3 +37,25 @@ sealed interface TasksAction {
     data class ConfirmTaskCompletion(val taskId: Uuid, val status: TaskStatus) : TasksAction
     data class ConfirmTaskDeletion(val taskId: Uuid) : TasksAction
 }
+
+sealed class TasksEffect {
+    data class ShowConfirmationSnackbar(
+        val message: String,
+        val actionLabel: String,
+        val onAction: () -> Unit
+    ) : TasksEffect()
+
+    data class ShowErrorSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val onAction: (() -> Unit)? = null
+    ) : TasksEffect()
+
+    data class ShowSuccessSnackbar(
+        val message: String
+    ) : TasksEffect()
+
+    data class NavigateToTaskDetail(val taskId: Uuid) : TasksEffect()
+
+    data object ShowCreateTaskBottomSheet : TasksEffect()
+}
