@@ -10,6 +10,7 @@ import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTaskPr
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTasksUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.UpdateTaskStatusUseCase
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditViewModel
+import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateViewModel
 import com.danioliveira.taskmanager.feature.tasks.ui.details.TasksDetailsViewModel
 import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksViewModel
 import org.koin.core.module.dsl.bind
@@ -32,4 +33,5 @@ val tasksModule = module {
     viewModelOf(::TasksViewModel)
     viewModelOf(::TasksDetailsViewModel)
     viewModelOf(::TaskCreateEditViewModel)
+    viewModelOf(::TaskCreateViewModel)
 }
