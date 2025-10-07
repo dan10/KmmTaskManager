@@ -181,7 +181,20 @@ class TasksViewModel(
             is TasksAction.DeleteTask -> deleteTask(action.taskId)
             is TasksAction.ConfirmTaskCompletion -> confirmTaskCompletion(action.taskId, action.status)
             is TasksAction.ConfirmTaskDeletion -> confirmTaskDeletion(action.taskId)
-            else -> Unit
+            is TasksAction.OpenTaskDetails -> navigateToTaskDetail(action.taskId)
+            is TasksAction.OpenCreateTask -> showCreateTaskBottomSheet()
+        }
+    }
+
+    private fun navigateToTaskDetail(taskId: Uuid) {
+        viewModelScope.launch {
+            _sideEffects.emit(TaskSideEffect.NavigateToTaskDetail(taskId))
+        }
+    }
+
+    private fun showCreateTaskBottomSheet() {
+        viewModelScope.launch {
+            _sideEffects.emit(TaskSideEffect.ShowCreateTaskBottomSheet)
         }
     }
 
@@ -209,5 +222,9 @@ class TasksViewModel(
         data class ShowSuccessSnackbar(
             val message: String
         ) : TaskSideEffect()
+
+        data class NavigateToTaskDetail(val taskId: Uuid) : TaskSideEffect()
+
+        data object ShowCreateTaskBottomSheet : TaskSideEffect()
     }
 }

@@ -24,15 +24,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,111 +74,53 @@ fun TasksScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
 ) {
     var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    // Also refresh when returning from other screens (e.g., after deleting a task)
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Refresh when returning from other screens
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.checkAndRefresh()
     }
-        // Create a wrapper for the onAction function that handles navigation
-        val onAction: (TasksAction) -> Unit = { action ->
-            when (action) {
-                is TasksAction.OpenTaskDetails -> {
-                    // Handle navigation directly
-                    navigateToTaskDetail(action.taskId)
-                }
 
-                is TasksAction.OpenCreateTask -> {
-                    // Show the BottomSheet instead of navigating
-                    showCreateTaskBottomSheet = true
-                }
+    TasksSideEffectHandler(
+        viewModel = viewModel,
+        snackbarHostState = snackbarHostState,
+        onNavigateToTaskDetail = navigateToTaskDetail,
+        onShowCreateTaskBottomSheet = { showCreateTaskBottomSheet = true }
+    )
 
-                else -> {
-                    // Pass other actions to the ViewModel
-                    viewModel.handleActions(action)
-                }
-            }
-        }
+    TasksContent(
+        pagingItems = viewModel.taskFlow.collectAsLazyPagingItems(),
+        state = viewModel.state,
+        onAction = viewModel::handleActions,
+        snackbarHostState = snackbarHostState
+    )
 
-        val snackbarHostState = remember { SnackbarHostState() }
-
-        LaunchedEffect(viewModel) {
-            viewModel.events.collect { event ->
-                when (event) {
-                    is TasksViewModel.TaskUiEvent.ShowSnackbar -> {
-                        val result = snackbarHostState.showSnackbar(
-                            message = event.message,
-                            actionLabel = event.actionLabel,
-                            duration = SnackbarDuration.Short
-                        )
-                        if (result == SnackbarResult.ActionPerformed) {
-                            event.onAction?.invoke()
-                        }
-                    }
-                }
-            }
-        }
-
-        LaunchedEffect(viewModel) {
-            viewModel.sideEffects.collect { sideEffect ->
-                when (sideEffect) {
-                    is TasksViewModel.TaskSideEffect.ShowConfirmationSnackbar -> {
-                        val result = snackbarHostState.showSnackbar(
-                            message = sideEffect.message,
-                            actionLabel = sideEffect.actionLabel,
-                            duration = SnackbarDuration.Long
-                        )
-                        if (result == SnackbarResult.ActionPerformed) {
-                            sideEffect.onAction.invoke()
-                        }
-                    }
-                    is TasksViewModel.TaskSideEffect.ShowErrorSnackbar -> {
-                        val result = snackbarHostState.showSnackbar(
-                            message = sideEffect.message,
-                            actionLabel = sideEffect.actionLabel,
-                            duration = SnackbarDuration.Long
-                        )
-                        if (result == SnackbarResult.ActionPerformed) {
-                            sideEffect.onAction?.invoke()
-                        }
-                    }
-                    is TasksViewModel.TaskSideEffect.ShowSuccessSnackbar -> {
-                        snackbarHostState.showSnackbar(
-                            message = sideEffect.message,
-                            duration = SnackbarDuration.Short
-                        )
-                    }
-                }
-            }
-        }
-
-        TasksScreen(
-            pagingItems = viewModel.taskFlow.collectAsLazyPagingItems(),
-            state = viewModel.state,
-            onAction = onAction,
-            snackbarHostState = snackbarHostState
+    if (showCreateTaskBottomSheet) {
+        TaskCreateBottomSheet(
+            onDismiss = { showCreateTaskBottomSheet = false }
         )
-        
-        // Task Create BottomSheet
-        if (showCreateTaskBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showCreateTaskBottomSheet = false
-                },
-                sheetState = sheetState
-            ) {
-                TaskCreateEditBottomSheet(
-                    taskId = null,
-                    projectId = null,
-                    onDismiss = {
-                        showCreateTaskBottomSheet = false
-                    }
-                )
-            }
-        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TaskCreateBottomSheet(
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = onDismiss
+    ) {
+        TaskCreateEditBottomSheet(
+            taskId = null,
+            projectId = null,
+            onDismiss = onDismiss
+        )
+    }
 }
 
 @Composable
-fun TasksScreen(
+fun TasksContent(
     pagingItems: LazyPagingItems<Task>,
     state: TasksState,
     onAction: (TasksAction) -> Unit,
@@ -269,7 +208,7 @@ private fun TasksScreenV2Preview() {
     val fakeDataFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {
-        TasksScreen(
+        TasksContent(
             pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
             state = TasksState(
                 totalTasks = 10,
@@ -418,7 +357,7 @@ fun EmptyTasksScreenPreview() {
     TaskItTheme {
         SharedTransitionLayout {
             AnimatedContent(targetState = Unit) {
-                TasksScreen(
+                TasksContent(
                     state = TasksState(
                         completedTasks = 0,
                         totalTasks = 0,

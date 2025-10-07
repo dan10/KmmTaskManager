@@ -98,14 +98,13 @@ fun TaskCreateEditBottomSheet(
         }
     }
 
-    TaskCreateEditBottomSheetContent(state, snackbarHostState, onDismiss, viewModel::handleActions)
+    TaskCreateEditBottomSheetContent(state, onDismiss, viewModel::handleActions)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TaskCreateEditBottomSheetContent(
     state: TaskCreateEditState,
-    snackbarHostState: SnackbarHostState,
     onDismiss: () -> Unit,
     actions: (TaskCreateEditAction) -> Unit
 ) {
