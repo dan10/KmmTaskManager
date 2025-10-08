@@ -1,13 +1,14 @@
 package com.danioliveira.taskmanager.feature.tasks.ui.list
 
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.feature.tasks.domain.search.TaskSearchHandler
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.DeleteTaskUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTasksUseCase
@@ -15,7 +16,6 @@ import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.UpdateTas
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlin.uuid.Uuid
@@ -24,7 +24,8 @@ class TasksViewModel(
     private val getTasksUseCase: GetTasksUseCase,
     private val getTaskProgressUseCase: GetTaskProgressUseCase,
     private val updateTaskStatusUseCase: UpdateTaskStatusUseCase,
-    private val deleteTaskUseCase: DeleteTaskUseCase
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val searchHandler: TaskSearchHandler
 ) : ViewModel() {
 
     var state by mutableStateOf(TasksState())
@@ -38,7 +39,7 @@ class TasksViewModel(
 
     val taskFlow = refreshTrigger
         .flatMapLatest {
-            val searchQuery = state.searchFieldState.text.toString().takeIf { it.isNotBlank() }
+            val searchQuery = searchHandler.processSearchQuery(state.searchFieldState.text.toString())
             getTasksUseCase(10, searchQuery)
         }
         .cachedIn(viewModelScope)
@@ -48,12 +49,11 @@ class TasksViewModel(
         refreshTrigger.tryEmit(Unit)
         loadTaskProgress()
 
-        // Watch for search text changes
+        // Watch for search text changes using searchHandler
         viewModelScope.launch {
-            snapshotFlow { state.searchFieldState.text }
-                .distinctUntilChanged()
-                .collect { searchText ->
-                    // Trigger refresh when search text changes
+            searchHandler.observeSearchQuery(state.searchFieldState)
+                .collect {
+                    // Trigger refresh when search query changes
                     refreshTrigger.tryEmit(Unit)
                 }
         }
@@ -193,5 +193,9 @@ class TasksViewModel(
         viewModelScope.launch {
             _effects.emit(TasksEffect.ShowCreateTaskBottomSheet)
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        state.searchFieldState.setTextAndPlaceCursorAtEnd(query)
     }
 }

@@ -3,6 +3,8 @@ package com.danioliveira.taskmanager.feature.tasks.di
 import com.danioliveira.taskmanager.feature.tasks.data.network.TaskApiService
 import com.danioliveira.taskmanager.feature.tasks.data.repository.TaskRepositoryImpl
 import com.danioliveira.taskmanager.feature.tasks.domain.repository.TaskRepository
+import com.danioliveira.taskmanager.feature.tasks.domain.search.TaskSearchHandler
+import com.danioliveira.taskmanager.feature.tasks.domain.search.TaskSearchHandlerImpl
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.CreateEditTaskUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.DeleteTaskUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTaskDetailsUseCase
@@ -22,6 +24,7 @@ import org.koin.dsl.module
 val tasksModule = module {
     singleOf(::TaskApiService)
     singleOf(::TaskRepositoryImpl) { bind<TaskRepository>() }
+    singleOf(::TaskSearchHandlerImpl) { bind<TaskSearchHandler>() }
 
     factoryOf(::GetTasksUseCase)
     factoryOf(::GetTaskProgressUseCase)

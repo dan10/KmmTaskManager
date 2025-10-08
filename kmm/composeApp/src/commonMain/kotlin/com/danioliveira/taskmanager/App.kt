@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,10 +74,22 @@ fun TaskItApp(
         Scaffold(
             modifier = Modifier,
             topBar = {
-                PrincipalTaskItTopAppBar(
-                    title = "Tasks",
-                    onSearch = {}
-                )
+                // Only show topBar on specific screens
+                val currentDestination = appState.currentDestination
+                if (currentDestination != null && appState.isToolbarDestination(currentDestination)) {
+                    val screenTitle = when {
+                        currentDestination.hasRoute(Screen.Tasks::class) -> "Tasks"
+                        currentDestination.hasRoute(Screen.Calendar::class) -> "Calendar"
+                        currentDestination.hasRoute(Screen.Projects::class) -> "Projects"
+                        else -> "Tasks"
+                    }
+                    PrincipalTaskItTopAppBar(
+                        title = screenTitle,
+                        onSearch = { query ->
+                            appState.onGlobalSearchQueryChanged(query)
+                        }
+                    )
+                }
             },
             bottomBar = {
                 TaskItBottomBar(appState = appState)
@@ -84,6 +97,7 @@ fun TaskItApp(
         ) { innerPadding ->
             TaskItNavHost(
                 navController = appState.navController,
+                appState = appState,
                 onAppReady = onAppReady,
                 modifier = Modifier
                     .padding(innerPadding)
@@ -150,6 +164,7 @@ fun TaskItBottomBar(
 @Composable
 fun TaskItNavHost(
     navController: NavHostController,
+    appState: TasksItAppState,
     modifier: Modifier = Modifier,
     onAppReady: () -> Unit = {},
 ) {
@@ -220,10 +235,12 @@ fun TaskItNavHost(
             ) {
                 TasksScreen(
                     sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@composable,
+                    animatedContentScope = this,
                     navigateToTaskDetail = { taskId ->
                         navController.navigate(Screen.TasksDetails(taskId.toString()))
-                    }
+                    },
+                    globalSearchQuery =
+                        appState.globalSearchQuery.collectAsState().value
                 )
             }
                 taskDetailsScreen(

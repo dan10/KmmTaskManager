@@ -22,14 +22,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,9 +71,15 @@ fun TasksScreen(
     animatedContentScope: AnimatedContentScope,
     viewModel: TasksViewModel = koinViewModel(),
     navigateToTaskDetail: (Uuid) -> Unit,
+    globalSearchQuery: String = "",
 ) {
     var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Sync global search query with local search field
+    LaunchedEffect(globalSearchQuery) {
+        viewModel.updateSearchQuery(globalSearchQuery)
+    }
 
     // Refresh when returning from other screens
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {

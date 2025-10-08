@@ -215,6 +215,7 @@ class TasksItAppState(
 
     fun shouldShowToolbar(destination: NavDestination): Boolean {
         return destination.hasRoute(Screen.Tasks::class) ||
+                destination.hasRoute(Screen.Calendar::class) ||
                 destination.hasRoute(Screen.Projects::class)
     }
 
