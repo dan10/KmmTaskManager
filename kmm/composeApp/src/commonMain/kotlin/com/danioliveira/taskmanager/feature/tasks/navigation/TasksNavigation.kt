@@ -77,11 +77,11 @@ fun NavGraphBuilder.taskDetailsScreen(
     onEditTask: (Uuid) -> Unit
 ) {
     composable<Screen.TasksDetails> { backStackEntry ->
+        val route = backStackEntry.toRoute<Screen.TasksDetails>()
+        backStackEntry.savedStateHandle["taskId"] = route.taskId
         TaskDetailsScreen(
             onBack = onBackClick,
-            onEditTask = { taskId ->
-                onEditTask(taskId)
-            }
+            onEditTask = onEditTask
         )
     }
 }

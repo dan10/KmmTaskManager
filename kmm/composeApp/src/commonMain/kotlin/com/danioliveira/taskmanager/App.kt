@@ -47,8 +47,6 @@ import com.danioliveira.taskmanager.feature.auth.ui.login.LoginScreen
 import com.danioliveira.taskmanager.feature.auth.ui.register.RegisterScreen
 import com.danioliveira.taskmanager.feature.projects.ui.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.feature.projects.ui.list.ProjectsScreen
-import com.danioliveira.taskmanager.feature.tasks.navigation.editTaskScreen
-import com.danioliveira.taskmanager.feature.tasks.navigation.taskDetailsScreen
 import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksScreen
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
@@ -243,17 +241,6 @@ fun TaskItNavHost(
                         appState.globalSearchQuery.collectAsState().value
                 )
             }
-                taskDetailsScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onEditTask = { taskId ->
-                        navController.navigate(Screen.EditTask(taskId.toString()))
-                    }
-                )
-
-                editTaskScreen(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    onBackClick = { navController.popBackStack() }
-                )
             composable<Screen.Projects>(
                 enterTransition = {
                     val isComingFromTasks = initialState.destination.hasRoute(Screen.Tasks::class)

@@ -5,4 +5,4 @@ import io.ktor.client.engine.okhttp.OkHttp
 
 actual fun createPlatformEngine(): HttpClientEngine = OkHttp.create()
 
-actual fun getBaseUrl(): String = "http://192.168.68.58:8081"
+actual fun getBaseUrl(): String = "http://192.168.68.54:8081"

@@ -1,0 +1,5 @@
+FROM amazoncorretto:24-alpine
+EXPOSE 8081
+RUN mkdir /app
+COPY ./server/build/libs/fat.jar /app/server.jar
+ENTRYPOINT ["java","-jar","/app/server.jar"]

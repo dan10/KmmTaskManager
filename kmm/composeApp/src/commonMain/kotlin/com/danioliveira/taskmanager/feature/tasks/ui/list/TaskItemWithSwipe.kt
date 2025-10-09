@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager.feature.tasks.ui.list
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.TaskItem
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun TaskItemWithSwipe(
     task: Task,

@@ -29,7 +29,8 @@ class TasksDetailsViewModel(
     }
 
     private fun loadTaskDetails() {
-        val taskId = savedStateHandle.get<Uuid>("taskId")
+        val taskIdString = savedStateHandle.get<String>("taskId")
+        val taskId = taskIdString?.let { runCatching { Uuid.parse(it) }.getOrNull() }
         if (taskId != null) {
             state = state.copy(isLoading = true, errorMessage = null)
             viewModelScope.launch {

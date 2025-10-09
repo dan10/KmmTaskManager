@@ -3,8 +3,8 @@ package com.danioliveira.taskmanager.domain.repository
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
-import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import java.util.UUID
