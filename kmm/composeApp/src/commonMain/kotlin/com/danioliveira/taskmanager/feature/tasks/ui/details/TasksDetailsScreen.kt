@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -155,6 +157,12 @@ private fun TasksDetailsScreenContent(
                             dueDate = state.task.dueDate,
                             status = state.task.status,
                             priority = state.task.priority
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        DatesCard(
+                            createdAt = state.task.createdAt
                         )
                     }
                     else -> TaskItErrorState("No task details available")
@@ -338,6 +346,75 @@ private fun TaskInfoRow(
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF6B7280),
             modifier = Modifier.width(80.dp)
+        )
+        
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF1A1A1A),
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun DatesCard(createdAt: LocalDateTime?) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Dates",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFF1A1A1A),
+                fontWeight = FontWeight.Bold
+            )
+            
+            DateInfoRow(
+                icon = Icons.Outlined.Add,
+                label = "Created",
+                value = createdAt?.let { DateFormatter.formatDate(it) } ?: "—"
+            )
+            
+            DateInfoRow(
+                icon = Icons.Outlined.DateRange,
+                label = "Last Updated",
+                value = createdAt?.let { DateFormatter.formatDate(it) } ?: "—"
+            )
+        }
+    }
+}
+
+@Composable
+private fun DateInfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = Color(0xFF7C3AED)
+        )
+        
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF6B7280),
+            modifier = Modifier.width(100.dp)
         )
         
         Text(
