@@ -38,8 +38,7 @@ fun NavGraphBuilder.authSection(
     navigation<AuthBaseRoute>(startDestination = LoginRoute) {
         composable<LoginRoute>(
             enterTransition = {
-                // When navigating to Login (not used initially, but for consistency)
-                slideInHorizontally(
+               slideInHorizontally(
                     initialOffsetX = { -it },
                     animationSpec = tween(300)
                 ) + fadeIn(animationSpec = tween(300))
@@ -78,7 +77,7 @@ fun NavGraphBuilder.authSection(
                 slideInHorizontally(
                     initialOffsetX = { it },
                     animationSpec = tween(300)
-                ) + fadeIn(animationSpec = tween(300))
+                )
             },
             exitTransition = {
                 // When going forward from Register (to home)

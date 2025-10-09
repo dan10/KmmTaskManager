@@ -9,9 +9,12 @@ import com.danioliveira.taskmanager.data.tables.ProjectsTable
 import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.Case
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -28,7 +31,7 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.core.sum
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
-import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.update
 import java.util.UUID
@@ -173,7 +176,9 @@ internal class TaskRepositoryImpl : TaskRepository {
     ): TaskResponse = with(transaction) {
         val id = UUID.randomUUID()
 
-        TasksTable.insert {
+       val row = TasksTable.insertReturning(
+            listOf(TasksTable.createdAt, TasksTable.updatedAt)
+        ) {
             it[TasksTable.id] = id
             it[TasksTable.title] = title
             it[TasksTable.description] = description
@@ -183,7 +188,8 @@ internal class TaskRepositoryImpl : TaskRepository {
             it[TasksTable.status] = status
             it[TasksTable.priority] = priority
             it[TasksTable.dueDate] = dueDate
-        }
+        }.single()
+
 
         return TaskResponse(
             id = id.toString(),
@@ -194,8 +200,10 @@ internal class TaskRepositoryImpl : TaskRepository {
             dueDate = dueDate,
             projectId = projectId?.toString(),
             projectName = null,
-            assigneeId = assigneeId.toString(),
-            creatorId = creatorId.toString()
+            assigneeId = assigneeId?.toString(),
+            creatorId = creatorId.toString(),
+            createdAt = row[TasksTable.createdAt].toLocalDateTime(TimeZone.UTC),
+            updatedAt = row[TasksTable.updatedAt].toLocalDateTime(TimeZone.UTC)
         )
     }
 
@@ -210,7 +218,9 @@ internal class TaskRepositoryImpl : TaskRepository {
             projectId = this[TasksTable.projectId]?.value?.toString(),
             projectName = this[ProjectsTable.name],
             assigneeId = this[TasksTable.assigneeId]?.value?.toString(),
-            creatorId = this[TasksTable.creatorId].value.toString()
+            creatorId = this[TasksTable.creatorId].value.toString(),
+            createdAt = this[TasksTable.createdAt].toLocalDateTime(TimeZone.UTC),
+            updatedAt = this[TasksTable.updatedAt].toLocalDateTime(TimeZone.UTC)
         )
     }
 

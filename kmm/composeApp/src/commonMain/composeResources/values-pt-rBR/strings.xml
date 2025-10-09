@@ -120,6 +120,7 @@
     <string name="task_title_label">Título</string>
     <string name="task_title_error">Título é obrigatório</string>
     <string name="task_description_label">Descrição</string>
+    <string name="task_created_label">Criada em</string>
     <string name="task_status_label">Status</string>
     <string name="task_priority_label">Prioridade</string>
     <string name="task_due_date_label">Data de Vencimento (DD/MM/AAAA)</string>

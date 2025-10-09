@@ -2,13 +2,14 @@ package com.danioliveira.taskmanager.feature.tasks.data.mapper
 
 import com.danioliveira.taskmanager.api.response.TaskResponse
 import com.danioliveira.taskmanager.core.domain.model.Task
+import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * Extension function to convert TaskResponse to Task domain model.
  */
-@OptIn(ExperimentalUuidApi::class)
+@OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
 fun TaskResponse.toTask(): Task {
     return Task(
         id = Uuid.parse(id),
@@ -17,6 +18,7 @@ fun TaskResponse.toTask(): Task {
         projectName = projectName,
         status = status,
         priority = priority,
-        dueDate = dueDate
+        dueDate = dueDate,
+        createdAt = createdAt,
     )
 }

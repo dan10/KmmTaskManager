@@ -19,5 +19,7 @@ data class TaskResponse(
     val projectId: String?,
     val projectName: String?,
     val assigneeId: String?,
-    val creatorId: String
+    val creatorId: String,
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime
 )

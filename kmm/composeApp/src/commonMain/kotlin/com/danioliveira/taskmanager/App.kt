@@ -1,8 +1,12 @@
 package com.danioliveira.taskmanager
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -32,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -189,11 +194,74 @@ fun TaskItNavHost(
         val actualStartDestination = if (destination == Screen.Login) AuthBaseRoute else TasksBaseRoute
 
         SharedTransitionLayout {
+
+            val authExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition? = {
+                when {
+                    initialState.destination.hasRoute(LoginRoute::class) &&
+                        targetState.destination.hasRoute(RegisterRoute::class) ->
+                        slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+
+                    initialState.destination.hasRoute(RegisterRoute::class) &&
+                        targetState.destination.hasRoute(LoginRoute::class) ->
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+
+                    else -> null
+                }
+            }
+
+            val authPopEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+                when {
+                    initialState.destination.hasRoute(RegisterRoute::class) &&
+                        targetState.destination.hasRoute(LoginRoute::class) ->
+                        slideInHorizontally(
+                            initialOffsetX = { -it },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+
+                    initialState.destination.hasRoute(LoginRoute::class) &&
+                        targetState.destination.hasRoute(RegisterRoute::class) ->
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+
+                    else -> null
+                }!!
+            }
+
+            val authPopExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition? = {
+                when {
+                    initialState.destination.hasRoute<RegisterRoute>() &&
+                        targetState.destination.hasRoute(LoginRoute::class) ->
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+
+                    initialState.destination.hasRoute(LoginRoute::class) &&
+                        targetState.destination.hasRoute(RegisterRoute::class) ->
+                        slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+
+                    else -> null
+                }
+            }
+
             NavHost(
                 modifier = modifier,
                 navController = navController,
-                startDestination = actualStartDestination
-            ) {
+                startDestination = actualStartDestination,
+                enterTransition = enterTransaction(),
+                popEnterTransition = authPopEnterTransition,
+            ){
                 // Auth Section - includes LoginRoute and RegisterRoute
                 authSection(
                     onNavigateToRegister = {
@@ -285,5 +353,31 @@ fun TaskItNavHost(
                 }
             }
         }
+    }
+}
+
+private fun enterTransaction(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    when {
+        initialState.destination.hasRoute(LoginRoute::class) &&
+                targetState.destination.hasRoute(RegisterRoute::class) ->
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(300)
+            ) + fadeIn(animationSpec = tween(300))
+
+        initialState.destination.hasRoute(RegisterRoute::class) &&
+                targetState.destination.hasRoute(LoginRoute::class) ->
+            slideInHorizontally(
+                initialOffsetX = { -it },
+                animationSpec = tween(300)
+            ) + fadeIn(animationSpec = tween(300))
+
+        else -> slideIntoContainer(
+            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+            animationSpec = tween(
+                durationMillis = 200,
+                easing = LinearEasing
+            )
+        )
     }
 }

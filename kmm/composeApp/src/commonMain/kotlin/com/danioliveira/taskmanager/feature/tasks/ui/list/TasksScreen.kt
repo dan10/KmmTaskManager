@@ -190,7 +190,8 @@ private fun TasksScreenV2Preview() {
                 1 -> Priority.MEDIUM
                 else -> Priority.LOW
             },
-            dueDate = LocalDateTime.parse("2023-12-31T00:00:00")
+            dueDate = LocalDateTime.parse("2023-12-31T00:00:00"),
+            createdAt = LocalDateTime.parse("2023-01-01T00:00:00")
         )
     }
     // create pagingData from a list of fake data

@@ -12,5 +12,6 @@ data class Task(
     val projectName: String?,
     val status: TaskStatus,
     val priority: Priority,
-    val dueDate: LocalDateTime?
+    val dueDate: LocalDateTime?,
+    val createdAt: LocalDateTime,
 )

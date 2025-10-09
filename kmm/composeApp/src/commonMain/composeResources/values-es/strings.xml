@@ -112,6 +112,7 @@
     <string name="task_title_label">Título</string>
     <string name="task_title_error">El título es obligatorio</string>
     <string name="task_description_label">Descripción</string>
+    <string name="task_created_label">Creada el</string>
     <string name="task_status_label">Estado</string>
     <string name="task_priority_label">Prioridad</string>
     <string name="task_due_date_label">Fecha de Vencimiento (DD/MM/AAAA)</string>

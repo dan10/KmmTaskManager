@@ -120,6 +120,7 @@
     <string name="task_title_label">Title</string>
     <string name="task_title_error">Title is required</string>
     <string name="task_description_label">Description</string>
+    <string name="task_created_label">Created</string>
     <string name="task_status_label">Status</string>
     <string name="task_priority_label">Priority</string>
     <string name="task_due_date_label">Due Date (MM/DD/YYYY)</string>

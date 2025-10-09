@@ -270,7 +270,8 @@ fun TaskItemPreview() {
                     status = TaskStatus.TODO,
                     priority = Priority.HIGH,
                     dueDate = LocalDateTime.parse("2024-11-25T00:00:00"),
-                    projectName = "Website Redesign"
+                    projectName = "Website Redesign",
+                    createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
                 ),
                 onClick = {},
                     onCheckedChange = {}
@@ -284,7 +285,8 @@ fun TaskItemPreview() {
                     status = TaskStatus.IN_PROGRESS,
                     priority = Priority.MEDIUM,
                     dueDate = LocalDateTime.parse("2024-11-26T00:00:00"),
-                    projectName = "Website Redesign"
+                    projectName = "Website Redesign",
+                    createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
                 ),
                 onClick = {},
                     onCheckedChange = {}
@@ -298,7 +300,8 @@ fun TaskItemPreview() {
                     status = TaskStatus.DONE,
                     priority = Priority.LOW,
                     dueDate = LocalDateTime.parse("2024-11-30T00:00:00"),
-                    projectName = null
+                    projectName = null,
+                    createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
                 ),
                 onClick = {},
                     onCheckedChange = {}

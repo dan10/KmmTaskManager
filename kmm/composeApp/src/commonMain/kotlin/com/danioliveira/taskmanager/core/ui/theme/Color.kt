@@ -1,6 +1,18 @@
-package com.danioliveira.taskmanager.ui.theme
+package com.danioliveira.taskmanager.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
+
+object TaskDetailColors {
+    val CardBorder = Color(0xFFF6C958)
+    val CardBackground = Color(0xFFFFFBF3)
+    val MetaSurface = Color(0xFFF2F0FF)
+    val MetaIconBackground = Color(0xFFE7E5FF)
+    val MetaIconColor = Color(0xFF6750A4)
+    val PillSecondary = Color(0xFFF1F2F7)
+    val PillSecondaryContent = Color(0xFF3C3F52)
+    val PillPrimary = Color(0xFFFFE9A6)
+    val PillPrimaryContent = Color(0xFF7A4E00)
+}
 
 val primaryLight = Color(0xFF575992)
 val onPrimaryLight = Color(0xFFFFFFFF)

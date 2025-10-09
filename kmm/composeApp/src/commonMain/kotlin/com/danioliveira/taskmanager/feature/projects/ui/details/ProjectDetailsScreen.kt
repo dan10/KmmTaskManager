@@ -385,7 +385,8 @@ private fun ProjectDetailsScreenPreview() {
                 else -> Priority.LOW
             },
             dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
-            projectName = "Website Redesign"
+            projectName = "Website Redesign",
+            createdAt = LocalDateTime.parse("2024-11-01T00:00:00")
         )
     }
 
@@ -432,7 +433,8 @@ private fun ProjectDetailsContentPreview() {
                 else -> Priority.LOW
             },
             dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
-            projectName = "Website Redesign"
+            projectName = "Website Redesign",
+            createdAt = LocalDateTime.parse("2024-11-01T00:00:00")
         )
     }
 
