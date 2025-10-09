@@ -14,6 +14,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.danioliveira.taskmanager.core.domain.manager.AuthManager
+import com.danioliveira.taskmanager.feature.auth.navigation.LoginRoute
+import com.danioliveira.taskmanager.feature.auth.navigation.RegisterRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsBaseRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsRoute
 import com.danioliveira.taskmanager.feature.tasks.navigation.TasksBaseRoute
@@ -128,8 +130,10 @@ class TasksItAppState(
      * Checks if the current screen is a login or register screen.
      */
     fun isLoginOrRegisterScreen(currentDestination: NavDestination): Boolean {
-        return currentDestination.hasRoute(Screen.Login::class) ||
-                currentDestination.hasRoute(Screen.Register::class)
+        return currentDestination.hierarchy.any {
+            it.hasRoute(LoginRoute::class) ||
+            it.hasRoute(RegisterRoute::class)
+        }
     }
 
 
@@ -148,7 +152,7 @@ class TasksItAppState(
         // Check if we're not already on login/register screen
         val currentDest = navController.currentDestination
         if (currentDest != null && !isLoginOrRegisterScreen(currentDest)) {
-            navController.navigate(Screen.Login) {
+            navController.navigate(LoginRoute) {
                 // Clear entire back stack
                 popUpTo(0) {
                     inclusive = true

@@ -25,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,10 +42,11 @@ import com.danioliveira.taskmanager.core.domain.manager.AuthManager
 import com.danioliveira.taskmanager.core.ui.TasksItAppState
 import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.rememberTasksItAppState
-import com.danioliveira.taskmanager.feature.auth.ui.login.LoginScreen
-import com.danioliveira.taskmanager.feature.auth.ui.register.RegisterScreen
+import com.danioliveira.taskmanager.feature.auth.navigation.AuthBaseRoute
+import com.danioliveira.taskmanager.feature.auth.navigation.LoginRoute
+import com.danioliveira.taskmanager.feature.auth.navigation.RegisterRoute
+import com.danioliveira.taskmanager.feature.auth.navigation.authSection
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectDetailRoute
-import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsBaseRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.projectsSection
 import com.danioliveira.taskmanager.feature.tasks.navigation.EditTaskRoute
@@ -62,7 +62,6 @@ import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import kotlin.uuid.Uuid
 
 @Composable
 fun TaskItApp(
@@ -187,42 +186,30 @@ fun TaskItNavHost(
 
     // Show nothing until we determine the start destination
     startDestination?.let { destination ->
+        val actualStartDestination = if (destination == Screen.Login) AuthBaseRoute else TasksBaseRoute
+
         SharedTransitionLayout {
             NavHost(
                 modifier = modifier,
                 navController = navController,
-                startDestination = TasksBaseRoute
+                startDestination = actualStartDestination
             ) {
-                // Authentication
-                composable<Screen.Login> {
-                    LoginScreen(
-                        navigateToRegister = {
-                            navController.navigate(Screen.Register)
-                        },
-                        navigateToHome = {
-                            navController.navigate(TasksBaseRoute) {
-                                popUpTo(Screen.Login) {
-                                    inclusive = true
-                                }
+                // Auth Section - includes LoginRoute and RegisterRoute
+                authSection(
+                    onNavigateToRegister = {
+                        navController.navigate(RegisterRoute)
+                    },
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToHome = {
+                        navController.navigate(TasksBaseRoute) {
+                            popUpTo(LoginRoute) {
+                                inclusive = true
                             }
                         }
-                    )
-                }
-
-                composable<Screen.Register> {
-                    RegisterScreen(
-                        navigateToLogin = {
-                            navController.popBackStack()
-                        },
-                        navigateToHome = {
-                            navController.navigate(TasksBaseRoute) {
-                                popUpTo(Screen.Login) {
-                                    inclusive = true
-                                }
-                            }
-                        }
-                    )
-                }
+                    }
+                )
 
                 // Tasks Section - includes TasksRoute, TaskDetailRoute, and EditTaskRoute
                 tasksSection(
