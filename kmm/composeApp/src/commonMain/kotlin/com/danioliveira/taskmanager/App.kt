@@ -45,9 +45,16 @@ import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.rememberTasksItAppState
 import com.danioliveira.taskmanager.feature.auth.ui.login.LoginScreen
 import com.danioliveira.taskmanager.feature.auth.ui.register.RegisterScreen
-import com.danioliveira.taskmanager.feature.projects.ui.details.ProjectDetailsScreen
-import com.danioliveira.taskmanager.feature.projects.ui.list.ProjectsScreen
-import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksScreen
+import com.danioliveira.taskmanager.feature.projects.navigation.ProjectDetailRoute
+import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsBaseRoute
+import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsRoute
+import com.danioliveira.taskmanager.feature.projects.navigation.projectsSection
+import com.danioliveira.taskmanager.feature.tasks.navigation.EditTaskRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.TaskDetailRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.TasksBaseRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.TasksRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.taskDetailsScreen
+import com.danioliveira.taskmanager.feature.tasks.navigation.tasksSection
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
@@ -55,6 +62,7 @@ import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import kotlin.uuid.Uuid
 
 @Composable
 fun TaskItApp(
@@ -76,9 +84,9 @@ fun TaskItApp(
                 val currentDestination = appState.currentDestination
                 if (currentDestination != null && appState.isToolbarDestination(currentDestination)) {
                     val screenTitle = when {
-                        currentDestination.hasRoute(Screen.Tasks::class) -> "Tasks"
+                        currentDestination.hierarchy.any { it.hasRoute(TasksRoute::class) } -> "Tasks"
                         currentDestination.hasRoute(Screen.Calendar::class) -> "Calendar"
-                        currentDestination.hasRoute(Screen.Projects::class) -> "Projects"
+                        currentDestination.hierarchy.any { it.hasRoute(ProjectsRoute::class) } -> "Projects"
                         else -> "Tasks"
                     }
                     PrincipalTaskItTopAppBar(
@@ -183,90 +191,94 @@ fun TaskItNavHost(
             NavHost(
                 modifier = modifier,
                 navController = navController,
-                startDestination = destination
+                startDestination = TasksBaseRoute
             ) {
-            // Authentication
-            composable<Screen.Login> {
-                LoginScreen(
-                    navigateToRegister = {
-                        navController.navigate(Screen.Register)
-                    },
-                    navigateToHome = {
-                        navController.navigate(Screen.Tasks) {
-                            popUpTo(Screen.Login) {
-                                inclusive = true
+                // Authentication
+                composable<Screen.Login> {
+                    LoginScreen(
+                        navigateToRegister = {
+                            navController.navigate(Screen.Register)
+                        },
+                        navigateToHome = {
+                            navController.navigate(TasksBaseRoute) {
+                                popUpTo(Screen.Login) {
+                                    inclusive = true
+                                }
                             }
                         }
-                    }
-                )
-            }
+                    )
+                }
 
-            composable<Screen.Register> {
-                RegisterScreen(
-                    navigateToLogin = {
+                composable<Screen.Register> {
+                    RegisterScreen(
+                        navigateToLogin = {
+                            navController.popBackStack()
+                        },
+                        navigateToHome = {
+                            navController.navigate(TasksBaseRoute) {
+                                popUpTo(Screen.Login) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    )
+                }
+
+                // Tasks Section - includes TasksRoute, TaskDetailRoute, and EditTaskRoute
+                tasksSection(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    onTaskClick = { taskId ->
+                        navController.navigate(TaskDetailRoute(taskId.toString()))
+                    },
+                    onBackClick = {
                         navController.popBackStack()
                     },
-                    navigateToHome = {
-                        navController.navigate(Screen.Tasks) {
-                            popUpTo(Screen.Login) {
-                                inclusive = true
-                            }
-                        }
+                    onEditTask = { taskId ->
+                        navController.navigate(EditTaskRoute(taskId.toString()))
                     }
                 )
-            }
 
-            // Top level destinations with slide animations
-            composable<Screen.Tasks>(
-                enterTransition = {
-                    slideInHorizontally(
-                        initialOffsetX = { -it },
-                        animationSpec = tween(300)
-                    ) + fadeIn(animationSpec = tween(300))
-                },
-                exitTransition = {
-                    slideOutHorizontally(
-                        targetOffsetX = { -it },
-                        animationSpec = tween(300)
-                    ) + fadeOut(animationSpec = tween(300))
-                }
-            ) {
-                TasksScreen(
+                // Projects Section - includes ProjectsRoute, ProjectDetailRoute, and TaskDetailRoute
+                projectsSection(
                     sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this,
-                    navigateToTaskDetail = { taskId ->
-                        navController.navigate(Screen.TasksDetails(taskId.toString()))
+                    onProjectClick = { projectId ->
+                        navController.navigate(ProjectDetailRoute(projectId))
                     },
-                    globalSearchQuery =
-                        appState.globalSearchQuery.collectAsState().value
-                )
-            }
-            composable<Screen.Projects>(
-                enterTransition = {
-                    val isComingFromTasks = initialState.destination.hasRoute(Screen.Tasks::class)
-                    slideInHorizontally(
-                        initialOffsetX = { if (isComingFromTasks) it else -it },
-                        animationSpec = tween(300)
-                    ) + fadeIn(animationSpec = tween(300))
-                },
-                exitTransition = {
-                    val isGoingToTasks = targetState.destination.hasRoute(Screen.Tasks::class)
-                    slideOutHorizontally(
-                        targetOffsetX = { if (isGoingToTasks) it else -it },
-                        animationSpec = tween(300)
-                    ) + fadeOut(animationSpec = tween(300))
-                }
-            ) {
-                ProjectsScreen(
-                    navigateToProjectDetail = { projectId ->
-                        navController.navigate(
-                            Screen.ProjectDetails(
-                                projectId
-                            )
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onTaskClick = { taskId ->
+                        navController.navigate(TaskDetailRoute(taskId.toString()))
+                    },
+                    taskDetailsDestination = {
+                        taskDetailsScreen(
+                            onBackClick = {
+                                navController.popBackStack()
+                            },
+                            onEditTask = { taskId ->
+                                navController.navigate(EditTaskRoute(taskId.toString()))
+                            }
                         )
                     }
                 )
-            }
+
+                // Calendar Section - placeholder for future implementation
+                composable<Screen.Calendar>(
+                    enterTransition = {
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+                    },
+                    exitTransition = {
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+                    }
+                ) {
+                    Text("Calendar Screen - Coming Soon")
+                }
 
                 composable<Screen.Profile>(
                     enterTransition = {
@@ -283,16 +295,6 @@ fun TaskItNavHost(
                     }
                 ) {
                     Text("Profile Screen - Coming Soon")
-                }
-
-
-                composable<Screen.ProjectDetails> { backStackEntry ->
-                    ProjectDetailsScreen(
-                        onBack = { navController.popBackStack() },
-                        navigateToTaskDetail = { taskId ->
-                            navController.navigate(Screen.TasksDetails(taskId.toString()))
-                        }
-                    )
                 }
             }
         }

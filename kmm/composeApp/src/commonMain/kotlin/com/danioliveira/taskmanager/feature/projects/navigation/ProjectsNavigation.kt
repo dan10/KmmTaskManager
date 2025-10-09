@@ -27,11 +27,10 @@ fun NavGraphBuilder.projectsSection(
     onProjectClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onTaskClick: (Uuid) -> Unit,
+    taskDetailsDestination: NavGraphBuilder.() -> Unit
 ) {
     navigation<ProjectsBaseRoute>(startDestination = ProjectsRoute) {
-        composable<ProjectsRoute>(
-
-        ) {
+        composable<ProjectsRoute> {
             ProjectsScreen(
                 navigateToProjectDetail = onProjectClick
             )
@@ -43,6 +42,9 @@ fun NavGraphBuilder.projectsSection(
                 navigateToTaskDetail = onTaskClick
             )
         }
+
+        // Include task details screen in this section
+        taskDetailsDestination()
     }
 }
 

@@ -16,15 +16,14 @@ import androidx.navigation.toRoute
 import com.danioliveira.taskmanager.feature.tasks.ui.details.TaskDetailsScreen
 import com.danioliveira.taskmanager.feature.tasks.ui.edit.EditTaskScreen
 import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksScreen
-import com.danioliveira.taskmanager.navigation.Screen
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
 @Serializable data object TasksRoute
 
-@Serializable data class TaskDetailRoute(val taskId: Uuid)
+@Serializable data class TaskDetailRoute(val taskId: String)
 
-@Serializable data class EditTaskRoute(val taskId: Uuid)
+@Serializable data class EditTaskRoute(val taskId: String)
 
 @Serializable data object TasksBaseRoute
 
@@ -76,9 +75,7 @@ fun NavGraphBuilder.taskDetailsScreen(
     onBackClick: () -> Unit,
     onEditTask: (Uuid) -> Unit
 ) {
-    composable<Screen.TasksDetails> { backStackEntry ->
-        val route = backStackEntry.toRoute<Screen.TasksDetails>()
-        backStackEntry.savedStateHandle["taskId"] = route.taskId
+    composable<TaskDetailRoute> { backStackEntry ->
         TaskDetailsScreen(
             onBack = onBackClick,
             onEditTask = onEditTask
@@ -91,7 +88,7 @@ fun NavGraphBuilder.editTaskScreen(
     sharedTransitionScope: SharedTransitionScope,
     onBackClick: () -> Unit
 ) {
-    composable<Screen.EditTask> { backStackEntry ->
+    composable<EditTaskRoute> { backStackEntry ->
         EditTaskScreen(
             taskId = backStackEntry.toRoute<EditTaskRoute>().taskId.toString(),
             sharedTransitionScope = sharedTransitionScope,

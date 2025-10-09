@@ -9,10 +9,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.danioliveira.taskmanager.core.domain.manager.AuthManager
+import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsBaseRoute
+import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.TasksBaseRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.TasksRoute
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.TopLevelRoute
 import kotlinx.coroutines.CoroutineScope
@@ -129,9 +134,11 @@ class TasksItAppState(
 
 
     private fun shouldShowBottomBar2(currentDestination: NavDestination): Boolean {
-        return currentDestination.hasRoute(Screen.Tasks::class) ||
-                currentDestination.hasRoute(Screen.Projects::class) ||
-                currentDestination.hasRoute(Screen.Profile::class)
+        return currentDestination.hierarchy.any {
+            it.hasRoute(TasksRoute::class) ||
+            it.hasRoute(ProjectsRoute::class) ||
+            it.hasRoute(Screen.Profile::class)
+        }
     }
 
     /**
@@ -159,7 +166,7 @@ class TasksItAppState(
         coroutineScope.launch {
             if (isAuthenticated.value) {
                 // If authenticated, navigate to home
-                navController.navigate(Screen.Tasks) {
+                navController.navigate(TasksBaseRoute) {
                     popUpTo(Screen.Login) {
                         inclusive = true
                     }
@@ -185,13 +192,13 @@ class TasksItAppState(
     }
 
     fun navigateToTasks() {
-        navController.navigate(Screen.Tasks) {
+        navController.navigate(TasksBaseRoute) {
             launchSingleTop = true
         }
     }
 
     fun navigateToProjects() {
-        navController.navigate(Screen.Projects) {
+        navController.navigate(ProjectsBaseRoute) {
             launchSingleTop = true
         }
     }
@@ -214,9 +221,11 @@ class TasksItAppState(
     }
 
     fun shouldShowToolbar(destination: NavDestination): Boolean {
-        return destination.hasRoute(Screen.Tasks::class) ||
-                destination.hasRoute(Screen.Calendar::class) ||
-                destination.hasRoute(Screen.Projects::class)
+        return destination.hierarchy.any {
+            it.hasRoute(TasksRoute::class) ||
+            it.hasRoute(Screen.Calendar::class) ||
+            it.hasRoute(ProjectsRoute::class)
+        }
     }
 
     fun isToolbarDestination(destination: NavDestination?): Boolean =

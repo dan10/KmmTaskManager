@@ -4,6 +4,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.List
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsBaseRoute
+import com.danioliveira.taskmanager.feature.tasks.navigation.TasksBaseRoute
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.ic_folder
 import kmmtaskmanager.composeapp.generated.resources.nav_calendar
@@ -21,11 +23,11 @@ sealed class NavIcon {
 data class TopLevelRoute<T : Any>(val name: StringResource, val route: T, val icon: NavIcon)
 
 val topLevelRoutes = listOf(
-    TopLevelRoute(Res.string.nav_tasks, Screen.Tasks, NavIcon.ImageVectorIcon(Icons.Default.Check)),
+    TopLevelRoute(Res.string.nav_tasks, TasksBaseRoute, NavIcon.ImageVectorIcon(Icons.Default.Check)),
     TopLevelRoute(Res.string.nav_calendar, Screen.Calendar, NavIcon.ImageVectorIcon(Icons.Default.List)),
     TopLevelRoute(
         Res.string.nav_projects,
-        Screen.Projects,
+        ProjectsBaseRoute,
         NavIcon.DrawableResourceIcon(Res.drawable.ic_folder)
     )
 )
