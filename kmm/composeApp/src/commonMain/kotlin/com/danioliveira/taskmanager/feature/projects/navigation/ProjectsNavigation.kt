@@ -39,11 +39,15 @@ fun NavGraphBuilder.projectsSection(
             }
         }
 
-        composable<ProjectDetailRoute> {
-            ProjectDetailsScreen(
-                onBack = onBackClick,
-                navigateToTaskDetail = onTaskClick
-            )
+        composableWithCompositionLocal<ProjectDetailRoute> {
+            val sharedTransitionScope = LocalSharedTransitionScope.current
+                ?: throw IllegalStateException("No sharedTransitionScope found")
+            with(sharedTransitionScope) {
+                ProjectDetailsScreen(
+                    onBack = onBackClick,
+                    navigateToTaskDetail = onTaskClick
+                )
+            }
         }
 
         // Include task details screen in this section

@@ -1,5 +1,8 @@
 package com.danioliveira.taskmanager.feature.tasks.ui.details
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +72,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalMaterial3Api::class)
+context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun TaskDetailsScreen(
     viewModel: TasksDetailsViewModel = koinViewModel(),
@@ -87,6 +91,8 @@ fun TaskDetailsScreen(
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun TasksDetailsScreenContent(
     state: TasksDetailsState,
@@ -141,26 +147,30 @@ private fun TasksDetailsScreenContent(
                     state.errorMessage != null -> TaskItErrorState(state.errorMessage)
                     state.task != null -> {
                         TaskHeaderCard(
+                            taskId = state.task.id,
                             title = state.task.title,
                             priority = state.task.priority,
                             status = state.task.status
                         )
-                        
+
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         if (state.task.description.isNotBlank()) {
-                            DescriptionCard(description = state.task.description)
+                            DescriptionCard(
+                                taskId = state.task.id,
+                                description = state.task.description
+                            )
                             Spacer(modifier = Modifier.height(16.dp))
                         }
-                        
+
                         TaskInformationCard(
                             dueDate = state.task.dueDate,
                             status = state.task.status,
                             priority = state.task.priority
                         )
-                        
+
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         DatesCard(
                             createdAt = state.task.createdAt
                         )
@@ -172,91 +182,122 @@ private fun TasksDetailsScreenContent(
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun TaskHeaderCard(
+    taskId: Uuid,
     title: String,
     priority: Priority,
     status: TaskStatus
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Yellow left border
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(100.dp)
-                    .background(Color(0xFFFDB022))
+    with(sts) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            modifier = Modifier.sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "task_card_$taskId"),
+                animatedVisibilityScope = avs
             )
-            
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color(0xFF1A1A1A),
-                    fontWeight = FontWeight.Bold
+                // Yellow left border
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(100.dp)
+                        .background(Color(0xFFFDB022))
+                        .sharedElement(
+                            rememberSharedContentState(key = "task_indicator_$taskId"),
+                            animatedVisibilityScope = avs
+                        )
                 )
-                
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    StatusBadge(status = status)
-                    
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = Color(0xFF6B7280)
-                    )
-                    
                     Text(
-                        text = "${priority.name.lowercase().replaceFirstChar { it.titlecase() }} Priority",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF6B7280)
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color(0xFF1A1A1A),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.sharedElement(
+                            rememberSharedContentState(key = "task_title_$taskId"),
+                            animatedVisibilityScope = avs
+                        )
                     )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        StatusBadge(
+                            taskId = taskId,
+                            status = status
+                        )
+
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color(0xFF6B7280)
+                        )
+
+                        Text(
+                            text = "${priority.name.lowercase().replaceFirstChar { it.titlecase() }} Priority",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF6B7280)
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun DescriptionCard(description: String) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+private fun DescriptionCard(
+    taskId: Uuid,
+    description: String
+) {
+    with(sts) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
-            Text(
-                text = "Description",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF1A1A1A),
-                fontWeight = FontWeight.Bold
-            )
-            
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF6B7280),
-                lineHeight = 22.sp
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Description",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFF1A1A1A),
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF6B7280),
+                    lineHeight = 22.sp,
+                    modifier = Modifier.sharedElement(
+                        rememberSharedContentState(key = "task_description_$taskId"),
+                        animatedVisibilityScope = avs
+                    )
+                )
+            }
         }
     }
 }
@@ -306,20 +347,31 @@ private fun TaskInformationCard(
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun StatusBadge(status: TaskStatus) {
-    val statusText = TaskStatusFormatter.formatTaskStatus(status)
-    Surface(
-        color = Color(0xFFE8F5E9),
-        shape = RoundedCornerShape(4.dp)
-    ) {
-        Text(
-            text = statusText,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF2E7D32),
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
+private fun StatusBadge(
+    taskId: Uuid,
+    status: TaskStatus
+) {
+    with(sts) {
+        val statusText = TaskStatusFormatter.formatTaskStatus(status)
+        Surface(
+            color = Color(0xFFE8F5E9),
+            shape = RoundedCornerShape(4.dp),
+            modifier = Modifier.sharedElement(
+                 rememberSharedContentState(key = "task_status_$taskId"),
+                animatedVisibilityScope = avs
+            )
+        ) {
+            Text(
+                text = statusText,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFF2E7D32),
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
     }
 }
 
@@ -426,13 +478,13 @@ private fun DateInfoRow(
     }
 }
 
-@Preview
-@Composable
-fun TasksDetailsScreenPreview() {
-    TaskItTheme {
-        TasksDetailsScreenContent(
-            state = TasksDetailsState(),
-            onAction = {}
-        )
-    }
-}
+//@Preview
+//@Composable
+//fun TasksDetailsScreenPreview() {
+//    TaskItTheme {
+//        TasksDetailsScreenContent(
+//            state = TasksDetailsState(),
+//            onAction = {}
+//        )
+//    }
+//}

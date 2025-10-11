@@ -1,5 +1,9 @@
 package com.danioliveira.taskmanager.feature.projects.ui.details
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -70,8 +74,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 fun ProjectDetailsScreen(
     onBack: () -> Unit,
     navigateToTaskDetail: (Uuid) -> Unit,
@@ -125,6 +129,7 @@ fun ProjectDetailsScreen(
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
 private fun ProjectDetailsScreen(
     state: ProjectDetailsState,
@@ -187,6 +192,7 @@ private fun CreateTaskFAB(onClick: () -> Unit) {
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
 private fun ProjectDetailsContent(
     project: Project?,
@@ -219,6 +225,8 @@ private fun ProjectDetailsContent(
     }
 }
 
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
 private fun ProjectTasksList(
     pagingItems: LazyPagingItems<Task>,
@@ -394,13 +402,18 @@ private fun ProjectDetailsScreenPreview() {
     val mockTaskFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {
-        ProjectDetailsScreen(
-            state = mockState,
-            onBack = {},
-            pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
-            navigateToTaskDetail = { _ -> },
-            actions = {}
-        )
+        SharedTransitionLayout {
+
+            AnimatedVisibility(true) {
+                ProjectDetailsScreen(
+                    state = mockState,
+                    onBack = {},
+                    pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+                    navigateToTaskDetail = { _ -> },
+                    actions = {}
+                )
+            }
+        }
     }
 }
 
@@ -442,11 +455,15 @@ private fun ProjectDetailsContentPreview() {
     val mockTaskFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {
-        ProjectDetailsContent(
-            project = mockProject,
-            pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
-            navigateToTaskDetail = { _ -> },
-            onTaskStatusChange = { _, _ -> }
-        )
+        SharedTransitionLayout {
+            AnimatedVisibility(true) {
+                ProjectDetailsContent(
+                    project = mockProject,
+                    pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+                    navigateToTaskDetail = { _ -> },
+                    onTaskStatusChange = { _, _ -> }
+                )
+            }
+        }
     }
 }

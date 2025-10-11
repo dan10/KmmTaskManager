@@ -131,6 +131,7 @@ fun TasksContent(
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
 private fun TaskList(
     pagingItems: LazyPagingItems<Task>,

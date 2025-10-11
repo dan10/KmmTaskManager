@@ -79,11 +79,15 @@ fun NavGraphBuilder.taskDetailsScreen(
     onBackClick: () -> Unit,
     onEditTask: (Uuid) -> Unit
 ) {
-    composable<TaskDetailRoute> { backStackEntry ->
-        TaskDetailsScreen(
-            onBack = onBackClick,
-            onEditTask = onEditTask
-        )
+    composableWithCompositionLocal<TaskDetailRoute> { backStackEntry ->
+        val sharedTransitionScope = LocalSharedTransitionScope.current
+            ?: throw IllegalStateException("No sharedTransitionScope found")
+        with(sharedTransitionScope) {
+            TaskDetailsScreen(
+                onBack = onBackClick,
+                onEditTask = onEditTask
+            )
+        }
     }
 }
 
