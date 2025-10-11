@@ -1,11 +1,16 @@
+@file:OptIn(
+    ExperimentalSharedTransitionApi::class,
+)
+
 package com.danioliveira.taskmanager
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -28,7 +33,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -191,165 +198,106 @@ fun TaskItNavHost(
 
     // Show nothing until we determine the start destination
     startDestination?.let { destination ->
-        val actualStartDestination = if (destination == Screen.Login) AuthBaseRoute else TasksBaseRoute
+        val actualStartDestination =
+            if (destination == Screen.Login) AuthBaseRoute else TasksBaseRoute
 
         SharedTransitionLayout {
-
-            val authExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition? = {
-                when {
-                    initialState.destination.hasRoute(LoginRoute::class) &&
-                        targetState.destination.hasRoute(RegisterRoute::class) ->
-                        slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = tween(300)
-                        ) + fadeOut(animationSpec = tween(300))
-
-                    initialState.destination.hasRoute(RegisterRoute::class) &&
-                        targetState.destination.hasRoute(LoginRoute::class) ->
-                        slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(300)
-                        ) + fadeOut(animationSpec = tween(300))
-
-                    else -> null
-                }
-            }
-
-            val authPopEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-                when {
-                    initialState.destination.hasRoute(RegisterRoute::class) &&
-                        targetState.destination.hasRoute(LoginRoute::class) ->
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = tween(300)
-                        ) + fadeIn(animationSpec = tween(300))
-
-                    initialState.destination.hasRoute(LoginRoute::class) &&
-                        targetState.destination.hasRoute(RegisterRoute::class) ->
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = tween(300)
-                        ) + fadeIn(animationSpec = tween(300))
-
-                    else -> null
-                }!!
-            }
-
-            val authPopExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition? = {
-                when {
-                    initialState.destination.hasRoute<RegisterRoute>() &&
-                        targetState.destination.hasRoute(LoginRoute::class) ->
-                        slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(300)
-                        ) + fadeOut(animationSpec = tween(300))
-
-                    initialState.destination.hasRoute(LoginRoute::class) &&
-                        targetState.destination.hasRoute(RegisterRoute::class) ->
-                        slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = tween(300)
-                        ) + fadeOut(animationSpec = tween(300))
-
-                    else -> null
-                }
-            }
-
-            NavHost(
-                modifier = modifier,
-                navController = navController,
-                startDestination = actualStartDestination,
-                enterTransition = enterTransaction(),
-                popEnterTransition = authPopEnterTransition,
-            ){
-                // Auth Section - includes LoginRoute and RegisterRoute
-                authSection(
-                    onNavigateToRegister = {
-                        navController.navigate(RegisterRoute)
-                    },
-                    onNavigateToLogin = {
-                        navController.popBackStack()
-                    },
-                    onNavigateToHome = {
-                        navController.navigate(TasksBaseRoute) {
-                            popUpTo(LoginRoute) {
-                                inclusive = true
+            CompositionLocalProvider(
+                LocalSharedTransitionScope provides this,
+            ) {
+                NavHost(
+                    modifier = modifier,
+                    navController = navController,
+                    startDestination = actualStartDestination,
+                ) {
+                    // Auth Section - includes LoginRoute and RegisterRoute
+                    authSection(
+                        onNavigateToRegister = {
+                            navController.navigate(RegisterRoute)
+                        },
+                        onNavigateToLogin = {
+                            navController.popBackStack()
+                        },
+                        onNavigateToHome = {
+                            navController.navigate(TasksBaseRoute) {
+                                popUpTo(LoginRoute) {
+                                    inclusive = true
+                                }
                             }
                         }
-                    }
-                )
+                    )
 
-                // Tasks Section - includes TasksRoute, TaskDetailRoute, and EditTaskRoute
-                tasksSection(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    onTaskClick = { taskId ->
-                        navController.navigate(TaskDetailRoute(taskId.toString()))
-                    },
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
-                    onEditTask = { taskId ->
-                        navController.navigate(EditTaskRoute(taskId.toString()))
-                    }
-                )
+                    // Tasks Section - includes TasksRoute, TaskDetailRoute, and EditTaskRoute
+                    tasksSection(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        onTaskClick = { taskId ->
+                            navController.navigate(TaskDetailRoute(taskId.toString()))
+                        },
+                        onBackClick = {
+                            navController.popBackStack()
+                        },
+                        onEditTask = { taskId ->
+                            navController.navigate(EditTaskRoute(taskId.toString()))
+                        }
+                    )
 
-                // Projects Section - includes ProjectsRoute, ProjectDetailRoute, and TaskDetailRoute
-                projectsSection(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    onProjectClick = { projectId ->
-                        navController.navigate(ProjectDetailRoute(projectId))
-                    },
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
-                    onTaskClick = { taskId ->
-                        navController.navigate(TaskDetailRoute(taskId.toString()))
-                    },
-                    taskDetailsDestination = {
-                        taskDetailsScreen(
-                            onBackClick = {
-                                navController.popBackStack()
-                            },
-                            onEditTask = { taskId ->
-                                navController.navigate(EditTaskRoute(taskId.toString()))
-                            }
-                        )
-                    }
-                )
+                    // Projects Section - includes ProjectsRoute, ProjectDetailRoute, and TaskDetailRoute
+                    projectsSection(
+                        onProjectClick = { projectId ->
+                            navController.navigate(ProjectDetailRoute(projectId))
+                        },
+                        onBackClick = {
+                            navController.popBackStack()
+                        },
+                        onTaskClick = { taskId ->
+                            navController.navigate(TaskDetailRoute(taskId.toString()))
+                        },
+                        taskDetailsDestination = {
+                            taskDetailsScreen(
+                                onBackClick = {
+                                    navController.popBackStack()
+                                },
+                                onEditTask = { taskId ->
+                                    navController.navigate(EditTaskRoute(taskId.toString()))
+                                }
+                            )
+                        }
+                    )
 
-                // Calendar Section - placeholder for future implementation
-                composable<Screen.Calendar>(
-                    enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = tween(300)
-                        ) + fadeIn(animationSpec = tween(300))
-                    },
-                    exitTransition = {
-                        slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(300)
-                        ) + fadeOut(animationSpec = tween(300))
+                    // Calendar Section - placeholder for future implementation
+                    composable<Screen.Calendar>(
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(300)
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(300)
+                            ) + fadeOut(animationSpec = tween(300))
+                        }
+                    ) {
+                        Text("Calendar Screen - Coming Soon")
                     }
-                ) {
-                    Text("Calendar Screen - Coming Soon")
-                }
 
-                composable<Screen.Profile>(
-                    enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = tween(300)
-                        ) + fadeIn(animationSpec = tween(300))
-                    },
-                    exitTransition = {
-                        slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(300)
-                        ) + fadeOut(animationSpec = tween(300))
+                    composable<Screen.Profile>(
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(300)
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(300)
+                            ) + fadeOut(animationSpec = tween(300))
+                        }
+                    ) {
+                        Text("Profile Screen - Coming Soon")
                     }
-                ) {
-                    Text("Profile Screen - Coming Soon")
                 }
             }
         }
@@ -381,3 +329,7 @@ private fun enterTransaction(): AnimatedContentTransitionScope<NavBackStackEntry
         )
     }
 }
+
+val LocalNavAnimatedVisibilityScope = compositionLocalOf<AnimatedVisibilityScope?> { null }
+val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope?> { null }
+

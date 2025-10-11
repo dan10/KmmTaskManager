@@ -13,9 +13,11 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.danioliveira.taskmanager.LocalSharedTransitionScope
 import com.danioliveira.taskmanager.feature.tasks.ui.details.TaskDetailsScreen
 import com.danioliveira.taskmanager.feature.tasks.ui.edit.EditTaskScreen
 import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksScreen
+import com.danioliveira.taskmanager.navigation.composableWithCompositionLocal
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
@@ -40,7 +42,7 @@ fun NavGraphBuilder.tasksSection(
     onEditTask: (Uuid) -> Unit
 ) {
     navigation<TasksBaseRoute>(startDestination = TasksRoute) {
-        composable<TasksRoute>(
+        composableWithCompositionLocal<TasksRoute>(
             enterTransition = {
                 slideInHorizontally(
                     initialOffsetX = { -it },
@@ -54,11 +56,13 @@ fun NavGraphBuilder.tasksSection(
                 ) + fadeOut(animationSpec = tween(300))
             }
         ) {
-            TasksScreen(
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = this@composable,
-                navigateToTaskDetail = onTaskClick
-            )
+            val sharedTransitionScope = LocalSharedTransitionScope.current
+                ?: throw IllegalStateException("No sharedTransitionScope found")
+            with(sharedTransitionScope) {
+                TasksScreen(
+                    navigateToTaskDetail = onTaskClick
+                )
+            }
         }
         taskDetailsScreen(
             onBackClick = onBackClick,

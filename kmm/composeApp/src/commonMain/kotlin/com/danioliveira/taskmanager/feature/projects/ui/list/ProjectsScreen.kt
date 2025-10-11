@@ -1,5 +1,8 @@
 package com.danioliveira.taskmanager.feature.projects.ui.list
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -85,7 +88,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3Api::class)
+context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
 fun ProjectsScreen(
     viewModel: ProjectsViewModel = koinViewModel(),
@@ -141,6 +144,7 @@ fun ProjectsScreen(
     }
 }
 
+context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
 private fun ProjectsScreen(
     state: ProjectsState,
@@ -162,17 +166,25 @@ private fun ProjectsScreen(
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
 private fun ProjectsFloatingActionButton(onAction: (ProjectsAction) -> Unit) {
-    FloatingActionButton(
-        onClick = { onAction(ProjectsAction.OpenCreateProject) },
-        containerColor = MaterialTheme.colorScheme.primary
-    ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = stringResource(Res.string.projects_add),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
+    with(sts) {
+        FloatingActionButton(
+            modifier = Modifier
+                .sharedElement(
+                    sts.rememberSharedContentState(key = "add_fab"),
+                avs
+            ),
+            onClick = { onAction(ProjectsAction.OpenCreateProject) },
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = stringResource(Res.string.projects_add),
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
 
@@ -389,11 +401,15 @@ private fun ProjectsScreenPreview() {
     val fakeDataFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {
-        ProjectsScreen(
-            state = ProjectsState(isLoading = false),
-            pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-            onAction = {}
-        )
+        SharedTransitionScope {
+            AnimatedVisibility(true) {
+                ProjectsScreen(
+                    state = ProjectsState(isLoading = false),
+                    pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
+                    onAction = {}
+                )
+            }
+        }
     }
 }
 
@@ -404,10 +420,15 @@ private fun PojectsEmptyScreenPreview() {
     val fakeDataFlow = MutableStateFlow(pagingData)
 
     TaskItTheme {
-        ProjectsScreen(
-            state = ProjectsState(isLoading = false),
-            pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-            onAction = {}
-        )
+        SharedTransitionScope {
+            AnimatedVisibility(true) {
+                ProjectsScreen(
+                    state = ProjectsState(isLoading = false),
+                    pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
+                    onAction = {}
+                )
+
+            }
+        }
     }
 }

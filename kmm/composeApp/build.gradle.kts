@@ -80,7 +80,13 @@ kotlin {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
                 optIn("kotlin.uuid.ExperimentalUuidApi")
                 optIn("kotlinx.coroutines.FlowPreview")
+                optIn("androidx.compose.animation.ExperimentalSharedTransitionApi")
+                optIn("androidx.compose.material3.ExperimentalMaterial3Api")
             }
+        }
+
+        compilerOptions {
+            freeCompilerArgs.add("-Xcontext-parameters")
         }
     }
 }

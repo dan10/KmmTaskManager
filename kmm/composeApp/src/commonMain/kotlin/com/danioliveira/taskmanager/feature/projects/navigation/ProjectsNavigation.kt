@@ -1,15 +1,15 @@
 package com.danioliveira.taskmanager.feature.projects.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.navigation.toRoute
+import com.danioliveira.taskmanager.LocalSharedTransitionScope
 import com.danioliveira.taskmanager.feature.projects.ui.details.ProjectDetailsScreen
 import com.danioliveira.taskmanager.feature.projects.ui.list.ProjectsScreen
+import com.danioliveira.taskmanager.navigation.composableWithCompositionLocal
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
@@ -23,17 +23,20 @@ fun NavController.navigateToProjects(navOptions: NavOptions) = navigate(Projects
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.projectsSection(
-    sharedTransitionScope: SharedTransitionScope,
     onProjectClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onTaskClick: (Uuid) -> Unit,
     taskDetailsDestination: NavGraphBuilder.() -> Unit
 ) {
     navigation<ProjectsBaseRoute>(startDestination = ProjectsRoute) {
-        composable<ProjectsRoute> {
-            ProjectsScreen(
-                navigateToProjectDetail = onProjectClick
-            )
+        composableWithCompositionLocal<ProjectsRoute> {
+            val sharedTransitionScope = LocalSharedTransitionScope.current
+                ?: throw IllegalStateException("No sharedTransitionScope found")
+            with(sharedTransitionScope) {
+                ProjectsScreen(
+                    navigateToProjectDetail = onProjectClick
+                )
+            }
         }
 
         composable<ProjectDetailRoute> {
