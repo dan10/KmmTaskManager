@@ -50,9 +50,12 @@ import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementType
 import com.danioliveira.taskmanager.util.DateFormatter
 import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.add_24px
 import kmmtaskmanager.composeapp.generated.resources.content_description_delete_task
 import kmmtaskmanager.composeapp.generated.resources.content_description_edit_task
+import kmmtaskmanager.composeapp.generated.resources.edit_24px
 import kmmtaskmanager.composeapp.generated.resources.ic_calendar_month
+import kmmtaskmanager.composeapp.generated.resources.ic_flag
 import kmmtaskmanager.composeapp.generated.resources.task_details_title
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
@@ -332,13 +335,13 @@ private fun TaskInformationCard(
             )
 
             TaskInfoRow(
-                icon = Icons.Default.Edit,
+                icon = vectorResource(Res.drawable.edit_24px),
                 label = "Status",
                 value = TaskStatusFormatter.formatTaskStatus(status)
             )
 
             TaskInfoRow(
-                icon = Icons.Default.Edit,
+                icon = vectorResource(Res.drawable.ic_flag),
                 label = "Priority",
                 value = priority.name.lowercase().replaceFirstChar { it.titlecase() }
             )
@@ -429,7 +432,7 @@ private fun DatesCard(createdAt: LocalDateTime?) {
             )
 
             DateInfoRow(
-                icon = Icons.Outlined.Add,
+                icon = vectorResource(Res.drawable.add_24px),
                 label = "Created",
                 value = createdAt?.let { DateFormatter.formatDate(it) } ?: "—"
             )
