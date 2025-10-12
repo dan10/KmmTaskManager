@@ -43,6 +43,7 @@ import androidx.paging.PagingData
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
 import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
@@ -54,6 +55,7 @@ import kmmtaskmanager.composeapp.generated.resources.empty_task_list
 import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
 import kmmtaskmanager.composeapp.generated.resources.tasks_empty_subtitle
 import kmmtaskmanager.composeapp.generated.resources.tasks_empty_title
+import kmmtaskmanager.composeapp.generated.resources.tasks_title
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.painterResource
@@ -70,6 +72,7 @@ fun TasksScreen(
     viewModel: TasksViewModel = koinViewModel(),
     navigateToTaskDetail: (Uuid) -> Unit,
     globalSearchQuery: String = "",
+    onGlobalSearch: (String) -> Unit = {}
 ) {
     var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -95,7 +98,8 @@ fun TasksScreen(
         pagingItems = viewModel.taskFlow.collectAsLazyPagingItems(),
         state = viewModel.state,
         onAction = viewModel::handleActions,
-        snackbarHostState = snackbarHostState
+        snackbarHostState = snackbarHostState,
+        onGlobalSearch = onGlobalSearch
     )
 
     if (showCreateTaskBottomSheet) {
@@ -108,17 +112,37 @@ fun TasksScreen(
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
+private fun TasksTopBar(onGlobalSearch: (String) -> Unit) {
+    with(sts) {
+        PrincipalTaskItTopAppBar(
+            title = stringResource(Res.string.tasks_title),
+            onSearch = onGlobalSearch,
+            modifier = Modifier.sharedBounds(
+                sts.rememberSharedContentState(key = "main_top_bar"),
+                avs
+            )
+        )
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
 fun TasksContent(
     pagingItems: LazyPagingItems<Task>,
     state: TasksState,
     onAction: (TasksAction) -> Unit,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onGlobalSearch: (String) -> Unit = {}
 ) {
     Scaffold(
+        topBar = {
+            TasksTopBar(onGlobalSearch = onGlobalSearch)
+        },
         floatingActionButton = { AddTaskButton(onAction) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) {
+    ) { innerPadding ->
         PullToRefreshBox(
+            modifier = Modifier.padding(innerPadding),
             isRefreshing = state.isRefreshing,
             onRefresh = { onAction(TasksAction.RefreshTasks) },
         ) {

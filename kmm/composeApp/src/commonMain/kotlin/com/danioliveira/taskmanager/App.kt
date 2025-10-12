@@ -58,6 +58,7 @@ import com.danioliveira.taskmanager.feature.auth.navigation.AuthBaseRoute
 import com.danioliveira.taskmanager.feature.auth.navigation.LoginRoute
 import com.danioliveira.taskmanager.feature.auth.navigation.RegisterRoute
 import com.danioliveira.taskmanager.feature.auth.navigation.authSection
+import com.danioliveira.taskmanager.feature.calendar.ui.CalendarScreen
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectDetailRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.projectsSection
@@ -67,6 +68,7 @@ import com.danioliveira.taskmanager.feature.tasks.navigation.TasksBaseRoute
 import com.danioliveira.taskmanager.feature.tasks.navigation.TasksRoute
 import com.danioliveira.taskmanager.feature.tasks.navigation.taskDetailsScreen
 import com.danioliveira.taskmanager.feature.tasks.navigation.tasksSection
+import com.danioliveira.taskmanager.navigation.composableWithCompositionLocal
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
@@ -90,24 +92,6 @@ fun TaskItApp(
 
         Scaffold(
             modifier = Modifier,
-            topBar = {
-                // Only show topBar on specific screens
-                val currentDestination = appState.currentDestination
-                if (currentDestination != null && appState.isToolbarDestination(currentDestination)) {
-                    val screenTitle = when {
-                        currentDestination.hierarchy.any { it.hasRoute(TasksRoute::class) } -> "Tasks"
-                        currentDestination.hasRoute(Screen.Calendar::class) -> "Calendar"
-                        currentDestination.hierarchy.any { it.hasRoute(ProjectsRoute::class) } -> "Projects"
-                        else -> "Tasks"
-                    }
-                    PrincipalTaskItTopAppBar(
-                        title = screenTitle,
-                        onSearch = { query ->
-                            appState.onGlobalSearchQueryChanged(query)
-                        }
-                    )
-                }
-            },
             bottomBar = {
                 TaskItBottomBar(appState = appState)
             }
@@ -116,6 +100,9 @@ fun TaskItApp(
                 navController = appState.navController,
                 appState = appState,
                 onAppReady = onAppReady,
+                onGlobalSearch = { query ->
+                    appState.onGlobalSearchQueryChanged(query)
+                },
                 modifier = Modifier
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding)
@@ -184,6 +171,7 @@ fun TaskItNavHost(
     appState: TasksItAppState,
     modifier: Modifier = Modifier,
     onAppReady: () -> Unit = {},
+    onGlobalSearch: (String) -> Unit = {},
 ) {
     val authManager = koinInject<AuthManager>()
     var startDestination by remember { mutableStateOf<Screen?>(null) }
@@ -238,7 +226,8 @@ fun TaskItNavHost(
                         },
                         onEditTask = { taskId ->
                             navController.navigate(EditTaskRoute(taskId.toString()))
-                        }
+                        },
+                        onGlobalSearch = onGlobalSearch
                     )
 
                     // Projects Section - includes ProjectsRoute, ProjectDetailRoute, and TaskDetailRoute
@@ -261,11 +250,12 @@ fun TaskItNavHost(
                                     navController.navigate(EditTaskRoute(taskId.toString()))
                                 }
                             )
-                        }
+                        },
+                        onGlobalSearch = onGlobalSearch
                     )
 
                     // Calendar Section - placeholder for future implementation
-                    composable<Screen.Calendar>(
+                    composableWithCompositionLocal<Screen.Calendar>(
                         enterTransition = {
                             slideInHorizontally(
                                 initialOffsetX = { it },
@@ -279,7 +269,11 @@ fun TaskItNavHost(
                             ) + fadeOut(animationSpec = tween(300))
                         }
                     ) {
-                        Text("Calendar Screen - Coming Soon")
+                        val sharedTransitionScope = LocalSharedTransitionScope.current
+                            ?: throw IllegalStateException("No sharedTransitionScope found")
+                        with(sharedTransitionScope) {
+                            CalendarScreen(onGlobalSearch = onGlobalSearch)
+                        }
                     }
 
                     composable<Screen.Profile>(

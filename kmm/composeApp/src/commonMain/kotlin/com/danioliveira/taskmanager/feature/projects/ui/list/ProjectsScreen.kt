@@ -60,6 +60,7 @@ import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.itemContentType
 import com.danioliveira.taskmanager.paging.compose.itemKey
+import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.ProjectItemSkeleton
 import com.danioliveira.taskmanager.core.ui.components.TaskItEmptyState
 import com.danioliveira.taskmanager.core.ui.components.TaskItSmallLoadingIndicator
@@ -92,7 +93,8 @@ context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
 fun ProjectsScreen(
     viewModel: ProjectsViewModel = koinViewModel(),
-    navigateToProjectDetail: (String) -> Unit
+    navigateToProjectDetail: (String) -> Unit,
+    onGlobalSearch: (String) -> Unit = {}
 ) {
     var showCreateProjectBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -122,7 +124,8 @@ fun ProjectsScreen(
         ProjectsScreen(
             state = viewModel.state,
             pagingItems = viewModel.projectFlow.collectAsLazyPagingItems(),
-            onAction = onAction
+            onAction = onAction,
+            onGlobalSearch = onGlobalSearch
         )
         
         // Project Create BottomSheet
@@ -144,15 +147,34 @@ fun ProjectsScreen(
     }
 }
 
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
+private fun ProjectsTopBar(onGlobalSearch: (String) -> Unit) {
+    with(sts) {
+        PrincipalTaskItTopAppBar(
+            title = stringResource(Res.string.projects_title),
+            onSearch = onGlobalSearch,
+            modifier = Modifier.sharedBounds(
+                sts.rememberSharedContentState(key = "main_top_bar"),
+                avs
+            )
+        )
+    }
+}
+
 context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
 private fun ProjectsScreen(
     state: ProjectsState,
     pagingItems: LazyPagingItems<Project>,
-    onAction: (ProjectsAction) -> Unit
+    onAction: (ProjectsAction) -> Unit,
+    onGlobalSearch: (String) -> Unit = {}
 ) {
     Scaffold(
         containerColor = Color(0xFFF1F5F9),
+        topBar = {
+            ProjectsTopBar(onGlobalSearch = onGlobalSearch)
+        },
         floatingActionButton = {
             ProjectsFloatingActionButton(onAction)
         }

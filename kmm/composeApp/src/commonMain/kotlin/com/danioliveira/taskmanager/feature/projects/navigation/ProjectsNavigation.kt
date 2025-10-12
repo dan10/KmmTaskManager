@@ -26,7 +26,8 @@ fun NavGraphBuilder.projectsSection(
     onProjectClick: (String) -> Unit,
     onBackClick: () -> Unit,
     onTaskClick: (Uuid) -> Unit,
-    taskDetailsDestination: NavGraphBuilder.() -> Unit
+    taskDetailsDestination: NavGraphBuilder.() -> Unit,
+    onGlobalSearch: (String) -> Unit = {}
 ) {
     navigation<ProjectsBaseRoute>(startDestination = ProjectsRoute) {
         composableWithCompositionLocal<ProjectsRoute> {
@@ -34,7 +35,8 @@ fun NavGraphBuilder.projectsSection(
                 ?: throw IllegalStateException("No sharedTransitionScope found")
             with(sharedTransitionScope) {
                 ProjectsScreen(
-                    navigateToProjectDetail = onProjectClick
+                    navigateToProjectDetail = onProjectClick,
+                    onGlobalSearch = onGlobalSearch
                 )
             }
         }

@@ -43,7 +43,8 @@ fun NavGraphBuilder.tasksSection(
     sharedTransitionScope: SharedTransitionScope,
     onTaskClick: (Uuid) -> Unit,
     onBackClick: () -> Unit,
-    onEditTask: (Uuid) -> Unit
+    onEditTask: (Uuid) -> Unit,
+    onGlobalSearch: (String) -> Unit = {}
 ) {
     navigation<TasksBaseRoute>(startDestination = TasksRoute) {
         composableWithCompositionLocal<TasksRoute>(
@@ -72,7 +73,8 @@ fun NavGraphBuilder.tasksSection(
                 ?: throw IllegalStateException("No sharedTransitionScope found")
             with(sharedTransitionScope) {
                 TasksScreen(
-                    navigateToTaskDetail = onTaskClick
+                    navigateToTaskDetail = onTaskClick,
+                    onGlobalSearch = onGlobalSearch
                 )
             }
         }
