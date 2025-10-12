@@ -53,10 +53,22 @@ import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.add_24px
 import kmmtaskmanager.composeapp.generated.resources.content_description_delete_task
 import kmmtaskmanager.composeapp.generated.resources.content_description_edit_task
+import kmmtaskmanager.composeapp.generated.resources.date_not_available
 import kmmtaskmanager.composeapp.generated.resources.edit_24px
 import kmmtaskmanager.composeapp.generated.resources.ic_calendar_month
 import kmmtaskmanager.composeapp.generated.resources.ic_flag
+import kmmtaskmanager.composeapp.generated.resources.task_created_field
+import kmmtaskmanager.composeapp.generated.resources.task_dates_section
+import kmmtaskmanager.composeapp.generated.resources.task_description_section
 import kmmtaskmanager.composeapp.generated.resources.task_details_title
+import kmmtaskmanager.composeapp.generated.resources.task_due_date_field
+import kmmtaskmanager.composeapp.generated.resources.task_information_section
+import kmmtaskmanager.composeapp.generated.resources.task_last_updated_field
+import kmmtaskmanager.composeapp.generated.resources.task_no_details_error
+import kmmtaskmanager.composeapp.generated.resources.task_no_due_date
+import kmmtaskmanager.composeapp.generated.resources.task_priority_field
+import kmmtaskmanager.composeapp.generated.resources.task_priority_suffix
+import kmmtaskmanager.composeapp.generated.resources.task_status_field
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -174,7 +186,7 @@ private fun TasksDetailsScreenContent(
                             )
                         }
 
-                        else -> TaskItErrorState("No task details available")
+                        else -> TaskItErrorState(stringResource(Res.string.task_no_details_error))
                     }
                 }
             }
@@ -252,7 +264,7 @@ private fun TaskHeaderCard(
                         Text(
                             text = "${
                                 priority.name.lowercase().replaceFirstChar { it.titlecase() }
-                            } Priority",
+                            } ${stringResource(Res.string.task_priority_suffix)}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF6B7280)
                         )
@@ -283,7 +295,7 @@ private fun DescriptionCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Description",
+                    text = stringResource(Res.string.task_description_section),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color(0xFF1A1A1A),
                     fontWeight = FontWeight.Bold
@@ -322,7 +334,7 @@ private fun TaskInformationCard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Task Information",
+                text = stringResource(Res.string.task_information_section),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFF1A1A1A),
                 fontWeight = FontWeight.Bold
@@ -330,19 +342,19 @@ private fun TaskInformationCard(
 
             TaskInfoRow(
                 icon = vectorResource(Res.drawable.ic_calendar_month),
-                label = "Due Date",
-                value = dueDate?.let { DateFormatter.formatDate(it) } ?: "No due date"
+                label = stringResource(Res.string.task_due_date_field),
+                value = dueDate?.let { DateFormatter.formatDate(it) } ?: stringResource(Res.string.task_no_due_date)
             )
 
             TaskInfoRow(
                 icon = vectorResource(Res.drawable.edit_24px),
-                label = "Status",
+                label = stringResource(Res.string.task_status_field),
                 value = TaskStatusFormatter.formatTaskStatus(status)
             )
 
             TaskInfoRow(
                 icon = vectorResource(Res.drawable.ic_flag),
-                label = "Priority",
+                label = stringResource(Res.string.task_priority_field),
                 value = priority.name.lowercase().replaceFirstChar { it.titlecase() }
             )
         }
@@ -425,7 +437,7 @@ private fun DatesCard(createdAt: LocalDateTime?) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Dates",
+                text = stringResource(Res.string.task_dates_section),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFF1A1A1A),
                 fontWeight = FontWeight.Bold
@@ -433,14 +445,14 @@ private fun DatesCard(createdAt: LocalDateTime?) {
 
             DateInfoRow(
                 icon = vectorResource(Res.drawable.add_24px),
-                label = "Created",
-                value = createdAt?.let { DateFormatter.formatDate(it) } ?: "—"
+                label = stringResource(Res.string.task_created_field),
+                value = createdAt?.let { DateFormatter.formatDate(it) } ?: stringResource(Res.string.date_not_available)
             )
 
             DateInfoRow(
                 icon = Icons.Outlined.DateRange,
-                label = "Last Updated",
-                value = createdAt?.let { DateFormatter.formatDate(it) } ?: "—"
+                label = stringResource(Res.string.task_last_updated_field),
+                value = createdAt?.let { DateFormatter.formatDate(it) } ?: stringResource(Res.string.date_not_available)
             )
         }
     }

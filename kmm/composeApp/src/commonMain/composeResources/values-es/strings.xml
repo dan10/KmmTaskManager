@@ -158,4 +158,15 @@
     <string name="task_no_due_date">Sin fecha de vencimiento</string>
     <string name="content_description_edit_task">Editar Tarea</string>
     <string name="content_description_delete_task">Eliminar Tarea</string>
+    <string name="task_description_section">Descripción</string>
+    <string name="task_information_section">Información de la Tarea</string>
+    <string name="task_due_date_field">Fecha de Vencimiento</string>
+    <string name="task_status_field">Estado</string>
+    <string name="task_priority_field">Prioridad</string>
+    <string name="task_priority_suffix">Prioridad</string>
+    <string name="task_dates_section">Fechas</string>
+    <string name="task_created_field">Creada</string>
+    <string name="task_last_updated_field">Última Actualización</string>
+    <string name="task_no_details_error">No hay detalles de tarea disponibles</string>
+    <string name="date_not_available">—</string>
 </resources>

@@ -166,6 +166,17 @@
     <string name="task_no_due_date">No due date</string>
     <string name="content_description_edit_task">Edit Task</string>
     <string name="content_description_delete_task">Delete Task</string>
+    <string name="task_description_section">Description</string>
+    <string name="task_information_section">Task Information</string>
+    <string name="task_due_date_field">Due Date</string>
+    <string name="task_status_field">Status</string>
+    <string name="task_priority_field">Priority</string>
+    <string name="task_priority_suffix">Priority</string>
+    <string name="task_dates_section">Dates</string>
+    <string name="task_created_field">Created</string>
+    <string name="task_last_updated_field">Last Updated</string>
+    <string name="task_no_details_error">No task details available</string>
+    <string name="date_not_available">—</string>
     
     <!-- Edit Task Screen strings -->
     <string name="task_edit_title">Edit Task</string>
