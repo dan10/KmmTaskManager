@@ -111,87 +111,127 @@ private fun TasksDetailsScreenContent(
             ),
             containerColor = Color(0XFFF5F5F5),
             topBar = {
-                TaskItTopAppBar(
-                    title = stringResource(Res.string.task_details_title),
-                    showNavigationIcon = true,
-                    onNavigateBack = { onAction(TasksDetailsAction.NavigateBack) },
-                    actions = {
-                        IconButton(onClick = { onAction(TasksDetailsAction.EditTask) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = stringResource(Res.string.content_description_edit_task),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        IconButton(
-                            onClick = { onAction(TasksDetailsAction.DeleteTask) },
-                            enabled = !state.isDeleting
-                        ) {
-                            if (state.isDeleting) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = stringResource(Res.string.content_description_delete_task),
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
+                TaskDetailsTopBar(
+                    isDeleting = state.isDeleting,
+                    onAction = onAction
                 )
             }
         ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    when {
-                        state.isLoading -> TaskItLoadingState()
-                        state.errorMessage != null -> TaskItErrorState(state.errorMessage)
-                        state.task != null -> {
-                            TaskHeaderCard(
-                                taskId = state.task.id,
-                                title = state.task.title,
-                                priority = state.task.priority,
-                                status = state.task.status
-                            )
+            TaskDetailsContent(
+                state = state,
+                paddingValues = paddingValues
+            )
+        }
+    }
+}
 
-                            Spacer(modifier = Modifier.height(16.dp))
+@Composable
+private fun TaskDetailsTopBar(
+    isDeleting: Boolean,
+    onAction: (TasksDetailsAction) -> Unit
+) {
+    TaskItTopAppBar(
+        title = stringResource(Res.string.task_details_title),
+        showNavigationIcon = true,
+        onNavigateBack = { onAction(TasksDetailsAction.NavigateBack) },
+        actions = {
+            TaskDetailsActions(
+                isDeleting = isDeleting,
+                onAction = onAction
+            )
+        }
+    )
+}
 
-                            if (state.task.description.isNotBlank()) {
-                                DescriptionCard(
-                                    taskId = state.task.id,
-                                    description = state.task.description
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
+@Composable
+private fun TaskDetailsActions(
+    isDeleting: Boolean,
+    onAction: (TasksDetailsAction) -> Unit
+) {
+    IconButton(onClick = { onAction(TasksDetailsAction.EditTask) }) {
+        Icon(
+            imageVector = Icons.Filled.Edit,
+            contentDescription = stringResource(Res.string.content_description_edit_task),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+    }
+    
+    IconButton(
+        onClick = { onAction(TasksDetailsAction.DeleteTask) },
+        enabled = !isDeleting
+    ) {
+        if (isDeleting) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.dp
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = stringResource(Res.string.content_description_delete_task),
+                tint = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
 
-                            TaskInformationCard(
-                                dueDate = state.task.dueDate,
-                                status = state.task.status,
-                                priority = state.task.priority
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            DatesCard(
-                                createdAt = state.task.createdAt
-                            )
-                        }
-
-                        else -> TaskItErrorState(stringResource(Res.string.task_no_details_error))
-                    }
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
+private fun TaskDetailsContent(
+    state: TasksDetailsState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            when {
+                state.isLoading -> TaskItLoadingState()
+                state.errorMessage != null -> TaskItErrorState(state.errorMessage)
+                state.task != null -> {
+                    TaskDetailsBody(task = state.task)
                 }
+                else -> TaskItErrorState(stringResource(Res.string.task_no_details_error))
             }
         }
     }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
+private fun TaskDetailsBody(task: com.danioliveira.taskmanager.core.domain.model.Task) {
+    TaskHeaderCard(
+        taskId = task.id,
+        title = task.title,
+        priority = task.priority,
+        status = task.status
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    if (task.description.isNotBlank()) {
+        DescriptionCard(
+            taskId = task.id,
+            description = task.description
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    TaskInformationCard(
+        dueDate = task.dueDate,
+        status = task.status,
+        priority = task.priority
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    DatesCard(
+        createdAt = task.createdAt
+    )
 }
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
