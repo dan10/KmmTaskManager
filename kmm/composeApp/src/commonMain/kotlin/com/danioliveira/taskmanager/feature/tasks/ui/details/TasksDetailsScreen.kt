@@ -3,7 +3,6 @@ package com.danioliveira.taskmanager.feature.tasks.ui.details
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -35,10 +33,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -49,26 +45,18 @@ import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorState
 import com.danioliveira.taskmanager.core.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
-import com.danioliveira.taskmanager.core.ui.theme.TaskDetailColors
-import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementKey
+import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementType
 import com.danioliveira.taskmanager.util.DateFormatter
 import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_delete_task
 import kmmtaskmanager.composeapp.generated.resources.content_description_edit_task
 import kmmtaskmanager.composeapp.generated.resources.ic_calendar_month
-import kmmtaskmanager.composeapp.generated.resources.schedule_24px
-import kmmtaskmanager.composeapp.generated.resources.task_created_label
-import kmmtaskmanager.composeapp.generated.resources.task_description_label
 import kmmtaskmanager.composeapp.generated.resources.task_details_title
-import kmmtaskmanager.composeapp.generated.resources.task_due_date
-import kmmtaskmanager.composeapp.generated.resources.task_no_due_date
-import kmmtaskmanager.composeapp.generated.resources.task_project
-import kmmtaskmanager.composeapp.generated.resources.work_24px
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.uuid.Uuid
 
@@ -83,12 +71,10 @@ fun TaskDetailsScreen(
     viewModel.onBack = onBack
     viewModel.onEditTask = onEditTask
 
-    Surface(color = Color(0XFFF1F5F9)) {
-        TasksDetailsScreenContent(
-            state = viewModel.state,
-            onAction = viewModel::handleActions
-        )
-    }
+    TasksDetailsScreenContent(
+        state = viewModel.state,
+        onAction = viewModel::handleActions
+    )
 }
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
@@ -98,84 +84,95 @@ private fun TasksDetailsScreenContent(
     state: TasksDetailsState,
     onAction: (TasksDetailsAction) -> Unit
 ) {
-    Scaffold(
-        containerColor = Color(0XFFF5F5F5),
-        topBar = {
-            TaskItTopAppBar(
-                title = stringResource(Res.string.task_details_title),
-                showNavigationIcon = true,
-                onNavigateBack = { onAction(TasksDetailsAction.NavigateBack) },
-                actions = {
-                    IconButton(onClick = { onAction(TasksDetailsAction.EditTask) }) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = stringResource(Res.string.content_description_edit_task),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    IconButton(
-                        onClick = { onAction(TasksDetailsAction.DeleteTask) },
-                        enabled = !state.isDeleting
-                    ) {
-                        if (state.isDeleting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
+    with(sts) {
+        Scaffold(
+            modifier = Modifier.sharedBounds(
+                sts.rememberSharedContentState(
+                    TaskSharedElementKey(
+                        state.task?.id.toString(),
+                        TaskSharedElementType.Bounds
+                    )
+                ), avs
+            ),
+            containerColor = Color(0XFFF5F5F5),
+            topBar = {
+                TaskItTopAppBar(
+                    title = stringResource(Res.string.task_details_title),
+                    showNavigationIcon = true,
+                    onNavigateBack = { onAction(TasksDetailsAction.NavigateBack) },
+                    actions = {
+                        IconButton(onClick = { onAction(TasksDetailsAction.EditTask) }) {
                             Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(Res.string.content_description_delete_task),
-                                tint = MaterialTheme.colorScheme.error
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = stringResource(Res.string.content_description_edit_task),
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
+                        IconButton(
+                            onClick = { onAction(TasksDetailsAction.DeleteTask) },
+                            enabled = !state.isDeleting
+                        ) {
+                            if (state.isDeleting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = stringResource(Res.string.content_description_delete_task),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
                     }
-                }
-            )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                when {
-                    state.isLoading -> TaskItLoadingState()
-                    state.errorMessage != null -> TaskItErrorState(state.errorMessage)
-                    state.task != null -> {
-                        TaskHeaderCard(
-                            taskId = state.task.id,
-                            title = state.task.title,
-                            priority = state.task.priority,
-                            status = state.task.status
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        if (state.task.description.isNotBlank()) {
-                            DescriptionCard(
+                )
+            }
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    when {
+                        state.isLoading -> TaskItLoadingState()
+                        state.errorMessage != null -> TaskItErrorState(state.errorMessage)
+                        state.task != null -> {
+                            TaskHeaderCard(
                                 taskId = state.task.id,
-                                description = state.task.description
+                                title = state.task.title,
+                                priority = state.task.priority,
+                                status = state.task.status
                             )
+
                             Spacer(modifier = Modifier.height(16.dp))
+
+                            if (state.task.description.isNotBlank()) {
+                                DescriptionCard(
+                                    taskId = state.task.id,
+                                    description = state.task.description
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            TaskInformationCard(
+                                dueDate = state.task.dueDate,
+                                status = state.task.status,
+                                priority = state.task.priority
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            DatesCard(
+                                createdAt = state.task.createdAt
+                            )
                         }
 
-                        TaskInformationCard(
-                            dueDate = state.task.dueDate,
-                            status = state.task.status,
-                            priority = state.task.priority
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        DatesCard(
-                            createdAt = state.task.createdAt
-                        )
+                        else -> TaskItErrorState("No task details available")
                     }
-                    else -> TaskItErrorState("No task details available")
                 }
             }
         }
@@ -250,7 +247,9 @@ private fun TaskHeaderCard(
                         )
 
                         Text(
-                            text = "${priority.name.lowercase().replaceFirstChar { it.titlecase() }} Priority",
+                            text = "${
+                                priority.name.lowercase().replaceFirstChar { it.titlecase() }
+                            } Priority",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF6B7280)
                         )
@@ -325,19 +324,19 @@ private fun TaskInformationCard(
                 color = Color(0xFF1A1A1A),
                 fontWeight = FontWeight.Bold
             )
-            
+
             TaskInfoRow(
                 icon = vectorResource(Res.drawable.ic_calendar_month),
                 label = "Due Date",
                 value = dueDate?.let { DateFormatter.formatDate(it) } ?: "No due date"
             )
-            
+
             TaskInfoRow(
                 icon = Icons.Default.Edit,
                 label = "Status",
                 value = TaskStatusFormatter.formatTaskStatus(status)
             )
-            
+
             TaskInfoRow(
                 icon = Icons.Default.Edit,
                 label = "Priority",
@@ -360,7 +359,7 @@ private fun StatusBadge(
             color = Color(0xFFE8F5E9),
             shape = RoundedCornerShape(4.dp),
             modifier = Modifier.sharedElement(
-                 rememberSharedContentState(key = "task_status_$taskId"),
+                rememberSharedContentState(key = "task_status_$taskId"),
                 animatedVisibilityScope = avs
             )
         ) {
@@ -392,14 +391,14 @@ private fun TaskInfoRow(
             modifier = Modifier.size(20.dp),
             tint = Color(0xFF9CA3AF)
         )
-        
+
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF6B7280),
             modifier = Modifier.width(80.dp)
         )
-        
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
@@ -428,13 +427,13 @@ private fun DatesCard(createdAt: LocalDateTime?) {
                 color = Color(0xFF1A1A1A),
                 fontWeight = FontWeight.Bold
             )
-            
+
             DateInfoRow(
                 icon = Icons.Outlined.Add,
                 label = "Created",
                 value = createdAt?.let { DateFormatter.formatDate(it) } ?: "—"
             )
-            
+
             DateInfoRow(
                 icon = Icons.Outlined.DateRange,
                 label = "Last Updated",
@@ -461,14 +460,14 @@ private fun DateInfoRow(
             modifier = Modifier.size(20.dp),
             tint = Color(0xFF7C3AED)
         )
-        
+
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF6B7280),
             modifier = Modifier.width(100.dp)
         )
-        
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,

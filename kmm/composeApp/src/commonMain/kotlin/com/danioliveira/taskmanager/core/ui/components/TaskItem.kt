@@ -40,6 +40,8 @@ import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.domain.model.toTaskPriority
+import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementKey
+import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementType
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
 import com.danioliveira.taskmanager.util.HapticFeedbackType
@@ -116,8 +118,12 @@ fun TaskItem(
                 .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)
                 .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "task_card_${task.id}"),
-                    animatedVisibilityScope = avs
+                    sts.rememberSharedContentState(
+                        TaskSharedElementKey(
+                            task.id.toString(),
+                            TaskSharedElementType.Bounds
+                        )
+                    ), avs
                 ),
             shape = MaterialTheme.shapes.small,
             colors = CardDefaults.cardColors(containerColor = containerColor)

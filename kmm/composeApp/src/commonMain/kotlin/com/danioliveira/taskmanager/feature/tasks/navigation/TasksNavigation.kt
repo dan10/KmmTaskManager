@@ -2,12 +2,16 @@ package com.danioliveira.taskmanager.feature.tasks.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
@@ -44,16 +48,24 @@ fun NavGraphBuilder.tasksSection(
     navigation<TasksBaseRoute>(startDestination = TasksRoute) {
         composableWithCompositionLocal<TasksRoute>(
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { -it },
-                    animationSpec = tween(300)
-                ) + fadeIn(animationSpec = tween(300))
+                if (initialState.destination.hasRoute<TaskDetailRoute>()) {
+                    fadeIn()
+                } else {
+                    slideInHorizontally(
+                        initialOffsetX = { -it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                }
             },
             exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(300)
-                ) + fadeOut(animationSpec = tween(300))
+                if (targetState.destination.hasRoute<TaskDetailRoute>()) {
+                    fadeOut(animationSpec = spring())
+                } else {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
             }
         ) {
             val sharedTransitionScope = LocalSharedTransitionScope.current
@@ -79,7 +91,26 @@ fun NavGraphBuilder.taskDetailsScreen(
     onBackClick: () -> Unit,
     onEditTask: (Uuid) -> Unit
 ) {
-    composableWithCompositionLocal<TaskDetailRoute> { backStackEntry ->
+    composableWithCompositionLocal<TaskDetailRoute>(
+        enterTransition = {
+            slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(400)
+            ) + fadeIn(animationSpec = tween(400))
+        },
+        exitTransition = {
+            fadeOut(animationSpec = tween(400))
+        },
+        popEnterTransition = {
+            fadeIn(animationSpec = tween(400))
+        },
+        popExitTransition = {
+            slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(400)
+            ) + fadeOut(animationSpec = tween(400))
+        }
+    ) { backStackEntry ->
         val sharedTransitionScope = LocalSharedTransitionScope.current
             ?: throw IllegalStateException("No sharedTransitionScope found")
         with(sharedTransitionScope) {
