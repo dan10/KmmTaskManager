@@ -17,6 +17,7 @@ import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +37,11 @@ fun TaskItemWithSwipe(
     modifier: Modifier = Modifier
 ) {
     val swipeToDismissState = rememberSwipeToDismissBoxState()
+
+    // Reset swipe state when task changes (e.g., status updated)
+    LaunchedEffect(task.id, task.status) {
+        swipeToDismissState.reset()
+    }
 
     SwipeToDismissBox(
         modifier = modifier,
