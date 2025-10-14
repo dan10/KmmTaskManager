@@ -34,3 +34,17 @@ sealed interface TaskCreateAction {
     data object CreateTask : TaskCreateAction
     data object ClearErrors : TaskCreateAction
 }
+
+sealed class TaskCreateEffect {
+    data class ShowSuccessSnackbar(
+        val message: String
+    ) : TaskCreateEffect()
+
+    data class ShowErrorSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val onAction: (() -> Unit)? = null
+    ) : TaskCreateEffect()
+
+    data object TaskCreatedSuccessfully : TaskCreateEffect()
+}

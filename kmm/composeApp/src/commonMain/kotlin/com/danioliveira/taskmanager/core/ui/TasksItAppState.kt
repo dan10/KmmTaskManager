@@ -141,6 +141,7 @@ class TasksItAppState(
         return currentDestination.hierarchy.any {
             it.hasRoute(TasksRoute::class) ||
             it.hasRoute(ProjectsRoute::class) ||
+            it.hasRoute(Screen.Calendar::class) ||
             it.hasRoute(Screen.Profile::class)
         }
     }

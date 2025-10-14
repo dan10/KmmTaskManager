@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -44,9 +43,9 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.Project
 import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
-import com.danioliveira.taskmanager.core.ui.components.TaskItEmptyState
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorState
 import com.danioliveira.taskmanager.core.ui.components.TaskItInfoCard
 import com.danioliveira.taskmanager.core.ui.components.TaskItLoadingState
@@ -54,7 +53,6 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItSmallLoadingIndicat
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.TaskItem
 import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
-import com.danioliveira.taskmanager.core.domain.model.Project
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditBottomSheet
 import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
@@ -69,7 +67,6 @@ import kmmtaskmanager.composeapp.generated.resources.project_progress_title
 import kmmtaskmanager.composeapp.generated.resources.project_status_completed
 import kmmtaskmanager.composeapp.generated.resources.project_status_in_progress
 import kmmtaskmanager.composeapp.generated.resources.project_status_total_tasks
-import kmmtaskmanager.composeapp.generated.resources.project_tasks_empty
 import kmmtaskmanager.composeapp.generated.resources.project_tasks_title
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
@@ -147,9 +144,9 @@ private fun ProjectDetailsScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TaskItTopAppBar(
+            ProjectDetailsTopBar(
                 title = state.project?.name ?: stringResource(Res.string.project_details_title),
-                onNavigateBack = onBack
+                onBack = onBack
             )
         },
         floatingActionButton = {
@@ -181,6 +178,21 @@ private fun ProjectDetailsScreen(
                 )
             }
         }
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
+private fun ProjectDetailsTopBar(
+    title: String,
+    onBack: () -> Unit
+) {
+    with(sts) {
+        TaskItTopAppBar(
+            title = title,
+            showNavigationIcon = true,
+            onNavigateBack = onBack,
+        )
     }
 }
 
@@ -390,10 +402,14 @@ fun ProjectStatus(label: String, value: Int) {
 @Composable
 private fun ProjectDetailsTopBarPreview() {
     TaskItTheme {
-        TaskItTopAppBar(
-            title = "Project Details",
-            onNavigateBack = {}
-        )
+        SharedTransitionLayout {
+            AnimatedVisibility(true) {
+                ProjectDetailsTopBar(
+                    title = "Project Details",
+                    onBack = {}
+                )
+            }
+        }
     }
 }
 

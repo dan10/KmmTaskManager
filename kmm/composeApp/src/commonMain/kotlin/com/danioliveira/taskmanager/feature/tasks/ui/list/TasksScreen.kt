@@ -104,8 +104,12 @@ fun TasksScreen(
 
     if (showCreateTaskBottomSheet) {
         TaskCreateBottomSheet(
-            onDismiss = { showCreateTaskBottomSheet = false },
-            onTaskCreated = { viewModel.refresh() }
+            onDismiss = { shouldRefresh ->
+                showCreateTaskBottomSheet = false
+                if (shouldRefresh) {
+                    viewModel.refresh()
+                }
+            }
         )
     }
 }

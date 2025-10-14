@@ -10,18 +10,15 @@ import androidx.compose.runtime.LaunchedEffect
 fun TaskCreateEffectHandler(
     viewModel: TaskCreateViewModel,
     snackbarHostState: SnackbarHostState,
-    onTaskCreated: () -> Unit
+    onDismiss: (Boolean) -> Unit
 ) {
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is TaskCreateViewModel.TaskCreateEffect.ShowSuccessSnackbar -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
+                is TaskCreateEffect.ShowSuccessSnackbar -> {
+                    // Don't show success snackbar, just dismiss with true
                 }
-                is TaskCreateViewModel.TaskCreateEffect.ShowErrorSnackbar -> {
+                is TaskCreateEffect.ShowErrorSnackbar -> {
                     val result = snackbarHostState.showSnackbar(
                         message = effect.message,
                         actionLabel = effect.actionLabel,
@@ -31,8 +28,8 @@ fun TaskCreateEffectHandler(
                         effect.onAction?.invoke()
                     }
                 }
-                is TaskCreateViewModel.TaskCreateEffect.TaskCreatedSuccessfully -> {
-                    onTaskCreated()
+                is TaskCreateEffect.TaskCreatedSuccessfully -> {
+                    onDismiss(true)
                 }
             }
         }

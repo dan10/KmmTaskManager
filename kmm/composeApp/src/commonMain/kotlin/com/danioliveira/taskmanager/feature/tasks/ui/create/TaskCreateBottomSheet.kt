@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager.feature.tasks.ui.create
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,13 +47,12 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCreateBottomSheet(
-    onDismiss: () -> Unit,
-    onTaskCreated: () -> Unit,
+    onDismiss: (shouldRefresh: Boolean) -> Unit,
     projectId: String? = null,
     viewModel: TaskCreateViewModel = koinViewModel()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-
+    
     LaunchedEffect(projectId) {
         viewModel.initialize(projectId)
     }
@@ -60,22 +60,26 @@ fun TaskCreateBottomSheet(
     TaskCreateEffectHandler(
         viewModel = viewModel,
         snackbarHostState = snackbarHostState,
-        onTaskCreated = {
-            onTaskCreated()
-            onDismiss()
-        }
+        onDismiss = onDismiss
     )
 
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        onDismissRequest = onDismiss
+        onDismissRequest = { onDismiss(false) }
     ) {
-        TaskCreateContent(
-            state = viewModel.state,
-            onAction = viewModel::handleActions,
-            onDismiss = onDismiss,
-            snackbarHostState = snackbarHostState
-        )
+        Box {
+            TaskCreateContent(
+                state = viewModel.state,
+                onAction = viewModel::handleActions,
+                snackbarHostState = snackbarHostState,
+                onCancel = { onDismiss(false) }
+            )
+            
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
 
@@ -83,8 +87,8 @@ fun TaskCreateBottomSheet(
 private fun TaskCreateContent(
     state: TaskCreateState,
     onAction: (TaskCreateAction) -> Unit,
-    onDismiss: () -> Unit,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    onCancel: () -> Unit
 ) {
     var priorityDropdownExpanded by remember { mutableStateOf(false) }
     var statusDropdownExpanded by remember { mutableStateOf(false) }
@@ -184,18 +188,10 @@ private fun TaskCreateContent(
                 isCreating = true,
                 isLoading = state.isSaving,
                 isButtonEnabled = !state.isSaving,
-                onCancel = onDismiss,
+                onCancel = onCancel,
                 onCreateOrUpdate = { onAction(TaskCreateAction.CreateTask) }
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        // Snackbar Host
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.padding(16.dp)
-        )
     }
 }
 
@@ -210,8 +206,8 @@ private fun TaskCreateContentPreview() {
                 selectedDueDate = LocalDateTime.parse("2023-12-31T00:00:00")
             ),
             onAction = {},
-            onDismiss = {},
-            snackbarHostState = SnackbarHostState()
+            snackbarHostState = remember { SnackbarHostState() },
+            onCancel = {}
         )
     }
 }
@@ -227,8 +223,8 @@ private fun TaskCreateContentWithErrorsPreview() {
                 isSaving = false
             ),
             onAction = {},
-            onDismiss = {},
-            snackbarHostState = SnackbarHostState()
+            snackbarHostState = remember { SnackbarHostState() },
+            onCancel = {}
         )
     }
 }
@@ -242,8 +238,8 @@ private fun TaskCreateContentLoadingPreview() {
                 isSaving = true
             ),
             onAction = {},
-            onDismiss = {},
-            snackbarHostState = SnackbarHostState()
+            snackbarHostState = remember { SnackbarHostState() },
+            onCancel = {}
         )
     }
 }
