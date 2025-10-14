@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,7 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -59,6 +63,7 @@ import com.danioliveira.taskmanager.paging.compose.itemKey
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
+import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
 import kmmtaskmanager.composeapp.generated.resources.project_details_title
 import kmmtaskmanager.composeapp.generated.resources.project_progress_title
 import kmmtaskmanager.composeapp.generated.resources.project_status_completed
@@ -68,6 +73,7 @@ import kmmtaskmanager.composeapp.generated.resources.project_tasks_empty
 import kmmtaskmanager.composeapp.generated.resources.project_tasks_title
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -273,12 +279,45 @@ private fun ProjectTasksList(
 
         if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
             item {
-                TaskItEmptyState(
-                    title = stringResource(Res.string.project_tasks_empty),
-                    message = stringResource(Res.string.project_tasks_empty)
-                )
+                EmptyProjectTasks()
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyProjectTasks() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 48.dp, horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.ic_empty_tasks),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
+            modifier = Modifier
+                .size(120.dp)
+                .padding(bottom = 24.dp)
+        )
+
+        Text(
+            text = "No Tasks Yet",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Create your first task for this project",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

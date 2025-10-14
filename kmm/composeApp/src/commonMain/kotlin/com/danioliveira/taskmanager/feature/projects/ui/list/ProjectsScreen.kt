@@ -4,10 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,13 +24,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
@@ -72,10 +66,6 @@ import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_search
 import kmmtaskmanager.composeapp.generated.resources.ic_folder
-import kmmtaskmanager.composeapp.generated.resources.project_completed
-import kmmtaskmanager.composeapp.generated.resources.project_icon
-import kmmtaskmanager.composeapp.generated.resources.project_in_progress
-import kmmtaskmanager.composeapp.generated.resources.project_total
 import kmmtaskmanager.composeapp.generated.resources.projects_add
 import kmmtaskmanager.composeapp.generated.resources.projects_all
 import kmmtaskmanager.composeapp.generated.resources.projects_empty_subtitle
@@ -87,7 +77,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.random.Random
 
 context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
@@ -102,8 +91,6 @@ fun ProjectsScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         viewModel.checkAndRefresh()
     }
-
-    Surface(color = Color(0XFFF1F5F9)) {
         val onAction: (ProjectsAction) -> Unit = { action ->
             when (action) {
                 is ProjectsAction.OpenProjectDetails -> {
@@ -122,7 +109,6 @@ fun ProjectsScreen(
         }
 
         ProjectsScreen(
-            state = viewModel.state,
             pagingItems = viewModel.projectFlow.collectAsLazyPagingItems(),
             onAction = onAction,
             onGlobalSearch = onGlobalSearch
@@ -144,7 +130,6 @@ fun ProjectsScreen(
                 )
             }
         }
-    }
 }
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
@@ -165,13 +150,11 @@ private fun ProjectsTopBar(onGlobalSearch: (String) -> Unit) {
 context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
 private fun ProjectsScreen(
-    state: ProjectsState,
     pagingItems: LazyPagingItems<Project>,
     onAction: (ProjectsAction) -> Unit,
     onGlobalSearch: (String) -> Unit = {}
 ) {
     Scaffold(
-        containerColor = Color(0xFFF1F5F9),
         topBar = {
             ProjectsTopBar(onGlobalSearch = onGlobalSearch)
         },
@@ -179,9 +162,8 @@ private fun ProjectsScreen(
             ProjectsFloatingActionButton(onAction)
         }
     ) { paddingValues ->
-        ProjectsContent(
-            paddingValues = paddingValues,
-            state = state,
+        ProjectsList(
+            modifier = Modifier.padding(paddingValues),
             pagingItems = pagingItems,
             onAction = onAction
         )
@@ -210,79 +192,16 @@ private fun ProjectsFloatingActionButton(onAction: (ProjectsAction) -> Unit) {
     }
 }
 
-@Composable
-private fun ProjectsContent(
-    paddingValues: PaddingValues,
-    state: ProjectsState,
-    pagingItems: LazyPagingItems<Project>,
-    onAction: (ProjectsAction) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .padding(16.dp)
-    ) {
-        ProjectsHeader()
-
-        ProjectsSubheader()
-
-        ProjectsList(
-            pagingItems = pagingItems,
-            onAction = onAction
-        )
-    }
-}
-
-@Composable
-private fun ProjectsHeader() {
-    Text(
-        text = stringResource(Res.string.projects_title),
-        style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 16.dp)
-    )
-}
-
-@Composable
-private fun ProjectsSearchField(
-    searchFieldState: TextFieldState
-) {
-    TrackItInputField(
-        state = searchFieldState,
-        label = stringResource(Res.string.projects_search_placeholder),
-        isError = false,
-        errorMessage = "",
-        enabled = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp),
-        trailingIcon = {
-            Icon(
-                Icons.Filled.Search,
-                contentDescription = stringResource(Res.string.content_description_search)
-            )
-        }
-    )
-}
-
-@Composable
-private fun ProjectsSubheader() {
-    Text(
-        text = stringResource(Res.string.projects_all),
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-}
 
 @Composable
 private fun ProjectsList(
     pagingItems: LazyPagingItems<Project>,
-    onAction: (ProjectsAction) -> Unit
+    onAction: (ProjectsAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
     ) {
         items(
             count = pagingItems.itemCount,
@@ -296,21 +215,9 @@ private fun ProjectsList(
                     project = project,
                     onClick = { onAction(ProjectsAction.OpenProjectDetails(project.id)) }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             } else {
                 // Placeholder (null item) - show shimmer skeleton
                 ProjectItemSkeleton()
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-
-        if (pagingItems.loadState.append == LoadState.Loading) {
-            item {
-                TaskItSmallLoadingIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
             }
         }
 
@@ -337,71 +244,78 @@ private fun ProjectsList(
 
 @Composable
 fun ProjectCard(project: Project, onClick: () -> Unit) {
-    val randomColor = remember {
-        Color(
-            red = Random.nextFloat(),
-            green = Random.nextFloat(),
-            blue = Random.nextFloat()
-        )
+    val progressPercentage = if (project.total > 0) {
+        ((project.completed.toFloat() / project.total) * 100).toInt()
+    } else {
+        0
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors()
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier.size(36.dp)
-                        .clip(MaterialTheme.shapes.small)
-                        .background(randomColor.copy(0.15f))
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_folder),
-                        contentDescription = stringResource(Res.string.project_icon),
-                        tint = randomColor,
-                        modifier = Modifier.size(24.dp).align(Alignment.Center)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
+            // Project name
+            Text(
+                text = project.name,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A1A1A)
+            )
+            
+            // Project description (if available)
+            if (!project.description.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = project.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    text = project.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF6B7280)
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            LinearProgressIndicator(
-                progress = { if (project.total > 0) project.completed.toFloat() / project.total else 0f },
-                modifier = Modifier.fillMaxWidth(),
-                color = randomColor,
-                trackColor = ProgressIndicatorDefaults.linearTrackColor,
-                strokeCap = StrokeCap.Round,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Progress text and percentage
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(Res.string.project_completed, project.completed),
-                    style = MaterialTheme.typography.labelMedium
+                    text = "${project.completed} of ${project.total} tasks",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF6B7280)
                 )
                 Text(
-                    text = stringResource(Res.string.project_in_progress, project.inProgress),
-                    style = MaterialTheme.typography.labelMedium
-                )
-                Text(
-                    text = stringResource(Res.string.project_total, project.total),
-                    style = MaterialTheme.typography.labelMedium
+                    text = "$progressPercentage%",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF1A1A1A)
                 )
             }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Progress bar
+            LinearProgressIndicator(
+                progress = { if (project.total > 0) project.completed.toFloat() / project.total else 0f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = Color(0xFFE5E7EB),
+                strokeCap = StrokeCap.Round,
+            )
         }
     }
 }
@@ -426,7 +340,6 @@ private fun ProjectsScreenPreview() {
         SharedTransitionScope {
             AnimatedVisibility(true) {
                 ProjectsScreen(
-                    state = ProjectsState(isLoading = false),
                     pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
                     onAction = {}
                 )
@@ -445,7 +358,6 @@ private fun PojectsEmptyScreenPreview() {
         SharedTransitionScope {
             AnimatedVisibility(true) {
                 ProjectsScreen(
-                    state = ProjectsState(isLoading = false),
                     pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
                     onAction = {}
                 )
