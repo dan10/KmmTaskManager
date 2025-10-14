@@ -11,9 +11,9 @@ import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTaskDe
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTaskProgressUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.GetTasksUseCase
 import com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks.UpdateTaskStatusUseCase
-import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditViewModel
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateViewModel
 import com.danioliveira.taskmanager.feature.tasks.ui.details.TasksDetailsViewModel
+import com.danioliveira.taskmanager.feature.tasks.ui.edit.EditTaskViewModel
 import com.danioliveira.taskmanager.feature.tasks.ui.list.TasksViewModel
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
@@ -35,6 +35,8 @@ val tasksModule = module {
 
     viewModelOf(::TasksViewModel)
     viewModelOf(::TasksDetailsViewModel)
-    viewModelOf(::TaskCreateEditViewModel)
     viewModelOf(::TaskCreateViewModel)
+    
+    // EditTaskViewModel with taskId parameter
+    factoryOf(::EditTaskViewModel)
 }

@@ -14,9 +14,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,15 +29,14 @@ import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.ui.components.TaskItCreateEditButtons
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorMessage
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
-import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditAction
-import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditViewModel
-import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskFormFields
 import com.danioliveira.taskmanager.util.HapticFeedbackType
 import com.danioliveira.taskmanager.util.rememberHapticFeedback
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_delete
+import kmmtaskmanager.composeapp.generated.resources.edit_task
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -45,20 +45,21 @@ fun EditTaskScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     onBack: () -> Unit,
-    viewModel: TaskCreateEditViewModel = koinViewModel(key = "edit-task-$taskId")
+    viewModel: EditTaskViewModel = koinViewModel(key = "edit-task-$taskId") { parametersOf(taskId) }
 ) {
     val haptic = rememberHapticFeedback()
-    
-    // Initialize the ViewModel with the task ID
-    LaunchedEffect(taskId) {
-        viewModel.initialize(null)
-    }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    viewModel.onTaskUpdated = {
-        haptic.performHapticFeedback(HapticFeedbackType.Success)
-        onBack()
-    }
-    viewModel.onTaskDeleted = onBack
+    // Handle effects
+    EditTaskEffectHandler(
+        viewModel = viewModel,
+        snackbarHostState = snackbarHostState,
+        onTaskUpdated = {
+            haptic.performHapticFeedback(HapticFeedbackType.Success)
+            onBack()
+        },
+        onTaskDeleted = onBack
+    )
 
     val state by viewModel.uiState.collectAsState()
     var priorityDropdownExpanded by remember { mutableStateOf(false) }
@@ -68,12 +69,12 @@ fun EditTaskScreen(
         Scaffold(
             topBar = {
                 TaskItTopAppBar(
-                    title = "Edit Task",
+                    title = stringResource(Res.string.edit_task),
                     onNavigateBack = onBack,
                     actions = {
                         IconButton(onClick = { 
                             haptic.performHapticFeedback(HapticFeedbackType.Error)
-                            viewModel.handleActions(TaskCreateEditAction.DeleteTask) 
+                            viewModel.handleActions(EditTaskAction.DeleteTask) 
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -82,6 +83,9 @@ fun EditTaskScreen(
                         }
                     }
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(snackbarHostState)
             }
         ) { paddingValues ->
             with(sharedTransitionScope) {
@@ -100,23 +104,23 @@ fun EditTaskScreen(
                     TaskItErrorMessage(errorMessage = state.errorMessage)
 
                     // Form fields
-                    TaskFormFields(
+                    EditTaskFormFields(
                         state = state,
                         priorityDropdownExpanded = priorityDropdownExpanded,
                         onPriorityDropdownExpandedChange = { priorityDropdownExpanded = it },
                         onPrioritySelected = { 
                             haptic.performHapticFeedback(HapticFeedbackType.Click)
-                            viewModel.handleActions(TaskCreateEditAction.SetPriority(it)) 
+                            viewModel.handleActions(EditTaskAction.SetPriority(it)) 
                         },
                         statusDropdownExpanded = statusDropdownExpanded,
                         onStatusDropdownExpandedChange = { statusDropdownExpanded = it },
                         onStatusSelected = { 
                             haptic.performHapticFeedback(HapticFeedbackType.Click)
-                            viewModel.handleActions(TaskCreateEditAction.SetStatus(it)) 
+                            viewModel.handleActions(EditTaskAction.SetStatus(it)) 
                         },
                         onDateSelected = { 
                             haptic.performHapticFeedback(HapticFeedbackType.Click)
-                            viewModel.handleActions(TaskCreateEditAction.SetDate(it)) 
+                            viewModel.handleActions(EditTaskAction.SetDate(it)) 
                         }
                     )
 
@@ -124,7 +128,7 @@ fun EditTaskScreen(
 
                     // Buttons
                     TaskItCreateEditButtons(
-                        isCreating = state.isCreating,
+                        isCreating = false,
                         isLoading = state.isLoading,
                         isButtonEnabled = state.isButtonEnabled,
                         onCancel = {
@@ -133,7 +137,7 @@ fun EditTaskScreen(
                         },
                         onCreateOrUpdate = {
                             haptic.performHapticFeedback(HapticFeedbackType.Success)
-                            viewModel.handleActions(TaskCreateEditAction.UpdateTask)
+                            viewModel.handleActions(EditTaskAction.UpdateTask)
                         }
                     )
 

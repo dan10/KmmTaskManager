@@ -53,7 +53,7 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItSmallLoadingIndicat
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.TaskItem
 import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
-import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateEditBottomSheet
+import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
 import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
 import com.danioliveira.taskmanager.paging.compose.itemContentType
@@ -120,8 +120,7 @@ fun ProjectDetailsScreen(
             },
             sheetState = sheetState
         ) {
-            TaskCreateEditBottomSheet(
-                taskId = null,
+            TaskCreateBottomSheet(
                 projectId = projectIdForTask,
                 onDismiss = {
                     showCreateTaskBottomSheet = false
