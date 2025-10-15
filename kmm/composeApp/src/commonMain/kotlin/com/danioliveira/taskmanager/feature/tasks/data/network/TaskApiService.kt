@@ -7,6 +7,7 @@ import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
+import com.danioliveira.taskmanager.api.routes.Projects
 import com.danioliveira.taskmanager.api.routes.Tasks
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -135,10 +136,12 @@ class TaskApiService(
         page: Int,
         size: Int
     ): PaginatedResponse<TaskResponse> {
-        return client.get("api/tasks/projects/$projectId") {
-            parameter("page", page)
-            parameter("size", size)
-        }.body()
+        val resource = Projects.Id.Tasks(
+            parent = Projects.Id(projectId = projectId),
+            page = page,
+            size = size
+        )
+        return client.get(resource).body()
     }
 
     /**
