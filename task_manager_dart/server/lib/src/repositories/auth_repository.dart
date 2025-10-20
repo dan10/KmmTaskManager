@@ -53,7 +53,8 @@ class AuthRepository {
       SET display_name = @displayName,
           email = @email,
           password_hash = @passwordHash,
-          google_id = @googleId
+          google_id = @googleId,
+          updated_at = CURRENT_TIMESTAMP
       WHERE id = @id
       ''',
       substitutionValues: {
@@ -74,13 +75,19 @@ class AuthRepository {
   }
 
   shared.User _mapUserFromRow(List<dynamic> row) {
+    // Handle created_at which is now TIMESTAMP (can be DateTime or String)
+    final createdAtValue = row[5];
+    final createdAtString = createdAtValue is DateTime
+        ? createdAtValue.toIso8601String()
+        : createdAtValue as String;
+    
     return shared.User(
       id: row[0] as String,
       displayName: row[1] as String,
       email: row[2] as String,
       passwordHash: row[3] as String?,
       googleId: row[4] as String?,
-      createdAt: row[5] as String,
+      createdAt: createdAtString,
     );
   }
 }

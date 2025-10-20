@@ -39,7 +39,7 @@ void main() {
 
       setUp(() async {
       // Clear all tables before each test
-      await testBase.connection.execute('DELETE FROM project_members');
+      await testBase.connection.execute('DELETE FROM project_assignments');
       await testBase.connection.execute('DELETE FROM projects');
       await testBase.connection.execute('DELETE FROM users');
       
@@ -47,8 +47,8 @@ void main() {
       await testBase.connection.execute('''
         INSERT INTO users (id, display_name, email, created_at)
         VALUES 
-          ('$testUserId', 'Test User', 'test@example.com', NOW()::TEXT),
-          ('other_user', 'Other User', 'other@example.com', NOW()::TEXT)
+          ('$testUserId', 'Test User', 'test@example.com', CURRENT_TIMESTAMP),
+          ('other_user', 'Other User', 'other@example.com', CURRENT_TIMESTAMP)
       ''');
     });
 
@@ -77,10 +77,10 @@ void main() {
         ''');
         
         await testBase.connection.execute('''
-          INSERT INTO project_members (project_id, user_id)
+          INSERT INTO project_assignments (id, project_id, user_id, assigned_by)
           VALUES 
-            ('1', '$testUserId'),
-            ('2', 'other_user')
+            ('assign-1', '1', '$testUserId', '$testUserId'),
+            ('assign-2', '2', 'other_user', 'other_user')
         ''');
 
         final request = Request(
@@ -132,8 +132,8 @@ void main() {
         ''');
         
         await testBase.connection.execute('''
-          INSERT INTO project_members (project_id, user_id)
-          VALUES ('test_project_id', '$testUserId')
+          INSERT INTO project_assignments (id, project_id, user_id, assigned_by)
+          VALUES ('assign-test', 'test_project_id', '$testUserId', '$testUserId')
         ''');
 
         final request = Request(

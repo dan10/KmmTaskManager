@@ -19,6 +19,16 @@ abstract class ProjectRepository {
   Future<bool> delete(String id);
 
   Future<List<shared_models.Project>> findByMemberId(String userId);
+  
+  // Project member management methods
+  Future<Map<String, String>> assignUserToProject(
+      String projectId, String userId, String assignedBy);
+  
+  Future<bool> removeUserFromProject(String projectId, String userId);
+  
+  Future<List<shared_models.User>> getUsersByProject(String projectId);
+  
+  Future<bool> isUserAssignedToProject(String projectId, String userId);
 }
 
 class ProjectRepositoryImpl implements ProjectRepository {
@@ -34,7 +44,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }) async {
     var sql = StringBuffer('''
       SELECT DISTINCT p.id, p.name, p.description, p.creator_id FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN project_assignments pm ON p.id = pm.project_id
     ''');
 
     final substitutionValues = <String, dynamic>{
@@ -147,7 +157,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   // Helper to check if a user is already a member of a project
   Future<bool> _isProjectMember(String projectId, String userId) async {
     final result = await _db.query(
-      'SELECT 1 FROM project_members WHERE project_id = @projectId AND user_id = @userId LIMIT 1',
+      'SELECT 1 FROM project_assignments WHERE project_id = @projectId AND user_id = @userId LIMIT 1',
       substitutionValues: {'projectId': projectId, 'userId': userId},
     );
     return result.isNotEmpty;
@@ -189,16 +199,18 @@ class ProjectRepositoryImpl implements ProjectRepository {
       },
     );
 
-    // Add project members
+    // Add project members (creator assigns themselves)
     for (final memberId in project.memberIds) {
       await _db.execute(
         '''
-        INSERT INTO project_members (project_id, user_id)
-        VALUES (@projectId, @userId)
+        INSERT INTO project_assignments (id, project_id, user_id, assigned_by)
+        VALUES (@id, @projectId, @userId, @assignedBy)
         ''',
         substitutionValues: {
+          'id': '${project.id}-$memberId', // Generate unique ID
           'projectId': project.id,
           'userId': memberId,
+          'assignedBy': project.creatorId, // Creator assigns members
         },
       );
     }
@@ -222,7 +234,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
       '''
       UPDATE projects
       SET name = @name,
-          description = @description
+          description = @description,
+          updated_at = CURRENT_TIMESTAMP
       WHERE id = @id
       ''',
       substitutionValues: {
@@ -234,19 +247,21 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
     // Update project members
     await _db.execute(
-      'DELETE FROM project_members WHERE project_id = @projectId',
+      'DELETE FROM project_assignments WHERE project_id = @projectId',
       substitutionValues: {'projectId': project.id},
     );
 
     for (final memberId in project.memberIds) {
       await _db.execute(
         '''
-        INSERT INTO project_members (project_id, user_id)
-        VALUES (@projectId, @userId)
+        INSERT INTO project_assignments (id, project_id, user_id, assigned_by)
+        VALUES (@id, @projectId, @userId, @assignedBy)
         ''',
         substitutionValues: {
+          'id': '${project.id}-$memberId',
           'projectId': project.id,
           'userId': memberId,
+          'assignedBy': project.creatorId,
         },
       );
     }
@@ -262,7 +277,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
   Future<bool> delete(String id) async {
     await _db.execute(
-      'DELETE FROM project_members WHERE project_id = @id',
+      'DELETE FROM project_assignments WHERE project_id = @id',
       substitutionValues: {'id': id},
     );
     await _db.execute(
@@ -273,7 +288,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   Future<Map<String, String>> assignUserToProject(
-      String projectId, String userId) async {
+      String projectId, String userId, String assignedBy) async {
     if (!await _projectExists(projectId)) {
       throw ProjectNotFoundException(id: projectId);
     }
@@ -285,14 +300,17 @@ class ProjectRepositoryImpl implements ProjectRepository {
           message: 'User $userId is already assigned to project $projectId.');
     }
 
+    final assignmentId = '$projectId-$userId-${DateTime.now().millisecondsSinceEpoch}';
     await _db.execute(
       '''
-      INSERT INTO project_members (project_id, user_id) 
-      VALUES (@projectId, @userId)
+      INSERT INTO project_assignments (id, project_id, user_id, assigned_by) 
+      VALUES (@id, @projectId, @userId, @assignedBy)
       ''',
       substitutionValues: {
+        'id': assignmentId,
         'projectId': projectId,
         'userId': userId,
+        'assignedBy': assignedBy,
       },
     );
     return {'projectId': projectId, 'userId': userId};
@@ -304,7 +322,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     // The main concern is if the assignment existed.
     final result = await _db.execute(
       '''
-      DELETE FROM project_members
+      DELETE FROM project_assignments
       WHERE project_id = @projectId AND user_id = @userId
       ''',
       substitutionValues: {
@@ -317,7 +335,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
   Future<List<String>> _getProjectMembers(String projectId) async {
     final result = await _db.query(
-      'SELECT user_id FROM project_members WHERE project_id = @projectId',
+      'SELECT user_id FROM project_assignments WHERE project_id = @projectId',
       substitutionValues: {'projectId': projectId},
     );
     return result.map((row) => row[0] as String).toList();
@@ -333,19 +351,25 @@ class ProjectRepositoryImpl implements ProjectRepository {
     final result = await _db.query(
       '''
       SELECT u.id, u.email, u.display_name, u.google_id, u.created_at FROM users u 
-      JOIN project_members pm ON u.id = pm.user_id 
+      JOIN project_assignments pm ON u.id = pm.user_id 
       WHERE pm.project_id = @projectId
       ''',
       substitutionValues: {'projectId': projectId},
     );
 
     return result.map((row) {
+      // Handle created_at which can be DateTime or String
+      final createdAtValue = row[4];
+      final createdAtString = createdAtValue is DateTime
+          ? createdAtValue.toIso8601String()
+          : createdAtValue as String;
+      
       return shared_models.User(
         id: row[0] as String,
         email: row[1] as String,
         displayName: row[2] as String,
         googleId: row[3] as String?,
-        createdAt: row[4] as String,
+        createdAt: createdAtString,
       );
     }).toList();
   }
@@ -359,7 +383,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
       '''
       SELECT DISTINCT p.id, p.name, p.description, p.creator_id
       FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN project_assignments pm ON p.id = pm.project_id
       WHERE p.creator_id = @userId OR pm.user_id = @userId
       ORDER BY p.name
       ''',
@@ -392,7 +416,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
       '''
       SELECT DISTINCT p.id, p.name, p.description, p.creator_id
       FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN project_assignments pm ON p.id = pm.project_id
       WHERE p.creator_id = @userId OR pm.user_id = @userId
       ORDER BY p.name
       ''',
@@ -414,5 +438,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
       projects[i] = projects[i].copyWith(memberIds: members);
     }
     return projects;
+  }
+
+  Future<bool> isUserAssignedToProject(String projectId, String userId) async {
+    return _isProjectMember(projectId, userId);
   }
 }

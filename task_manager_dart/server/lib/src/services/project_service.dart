@@ -101,4 +101,46 @@ class ProjectServiceImpl implements ProjectService {
   Future<List<shared_models.Project>> getProjectsByMember(String userId) async {
     return _repository.findByMemberId(userId);
   }
+
+  // Project Member Management Methods (matching KMM)
+  
+  Future<void> _validateProjectAccess(String projectId, String userId) async {
+    final project = await _repository.findById(projectId);
+    if (project == null) {
+      throw ProjectNotFoundException(id: projectId);
+    }
+
+    final isOwner = project.creatorId == userId;
+    final isAssignedMember = await _repository.isUserAssignedToProject(projectId, userId);
+
+    if (!isOwner && !isAssignedMember) {
+      throw ForbiddenException(
+          message: 'User not authorized to access project $projectId.');
+    }
+  }
+
+  Future<Map<String, String>> assignUserToProject(
+      String projectId, String userId, String creatorId) async {
+    // Validate that the creator has access to the project
+    await _validateProjectAccess(projectId, creatorId);
+    
+    // Assign user to project with assignedBy set to creatorId
+    return _repository.assignUserToProject(projectId, userId, creatorId);
+  }
+
+  Future<bool> removeUserFromProject(
+      String projectId, String userId, String creatorId) async {
+    // Validate that the creator has access to the project
+    await _validateProjectAccess(projectId, creatorId);
+    
+    return _repository.removeUserFromProject(projectId, userId);
+  }
+
+  Future<List<shared_models.User>> getUsersByProject(String projectId) async {
+    return _repository.getUsersByProject(projectId);
+  }
+
+  Future<bool> isUserAssignedToProject(String projectId, String userId) async {
+    return _repository.isUserAssignedToProject(projectId, userId);
+  }
 }

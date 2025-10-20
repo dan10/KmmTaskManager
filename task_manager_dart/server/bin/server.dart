@@ -31,6 +31,8 @@ import '../lib/src/middleware/error_handling_middleware.dart'; // Import error h
 import '../lib/src/routes/auth_routes.dart';
 import '../lib/src/routes/task_routes.dart';
 import '../lib/src/routes/project_routes.dart';
+import '../lib/src/routes/project_member_routes.dart';
+import '../lib/src/routes/project_task_routes.dart';
 
 void main() async {
   // 1. Initialize Configuration
@@ -68,6 +70,8 @@ void main() async {
     ..mount('/api/auth', AuthRoutes(authService, jwtService).router)
     ..mount('/api/tasks', TaskRoutes(taskService, authMiddleware).router)
     ..mount('/api/projects', ProjectRoutes(projectService, authMiddleware).router)
+    ..mount('/api/projects', ProjectMemberRoutes(projectService, authMiddleware).router)
+    ..mount('/api/projects', ProjectTaskRoutes(taskService, authMiddleware).router)
     ..get('/metrics', prometheusHandler(metricsService.registry))
     ..get('/health', (Request request) => Response.ok('OK'));
 

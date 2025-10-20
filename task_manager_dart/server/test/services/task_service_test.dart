@@ -59,18 +59,22 @@ void main() {
 
       // Create project memberships
       await testBase.connection.execute(
-        'INSERT INTO project_members (project_id, user_id) VALUES (@projectId, @userId)',
+        'INSERT INTO project_assignments (id, project_id, user_id, assigned_by) VALUES (@id, @projectId, @userId, @assignedBy)',
         substitutionValues: {
+          'id': 'assign-1',
           'projectId': 'project-1',
           'userId': 'user-1',
+          'assignedBy': 'user-1',
         },
       );
 
       await testBase.connection.execute(
-        'INSERT INTO project_members (project_id, user_id) VALUES (@projectId, @userId)',
+        'INSERT INTO project_assignments (id, project_id, user_id, assigned_by) VALUES (@id, @projectId, @userId, @assignedBy)',
         substitutionValues: {
+          'id': 'assign-2',
           'projectId': 'project-1',
           'userId': 'user-2',
+          'assignedBy': 'user-1',
         },
       );
     }

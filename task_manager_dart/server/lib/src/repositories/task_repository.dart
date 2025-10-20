@@ -111,7 +111,8 @@ class TaskRepository {
           priority = @priority,
           project_id = @projectId,
           assignee_id = @assigneeId,
-          due_date = @dueDate
+          due_date = @dueDate,
+          updated_at = CURRENT_TIMESTAMP
       WHERE id = @id
       ''',
       substitutionValues: {
@@ -153,7 +154,7 @@ class TaskRepository {
     }
 
     final result = await _db.execute(
-      'UPDATE tasks SET assignee_id = @assigneeId WHERE id = @taskId',
+      'UPDATE tasks SET assignee_id = @assigneeId, updated_at = CURRENT_TIMESTAMP WHERE id = @taskId',
       substitutionValues: {'assigneeId': assigneeId, 'taskId': taskId},
     );
 
@@ -178,7 +179,7 @@ class TaskRepository {
     }
 
     final result = await _db.execute(
-      'UPDATE tasks SET status = @status WHERE id = @taskId',
+      'UPDATE tasks SET status = @status, updated_at = CURRENT_TIMESTAMP WHERE id = @taskId',
       substitutionValues: {'status': _mapTaskStatusToString(newStatus), 'taskId': taskId},
     );
 

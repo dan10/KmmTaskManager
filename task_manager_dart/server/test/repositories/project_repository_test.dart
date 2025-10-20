@@ -42,8 +42,8 @@ void main() {
   });
   
   setUp(() async {
-    // Clear projects and project_members before each test
-    await testBase.connection.execute('DELETE FROM project_members');
+    // Clear projects and project_assignments before each test
+    await testBase.connection.execute('DELETE FROM project_assignments');
     await testBase.connection.execute('DELETE FROM projects');
   });
 
@@ -132,7 +132,7 @@ void main() {
 
       // Verify memberships are also deleted
       final membershipsResult = await testBase.connection.query(
-        'SELECT * FROM project_members WHERE project_id = @id',
+        'SELECT * FROM project_assignments WHERE project_id = @id',
         substitutionValues: {'id': 'project-1'},
       );
       expect(membershipsResult, isEmpty);

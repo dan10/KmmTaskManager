@@ -34,20 +34,26 @@ class Database {
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT,
         google_id TEXT,
-        created_at TEXT NOT NULL
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
-        creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE
+        creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE TABLE IF NOT EXISTS project_members (
+      CREATE TABLE IF NOT EXISTS project_assignments (
+        id TEXT PRIMARY KEY,
         project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        PRIMARY KEY (project_id, user_id)
+        assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        assigned_by TEXT NOT NULL REFERENCES users(id),
+        UNIQUE (project_id, user_id)
       );
 
       CREATE TABLE IF NOT EXISTS tasks (
@@ -59,8 +65,39 @@ class Database {
         project_id TEXT REFERENCES projects(id) ON DELETE SET NULL,
         assignee_id TEXT REFERENCES users(id) ON DELETE SET NULL,
         creator_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        due_date TIMESTAMP
+        due_date TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
+    ''');
+    
+    // Create indexes for users table
+    await connection.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_users_google_id ON users(google_id) WHERE google_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
+    ''');
+    
+    // Create indexes for projects table
+    await connection.execute('''
+      CREATE INDEX IF NOT EXISTS idx_projects_creator_id ON projects(creator_id);
+      CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at);
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_projects_name_creator ON projects(name, creator_id);
+    ''');
+    
+    // Create indexes for project_assignments table
+    await connection.execute('''
+      CREATE INDEX IF NOT EXISTS idx_project_assignments_project_id ON project_assignments(project_id);
+      CREATE INDEX IF NOT EXISTS idx_project_assignments_user_id ON project_assignments(user_id);
+      CREATE INDEX IF NOT EXISTS idx_project_assignments_assigned_at ON project_assignments(assigned_at);
+    ''');
+    
+    // Create indexes for tasks table
+    await connection.execute('''
+      CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);
+      CREATE INDEX IF NOT EXISTS idx_tasks_assignee_id ON tasks(assignee_id);
+      CREATE INDEX IF NOT EXISTS idx_tasks_creator_id ON tasks(creator_id);
+      CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+      CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at);
     ''');
   }
 
@@ -91,7 +128,7 @@ class Database {
 
   static Future<void> dropTables(PostgreSQLConnection connection) async {
     await connection.execute('DROP TABLE IF EXISTS tasks');
-    await connection.execute('DROP TABLE IF EXISTS project_members');
+    await connection.execute('DROP TABLE IF EXISTS project_assignments');
     await connection.execute('DROP TABLE IF EXISTS projects');
     await connection.execute('DROP TABLE IF EXISTS users');
   }
