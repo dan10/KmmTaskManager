@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_app/core/theme/theme.dart';
-import 'package:task_manager_app/l10n/app_localizations.dart';
 
 import 'core/di/providers.dart';
-import 'navigation/app_router.dart';
+import 'core/l10n/app_l10n.dart';
+import 'core/routing/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,25 +22,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = View.of(context).platformDispatcher.platformBrightness;
 
     return MultiProvider(
       providers: DependencyProviders.providers,
       child: MaterialApp.router(
-        title: 'TaskIt',
-        theme: brightness == Brightness.light ? TaskItTheme.light() : TaskItTheme.dark(),
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
-          Locale('en'), // English
-          Locale('es'), // Spanish
-          Locale('pt', 'BR'), // Portuguese Brazil
-        ],
-        routerConfig: AppRouter.router,
+        themeMode: ThemeMode.system,
+        theme:TaskItTheme.light(),
+        darkTheme: TaskItTheme.dark(),
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: appRouter,
     ));
   }
 } 

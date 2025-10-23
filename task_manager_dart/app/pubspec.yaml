@@ -13,6 +13,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
+  logging: ^1.2.0
 
   # State Management (Flutter Official Recommendation)
   provider: 6.1.5+1

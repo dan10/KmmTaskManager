@@ -1,0 +1,165 @@
+{
+  "@@locale": "pt",
+  "authAppName": "Task Manager",
+   "@authAppName": {
+     "description": "App name displayed on auth screens"
+   },
+
+   "authLoginTitle": "Welcome Back",
+   "@authLoginTitle": {
+     "description": "Login screen title"
+   },
+
+   "authRegisterTitle": "Create Account",
+   "@authRegisterTitle": {
+     "description": "Register screen title"
+   },
+
+   "authEmail": "Email",
+   "@authEmail": {
+     "description": "Email field label"
+   },
+
+   "authEmailHint": "Enter your email",
+   "@authEmailHint": {
+     "description": "Email field hint text"
+   },
+
+   "authPassword": "Password",
+   "@authPassword": {
+     "description": "Password field label"
+   },
+
+   "authPasswordHint": "Enter your password",
+   "@authPasswordHint": {
+     "description": "Password field hint text"
+   },
+
+   "authConfirmPassword": "Confirm Password",
+   "@authConfirmPassword": {
+     "description": "Confirm password field label"
+   },
+
+   "authName": "Name",
+   "@authName": {
+     "description": "Name field label for registration"
+   },
+
+   "authNameHint": "Enter your full name",
+   "@authNameHint": {
+     "description": "Name field hint text"
+   },
+
+   "authLoginButton": "Login",
+   "@authLoginButton": {
+     "description": "Login button text"
+   },
+
+   "authRegisterButton": "Create Account",
+   "@authRegisterButton": {
+     "description": "Register button text"
+   },
+
+   "authSignUp": "Sign Up",
+   "@authSignUp": {
+     "description": "Sign up link text"
+   },
+
+   "authSignIn": "Sign In",
+   "@authSignIn": {
+     "description": "Sign in link text"
+   },
+
+   "authWithoutAccount": "Don't have an account?",
+   "@authWithoutAccount": {
+     "description": "Text asking if user doesn't have an account"
+   },
+
+   "authAlreadyHaveAccount": "Already have an account?",
+   "@authAlreadyHaveAccount": {
+     "description": "Text asking if user already has an account"
+   },
+
+   "authEmailError": "Please enter a valid email address",
+   "@authEmailError": {
+     "description": "Error message for invalid email"
+   },
+
+   "authPasswordError": "Password must be at least 8 characters",
+   "@authPasswordError": {
+     "description": "Error message for invalid password"
+   },
+
+   "authPasswordTooShort": "Password must be at least {minLength} characters",
+   "@authPasswordTooShort": {
+     "description": "Error message when password is too short",
+     "placeholders": {
+       "minLength": {
+         "type": "int",
+         "example": "8"
+       }
+     }
+   },
+
+   "authNameError": "Name should not be empty",
+   "@authNameError": {
+     "description": "Error message for empty name field"
+   },
+
+   "authNameTooShort": "Name must be at least 2 characters",
+   "@authNameTooShort": {
+     "description": "Error message when name is too short"
+   },
+
+   "authConfirmPasswordError": "Passwords do not match",
+   "@authConfirmPasswordError": {
+     "description": "Error message when passwords don't match"
+   },
+
+   "authLoginError": "Login failed: {error}",
+   "@authLoginError": {
+     "description": "Generic login error message",
+     "placeholders": {
+       "error": {
+         "type": "String",
+         "example": "Invalid credentials"
+       }
+     }
+   },
+
+   "authRegisterError": "Registration failed: {error}",
+   "@authRegisterError": {
+     "description": "Generic registration error message",
+     "placeholders": {
+       "error": {
+         "type": "String",
+         "example": "Email already exists"
+       }
+     }
+   },
+
+   "authForgotPassword": "Forgot Password?",
+   "@authForgotPassword": {
+     "description": "Forgot password link text"
+   },
+
+   "authResetPassword": "Reset Password",
+   "@authResetPassword": {
+     "description": "Reset password button text"
+   },
+
+   "authLogout": "Logout",
+   "@authLogout": {
+     "description": "Logout button text"
+   },
+
+   "authLoggingIn": "Logging in...",
+   "@authLoggingIn": {
+     "description": "Loading text while logging in"
+   },
+
+   "authCreatingAccount": "Creating account...",
+   "@authCreatingAccount": {
+     "description": "Loading text while creating account"
+   }
+}
