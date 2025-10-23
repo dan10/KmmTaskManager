@@ -67,11 +67,11 @@ void main() async {
 
   // 6. Create Router and Mount Routes
   final router = Router()
-    ..mount('/api/auth', AuthRoutes(authService, jwtService).router)
-    ..mount('/api/tasks', TaskRoutes(taskService, authMiddleware).router)
-    ..mount('/api/projects', ProjectRoutes(projectService, authMiddleware).router)
-    ..mount('/api/projects', ProjectMemberRoutes(projectService, authMiddleware).router)
-    ..mount('/api/projects', ProjectTaskRoutes(taskService, authMiddleware).router)
+    ..mount('/v1/auth', AuthRoutes(authService, jwtService).router)
+    ..mount('/v1/tasks', TaskRoutes(taskService, authMiddleware).router)
+    ..mount('/v1/projects', ProjectRoutes(projectService, authMiddleware).router)
+    ..mount('/v1/projects', ProjectMemberRoutes(projectService, authMiddleware).router)
+    ..mount('/v1/projects', ProjectTaskRoutes(taskService, authMiddleware).router)
     ..get('/metrics', prometheusHandler(metricsService.registry))
     ..get('/health', (Request request) => Response.ok('OK'));
 

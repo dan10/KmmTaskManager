@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:postgres/postgres.dart';
 import 'package:test/test.dart';
 import 'package:shelf/shelf.dart';
 import 'package:task_manager_shared/models.dart';
@@ -176,9 +177,9 @@ void main() {
         expect(userResponse['id'], isNotEmpty);
         
         // Verify user was actually saved to database
-        final dbResult = await testBase.connection.query(
-          'SELECT email, display_name FROM users WHERE email = @email',
-          substitutionValues: {'email': 'test@example.com'},
+        final dbResult = await testBase.connection.execute(
+          Sql.named('SELECT email, display_name FROM users WHERE email = @email'),
+          parameters: {'email': 'test@example.com'},
         );
         expect(dbResult, hasLength(1));
         expect(dbResult.first[0], equals('test@example.com'));

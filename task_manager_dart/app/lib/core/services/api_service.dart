@@ -11,7 +11,7 @@ class ApiService {
   final Logger _logger = Logger();
 
   // Default to localhost for development, change for production
-  static const String baseUrl = 'http://localhost:8082';
+  static const String baseUrl = 'http://localhost:8081';
 
   Future<void> init() async {
     _dio = Dio(BaseOptions(

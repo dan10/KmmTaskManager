@@ -217,7 +217,7 @@ class TaskCreateEditViewModel extends ChangeNotifier {
       throw Exception('Project ID is required for creating a task');
     }
 
-    final description = _description.trim().isEmpty ? '' : _description.trim();
+    final description = _description.trim();
 
     final request = TaskCreateRequestDto(
       title: _title.trim(),
@@ -236,8 +236,8 @@ class TaskCreateEditViewModel extends ChangeNotifier {
 
     final request = TaskUpdateRequestDto(
       title: _title.trim() != _task!.title ? _title.trim() : null,
-      description: _description.trim() != (_task!.description ?? '') 
-          ? (_description.trim().isEmpty ? null : _description.trim()) 
+      description: _description.trim() != _task!.description
+          ? (_description.trim().isEmpty ? null : _description.trim())
           : null,
       priority: _priority != _task!.priority ? _priority : null,
       dueDate: _dueDate != _task!.dueDate ? _dueDate : null,
@@ -262,7 +262,7 @@ class TaskCreateEditViewModel extends ChangeNotifier {
     }
 
     return _title.trim() != _task!.title ||
-           _description.trim() != (_task!.description ?? '') ||
+           _description.trim() != _task!.description ||
            _priority != _task!.priority ||
            _dueDate != _task!.dueDate ||
            _projectId != _task!.projectId ||

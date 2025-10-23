@@ -55,12 +55,13 @@ void main() {
     group('GET /projects', () {
       test('should return empty list when no projects exist', () async {
         final request = Request(
-          'GET', 
-          Uri.parse('http://localhost/projects'),
+          'GET',
+          Uri.parse('http://localhost/'),
           headers: {'Authorization': 'Bearer mock_token'},
+          context: {'userId': testUserId},
         );
         final response = await projectRoutes.router.call(request);
-        
+
         expect(response.statusCode, equals(200));
         final body = await response.readAsString();
         final List<dynamic> projects = jsonDecode(body);
@@ -84,12 +85,13 @@ void main() {
         ''');
 
         final request = Request(
-          'GET', 
-          Uri.parse('http://localhost/projects'),
+          'GET',
+          Uri.parse('http://localhost/'),
           headers: {'Authorization': 'Bearer mock_token'},
+          context: {'userId': testUserId},
         );
         final response = await projectRoutes.router.call(request);
-        
+
         expect(response.statusCode, equals(200));
         final body = await response.readAsString();
         final List<dynamic> projects = jsonDecode(body);
@@ -106,15 +108,16 @@ void main() {
 
         final request = Request(
           'POST',
-          Uri.parse('http://localhost/projects'),
+          Uri.parse('http://localhost/'),
           body: jsonEncode(projectData),
           headers: {
             'content-type': 'application/json',
             'Authorization': 'Bearer mock_token',
           },
+          context: {'userId': testUserId},
         );
         final response = await projectRoutes.router.call(request);
-        
+
         expect(response.statusCode, equals(200));
         final body = await response.readAsString();
         final Map<String, dynamic> createdProject = jsonDecode(body);
@@ -137,12 +140,13 @@ void main() {
         ''');
 
         final request = Request(
-          'GET', 
-          Uri.parse('http://localhost/projects/test_project_id'),
+          'GET',
+          Uri.parse('http://localhost/test_project_id'),
           headers: {'Authorization': 'Bearer mock_token'},
+          context: {'userId': testUserId},
         );
         final response = await projectRoutes.router.call(request);
-        
+
         expect(response.statusCode, equals(200));
         final body = await response.readAsString();
         final Map<String, dynamic> project = jsonDecode(body);
@@ -152,12 +156,13 @@ void main() {
 
       test('should return 404 when project not found', () async {
         final request = Request(
-          'GET', 
-          Uri.parse('http://localhost/projects/nonexistent_id'),
+          'GET',
+          Uri.parse('http://localhost/nonexistent_id'),
           headers: {'Authorization': 'Bearer mock_token'},
+          context: {'userId': testUserId},
         );
         final response = await projectRoutes.router.call(request);
-        
+
         expect(response.statusCode, equals(404));
       });
     });
@@ -166,12 +171,13 @@ void main() {
       test('should handle malformed JSON in POST request', () async {
         final request = Request(
           'POST',
-          Uri.parse('http://localhost/projects'),
+          Uri.parse('http://localhost/'),
           body: 'invalid json',
           headers: {
             'content-type': 'application/json',
             'Authorization': 'Bearer mock_token',
           },
+          context: {'userId': testUserId},
         );
         final response = await projectRoutes.router.call(request);
         

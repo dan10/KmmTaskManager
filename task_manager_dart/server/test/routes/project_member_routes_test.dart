@@ -1,3 +1,4 @@
+import 'package:postgres/postgres.dart';
 import 'package:test/test.dart';
 import 'package:shelf/shelf.dart';
 import '../../lib/src/routes/project_member_routes.dart';
@@ -128,9 +129,9 @@ void main() {
       expect(response.statusCode, 201);
       
       // Verify assignment was created
-      final result = await testBase.connection.query(
-        'SELECT * FROM project_assignments WHERE project_id = @projectId AND user_id = @userId',
-        substitutionValues: {
+      final result = await testBase.connection.execute(
+        Sql.named('SELECT * FROM project_assignments WHERE project_id = @projectId AND user_id = @userId'),
+        parameters: {
           'projectId': 'test_project',
           'userId': otherUserId,
         },
@@ -164,9 +165,9 @@ void main() {
       expect(response.statusCode, 204);
       
       // Verify assignment was removed
-      final result = await testBase.connection.query(
-        'SELECT * FROM project_assignments WHERE project_id = @projectId AND user_id = @userId',
-        substitutionValues: {
+      final result = await testBase.connection.execute(
+        Sql.named('SELECT * FROM project_assignments WHERE project_id = @projectId AND user_id = @userId'),
+        parameters: {
           'projectId': 'test_project',
           'userId': otherUserId,
         },

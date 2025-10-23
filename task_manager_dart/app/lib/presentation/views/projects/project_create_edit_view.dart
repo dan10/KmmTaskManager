@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager_app/l10n/app_localizations.dart';
 
 import '../../viewmodels/project_viewmodel.dart';
-import '../../../domain/entities/project.dart';
 
 class ProjectCreateEditView extends StatefulWidget {
   final String? projectId;
@@ -25,11 +24,9 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
 
   bool _isLoading = false;
   String? _errorMessage;
-  Project? _currentProject;
-
   bool get _isCreating => widget.projectId == null;
 
-  bool get _isButtonEnabled => _nameController.text.isNotEmpty && !_isLoading;
+  bool get _isButtonEnabled => _nameController.text.trim().isNotEmpty && !_isLoading;
 
   @override
   void initState() {
@@ -64,13 +61,12 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
     });
 
     try {
-      final projectViewModel = Provider.of<ProjectViewModel>(
-          context, listen: false);
+      final projectViewModel =
+          Provider.of<ProjectViewModel>(context, listen: false);
       final project = projectViewModel.getProject(widget.projectId!);
 
       if (project != null) {
         setState(() {
-          _currentProject = project;
           _nameController.text = project.name;
           _descriptionController.text = project.description ?? '';
         });
@@ -122,7 +118,8 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildNameField(),
-                    const SizedBox(height: 16),
+      const SizedBox(height: 16),
+      const SizedBox(height: 16),
                     _buildDescriptionField(),
                   ],
                 ),
@@ -249,7 +246,7 @@ class _ProjectCreateEditViewState extends State<ProjectCreateEditView> {
           ),
         ),
         const SizedBox(height: 4),
-        Container(
+        SizedBox(
           height: 120,
           child: TextFormField(
             controller: _descriptionController,

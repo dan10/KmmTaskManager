@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/data/repositories/task_repository.dart';
-import '../../../lib/data/services/task_api_service.dart';
+import 'package:task_manager_app/data/repositories/task_repository.dart';
 import '../../mocks/mock_task_api_service.dart';
 
 void main() {
@@ -65,7 +64,7 @@ void main() {
 
       test('should handle pagination parameters correctly', () async {
         // Arrange
-        final mockResponse = PaginatedResponse<TaskDto>(
+        const mockResponse = PaginatedResponse<TaskDto>(
           items: [],
           total: 0,
           page: 1,
@@ -146,7 +145,7 @@ void main() {
     group('createTask', () {
       test('should create task successfully with valid request', () async {
         // Arrange
-        final request = TaskCreateRequestDto(
+        const request = TaskCreateRequestDto(
           title: 'New Task',
           description: 'New Description',
           priority: Priority.medium,
@@ -180,7 +179,7 @@ void main() {
 
       test('should throw validation exception for invalid request', () async {
         // Arrange
-        final request = TaskCreateRequestDto(
+        const request = TaskCreateRequestDto(
           title: 'A', // Too short
           description: 'Short', // Too short
           priority: Priority.medium,
@@ -199,7 +198,7 @@ void main() {
 
       test('should throw exception when API call fails', () async {
         // Arrange
-        final request = TaskCreateRequestDto(
+        const request = TaskCreateRequestDto(
           title: 'Valid Task Title',
           description: 'Valid task description that is long enough',
           priority: Priority.medium,
@@ -222,7 +221,7 @@ void main() {
     group('updateTask', () {
       test('should update task successfully with valid request', () async {
         // Arrange
-        final request = TaskUpdateRequestDto(
+        const request = TaskUpdateRequestDto(
           title: 'Updated Task',
           description: 'Updated description that is long enough',
           priority: Priority.high,
@@ -252,7 +251,7 @@ void main() {
 
       test('should throw validation exception for invalid request', () async {
         // Arrange
-        final request = TaskUpdateRequestDto(
+        const request = TaskUpdateRequestDto(
           title: 'A', // Too short
         );
 
@@ -269,7 +268,7 @@ void main() {
 
       test('should throw exception when no updates provided', () async {
         // Arrange
-        final request = TaskUpdateRequestDto(); // No updates
+        const request = TaskUpdateRequestDto(); // No updates
 
         // Act & Assert
         expect(
@@ -284,7 +283,7 @@ void main() {
 
       test('should throw exception when API call fails', () async {
         // Arrange
-        final request = TaskUpdateRequestDto(
+        const request = TaskUpdateRequestDto(
           title: 'Valid Updated Title',
         );
 

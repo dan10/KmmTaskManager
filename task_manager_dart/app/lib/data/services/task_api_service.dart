@@ -49,8 +49,8 @@ class TaskApiServiceImpl implements TaskApiService {
       if (query != null && query.isNotEmpty) 'query': query,
       if (projectId != null) 'projectId': projectId,
     };
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}')
+
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.assignedTasksEndpoint}')
         .replace(queryParameters: queryParams);
     
     final response = await http.get(uri, headers: headers);

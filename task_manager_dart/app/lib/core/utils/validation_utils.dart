@@ -1,4 +1,4 @@
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager_app/l10n/app_localizations.dart';
 
 /// Comprehensive validation utility class for form validation
 class ValidationUtils {

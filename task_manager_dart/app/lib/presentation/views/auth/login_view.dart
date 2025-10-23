@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager_app/l10n/app_localizations.dart';
 import 'dart:math' as math;
 
 import '../../viewmodels/login_viewmodel.dart';
-import '../../viewmodels/auth_viewmodel.dart';
+import '../../providers/auth_provider.dart';
 import '../../../core/utils/validation_utils.dart';
 
 class LoginView extends StatefulWidget {
@@ -24,6 +24,7 @@ class _LoginViewState extends State<LoginView> {
   String? _emailError;
   String? _passwordError;
   bool _hasAttemptedSubmit = false;
+  bool _hasNavigated = false;
 
   @override
   void dispose() {
@@ -67,15 +68,34 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _handleLogin() async {
     setState(() {
       _hasAttemptedSubmit = true;
+      _hasNavigated = false;
     });
 
     _validateForm();
 
     if (_emailError == null && _passwordError == null) {
-      final loginViewModel = Provider.of<LoginViewModel>(
-          context, listen: false);
+      final loginViewModel =
+          Provider.of<LoginViewModel>(context, listen: false);
+      final authProvider =
+          Provider.of<AuthProvider>(context, listen: false);
+      
       await loginViewModel.login(
           _emailController.text.trim(), _passwordController.text);
+      
+      // Check if login was successful
+      if (loginViewModel.isSuccess &&
+          loginViewModel.user != null &&
+          !_hasNavigated) {
+        _hasNavigated = true;
+        // Set authenticated state in auth provider
+        authProvider.setAuthenticated(loginViewModel.user!);
+        // Reset login view model for next time
+        loginViewModel.reset();
+        // Navigate to home
+        if (mounted) {
+          context.go('/');
+        }
+      }
     }
   }
 
@@ -111,22 +131,8 @@ class _LoginViewState extends State<LoginView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Consumer2<LoginViewModel, AuthViewModel>(
-                      builder: (context, loginViewModel, authViewModel, child) {
-                        // Handle successful login
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (loginViewModel.isSuccess &&
-                              loginViewModel.user != null) {
-                            // Set authenticated state in main auth view model
-                            authViewModel.setAuthenticated(
-                                loginViewModel.user!);
-                            // Reset login view model for next time
-                            loginViewModel.reset();
-                            // Navigate to home
-                            context.go('/');
-                          }
-                        });
-
+                    Consumer<LoginViewModel>(
+                      builder: (context, loginViewModel, child) {
                         return Form(
                           key: _formKey,
                           child: Card(
@@ -295,7 +301,7 @@ class _LoginViewState extends State<LoginView> {
                                               .of(context)
                                               .colorScheme
                                               .onSurface
-                                              .withOpacity(0.7),
+                                              .withValues(alpha: 0.7),
                                         ),
                                       ),
                                       TextButton(

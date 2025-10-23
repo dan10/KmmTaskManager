@@ -1,3 +1,4 @@
+import 'package:postgres/postgres.dart';
 import 'package:test/test.dart';
 import 'package:task_manager_shared/models.dart';
 import '../../lib/src/repositories/task_repository.dart';
@@ -21,8 +22,8 @@ void main() {
     Future<void> _setupTestData() async {
       // Create test user
       await testBase.connection.execute(
-        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
-        substitutionValues: {
+        Sql.named('INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)'),
+        parameters: {
           'id': 'user-1',
           'name': 'Test User',
           'email': 'test@example.com',
@@ -33,8 +34,8 @@ void main() {
 
       // Create additional test users
       await testBase.connection.execute(
-        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
-        substitutionValues: {
+        Sql.named('INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)'),
+        parameters: {
           'id': 'user-2',
           'name': 'Test User 2',
           'email': 'test2@example.com',
@@ -44,8 +45,8 @@ void main() {
       );
 
       await testBase.connection.execute(
-        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
-        substitutionValues: {
+        Sql.named('INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)'),
+        parameters: {
           'id': 'user-3',
           'name': 'Test User 3',
           'email': 'test3@example.com',
@@ -56,8 +57,8 @@ void main() {
       
       // Create test projects
       await testBase.connection.execute(
-        'INSERT INTO projects (id, name, description, creator_id) VALUES (@id, @name, @description, @creatorId)',
-        substitutionValues: {
+        Sql.named('INSERT INTO projects (id, name, description, creator_id) VALUES (@id, @name, @description, @creatorId)'),
+        parameters: {
           'id': 'project-1',
           'name': 'Test Project',
           'description': 'Test Description',
@@ -66,8 +67,8 @@ void main() {
       );
 
       await testBase.connection.execute(
-        'INSERT INTO projects (id, name, description, creator_id) VALUES (@id, @name, @description, @creatorId)',
-        substitutionValues: {
+      Sql.named('INSERT INTO projects (id, name, description, creator_id) VALUES (@id, @name, @description, @creatorId)'),
+        parameters: {
           'id': 'project-2',
           'name': 'Test Project 2',
           'description': 'Test Description 2',
@@ -77,8 +78,8 @@ void main() {
 
       // Create project memberships
       await testBase.connection.execute(
-        'INSERT INTO project_assignments (id, project_id, user_id, assigned_by) VALUES (@id, @projectId, @userId, @assignedBy)',
-        substitutionValues: {
+        Sql.named('INSERT INTO project_assignments (id, project_id, user_id, assigned_by) VALUES (@id, @projectId, @userId, @assignedBy)'),
+        parameters: {
           'id': 'assign-1',
           'projectId': 'project-1',
           'userId': 'user-1',
@@ -87,8 +88,8 @@ void main() {
       );
 
       await testBase.connection.execute(
-        'INSERT INTO project_assignments (id, project_id, user_id, assigned_by) VALUES (@id, @projectId, @userId, @assignedBy)',
-        substitutionValues: {
+      Sql.named('INSERT INTO project_assignments (id, project_id, user_id, assigned_by) VALUES (@id, @projectId, @userId, @assignedBy)'),
+        parameters: {
           'id': 'assign-2',
           'projectId': 'project-2',
           'userId': 'user-1',

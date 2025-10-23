@@ -24,10 +24,6 @@ internal object Routes {
     const val ALL_PROJECT_ASSIGNMENTS = "v1/assignments"
     const val BY_PROJECT_ASSIGNMENT_ID = "{assignmentId}"
 
-    // Nested/user-specific routes
-    const val USER_PROJECTS = "v1/users/{userId}/projects"
-    const val USER_TASKS = "v1/users/{userId}/tasks"
-
     const val PROJECT_TASKS = "v1/projects/{projectId}/tasks"
 
     // Auth routes

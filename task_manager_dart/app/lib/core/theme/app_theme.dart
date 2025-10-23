@@ -53,7 +53,7 @@ class AppTheme {
 
   static ThemeData get lightTheme {
     return ThemeData(
-      useMaterial3: false, // Using Material 2 to match Compose app
+      useMaterial3: true, // Using Material 3 to match Compose app
       primarySwatch: _createMaterialColor(primaryLight),
       primaryColor: primaryLight,
       colorScheme: const ColorScheme.light(
@@ -73,11 +73,9 @@ class AppTheme {
         onError: onErrorLight,
         errorContainer: errorContainerLight,
         onErrorContainer: onErrorContainerLight,
-        background: backgroundLight,
-        onBackground: onBackgroundLight,
         surface: surfaceLight,
         onSurface: onSurfaceLight,
-        surfaceVariant: surfaceVariantLight,
+        surfaceContainerHighest: surfaceVariantLight,
         onSurfaceVariant: onSurfaceVariantLight,
         outline: outlineLight,
       ),
@@ -88,11 +86,11 @@ class AppTheme {
         foregroundColor: onPrimaryLight,
         iconTheme: IconThemeData(color: onPrimaryLight),
       ),
-      cardTheme: const CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
-        margin: EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)), // Medium = 16dp in Compose
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -132,7 +130,7 @@ class AppTheme {
 
   static ThemeData get darkTheme {
     return ThemeData(
-      useMaterial3: false, // Using Material 2 to match Compose app
+      useMaterial3: true, // Using Material 3 to match Compose app
       brightness: Brightness.dark,
       primarySwatch: _createMaterialColor(primaryDark),
       primaryColor: primaryDark,
@@ -153,11 +151,9 @@ class AppTheme {
         onError: onErrorDark,
         errorContainer: errorContainerDark,
         onErrorContainer: onErrorContainerDark,
-        background: backgroundDark,
-        onBackground: onBackgroundDark,
         surface: surfaceDark,
         onSurface: onSurfaceDark,
-        surfaceVariant: surfaceVariantDark,
+        surfaceContainerHighest: surfaceVariantDark,
         onSurfaceVariant: onSurfaceVariantDark,
         outline: outlineDark,
       ),
@@ -168,12 +164,12 @@ class AppTheme {
         foregroundColor: onPrimaryContainerDark,
         iconTheme: IconThemeData(color: onPrimaryContainerDark),
       ),
-      cardTheme: const CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
-        margin: EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
         color: surfaceDark,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)), // Medium = 16dp in Compose
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -215,7 +211,9 @@ class AppTheme {
   static MaterialColor _createMaterialColor(Color color) {
     List strengths = <double>[.05];
     Map<int, Color> swatch = {};
-    final int r = color.red, g = color.green, b = color.blue;
+    final int r = (color.r * 255.0).round() & 0xff;
+    final int g = (color.g * 255.0).round() & 0xff;
+    final int b = (color.b * 255.0).round() & 0xff;
 
     for (int i = 1; i < 10; i++) {
       strengths.add(0.1 * i);
@@ -229,6 +227,6 @@ class AppTheme {
         1,
       );
     }
-    return MaterialColor(color.value, swatch);
+    return MaterialColor(color.toARGB32(), swatch);
   }
 } 

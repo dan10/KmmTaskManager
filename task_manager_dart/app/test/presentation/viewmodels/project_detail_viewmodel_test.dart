@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/presentation/viewmodels/project_detail_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/project_detail_viewmodel.dart';
 import '../../mocks/mock_project_repository.dart';
 
 void main() {
@@ -51,7 +51,7 @@ void main() {
 
     group('Load Project', () {
       test('should load project successfully', () async {
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           description: 'Test Description',
@@ -90,7 +90,7 @@ void main() {
       });
 
       test('should handle completed project', () async {
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Completed Project',
           completed: 10,
@@ -109,7 +109,7 @@ void main() {
       });
 
       test('should handle project with no tasks', () async {
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Empty Project',
           completed: 0,
@@ -137,7 +137,7 @@ void main() {
       });
 
       test('should handle statistics loading error gracefully', () async {
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -162,7 +162,7 @@ void main() {
     group('Update Project', () {
       test('should update project successfully', () async {
         // Load initial project
-        final initialProject = const Project(
+        const initialProject = Project(
           id: 'project1',
           name: 'Original Name',
           description: 'Original Description',
@@ -176,7 +176,7 @@ void main() {
         await viewModel.loadProject('project1');
 
         // Update project
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: 'project1',
           name: 'Updated Name',
           description: 'Updated Description',
@@ -211,7 +211,7 @@ void main() {
 
       test('should handle update project error', () async {
         // Load initial project
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -237,7 +237,7 @@ void main() {
     group('Delete Project', () {
       test('should delete project successfully', () async {
         // Load initial project
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -267,7 +267,7 @@ void main() {
 
       test('should handle delete project error', () async {
         // Load initial project
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -293,7 +293,7 @@ void main() {
     group('Member Management', () {
       test('should add member successfully', () async {
         // Load initial project
-        final initialProject = const Project(
+        const initialProject = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -306,7 +306,7 @@ void main() {
         await viewModel.loadProject('project1');
 
         // Add member
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -328,7 +328,7 @@ void main() {
 
       test('should remove member successfully', () async {
         // Load initial project with member
-        final initialProject = const Project(
+        const initialProject = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -341,7 +341,7 @@ void main() {
         await viewModel.loadProject('project1');
 
         // Remove member
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -377,7 +377,7 @@ void main() {
 
       test('should handle add member error', () async {
         // Load initial project
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -401,7 +401,7 @@ void main() {
 
       test('should handle remove member error', () async {
         // Load initial project
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -427,7 +427,7 @@ void main() {
     group('Refresh', () {
       test('should refresh project data', () async {
         // Load initial project
-        final initialProject = const Project(
+        const initialProject = Project(
           id: 'project1',
           name: 'Original Project',
           completed: 0,
@@ -442,7 +442,7 @@ void main() {
         expect(viewModel.projectName, 'Original Project');
 
         // Update mock to return different data
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: 'project1',
           name: 'Refreshed Project',
           completed: 5,
@@ -471,7 +471,7 @@ void main() {
 
     group('Utility Methods', () {
       test('should check if user is member', () async {
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -493,7 +493,7 @@ void main() {
       });
 
       test('should get statistics value safely', () async {
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -541,7 +541,7 @@ void main() {
 
       test('should clear error and set loaded state when project exists', () async {
         // Load project first
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -567,7 +567,7 @@ void main() {
     group('Reset', () {
       test('should reset to initial state', () async {
         // Load some data first
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,

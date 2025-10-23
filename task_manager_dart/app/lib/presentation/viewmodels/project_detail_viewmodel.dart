@@ -13,7 +13,7 @@ enum ProjectDetailState {
 }
 
 class ProjectDetailViewModel extends ChangeNotifier {
-  final ProjectRepository _projectRepository;
+  ProjectRepository _projectRepository;
 
   ProjectDetailState _state = ProjectDetailState.initial;
   Project? _project;
@@ -53,6 +53,10 @@ class ProjectDetailViewModel extends ChangeNotifier {
   int get memberCount => _project?.memberIds.length ?? 0;
 
   ProjectDetailViewModel(this._projectRepository);
+
+  void updateRepository(ProjectRepository repository) {
+    _projectRepository = repository;
+  }
 
   // Load project details
   Future<void> loadProject(String projectId) async {

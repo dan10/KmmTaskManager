@@ -29,6 +29,7 @@
   "navTasks": "Tareas",
   "navProjects": "Proyectos",
   "navProfile": "Perfil",
+  "navCalendar": "Calendario",
 
   "tasksTitle": "Mis Tareas",
   "tasksSearchPlaceholder": "Buscar tareas...",
@@ -208,5 +209,12 @@
   "passwordStrengthVeryStrong": "Muy Fuerte",
   "@passwordStrengthVeryStrong": {
     "description": "Password strength indicator for very strong passwords"
-  }
+  },
+  "taskProjectHint": "Seleccionar un proyecto",
+  "saveChanges": "Guardar Cambios",
+  "taskCreated": "Tarea creada con éxito",
+  "taskUpdated": "Tarea actualizada con éxito",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "deleteTask": "Eliminar Tarea"
 } 

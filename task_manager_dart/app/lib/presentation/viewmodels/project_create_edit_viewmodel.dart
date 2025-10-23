@@ -15,7 +15,7 @@ enum ProjectCreateEditState {
 }
 
 class ProjectCreateEditViewModel extends ChangeNotifier {
-  final ProjectRepository _projectRepository;
+  ProjectRepository _projectRepository;
 
   ProjectCreateEditState _state = ProjectCreateEditState.initial;
   Project? _project;
@@ -49,6 +49,10 @@ class ProjectCreateEditViewModel extends ChangeNotifier {
   bool get hasChanges => _hasChanges();
 
   ProjectCreateEditViewModel(this._projectRepository);
+
+  void updateRepository(ProjectRepository repository) {
+    _projectRepository = repository;
+  }
 
   // Initialize for creating a new project
   void initializeForCreate() {

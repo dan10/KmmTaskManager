@@ -272,7 +272,7 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
     return Chip(
       avatar: Icon(icon, size: 16, color: color),
       label: Text('$value $label'),
-      backgroundColor: color.withOpacity(0.1),
+      backgroundColor: color.withValues(alpha: 0.1),
     );
   }
 
@@ -298,7 +298,7 @@ class _ProjectDetailViewState extends State<ProjectDetailView> {
     return Chip(
       avatar: Icon(Icons.flag, size: 16, color: color),
       label: Text(text),
-      backgroundColor: color.withOpacity(0.1),
+      backgroundColor: color.withValues(alpha: 0.1),
       side: BorderSide(color: color),
     );
   }

@@ -3,24 +3,24 @@ import 'package:task_manager_shared/models.dart' as shared_models;
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
 
 class TaskRepository {
-  final PostgreSQLConnection _db;
+  final Connection _db;
 
   TaskRepository(this._db);
 
   // Helper to check if a task exists
   Future<bool> _taskExists(String taskId) async {
-    final result = await _db.query(
-      'SELECT 1 FROM tasks WHERE id = @taskId LIMIT 1',
-      substitutionValues: {'taskId': taskId},
+    final result = await _db.execute(
+      Sql.named('SELECT 1 FROM tasks WHERE id = @taskId LIMIT 1'),
+      parameters: {'taskId': taskId},
     );
     return result.isNotEmpty;
   }
 
   // Helper to check if a user exists
   Future<bool> _userExists(String userId) async {
-    final result = await _db.query(
-      'SELECT 1 FROM users WHERE id = @userId LIMIT 1',
-      substitutionValues: {'userId': userId},
+    final result = await _db.execute(
+      Sql.named('SELECT 1 FROM users WHERE id = @userId LIMIT 1'),
+      parameters: {'userId': userId},
     );
     return result.isNotEmpty;
   }
@@ -34,27 +34,27 @@ class TaskRepository {
     int size = 10,
   }) async {
     final conditions = <String>[];
-    final substitutionValues = <String, dynamic>{
+    final parameters = <String, dynamic>{
       'limit': size,
       'offset': page * size,
     };
 
     if (assigneeId != null) {
       conditions.add('assignee_id = @assigneeId');
-      substitutionValues['assigneeId'] = assigneeId;
+      parameters['assigneeId'] = assigneeId;
     }
     if (creatorId != null) {
       conditions.add('creator_id = @creatorId');
-      substitutionValues['creatorId'] = creatorId;
+      parameters['creatorId'] = creatorId;
     }
     if (projectId != null) {
       conditions.add('project_id = @projectId');
-      substitutionValues['projectId'] = projectId;
+      parameters['projectId'] = projectId;
     }
     if (query != null && query.isNotEmpty) {
       conditions
           .add('(title ILIKE @searchQuery OR description ILIKE @searchQuery)');
-      substitutionValues['searchQuery'] = '%$query%';
+      parameters['searchQuery'] = '%$query%';
     }
 
     var sql = 'SELECT * FROM tasks';
@@ -64,28 +64,28 @@ class TaskRepository {
     sql +=
         ' ORDER BY due_date ASC NULLS LAST, title ASC LIMIT @limit OFFSET @offset';
 
-    final result = await _db.query(sql, substitutionValues: substitutionValues);
-    return result.map(_mapTaskFromRow).toList();
+    final result = await _db.execute(Sql.named(sql), parameters: parameters);
+    return result.map((row) => _mapTaskFromRow(row.toColumnMap())).toList();
   }
 
   Future<shared_models.TaskDto?> findById(String id) async {
-    final result = await _db.query(
-      'SELECT * FROM tasks WHERE id = @id',
-      substitutionValues: {'id': id},
+    final result = await _db.execute(
+      Sql.named('SELECT * FROM tasks WHERE id = @id'),
+      parameters: {'id': id},
     );
 
     if (result.isEmpty) return null;
-    return _mapTaskFromRow(result.first);
+    return _mapTaskFromRow(result.first.toColumnMap());
   }
 
   Future<shared_models.TaskDto> create(shared_models.TaskDto task) async {
-    final result = await _db.query(
-      '''
+    final result = await _db.execute(
+      Sql.named('''
       INSERT INTO tasks (id, title, description, status, priority, project_id, assignee_id, creator_id, due_date)
       VALUES (@id, @title, @description, @status, @priority, @projectId, @assigneeId, @creatorId, @dueDate)
       RETURNING *
-      ''',
-      substitutionValues: {
+      '''),
+      parameters: {
         'id': task.id,
         'title': task.title,
         'description': task.description,
@@ -98,12 +98,12 @@ class TaskRepository {
       },
     );
 
-    return _mapTaskFromRow(result.first);
+    return _mapTaskFromRow(result.first.toColumnMap());
   }
 
   Future<shared_models.TaskDto> update(shared_models.TaskDto task) async {
     await _db.execute(
-      '''
+      Sql.named('''
       UPDATE tasks
       SET title = @title,
           description = @description,
@@ -114,8 +114,8 @@ class TaskRepository {
           due_date = @dueDate,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = @id
-      ''',
-      substitutionValues: {
+      '''),
+      parameters: {
         'id': task.id,
         'title': task.title,
         'description': task.description,
@@ -136,10 +136,10 @@ class TaskRepository {
 
   Future<void> delete(String id) async {
     final result = await _db.execute(
-      'DELETE FROM tasks WHERE id = @id',
-      substitutionValues: {'id': id},
+      Sql.named('DELETE FROM tasks WHERE id = @id'),
+      parameters: {'id': id},
     );
-    if (result == 0) {
+    if (result.affectedRows == 0) {
       throw TaskNotFoundException(id: id); // Use new exception
     }
   }
@@ -154,11 +154,11 @@ class TaskRepository {
     }
 
     final result = await _db.execute(
-      'UPDATE tasks SET assignee_id = @assigneeId, updated_at = CURRENT_TIMESTAMP WHERE id = @taskId',
-      substitutionValues: {'assigneeId': assigneeId, 'taskId': taskId},
+      Sql.named('UPDATE tasks SET assignee_id = @assigneeId, updated_at = CURRENT_TIMESTAMP WHERE id = @taskId'),
+      parameters: {'assigneeId': assigneeId, 'taskId': taskId},
     );
 
-    if (result > 0) {
+    if (result.affectedRows > 0) {
       final updatedTask = await findById(taskId);
       if (updatedTask == null) {
         // Should ideally not happen if update succeeded
@@ -179,11 +179,11 @@ class TaskRepository {
     }
 
     final result = await _db.execute(
-      'UPDATE tasks SET status = @status, updated_at = CURRENT_TIMESTAMP WHERE id = @taskId',
-      substitutionValues: {'status': _mapTaskStatusToString(newStatus), 'taskId': taskId},
+      Sql.named('UPDATE tasks SET status = @status, updated_at = CURRENT_TIMESTAMP WHERE id = @taskId'),
+      parameters: {'status': _mapTaskStatusToString(newStatus), 'taskId': taskId},
     );
 
-    if (result > 0) {
+    if (result.affectedRows > 0) {
       final updatedTask = await findById(taskId);
       if (updatedTask == null) {
         // Should ideally not happen
@@ -196,13 +196,13 @@ class TaskRepository {
         'Failed to change task status for $taskId, update operation affected 0 rows.');
   }
 
-  shared_models.TaskDto _mapTaskFromRow(List<dynamic> row) {
-    final dueDateValue = row[8];
+  shared_models.TaskDto _mapTaskFromRow(Map<String, dynamic> row) {
+    final dueDateValue = row['due_date'];
     final dueDate = dueDateValue is DateTime ? dueDateValue : null;
 
     shared_models.TaskStatus status;
     try {
-      final statusString = row[3] as String;
+      final statusString = row['status'] as String;
       switch (statusString) {
         case 'TODO':
           status = shared_models.TaskStatus.todo;
@@ -218,13 +218,13 @@ class TaskRepository {
           status = shared_models.TaskStatus.todo;
       }
     } catch (e) {
-      print("Error mapping status: ${row[3]}, using default TaskStatus.todo");
+      print("Error mapping status: ${row['status']}, using default TaskStatus.todo");
       status = shared_models.TaskStatus.todo; // Default on error
     }
 
     shared_models.Priority priority;
     try {
-      final priorityString = row[4] as String;
+      final priorityString = row['priority'] as String;
       switch (priorityString) {
         case 'LOW':
           priority = shared_models.Priority.low;
@@ -240,19 +240,19 @@ class TaskRepository {
           priority = shared_models.Priority.low;
       }
     } catch (e) {
-      print("Error mapping priority: ${row[4]}, using default Priority.low");
+      print("Error mapping priority: ${row['priority']}, using default Priority.low");
       priority = shared_models.Priority.low; // Default on error
     }
 
     return shared_models.TaskDto(
-      id: row[0] as String,
-      title: row[1] as String,
-      description: (row[2] as String?) ?? '',
+      id: row['id'] as String,
+      title: row['title'] as String,
+      description: (row['description'] as String?) ?? '',
       status: status,
       priority: priority,
-      projectId: row[5] as String?,
-      assigneeId: row[6] as String?,
-      creatorId: row[7] as String,
+      projectId: row['project_id'] as String?,
+      assigneeId: row['assignee_id'] as String?,
+      creatorId: row['creator_id'] as String,
       dueDate: dueDate,
     );
   }

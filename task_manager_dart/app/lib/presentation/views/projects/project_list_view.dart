@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -214,7 +214,7 @@ class _ProjectListViewState extends State<ProjectListView> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: projectColor.withOpacity(0.15),
+                      color: projectColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Icon(
@@ -286,45 +286,6 @@ class _ProjectListViewState extends State<ProjectListView> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showCreateProjectDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _ProjectDialog(),
-    );
-  }
-
-  void _showEditProjectDialog(BuildContext context, Project project) {
-    showDialog(
-      context: context,
-      builder: (context) => _ProjectDialog(project: project),
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context, Project project) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Project'),
-        content: Text('Are you sure you want to delete "${project.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Provider.of<ProjectViewModel>(context, listen: false)
-                  .deleteProject(project.id);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Delete'),
-          ),
-        ],
       ),
     );
   }

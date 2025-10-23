@@ -1,3 +1,4 @@
+import 'package:postgres/postgres.dart';
 import 'package:test/test.dart';
 import 'package:task_manager_shared/models.dart';
 import '../../lib/src/repositories/project_repository.dart';
@@ -131,9 +132,9 @@ void main() {
       expect(result, isNull);
 
       // Verify memberships are also deleted
-      final membershipsResult = await testBase.connection.query(
-        'SELECT * FROM project_assignments WHERE project_id = @id',
-        substitutionValues: {'id': 'project-1'},
+      final membershipsResult = await testBase.connection.execute(
+          Sql.named('SELECT * FROM project_assignments WHERE project_id = @id'),
+        parameters: {'id': 'project-1'},
       );
       expect(membershipsResult, isEmpty);
     });

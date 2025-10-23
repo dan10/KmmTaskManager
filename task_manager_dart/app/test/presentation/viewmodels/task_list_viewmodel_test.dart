@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/data/repositories/task_repository.dart';
-import '../../../lib/presentation/viewmodels/task_list_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/task_list_viewmodel.dart';
 import '../../mocks/mock_task_repository.dart';
 
 void main() {
@@ -42,7 +41,7 @@ void main() {
       test('should load tasks successfully', () async {
         // Arrange
         final mockTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Task 1',
             description: 'Description 1',
@@ -50,7 +49,7 @@ void main() {
             priority: Priority.high,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '2',
             title: 'Task 2',
             description: 'Description 2',
@@ -103,7 +102,7 @@ void main() {
       test('should handle refresh correctly', () async {
         // Arrange
         final initialTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Task 1',
             description: 'Description 1',
@@ -114,7 +113,7 @@ void main() {
         ];
 
         final refreshedTasks = [
-          TaskDto(
+          const TaskDto(
             id: '2',
             title: 'Task 2',
             description: 'Description 2',
@@ -155,7 +154,7 @@ void main() {
 
       test('should handle project filter correctly', () async {
         // Arrange
-        final mockResponse = PaginatedResponse<TaskDto>(
+        const mockResponse = PaginatedResponse<TaskDto>(
           items: [],
           total: 0,
           page: 0,
@@ -191,7 +190,7 @@ void main() {
       test('should load more tasks when has more pages', () async {
         // Arrange - Initial load
         final initialTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Task 1',
             description: 'Description 1',
@@ -215,7 +214,7 @@ void main() {
 
         // Arrange - Load more
         final moreTasks = [
-          TaskDto(
+          const TaskDto(
             id: '2',
             title: 'Task 2',
             description: 'Description 2',
@@ -248,7 +247,7 @@ void main() {
       test('should not load more when no more pages', () async {
         // Arrange
         final mockTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Task 1',
             description: 'Description 1',
@@ -280,7 +279,7 @@ void main() {
       test('should handle loadMore error correctly', () async {
         // Arrange - Initial successful load
         final initialTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Task 1',
             description: 'Description 1',
@@ -318,7 +317,7 @@ void main() {
       test('should search tasks correctly', () async {
         // Arrange
         final searchResults = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Search Result',
             description: 'Found task',
@@ -351,7 +350,7 @@ void main() {
         await viewModel.searchTasks('test query');
         expect(viewModel.searchQuery, 'test query');
 
-        mockRepository.setGetTasksResponse(PaginatedResponse<TaskDto>(
+        mockRepository.setGetTasksResponse(const PaginatedResponse<TaskDto>(
           items: [],
           total: 0,
           page: 0,
@@ -370,13 +369,13 @@ void main() {
     group('CRUD Operations', () {
       test('should create task successfully', () async {
         // Arrange
-        final request = TaskCreateRequestDto(
+        const request = TaskCreateRequestDto(
           title: 'New Task',
           description: 'New task description',
           priority: Priority.high,
         );
 
-        final newTask = TaskDto(
+        const newTask = TaskDto(
           id: '1',
           title: 'New Task',
           description: 'New task description',
@@ -398,7 +397,7 @@ void main() {
 
       test('should update task successfully', () async {
         // Arrange - Add initial task
-        final initialTask = TaskDto(
+        const initialTask = TaskDto(
           id: '1',
           title: 'Original Task',
           description: 'Original description',
@@ -407,7 +406,7 @@ void main() {
           creatorId: 'user1',
         );
 
-        mockRepository.setGetTasksResponse(PaginatedResponse<TaskDto>(
+        mockRepository.setGetTasksResponse(const PaginatedResponse<TaskDto>(
           items: [initialTask],
           total: 1,
           page: 0,
@@ -418,12 +417,12 @@ void main() {
         await viewModel.loadTasks();
 
         // Arrange - Update
-        final request = TaskUpdateRequestDto(
+        const request = TaskUpdateRequestDto(
           title: 'Updated Task',
           description: 'Updated description',
         );
 
-        final updatedTask = TaskDto(
+        const updatedTask = TaskDto(
           id: '1',
           title: 'Updated Task',
           description: 'Updated description',
@@ -444,7 +443,7 @@ void main() {
 
       test('should delete task successfully', () async {
         // Arrange - Add initial task
-        final initialTask = TaskDto(
+        const initialTask = TaskDto(
           id: '1',
           title: 'Task to Delete',
           description: 'Description',
@@ -453,7 +452,7 @@ void main() {
           creatorId: 'user1',
         );
 
-        mockRepository.setGetTasksResponse(PaginatedResponse<TaskDto>(
+        mockRepository.setGetTasksResponse(const PaginatedResponse<TaskDto>(
           items: [initialTask],
           total: 1,
           page: 0,
@@ -476,7 +475,7 @@ void main() {
 
       test('should change task status successfully', () async {
         // Arrange - Add initial task
-        final initialTask = TaskDto(
+        const initialTask = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -485,7 +484,7 @@ void main() {
           creatorId: 'user1',
         );
 
-        mockRepository.setGetTasksResponse(PaginatedResponse<TaskDto>(
+        mockRepository.setGetTasksResponse(const PaginatedResponse<TaskDto>(
           items: [initialTask],
           total: 1,
           page: 0,
@@ -496,7 +495,7 @@ void main() {
         await viewModel.loadTasks();
 
         // Arrange - Status change
-        final updatedTask = TaskDto(
+        const updatedTask = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -516,7 +515,7 @@ void main() {
 
       test('should assign task successfully', () async {
         // Arrange - Add initial task
-        final initialTask = TaskDto(
+        const initialTask = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -525,7 +524,7 @@ void main() {
           creatorId: 'user1',
         );
 
-        mockRepository.setGetTasksResponse(PaginatedResponse<TaskDto>(
+        mockRepository.setGetTasksResponse(const PaginatedResponse<TaskDto>(
           items: [initialTask],
           total: 1,
           page: 0,
@@ -536,7 +535,7 @@ void main() {
         await viewModel.loadTasks();
 
         // Arrange - Assignment
-        final assignedTask = TaskDto(
+        const assignedTask = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -560,7 +559,7 @@ void main() {
       test('should filter tasks by status correctly', () async {
         // Arrange
         final mockTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Todo Task',
             description: 'Description',
@@ -568,7 +567,7 @@ void main() {
             priority: Priority.medium,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '2',
             title: 'In Progress Task',
             description: 'Description',
@@ -576,7 +575,7 @@ void main() {
             priority: Priority.medium,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '3',
             title: 'Done Task',
             description: 'Description',
@@ -608,7 +607,7 @@ void main() {
       test('should filter tasks by priority correctly', () async {
         // Arrange
         final mockTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'High Priority Task',
             description: 'Description',
@@ -616,7 +615,7 @@ void main() {
             priority: Priority.high,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '2',
             title: 'Medium Priority Task',
             description: 'Description',
@@ -624,7 +623,7 @@ void main() {
             priority: Priority.medium,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '3',
             title: 'Low Priority Task',
             description: 'Description',
@@ -708,7 +707,7 @@ void main() {
       test('should calculate task statistics correctly', () async {
         // Arrange
         final mockTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Todo Task',
             description: 'Description',
@@ -716,7 +715,7 @@ void main() {
             priority: Priority.medium,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '2',
             title: 'In Progress Task',
             description: 'Description',
@@ -724,7 +723,7 @@ void main() {
             priority: Priority.medium,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '3',
             title: 'Done Task 1',
             description: 'Description',
@@ -732,7 +731,7 @@ void main() {
             priority: Priority.medium,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '4',
             title: 'Done Task 2',
             description: 'Description',
@@ -781,7 +780,7 @@ void main() {
         mockRepository.setShouldThrowError(true);
 
         // Act & Assert - Create error
-        await viewModel.createTask(TaskCreateRequestDto(
+        await viewModel.createTask(const TaskCreateRequestDto(
           title: 'Test Task',
           description: 'Test Description',
           priority: Priority.medium,
@@ -792,7 +791,7 @@ void main() {
         viewModel.clearError();
 
         // Act & Assert - Update error
-        await viewModel.updateTask('1', TaskUpdateRequestDto(title: 'Updated'));
+        await viewModel.updateTask('1', const TaskUpdateRequestDto(title: 'Updated'));
         expect(viewModel.state, TaskListState.error);
 
         // Reset
@@ -808,7 +807,7 @@ void main() {
       test('should get task by id correctly', () async {
         // Arrange
         final mockTasks = [
-          TaskDto(
+          const TaskDto(
             id: '1',
             title: 'Task 1',
             description: 'Description 1',
@@ -816,7 +815,7 @@ void main() {
             priority: Priority.medium,
             creatorId: 'user1',
           ),
-          TaskDto(
+          const TaskDto(
             id: '2',
             title: 'Task 2',
             description: 'Description 2',

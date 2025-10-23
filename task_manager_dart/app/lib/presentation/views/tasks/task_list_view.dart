@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_manager_shared/models.dart';
@@ -246,7 +246,7 @@ class _TaskListViewState extends State<TaskListView> {
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: task.status == TaskStatus.done
-                                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                                  ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
                                   : Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
@@ -276,7 +276,7 @@ class _TaskListViewState extends State<TaskListView> {
                       Text(
                         task.description,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -414,127 +414,5 @@ class _TaskListViewState extends State<TaskListView> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
-  }
-
-  void _showCreateTaskDialog(BuildContext context) {
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    Priority selectedPriority = Priority.medium;
-    String? selectedProjectId = widget.projectId;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Create Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Task Title',
-                  hintText: 'Enter task title',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'Enter task description',
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<Priority>(
-                value: selectedPriority,
-                decoration: const InputDecoration(labelText: 'Priority'),
-                items: Priority.values.map((priority) {
-                  return DropdownMenuItem(
-                    value: priority,
-                    child: Text(priority.name.toUpperCase()),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedPriority = value;
-                    });
-                  }
-                },
-              ),
-              if (widget.projectId == null) ...[
-                const SizedBox(height: 16),
-                Consumer<ProjectViewModel>(
-                  builder: (context, projectViewModel, child) {
-                    return DropdownButtonFormField<String>(
-                      value: selectedProjectId,
-                      decoration: const InputDecoration(labelText: 'Project'),
-                      items: projectViewModel.projects.map((project) {
-                        return DropdownMenuItem(
-                          value: project.id,
-                          child: Text(project.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedProjectId = value;
-                        });
-                      },
-                    );
-                  },
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (titleController.text.isNotEmpty && selectedProjectId != null) {
-                  final request = TaskCreateRequestDto(
-                    title: titleController.text,
-                    description: descriptionController.text.isEmpty ? '' : descriptionController.text,
-                    priority: selectedPriority,
-                    projectId: selectedProjectId,
-                  );
-                  Provider.of<TaskListViewModel>(context, listen: false).createTask(request);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Create'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context, String taskId) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: const Text('Are you sure you want to delete this task? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Provider.of<TaskListViewModel>(context, listen: false).deleteTask(taskId);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
   }
 } 

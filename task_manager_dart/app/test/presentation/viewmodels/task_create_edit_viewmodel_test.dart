@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/presentation/viewmodels/task_create_edit_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/task_create_edit_viewmodel.dart';
 import '../../mocks/mock_task_repository.dart';
 
 void main() {
@@ -214,7 +214,7 @@ void main() {
 
       test('should detect changes correctly for existing task', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Original Title',
           description: 'Original Description',
@@ -249,7 +249,7 @@ void main() {
         viewModel.updateProjectId('project1');
         viewModel.updatePriority(Priority.high);
 
-        final createdTask = TaskDto(
+        const createdTask = TaskDto(
           id: '1',
           title: 'New Task',
           description: 'Task description',
@@ -277,7 +277,7 @@ void main() {
         viewModel.updateProjectId('project1');
         
         mockRepository.setDelayResponse(true);
-        mockRepository.setCreateTaskResponse(TaskDto(
+        mockRepository.setCreateTaskResponse(const TaskDto(
           id: '1',
           title: 'New Task',
           description: '',
@@ -302,7 +302,7 @@ void main() {
 
       test('should update existing task successfully', () async {
         // Arrange
-        final originalTask = TaskDto(
+        const originalTask = TaskDto(
           id: '1',
           title: 'Original Task',
           description: 'Original Description',
@@ -337,7 +337,7 @@ void main() {
 
       test('should not update when no changes are made', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task Title',
           description: 'Task Description',
@@ -391,7 +391,7 @@ void main() {
 
       test('should handle update error correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Original Task',
           description: 'Description',
@@ -420,7 +420,7 @@ void main() {
     group('Delete Task', () {
       test('should delete task successfully', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task to Delete',
           description: 'Description',
@@ -445,7 +445,7 @@ void main() {
 
       test('should handle deleting state correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -485,7 +485,7 @@ void main() {
 
       test('should handle delete error correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -527,7 +527,7 @@ void main() {
 
       test('should clear error and return to loaded state when task exists', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -560,7 +560,7 @@ void main() {
     group('Reset', () {
       test('should reset viewmodel correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -607,7 +607,7 @@ void main() {
 
       test('should handle task with null description', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: '',
@@ -632,7 +632,7 @@ void main() {
         viewModel.updateProjectId('project1');
         // Leave description empty, no due date, no assignee
 
-        final createdTask = TaskDto(
+        const createdTask = TaskDto(
           id: '1',
           title: 'Minimal Task',
           description: '',

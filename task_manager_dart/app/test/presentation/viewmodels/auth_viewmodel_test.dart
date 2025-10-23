@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/auth_viewmodel.dart';
 import '../../mocks/mock_auth_repository.dart';
 
 void main() {
@@ -14,7 +14,7 @@ void main() {
       mockAuthRepository = MockAuthRepository();
       authViewModel = AuthViewModel(mockAuthRepository);
 
-      mockUser = UserPublicResponseDto(
+      mockUser = const UserPublicResponseDto(
         id: 'test-id',
         email: 'test@example.com',
         displayName: 'Test User',
@@ -254,7 +254,7 @@ void main() {
     group('Refresh User', () {
       test('should refresh user data successfully', () async {
         // Arrange
-        final updatedUser = UserPublicResponseDto(
+        const updatedUser = UserPublicResponseDto(
           id: 'test-id',
           email: 'updated@example.com',
           displayName: 'Updated User',
@@ -294,7 +294,7 @@ void main() {
 
       test('should notify listeners when user is refreshed', () async {
         // Arrange
-        final updatedUser = UserPublicResponseDto(
+        const updatedUser = UserPublicResponseDto(
           id: 'test-id',
           email: 'updated@example.com',
           displayName: 'Updated User',

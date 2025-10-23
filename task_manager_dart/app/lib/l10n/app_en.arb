@@ -101,6 +101,10 @@
   "@navProfile": {
     "description": "Bottom navigation profile tab"
   },
+  "navCalendar": "Calendar",
+  "@navCalendar": {
+    "description": "Bottom navigation calendar tab"
+  },
 
   "tasksTitle": "My Tasks",
   "@tasksTitle": {
@@ -601,5 +605,17 @@
   "taskUpdated": "Task updated successfully",
   "@taskUpdated": {
     "description": "Success message when task is updated"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "deleteTask": "Delete Task",
+  "@deleteTask": {
+    "description": "Delete task dialog title"
   }
 } 

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/presentation/viewmodels/project_list_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/project_list_viewmodel.dart';
 import '../../mocks/mock_project_repository.dart';
 
 void main() {
@@ -194,7 +194,7 @@ void main() {
 
       test('should not load more when no more pages', () async {
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [],
             page: 0,
             size: 10,
@@ -219,9 +219,9 @@ void main() {
       test('should refresh projects list', () async {
         // Initial load
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [
-              const Project(
+              Project(
                 id: '1',
                 name: 'Project 1',
                 completed: 0,
@@ -242,9 +242,9 @@ void main() {
 
         // Refresh with new data
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [
-              const Project(
+              Project(
                 id: '2',
                 name: 'Project 2',
                 completed: 0,
@@ -270,9 +270,9 @@ void main() {
       test('should set refreshing state during refresh', () async {
         // First load some projects
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [
-              const Project(
+              Project(
                 id: '1',
                 name: 'Project 1',
                 completed: 0,
@@ -307,9 +307,9 @@ void main() {
     group('Search', () {
       test('should search projects with query', () async {
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [
-              const Project(
+              Project(
                 id: '1',
                 name: 'Test Project',
                 completed: 0,
@@ -348,7 +348,7 @@ void main() {
         expect(viewModel.searchQuery, 'test');
 
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [],
             page: 0,
             size: 10,
@@ -376,7 +376,7 @@ void main() {
 
     group('Create Project', () {
       test('should create project successfully', () async {
-        final newProject = const Project(
+        const newProject = Project(
           id: 'new-id',
           name: 'New Project',
           description: 'New Description',
@@ -401,7 +401,7 @@ void main() {
       });
 
       test('should handle empty description', () async {
-        final newProject = const Project(
+        const newProject = Project(
           id: 'new-id',
           name: 'New Project',
           completed: 0,
@@ -437,7 +437,7 @@ void main() {
     group('Update Project', () {
       test('should update project successfully', () async {
         // First load the project through the repository
-        final initialProject = const Project(
+        const initialProject = Project(
           id: '1',
           name: 'Original Project',
           description: 'Original Description',
@@ -448,7 +448,7 @@ void main() {
         );
 
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [initialProject],
             page: 0,
             size: 10,
@@ -459,7 +459,7 @@ void main() {
 
         await viewModel.initialize();
 
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: '1',
           name: 'Updated Project',
           description: 'Updated Description',
@@ -501,7 +501,7 @@ void main() {
     group('Delete Project', () {
       test('should delete project successfully', () async {
         // Add initial project
-        final project = const Project(
+        const project = Project(
           id: '1',
           name: 'Project to Delete',
           completed: 0,
@@ -512,7 +512,7 @@ void main() {
 
         // First load the project through the repository
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [project],
             page: 0,
             size: 10,
@@ -546,7 +546,7 @@ void main() {
     group('Member Management', () {
       test('should add member to project successfully', () async {
         // First load the project through the repository
-        final initialProject = const Project(
+        const initialProject = Project(
           id: '1',
           name: 'Project',
           completed: 0,
@@ -556,7 +556,7 @@ void main() {
         );
 
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [initialProject],
             page: 0,
             size: 10,
@@ -567,7 +567,7 @@ void main() {
 
         await viewModel.initialize();
 
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: '1',
           name: 'Project',
           completed: 0,
@@ -588,7 +588,7 @@ void main() {
 
       test('should remove member from project successfully', () async {
         // First load the project with member through the repository
-        final initialProject = const Project(
+        const initialProject = Project(
           id: '1',
           name: 'Project',
           completed: 0,
@@ -598,7 +598,7 @@ void main() {
         );
 
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [initialProject],
             page: 0,
             size: 10,
@@ -609,7 +609,7 @@ void main() {
 
         await viewModel.initialize();
 
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: '1',
           name: 'Project',
           completed: 0,
@@ -651,7 +651,7 @@ void main() {
 
     group('Get Project', () {
       test('should return project by ID', () async {
-        final project = const Project(
+        const project = Project(
           id: '1',
           name: 'Test Project',
           completed: 0,
@@ -662,7 +662,7 @@ void main() {
 
         // First load the project through the repository
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [project],
             page: 0,
             size: 10,
@@ -780,9 +780,9 @@ void main() {
       test('should clear error and set loaded state when projects exist', () async {
         // Load some projects first
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [
-              const Project(
+              Project(
                 id: '1',
                 name: 'Project 1',
                 completed: 0,
@@ -815,9 +815,9 @@ void main() {
       test('should reset to initial state', () async {
         // Load some data first
         mockRepository.setGetProjectsResponse(
-          PaginatedResponse<Project>(
+          const PaginatedResponse<Project>(
             items: [
-              const Project(
+              Project(
                 id: '1',
                 name: 'Project 1',
                 completed: 0,

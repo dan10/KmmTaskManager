@@ -1,5 +1,5 @@
 import 'package:task_manager_shared/models.dart';
-import '../../lib/data/repositories/auth_repository.dart';
+import 'package:task_manager_app/data/repositories/auth_repository.dart';
 
 /// Manual mock implementation of AuthRepository for testing
 class MockAuthRepository implements AuthRepository {
@@ -91,7 +91,6 @@ class MockAuthRepository implements AuthRepository {
     return _storedToken;
   }
 
-  @override
   Future<String?> getStoredRefreshToken() async {
     if (shouldThrowException && mockException != null) {
       throw mockException!;
@@ -107,7 +106,6 @@ class MockAuthRepository implements AuthRepository {
     return _currentUser;
   }
 
-  @override
   Future<void> storeTokens(String token, String refreshToken) async {
     if (shouldThrowException && mockException != null) {
       throw mockException!;
@@ -116,7 +114,6 @@ class MockAuthRepository implements AuthRepository {
     _storedRefreshToken = refreshToken;
   }
 
-  @override
   Future<void> storeUser(UserPublicResponseDto user) async {
     if (shouldThrowException && mockException != null) {
       throw mockException!;
@@ -124,7 +121,6 @@ class MockAuthRepository implements AuthRepository {
     _currentUser = user;
   }
 
-  @override
   Future<void> clearStorage() async {
     if (shouldThrowException && mockException != null) {
       throw mockException!;

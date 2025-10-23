@@ -1,17 +1,19 @@
 class ApiConstants {
-  // Base URL - this should be configurable based on environment
-  static const String baseUrl = 'http://localhost:8080';
+  // Base URL - Android emulator uses 10.0.2.2 to access host machine's localhost
+  // Use 'http://localhost:8081' for iOS simulator or web
+  static const String baseUrl = 'http://192.168.68.57:8081';
 
-  // Auth endpoints
-  static const String loginEndpoint = '/api/auth/login';
-  static const String registerEndpoint = '/api/auth/register';
-  static const String googleLoginEndpoint = '/api/auth/google-login';
-  static const String logoutEndpoint = '/api/auth/logout';
-  static const String refreshTokenEndpoint = '/api/auth/refresh';
+  // Auth endpoints (matching KMM: v1/auth/...)
+  static const String loginEndpoint = '/v1/auth/login';
+  static const String registerEndpoint = '/v1/auth/register';
+  static const String googleLoginEndpoint = '/v1/auth/google-login';
+  static const String logoutEndpoint = '/v1/auth/logout';
+  static const String refreshTokenEndpoint = '/v1/auth/refresh';
 
-  // Task endpoints
-  static const String tasksEndpoint = '/api/tasks';
+  // Task endpoints (matching KMM: v1/tasks/...)
+  static const String tasksEndpoint = '/v1/tasks';
+  static const String assignedTasksEndpoint = '/v1/tasks/assigned';
 
-  // Project endpoints
-  static const String projectsEndpoint = '/api/projects';
+  // Project endpoints (matching KMM: v1/projects/...)
+  static const String projectsEndpoint = '/v1/projects';
 } 

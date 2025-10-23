@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:task_manager_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_manager_shared/models.dart';
@@ -292,7 +292,7 @@ class _TaskCreateEditViewState extends State<TaskCreateEditView> {
                                       style: TextStyle(
                                         color: _selectedDueDate != null
                                             ? Theme.of(context).colorScheme.onSurface
-                                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                       ),
                                     ),
                                   ),

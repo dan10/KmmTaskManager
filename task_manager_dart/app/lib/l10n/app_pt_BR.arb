@@ -29,6 +29,7 @@
   "navTasks": "Tarefas",
   "navProjects": "Projetos",
   "navProfile": "Perfil",
+  "navCalendar": "Calendário",
 
   "tasksTitle": "Minhas Tarefas",
   "tasksSearchPlaceholder": "Pesquisar tarefas...",
@@ -141,5 +142,8 @@
   "taskProjectHint": "Selecione um projeto",
   "saveChanges": "Salvar Alterações",
   "taskCreated": "Tarefa criada com sucesso",
-  "taskUpdated": "Tarefa atualizada com sucesso"
+  "taskUpdated": "Tarefa atualizada com sucesso",
+  "cancel": "Cancelar",
+  "delete": "Excluir",
+  "deleteTask": "Excluir Tarefa"
 } 

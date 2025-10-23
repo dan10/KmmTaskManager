@@ -13,7 +13,7 @@ enum ProjectListState {
 }
 
 class ProjectListViewModel extends ChangeNotifier {
-  final ProjectRepository _projectRepository;
+  ProjectRepository _projectRepository;
 
   ProjectListState _state = ProjectListState.initial;
   List<Project> _projects = [];
@@ -63,6 +63,10 @@ class ProjectListViewModel extends ChangeNotifier {
   bool get isNotEmpty => _projects.isNotEmpty;
 
   ProjectListViewModel(this._projectRepository);
+
+  void updateRepository(ProjectRepository repository) {
+    _projectRepository = repository;
+  }
 
   // Initialize and load first page
   Future<void> initialize() async {

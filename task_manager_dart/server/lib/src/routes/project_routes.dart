@@ -15,12 +15,12 @@ class ProjectRoutes {
 
   ProjectRoutes(this._projectService, this._authMiddleware) {
     final baseRouter = Router()
-      ..get('/projects', _getProjects)
-      ..get('/projects/<id>', _getProjectById)
-      ..post('/projects', _createProject)
-      ..put('/projects/<id>', _updateProject)
-      ..delete('/projects/<id>', _deleteProject)
-      ..get('/projects/member/<userId>', _getProjectsByMember);
+      ..get('/', _getProjects)
+      ..get('/<id>', _getProjectById)
+      ..post('/', _createProject)
+      ..put('/<id>', _updateProject)
+      ..delete('/<id>', _deleteProject)
+      ..get('/member/<userId>', _getProjectsByMember);
     
     // Wrap the router with auth middleware using Pipeline
     final handler = Pipeline()

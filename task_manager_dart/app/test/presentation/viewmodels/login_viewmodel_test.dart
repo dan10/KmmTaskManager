@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/presentation/viewmodels/login_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/login_viewmodel.dart';
 import '../../mocks/mock_auth_repository.dart';
 
 void main() {
@@ -15,7 +15,7 @@ void main() {
       mockAuthRepository = MockAuthRepository();
       loginViewModel = LoginViewModel(mockAuthRepository);
 
-      mockUser = UserPublicResponseDto(
+      mockUser = const UserPublicResponseDto(
         id: 'test-id',
         email: 'test@example.com',
         displayName: 'Test User',

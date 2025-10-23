@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/presentation/viewmodels/task_detail_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/task_detail_viewmodel.dart';
 import '../../mocks/mock_task_repository.dart';
 
 void main() {
@@ -181,7 +181,7 @@ void main() {
     group('updateTask', () {
       test('should update task successfully', () async {
         // Arrange - Load initial task
-        final initialTask = TaskDto(
+        const initialTask = TaskDto(
           id: '1',
           title: 'Original Task',
           description: 'Original Description',
@@ -194,13 +194,13 @@ void main() {
         await viewModel.loadTask('1');
 
         // Arrange - Update
-        final request = TaskUpdateRequestDto(
+        const request = TaskUpdateRequestDto(
           title: 'Updated Task',
           description: 'Updated Description',
           priority: Priority.high,
         );
 
-        final updatedTask = TaskDto(
+        const updatedTask = TaskDto(
           id: '1',
           title: 'Updated Task',
           description: 'Updated Description',
@@ -224,7 +224,7 @@ void main() {
 
       test('should handle updating state correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -240,7 +240,7 @@ void main() {
         mockRepository.setUpdateTaskResponse(task);
 
         // Act
-        final future = viewModel.updateTask('1', TaskUpdateRequestDto(title: 'Updated'));
+        final future = viewModel.updateTask('1', const TaskUpdateRequestDto(title: 'Updated'));
         
         // Assert - Check updating state
         expect(viewModel.state, TaskDetailState.updating);
@@ -254,7 +254,7 @@ void main() {
 
       test('should handle update error correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -269,7 +269,7 @@ void main() {
         mockRepository.setShouldThrowError(true);
 
         // Act
-        await viewModel.updateTask('1', TaskUpdateRequestDto(title: 'Updated'));
+        await viewModel.updateTask('1', const TaskUpdateRequestDto(title: 'Updated'));
 
         // Assert
         expect(viewModel.state, TaskDetailState.error);
@@ -281,7 +281,7 @@ void main() {
     group('deleteTask', () {
       test('should delete task successfully', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task to Delete',
           description: 'Description',
@@ -307,7 +307,7 @@ void main() {
 
       test('should handle deleting state correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -338,7 +338,7 @@ void main() {
 
       test('should handle delete error correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -367,7 +367,7 @@ void main() {
     group('changeTaskStatus', () {
       test('should change task status successfully', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -379,7 +379,7 @@ void main() {
         mockRepository.setGetTaskResponse(task);
         await viewModel.loadTask('1');
 
-        final updatedTask = TaskDto(
+        const updatedTask = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -402,7 +402,7 @@ void main() {
 
       test('should handle status change error correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -439,7 +439,7 @@ void main() {
     group('assignTask', () {
       test('should assign task successfully', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -451,7 +451,7 @@ void main() {
         mockRepository.setGetTaskResponse(task);
         await viewModel.loadTask('1');
 
-        final assignedTask = TaskDto(
+        const assignedTask = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -474,7 +474,7 @@ void main() {
 
       test('should handle assignment error correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -525,7 +525,7 @@ void main() {
 
       test('should clear error when task is loaded', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -539,7 +539,7 @@ void main() {
 
         // Simulate error
         mockRepository.setShouldThrowError(true);
-        await viewModel.updateTask('1', TaskUpdateRequestDto(title: 'Updated'));
+        await viewModel.updateTask('1', const TaskUpdateRequestDto(title: 'Updated'));
         expect(viewModel.state, TaskDetailState.error);
 
         // Reset error flag
@@ -558,7 +558,7 @@ void main() {
     group('Reset', () {
       test('should reset viewmodel correctly', () async {
         // Arrange
-        final task = TaskDto(
+        const task = TaskDto(
           id: '1',
           title: 'Task',
           description: 'Description',
@@ -585,7 +585,7 @@ void main() {
     group('Priority Checks', () {
       test('should correctly identify task priorities', () async {
         // Test High Priority
-        final highPriorityTask = TaskDto(
+        const highPriorityTask = TaskDto(
           id: '1',
           title: 'High Priority Task',
           description: 'Description',
@@ -602,7 +602,7 @@ void main() {
         expect(viewModel.isLowPriority, false);
 
         // Test Medium Priority
-        final mediumPriorityTask = TaskDto(
+        const mediumPriorityTask = TaskDto(
           id: '2',
           title: 'Medium Priority Task',
           description: 'Description',
@@ -619,7 +619,7 @@ void main() {
         expect(viewModel.isLowPriority, false);
 
         // Test Low Priority
-        final lowPriorityTask = TaskDto(
+        const lowPriorityTask = TaskDto(
           id: '3',
           title: 'Low Priority Task',
           description: 'Description',
@@ -640,7 +640,7 @@ void main() {
     group('Status Checks', () {
       test('should correctly identify task statuses', () async {
         // Test Todo Status
-        final todoTask = TaskDto(
+        const todoTask = TaskDto(
           id: '1',
           title: 'Todo Task',
           description: 'Description',
@@ -657,7 +657,7 @@ void main() {
         expect(viewModel.isTaskDone, false);
 
         // Test In Progress Status
-        final inProgressTask = TaskDto(
+        const inProgressTask = TaskDto(
           id: '2',
           title: 'In Progress Task',
           description: 'Description',
@@ -674,7 +674,7 @@ void main() {
         expect(viewModel.isTaskDone, false);
 
         // Test Done Status
-        final doneTask = TaskDto(
+        const doneTask = TaskDto(
           id: '3',
           title: 'Done Task',
           description: 'Description',

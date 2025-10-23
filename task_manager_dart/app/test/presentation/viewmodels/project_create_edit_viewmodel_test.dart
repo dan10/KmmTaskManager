@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../../../lib/presentation/viewmodels/project_create_edit_viewmodel.dart';
+import 'package:task_manager_app/presentation/viewmodels/project_create_edit_viewmodel.dart';
 import '../../mocks/mock_project_repository.dart';
 
 void main() {
@@ -56,7 +56,7 @@ void main() {
 
     group('Initialize for Edit', () {
       test('should initialize for editing existing project', () async {
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           description: 'Test Description',
@@ -186,7 +186,7 @@ void main() {
 
     group('Save Project - Create Mode', () {
       test('should create project successfully', () async {
-        final createdProject = const Project(
+        const createdProject = Project(
           id: 'new-id',
           name: 'New Project',
           description: 'New Description',
@@ -211,7 +211,7 @@ void main() {
       });
 
       test('should create project with members', () async {
-        final createdProject = const Project(
+        const createdProject = Project(
           id: 'new-id',
           name: 'New Project',
           completed: 0,
@@ -220,7 +220,7 @@ void main() {
           memberIds: [],
         );
 
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: 'new-id',
           name: 'New Project',
           completed: 0,
@@ -244,7 +244,7 @@ void main() {
       });
 
       test('should handle empty description in create mode', () async {
-        final createdProject = const Project(
+        const createdProject = Project(
           id: 'new-id',
           name: 'New Project',
           completed: 0,
@@ -290,7 +290,7 @@ void main() {
     group('Save Project - Edit Mode', () {
       test('should update project successfully', () async {
         // Initialize for edit
-        final originalProject = const Project(
+        const originalProject = Project(
           id: 'project1',
           name: 'Original Name',
           description: 'Original Description',
@@ -308,7 +308,7 @@ void main() {
         viewModel.updateDescription('Updated Description');
         viewModel.addMember('user2');
 
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: 'project1',
           name: 'Updated Name',
           description: 'Updated Description',
@@ -332,7 +332,7 @@ void main() {
 
       test('should only update changed fields', () async {
         // Initialize for edit
-        final originalProject = const Project(
+        const originalProject = Project(
           id: 'project1',
           name: 'Original Name',
           description: 'Original Description',
@@ -348,7 +348,7 @@ void main() {
         // Only update name
         viewModel.updateName('Updated Name');
 
-        final updatedProject = const Project(
+        const updatedProject = Project(
           id: 'project1',
           name: 'Updated Name',
           description: 'Original Description',
@@ -370,7 +370,7 @@ void main() {
 
       test('should handle no changes in edit mode', () async {
         // Initialize for edit
-        final originalProject = const Project(
+        const originalProject = Project(
           id: 'project1',
           name: 'Original Name',
           description: 'Original Description',
@@ -394,7 +394,7 @@ void main() {
 
       test('should handle update project error', () async {
         // Initialize for edit
-        final originalProject = const Project(
+        const originalProject = Project(
           id: 'project1',
           name: 'Original Name',
           completed: 0,
@@ -421,7 +421,7 @@ void main() {
     group('Delete Project', () {
       test('should delete project successfully', () async {
         // Initialize for edit
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -449,7 +449,7 @@ void main() {
 
       test('should handle delete project error', () async {
         // Initialize for edit
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -489,7 +489,7 @@ void main() {
 
       test('should detect changes in edit mode', () async {
         // Initialize for edit
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Original Name',
           description: 'Original Description',
@@ -539,7 +539,7 @@ void main() {
 
       test('should clear error and set loaded state when project exists', () async {
         // Load project first
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,
@@ -566,7 +566,7 @@ void main() {
     group('Reset', () {
       test('should reset to initial state', () async {
         // Load some data first
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           description: 'Test Description',
@@ -616,7 +616,7 @@ void main() {
 
       test('should set deleting state during delete', () async {
         // Initialize for edit
-        final project = const Project(
+        const project = Project(
           id: 'project1',
           name: 'Test Project',
           completed: 0,

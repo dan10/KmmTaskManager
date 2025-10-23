@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/project.dart';
-import '../../domain/repositories/project_repository.dart';
 
 enum ProjectViewState {
   initial,

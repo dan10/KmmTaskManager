@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../lib/core/utils/validation_utils.dart';
+import 'package:task_manager_app/core/utils/validation_utils.dart';
 
 void main() {
   group('ValidationUtils Tests', () {
@@ -99,13 +99,13 @@ void main() {
       });
 
       test('should handle passwords with only special characters', () {
-        final specialPassword = '!@#\$%^&*()';
+        const specialPassword = '!@#\$%^&*()';
         final strength = ValidationUtils.getPasswordStrength(specialPassword);
         expect(strength, 2); // length + special characters
       });
 
       test('should handle mixed case passwords', () {
-        final mixedPassword = 'AbCdEfGh';
+        const mixedPassword = 'AbCdEfGh';
         final strength = ValidationUtils.getPasswordStrength(mixedPassword);
         expect(strength, 3); // length + lowercase + uppercase
       });
