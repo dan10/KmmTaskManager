@@ -32,6 +32,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
     return Column(
       children: [
+        if (vm.load.running)
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: CircularProgressIndicator(),
+          ),
         Expanded(
           child: ListView.builder(
             itemCount: vm.state.items.length,
@@ -45,6 +50,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
             },
           ),
         ),
+        if (vm.state.items.isEmpty && !vm.load.running)
+          const Padding(
+            padding: EdgeInsets.all(24.0),
+            child: Text('No tasks found'),
+          ),
         if (vm.loadMore.running) const Padding(
           padding: EdgeInsets.all(16.0),
           child: CircularProgressIndicator(),

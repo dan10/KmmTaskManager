@@ -9,3 +9,5 @@ workspace:
 dependency_overrides:
   analyzer: ^8.0.0
   test: ^1.25.8
+dependencies:
+  collection: ^1.19.1

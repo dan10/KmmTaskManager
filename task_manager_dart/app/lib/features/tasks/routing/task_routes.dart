@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:task_manager_app/features/tasks/pages/task_list_screen.dart';
 
 import '../view_models/task_detail_viewmodel.dart';
 import '../view_models/task_create_edit_viewmodel.dart';
@@ -10,7 +11,10 @@ import '../../../core/routing/app_router.dart';
 final List<GoRoute> taskRoutes = [
   GoRoute(
     path: AppRoutes.tasks,
-    redirect: (context, state) => '${AppRoutes.home}?tab=0',
+    builder: (context, state) {
+
+      return TaskListScreen();
+    }
   ),
   GoRoute(
     path: AppRoutes.taskDetail,
