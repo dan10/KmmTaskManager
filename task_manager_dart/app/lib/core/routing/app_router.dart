@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
+import '../../data/sources/local/secure_storage.dart';
 import '../../features/auth/routing/auth_routes.dart';
 import '../../features/projects/routing/project_routes.dart';
 import '../../features/tasks/routing/task_routes.dart';
-import '../../features/tasks/pages/task_list_screen.dart';
-import '../../features/projects/pages/project_list_screen.dart';
-import '../../data/sources/local/secure_storage.dart';
-import 'package:collection/collection.dart';
 
 // It's good practice to have your route paths as constants
 class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/';
+
   // Projects
   static const String projects = '/projects';
   static const String projectDetail = '/project/:projectId';
   static const String projectCreate = '/project/create';
   static const String projectEdit = '/project/:projectId/edit';
+
   // Tasks
   static const String tasks = '/tasks';
   static const String taskDetail = '/task/:taskId';
   static const String taskCreate = '/task/create';
   static const String taskEdit = '/task/:taskId/edit';
+
   // Calendar
   static const String calendar = '/calendar';
 }
@@ -44,26 +45,27 @@ final GoRouter appRouter = GoRouter(
       redirect: (context, state) => AppRoutes.tasks,
     ),
 
-    // Bottom-navigation shell with horizontal slide transitions
+    // Bottom-navigation shell
     StatefulShellRoute(
-      parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state, navigationShell) {
         return navigationShell;
       },
       navigatorContainerBuilder: (context, navigationShell, children) {
-        return ScaffoldWithNavBar(
-          navigationShell: navigationShell,
-          children: children,
-        );
-      },
+            return ScaffoldWithNavBar(
+              navigationShell: navigationShell,
+              children: children,
+            );
+          },
       branches: [
+        // Branch 0: Tasks
         StatefulShellBranch(routes: taskRoutes),
         // Branch 1: Calendar (middle)
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: AppRoutes.calendar,
-              builder: (context, state) => const Center(child: Text('Calendar')),
+              builder: (context, state) =>
+                  const Center(child: Text('Calendar')),
             ),
           ],
         ),
@@ -72,9 +74,8 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
   ],
-  errorBuilder: (context, state) => Scaffold(
-    body: Center(child: Text('Page not found: ${state.error}')),
-  ),
+  errorBuilder: (context, state) =>
+      Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
 );
 
 Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
@@ -82,7 +83,8 @@ Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
   final token = await secureStorage.getToken();
   final loggedIn = token != null && token.isNotEmpty;
 
-  final isAuthRoute = state.matchedLocation == AppRoutes.login ||
+  final isAuthRoute =
+      state.matchedLocation == AppRoutes.login ||
       state.matchedLocation == AppRoutes.register;
 
   if (!loggedIn && !isAuthRoute) {
@@ -96,170 +98,66 @@ Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
   return null;
 }
 
-class _ShellScaffold extends StatefulWidget {
-  const _ShellScaffold({required this.child});
-  final StatefulNavigationShell child;
-
-  @override
-  State<_ShellScaffold> createState() => _ShellScaffoldState();
-}
-
-class _ShellScaffoldState extends State<_ShellScaffold> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _animation;
-  int _previousIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = Tween<Offset>(
-      begin: Offset.zero,
-      end: Offset.zero,
-    ).animate(CurveTween(curve: Curves.easeInOut).animate(_controller));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onTabTapped(int index) {
-    if (index == widget.child.currentIndex) {
-      widget.child.goBranch(index, initialLocation: true);
-      return;
-    }
-
-    final direction = index > _previousIndex ? 1.0 : -1.0;
-
-    setState(() {
-      _animation = Tween<Offset>(
-        begin: Offset(direction, 0),
-        end: Offset.zero,
-      ).animate(CurveTween(curve: Curves.easeInOut).animate(_controller));
-      _previousIndex = widget.child.currentIndex;
-    });
-
-    _controller.forward(from: 0.0);
-    widget.child.goBranch(index);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('TaskIt')),
-      body: SafeArea(
-        child: SlideTransition(
-          position: _animation,
-          child: widget.child,
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: widget.child.currentIndex,
-        onTap: _onTabTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.checklist), label: 'Tasks'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Projects'),
-        ],
-      ),
-    );
-  }
-}
-
-class ScaffoldWithNavBar extends StatelessWidget {
-  /// Constructs an [ScaffoldWithNavBar].
+/// A StatefulWidget that combines a Scaffold with a PageView for smooth transitions.
+class ScaffoldWithNavBar extends StatefulWidget {
   const ScaffoldWithNavBar({
     required this.navigationShell,
     required this.children,
-    Key? key,
-  }) : super(key: key ?? const ValueKey<String>('ScaffoldWithNavBar'));
+    super.key,
+  });
 
-  /// The navigation shell and container for the branch Navigators.
   final StatefulNavigationShell navigationShell;
-
-  /// The children (branch Navigators) to display in a custom container
-  /// ([AnimatedBranchContainer]).
   final List<Widget> children;
+
+  @override
+  State<ScaffoldWithNavBar> createState() => _ScaffoldWithNavBarState();
+}
+
+class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
+  late final PageController _pageController = PageController(
+    initialPage: widget.navigationShell.currentIndex,
+  );
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBranchContainer(
-        currentIndex: navigationShell.currentIndex,
-        children: children,
+      body: SafeArea(
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (int i) => widget.navigationShell.goBranch(i),
+          children: widget.children,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        // Here, the items of BottomNavigationBar are hard coded. In a real
-        // world scenario, the items would most likely be generated from the
-        // branches of the shell route, which can be fetched using
-        // `navigationShell.route.branches`.
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.checklist), label: 'Tasks'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Projects'),
         ],
-        currentIndex: navigationShell.currentIndex,
-        onTap: (int index) => _onTap(context, index),
+        currentIndex: widget.navigationShell.currentIndex,
+        onTap: _onTap,
       ),
     );
   }
 
-  /// Navigate to the current location of the branch at the provided index when
-  /// tapping an item in the BottomNavigationBar.
-  void _onTap(BuildContext context, int index) {
-    // When navigating to a new branch, it's recommended to use the goBranch
-    // method, as doing so makes sure the last navigation state of the
-    // Navigator for the branch is restored.
-    navigationShell.goBranch(
-      index,
-      // A common pattern when using bottom navigation bars is to support
-      // navigating to the initial location when tapping the item that is
-      // already active. This example demonstrates how to support this behavior,
-      // using the initialLocation parameter of goBranch.
-      initialLocation: index == navigationShell.currentIndex,
-    );
+  void _onTap(int index) {
+    // Animate the PageView to the new page.
+    // The router's state will be updated automatically by the PageView's onPageChanged callback.
+    if (_pageController.hasClients && _pageController.page?.round() != index) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    }
   }
-}
-
-class AnimatedBranchContainer extends StatelessWidget {
-  /// Creates a AnimatedBranchContainer
-  const AnimatedBranchContainer({
-    super.key,
-    required this.currentIndex,
-    required this.children,
-  });
-
-  /// The index (in [children]) of the branch Navigator to display.
-  final int currentIndex;
-
-  /// The children (branch Navigators) to display in this container.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children:
-      children.mapIndexed((int index, Widget navigator) {
-        return AnimatedScale(
-          scale: index == currentIndex ? 1 : 1.5,
-          duration: const Duration(milliseconds: 400),
-          child: AnimatedOpacity(
-            opacity: index == currentIndex ? 1 : 0,
-            duration: const Duration(milliseconds: 400),
-            child: _branchNavigatorWrapper(index, navigator),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _branchNavigatorWrapper(int index, Widget navigator) => IgnorePointer(
-    ignoring: index != currentIndex,
-    child: TickerMode(enabled: index == currentIndex, child: navigator),
-  );
 }
