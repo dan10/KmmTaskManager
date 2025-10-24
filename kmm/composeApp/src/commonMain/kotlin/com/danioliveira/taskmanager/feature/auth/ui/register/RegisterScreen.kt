@@ -36,6 +36,7 @@ import kmmtaskmanager.composeapp.generated.resources.ic_app_logo
 import kmmtaskmanager.composeapp.generated.resources.title_already_have_account
 import kmmtaskmanager.composeapp.generated.resources.title_confirm_password
 import kmmtaskmanager.composeapp.generated.resources.title_confirm_password_error
+import kmmtaskmanager.composeapp.generated.resources.title_create_account
 import kmmtaskmanager.composeapp.generated.resources.title_email
 import kmmtaskmanager.composeapp.generated.resources.title_email_error
 import kmmtaskmanager.composeapp.generated.resources.title_name
@@ -126,7 +127,7 @@ private fun RegisterHeader() {
     )
 
     Text(
-        text = "Create Account",
+        text = stringResource(Res.string.title_create_account),
         style = MaterialTheme.typography.headlineMedium
     )
 }

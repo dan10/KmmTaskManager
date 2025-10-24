@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -23,13 +25,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     widget.viewModel.register.addListener(_onResult);
     
-    // Listen to text changes for real-time validation
+    // Listen to text changes for debounced validation
     _name.addListener(_onTextChanged);
     _email.addListener(_onTextChanged);
     _password.addListener(_onTextChanged);
@@ -45,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     widget.viewModel.register.removeListener(_onResult);
     _name.removeListener(_onTextChanged);
     _email.removeListener(_onTextChanged);
@@ -58,12 +62,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _onTextChanged() {
-    widget.viewModel.validateForm(
-      _name.text,
-      _email.text,
-      _password.text,
-      _confirmPassword.text,
-    );
+    // Cancel previous timer
+    _debounceTimer?.cancel();
+    
+    // Start new timer - validate after 300ms of no typing
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      widget.viewModel.validateForm(
+        _name.text,
+        _email.text,
+        _password.text,
+        _confirmPassword.text,
+      );
+    });
   }
 
   @override
@@ -72,154 +82,141 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final l10n = AppLocalization.of(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Keep screen fixed when keyboard appears
       backgroundColor: theme.colorScheme.primaryContainer,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            top: 16.0,
-            left: 16.0,
-            right: 16.0,
-            bottom: 16.0 + MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height - 
-                         MediaQuery.of(context).padding.top - 
-                         MediaQuery.of(context).padding.bottom - 32.0,
-            ),
-            child: Center(
-              child: FractionallySizedBox(
-                widthFactor: 0.9,
-                child: Card(
-                elevation: 8,
-                color: theme.colorScheme.surface,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 24.0,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // App Logo Icon
-                      SvgPicture.asset(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FractionallySizedBox(
+            widthFactor: 0.9,
+            child: Card(
+              elevation: 8,
+              color: theme.colorScheme.surface,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 24.0,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // App Logo Icon - isolated to prevent repainting
+                    RepaintBoundary(
+                      child: SvgPicture.asset(
                         'assets/icons/app_icon.svg',
                         width: 64,
                         height: 64,
                       ),
-                      const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Create Account Title
-                      Text(
-                        'Create Account',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
+                    // Create Account Title
+                    Text(
+                      l10n.createAccount,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: theme.colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Name Field
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.nameHasError,
-                        builder: (context, hasError, _) {
-                          return TaskItInputField(
-                            controller: _name,
-                            label: l10n.name,
-                            keyboardType: TextInputType.name,
-                            textInputAction: TextInputAction.next,
-                            enabled: !widget.viewModel.register.running,
-                            isError: hasError,
-                            errorMessage: l10n.nameError,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
+                    // Name Field
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.nameHasError,
+                      builder: (context, hasError, _) {
+                        return TaskItInputField(
+                          controller: _name,
+                          label: l10n.name,
+                          keyboardType: TextInputType.name,
+                          textInputAction: TextInputAction.next,
+                          enabled: !widget.viewModel.register.running,
+                          isError: hasError,
+                          errorMessage: l10n.nameError,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Email Field
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.emailHasError,
-                        builder: (context, hasError, _) {
-                          return TaskItInputField(
-                            controller: _email,
-                            label: l10n.email,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            enabled: !widget.viewModel.register.running,
-                            isError: hasError,
-                            errorMessage: l10n.emailError,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
+                    // Email Field
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.emailHasError,
+                      builder: (context, hasError, _) {
+                        return TaskItInputField(
+                          controller: _email,
+                          label: l10n.email,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          enabled: !widget.viewModel.register.running,
+                          isError: hasError,
+                          errorMessage: l10n.emailError,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Password Field
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.passwordHasError,
-                        builder: (context, hasError, _) {
-                          return TaskItPasswordField(
-                            controller: _password,
-                            label: l10n.password,
-                            textInputAction: TextInputAction.next,
-                            enabled: !widget.viewModel.register.running,
-                            isError: hasError,
-                            errorMessage: l10n.passwordError,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
+                    // Password Field
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.passwordHasError,
+                      builder: (context, hasError, _) {
+                        return TaskItPasswordField(
+                          controller: _password,
+                          label: l10n.password,
+                          textInputAction: TextInputAction.next,
+                          enabled: !widget.viewModel.register.running,
+                          isError: hasError,
+                          errorMessage: l10n.passwordError,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Confirm Password Field
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.confirmPasswordHasError,
-                        builder: (context, hasError, _) {
-                          return TaskItPasswordField(
-                            controller: _confirmPassword,
-                            label: l10n.confirmPassword,
-                            textInputAction: TextInputAction.done,
-                            enabled: !widget.viewModel.register.running,
-                            onSubmitted: (_) => _handleRegister(),
-                            isError: hasError,
-                            errorMessage: l10n.confirmPasswordError,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
+                    // Confirm Password Field
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.confirmPasswordHasError,
+                      builder: (context, hasError, _) {
+                        return TaskItPasswordField(
+                          controller: _confirmPassword,
+                          label: l10n.confirmPassword,
+                          textInputAction: TextInputAction.done,
+                          enabled: !widget.viewModel.register.running,
+                          onSubmitted: (_) => _handleRegister(),
+                          isError: hasError,
+                          errorMessage: l10n.confirmPasswordError,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Register Button
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.isFormValid,
-                        builder: (context, isValid, _) {
-                          return ListenableBuilder(
-                            listenable: widget.viewModel.register,
-                            builder: (context, _) {
-                              return SizedBox(
-                                width: double.infinity,
-                                child: TaskItPrimaryActionButton(
-                                  text: l10n.register,
-                                  onPressed: _handleRegister,
-                                  enabled: isValid && !widget.viewModel.register.running,
-                                  isLoading: widget.viewModel.register.running,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 16),
+                    // Register Button
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.isFormValid,
+                      builder: (context, isValid, _) {
+                        return ListenableBuilder(
+                          listenable: widget.viewModel.register,
+                          builder: (context, _) {
+                            return SizedBox(
+                              width: double.infinity,
+                              child: TaskItPrimaryActionButton(
+                                text: l10n.register,
+                                onPressed: _handleRegister,
+                                enabled: isValid && !widget.viewModel.register.running,
+                                isLoading: widget.viewModel.register.running,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Sign In Link
-                      _RegisterAccountLink(
-                        onLinkClick: () {
-                          context.go(AppRoutes.login);
-                        },
-                      ),
-                    ],
-                  ),
+                    // Sign In Link
+                    _RegisterAccountLink(
+                      onLinkClick: () {
+                        context.go(AppRoutes.login);
+                      },
+                    ),
+                  ],
                 ),
               ),
-          ),
             ),
           ),
         ),

@@ -23,6 +23,7 @@ class AppLocalization {
   String get signUp => _strings.authSignUp;
   
   // Register
+  String get createAccount => _strings.authRegisterTitle;
   String get name => _strings.authName;
   String get confirmPassword => _strings.authConfirmPassword;
   String get nameError => _strings.authNameError;

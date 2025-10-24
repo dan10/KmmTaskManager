@@ -22,6 +22,7 @@
     <string name="title_password_error">La contraseña debe tener al menos 8 caracteres</string>
 
     <!-- RegisterScreen strings -->
+    <string name="title_create_account">Crear Cuenta</string>
     <string name="title_name">Nombre</string>
     <string name="title_name_error">Por favor, introduce un nombre</string>
     <string name="title_register_button">Registrar</string>

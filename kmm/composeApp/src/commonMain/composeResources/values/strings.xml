@@ -23,6 +23,7 @@
     <string name="title_password_error">Password must be at least 8 characters</string>
 
     <!-- RegisterScreen strings -->
+    <string name="title_create_account">Create Account</string>
     <string name="title_name">Name</string>
     <string name="title_name_error">Name should not be empty</string>
     <string name="title_register_button">Register</string>

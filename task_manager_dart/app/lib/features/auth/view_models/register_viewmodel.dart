@@ -53,11 +53,28 @@ class RegisterViewModel {
     final passwordValid = _isPasswordValid(password);
     final confirmPasswordValid = _isConfirmPasswordValid(password, confirmPassword);
 
-    nameHasError.value = name.isNotEmpty && !nameValid;
-    emailHasError.value = email.isNotEmpty && !emailValid;
-    passwordHasError.value = password.isNotEmpty && !passwordValid;
-    confirmPasswordHasError.value = confirmPassword.isNotEmpty && !confirmPasswordValid;
-    isFormValid.value = nameValid && emailValid && passwordValid && confirmPasswordValid;
+    final newNameHasError = name.isNotEmpty && !nameValid;
+    final newEmailHasError = email.isNotEmpty && !emailValid;
+    final newPasswordHasError = password.isNotEmpty && !passwordValid;
+    final newConfirmPasswordHasError = confirmPassword.isNotEmpty && !confirmPasswordValid;
+    final newIsFormValid = nameValid && emailValid && passwordValid && confirmPasswordValid;
+
+    // Only update if values changed to prevent unnecessary rebuilds
+    if (nameHasError.value != newNameHasError) {
+      nameHasError.value = newNameHasError;
+    }
+    if (emailHasError.value != newEmailHasError) {
+      emailHasError.value = newEmailHasError;
+    }
+    if (passwordHasError.value != newPasswordHasError) {
+      passwordHasError.value = newPasswordHasError;
+    }
+    if (confirmPasswordHasError.value != newConfirmPasswordHasError) {
+      confirmPasswordHasError.value = newConfirmPasswordHasError;
+    }
+    if (isFormValid.value != newIsFormValid) {
+      isFormValid.value = newIsFormValid;
+    }
   }
 
   // Clear validation errors

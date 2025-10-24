@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_app/core/theme/theme.dart';
@@ -14,6 +15,7 @@ void main() async {
   // await StorageService.instance.init();
   // await ApiService.instance.init();
 
+  debugRepaintRainbowEnabled = true;
   runApp(const MyApp());
 }
 
