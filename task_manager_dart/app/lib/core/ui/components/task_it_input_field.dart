@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 
 /// Custom text input field matching the KMM design
 class TaskItInputField extends StatelessWidget {
@@ -26,10 +27,10 @@ class TaskItInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Use white background for text fields
+    // Use white background for enabled, grey for disabled
     final fillColor = enabled
         ? Colors.white
-        : Colors.white.withValues(alpha: 0.5);
+        : theme.colorScheme.surfaceContainerHighest;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,4 +83,76 @@ class TaskItInputField extends StatelessWidget {
       ],
     );
   }
+}
+
+// Widget Previews
+@Preview(name: 'TaskIt Input Field - Normal')
+Widget previewTaskItInputFieldNormal() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItInputField(
+            controller: TextEditingController(text: 'Sample text'),
+            label: 'Email',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(name: 'TaskIt Input Field - Empty')
+Widget previewTaskItInputFieldEmpty() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItInputField(
+            controller: TextEditingController(),
+            label: 'Email',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(name: 'TaskIt Input Field - Error')
+Widget previewTaskItInputFieldError() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItInputField(
+            controller: TextEditingController(text: 'invalid'),
+            label: 'Email',
+            isError: true,
+            errorMessage: 'Please enter a valid email address',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(name: 'TaskIt Input Field - Disabled')
+Widget previewTaskItInputFieldDisabled() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItInputField(
+            controller: TextEditingController(text: 'disabled@example.com'),
+            label: 'Email',
+            enabled: false,
+          ),
+        ),
+      ),
+    ),
+  );
 }

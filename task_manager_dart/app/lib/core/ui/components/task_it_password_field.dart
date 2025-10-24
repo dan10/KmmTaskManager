@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 
 /// Custom password input field matching the KMM design
 class TaskItPasswordField extends StatefulWidget {
@@ -31,10 +32,10 @@ class _TaskItPasswordFieldState extends State<TaskItPasswordField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Use white background for text fields
+    // Use white background for enabled, grey for disabled
     final fillColor = widget.enabled
         ? Colors.white
-        : Colors.white.withValues(alpha: 0.5);
+        : theme.colorScheme.surfaceContainerHighest;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,4 +99,76 @@ class _TaskItPasswordFieldState extends State<TaskItPasswordField> {
       ],
     );
   }
+}
+
+// Widget Previews
+@Preview(name: 'TaskIt Password Field - Normal')
+Widget previewTaskItPasswordFieldNormal() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItPasswordField(
+            controller: TextEditingController(text: 'password123'),
+            label: 'Password',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(name: 'TaskIt Password Field - Empty')
+Widget previewTaskItPasswordFieldEmpty() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItPasswordField(
+            controller: TextEditingController(),
+            label: 'Password',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(name: 'TaskIt Password Field - Error')
+Widget previewTaskItPasswordFieldError() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItPasswordField(
+            controller: TextEditingController(text: 'short'),
+            label: 'Password',
+            isError: true,
+            errorMessage: 'Password must be at least 8 characters',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(name: 'TaskIt Password Field - Disabled')
+Widget previewTaskItPasswordFieldDisabled() {
+  return MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TaskItPasswordField(
+            controller: TextEditingController(text: 'password123'),
+            label: 'Password',
+            enabled: false,
+          ),
+        ),
+      ),
+    ),
+  );
 }
