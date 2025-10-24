@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Sign Up Link
                       _LoginAccountLink(
                         onLinkClick: () {
-                          // TODO: Navigate to register screen when implemented
+                          context.go(AppRoutes.register);
                         },
                       ),
                     ],

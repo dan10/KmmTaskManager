@@ -21,6 +21,15 @@ class AppLocalization {
   String get passwordError => _strings.authPasswordError;
   String get withoutAccount => _strings.authWithoutAccount;
   String get signUp => _strings.authSignUp;
+  
+  // Register
+  String get name => _strings.authName;
+  String get confirmPassword => _strings.authConfirmPassword;
+  String get nameError => _strings.authNameError;
+  String get confirmPasswordError => _strings.authConfirmPasswordError;
+  String get alreadyHaveAccount => _strings.authAlreadyHaveAccount;
+  String get signIn => _strings.authSignIn;
+  String get register => _strings.authRegisterButton;
 }
 
 
