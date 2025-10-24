@@ -63,7 +63,7 @@ class AuthApiServiceImpl implements AuthApiService {
         body: jsonEncode(request.toJson()),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         return LoginResponseDto.fromJson(
           jsonDecode(response.body) as Map<String, dynamic>,
         );
