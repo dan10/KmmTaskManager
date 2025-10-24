@@ -3,9 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/applocalization.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../core/themes/dimens.dart';
+import '../../../core/ui/components/task_it_input_field.dart';
+import '../../../core/ui/components/task_it_password_field.dart';
+import '../../../core/ui/components/task_it_primary_action_button.dart';
 import '../view_models/login_viewmodel.dart';
-import 'tilted_cards.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.viewModel});
@@ -17,12 +18,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _email = TextEditingController(
-    text: 'email@example.com',
-  );
-  final TextEditingController _password = TextEditingController(
-    text: 'password',
-  );
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
 
   @override
   void initState() {
@@ -40,48 +37,113 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     widget.viewModel.login.removeListener(_onResult);
+    _email.dispose();
+    _password.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalization.of(context);
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const TiltedCards(),
-            Padding(
-              padding: Dimens.of(context).edgeInsetsScreenSymmetric,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(controller: _email),
-                  const SizedBox(height: Dimens.paddingVertical),
-                  TextField(controller: _password, obscureText: true),
-                  const SizedBox(height: Dimens.paddingVertical),
-                  ListenableBuilder(
-                    listenable: widget.viewModel.login,
-                    builder: (context, _) {
-                      return FilledButton(
-                        onPressed: () {
-                          widget.viewModel.login.execute((
-                            _email.value.text,
-                            _password.value.text,
-                          ));
-                        },
-                        child: Text(AppLocalization.of(context).login),
-                      );
-                    },
+      backgroundColor: theme.colorScheme.primaryContainer,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FractionallySizedBox(
+              widthFactor: 0.9,
+              child: Card(
+                elevation: 8,
+                color: theme.colorScheme.surface,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 24.0,
                   ),
-                ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // App Logo Icon
+                      Icon(
+                        Icons.task_alt_rounded,
+                        size: 80,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // App Name
+                      Text(
+                        l10n.appName,
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Email Field
+                      TaskItInputField(
+                        controller: _email,
+                        label: l10n.email,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        enabled: !widget.viewModel.login.running,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Password Field
+                      TaskItPasswordField(
+                        controller: _password,
+                        label: l10n.password,
+                        textInputAction: TextInputAction.done,
+                        enabled: !widget.viewModel.login.running,
+                        onSubmitted: (_) => _handleLogin(),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Login Button
+                      ListenableBuilder(
+                        listenable: widget.viewModel.login,
+                        builder: (context, _) {
+                          return SizedBox(
+                            width: double.infinity,
+                            child: TaskItPrimaryActionButton(
+                              text: l10n.login,
+                              onPressed: _handleLogin,
+                              enabled: !widget.viewModel.login.running,
+                              isLoading: widget.viewModel.login.running,
+                            ),
+                          );
+                        },
+                      ),
+
+                      // Sign Up Link
+                      _LoginAccountLink(
+                        onLinkClick: () {
+                          // TODO: Navigate to register screen when implemented
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  void _handleLogin() {
+    if (!widget.viewModel.login.running) {
+      widget.viewModel.login.execute((
+        _email.value.text,
+        _password.value.text,
+      ));
+    }
   }
 
   void _onResult() {
@@ -97,14 +159,44 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Text(AppLocalization.of(context).errorWhileLogin),
           action: SnackBarAction(
             label: AppLocalization.of(context).tryAgain,
-            onPressed: () => widget.viewModel.login.execute((
-              _email.value.text,
-              _password.value.text,
-            )),
+            onPressed: _handleLogin,
           ),
         ),
       );
     }
+  }
+}
+
+class _LoginAccountLink extends StatelessWidget {
+  final VoidCallback onLinkClick;
+
+  const _LoginAccountLink({required this.onLinkClick});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalization.of(context);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          l10n.withoutAccount,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        TextButton(
+          onPressed: onLinkClick,
+          child: Text(
+            l10n.signUp,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

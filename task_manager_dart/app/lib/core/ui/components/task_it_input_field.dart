@@ -26,6 +26,10 @@ class TaskItInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Use white background for text fields
+    final fillColor = enabled
+        ? Colors.white
+        : Colors.white.withValues(alpha: 0.5);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,20 +40,17 @@ class TaskItInputField extends StatelessWidget {
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           onSubmitted: onSubmitted,
+          style: TextStyle(color: theme.colorScheme.onSurface),
           decoration: InputDecoration(
             labelText: label,
             errorText: isError ? errorMessage : null,
             filled: true,
-            fillColor: enabled
-                ? theme.colorScheme.surfaceContainerHighest
-                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            fillColor: fillColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

@@ -46,6 +46,7 @@ class TaskItPrimaryActionButton extends StatelessWidget {
               text,
               style: theme.textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onPrimary, // Ensure white text on primary color
               ),
             ),
     );
