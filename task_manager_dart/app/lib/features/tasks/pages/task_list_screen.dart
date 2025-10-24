@@ -30,8 +30,26 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Widget build(BuildContext context) {
     final vm = Provider.of<TaskListViewModel>(context);
 
-    return Column(
-      children: [
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: const [
+            Icon(Icons.checklist, size: 28),
+            SizedBox(width: 12),
+            Text('Tasks'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              // TODO: Navigate to create task
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
         if (vm.load.running)
           const Padding(
             padding: EdgeInsets.all(16.0),
@@ -59,7 +77,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
           padding: EdgeInsets.all(16.0),
           child: CircularProgressIndicator(),
         ),
-      ],
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          heroTag: 'add_fab', // Disable default FAB Hero
+          onPressed: () {
+            // TODO: Navigate to create task
+          },
+          child: const Icon(Icons.add),
+        ),
     );
   }
 }

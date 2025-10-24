@@ -1,7 +1,7 @@
 class ApiConstants {
   // Base URL - Android emulator uses 10.0.2.2 to access host machine's localhost
   // Use 'http://localhost:8081' for iOS simulator or web
-  static const String baseUrl = 'http://192.168.68.57:8081';
+  static const String baseUrl = 'http://192.168.68.51:8081';
 
   // Auth endpoints (matching KMM: v1/auth/...)
   static const String loginEndpoint = '/v1/auth/login';

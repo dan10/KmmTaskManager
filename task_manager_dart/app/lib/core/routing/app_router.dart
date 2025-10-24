@@ -153,11 +153,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
     // Animate the PageView to the new page.
     // The router's state will be updated automatically by the PageView's onPageChanged callback.
     if (_pageController.hasClients && _pageController.page?.round() != index) {
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
-      );
+      _pageController.jumpToPage(index);
     }
   }
 }

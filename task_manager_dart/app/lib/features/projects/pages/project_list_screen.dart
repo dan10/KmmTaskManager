@@ -11,7 +11,23 @@ class ProjectListScreen extends StatelessWidget {
     final vm = Provider.of<ProjectListViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Projects')),
+      appBar: AppBar(
+        title: Row(
+          children: const [
+            Icon(Icons.folder, size: 28),
+            SizedBox(width: 12),
+            Text('Projects'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              // TODO: Navigate to create project
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -32,9 +48,12 @@ class ProjectListScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => vm.loadMore.execute(),
-        child: const Icon(Icons.more_horiz),
+      floatingActionButton:  FloatingActionButton(
+          heroTag: 'add_fab',
+          onPressed: () {
+            // TODO: Navigate to create project
+          },
+          child: const Icon(Icons.add),
       ),
     );
   }
