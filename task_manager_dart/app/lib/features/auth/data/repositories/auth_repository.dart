@@ -1,6 +1,6 @@
 import 'package:task_manager_shared/models.dart';
 
-import '../../../../data/services/auth_service.dart';
+import '../services/auth_service.dart';
 import '../../../../data/sources/local/secure_storage.dart';
 import '../../../../utils/result.dart';
 
