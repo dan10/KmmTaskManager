@@ -32,10 +32,11 @@ class TaskItInputField extends StatelessWidget {
         ? Colors.white
         : theme.colorScheme.surfaceContainerHighest;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
+    return RepaintBoundary(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
           controller: controller,
           enabled: enabled,
           keyboardType: keyboardType,
@@ -81,6 +82,7 @@ class TaskItInputField extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }

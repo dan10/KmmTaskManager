@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -21,13 +23,14 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     widget.viewModel.login.addListener(_onResult);
     
-    // Listen to text changes for real-time validation
+    // Listen to text changes for debounced validation
     _email.addListener(_onTextChanged);
     _password.addListener(_onTextChanged);
   }
@@ -41,6 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     widget.viewModel.login.removeListener(_onResult);
     _email.removeListener(_onTextChanged);
     _password.removeListener(_onTextChanged);
@@ -50,7 +54,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onTextChanged() {
-    widget.viewModel.validateForm(_email.text, _password.text);
+    // Cancel previous timer
+    _debounceTimer?.cancel();
+    
+    // Start new timer - validate after 300ms of no typing
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      widget.viewModel.validateForm(_email.text, _password.text);
+    });
   }
 
   @override
@@ -89,82 +99,84 @@ class _LoginScreenState extends State<LoginScreen> {
                         fit: BoxFit.contain,
                       ),
 
-                      // App Name
-                      Text(
-                        l10n.appName,
-                        style: theme.textTheme.headlineLarge?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
+                    // App Name
+                    Text(
+                      l10n.appName,
+                      style: theme.textTheme.headlineLarge?.copyWith(
+                        color: theme.colorScheme.onSurface,
                       ),
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Email Field
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.emailHasError,
-                        builder: (context, hasError, _) {
-                          return TaskItInputField(
-                            controller: _email,
-                            label: l10n.email,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            enabled: !widget.viewModel.login.running,
-                            isError: hasError,
-                            errorMessage: l10n.emailError,
-                          );
-                        },
-                      ),
+                    // Email Field
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.emailHasError,
+                      builder: (context, hasError, _) {
+                        return TaskItInputField(
+                          controller: _email,
+                          label: l10n.email,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          enabled: !widget.viewModel.login.running,
+                          isError: hasError,
+                          errorMessage: l10n.emailError,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Password Field
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.passwordHasError,
-                        builder: (context, hasError, _) {
-                          return TaskItPasswordField(
-                            controller: _password,
-                            label: l10n.password,
-                            textInputAction: TextInputAction.done,
-                            enabled: !widget.viewModel.login.running,
-                            onSubmitted: (_) => _handleLogin(),
-                            isError: hasError,
-                            errorMessage: l10n.passwordError,
-                          );
-                        },
-                      ),
+                    // Password Field
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.passwordHasError,
+                      builder: (context, hasError, _) {
+                        return TaskItPasswordField(
+                          controller: _password,
+                          label: l10n.password,
+                          textInputAction: TextInputAction.done,
+                          enabled: !widget.viewModel.login.running,
+                          onSubmitted: (_) => _handleLogin(),
+                          isError: hasError,
+                          errorMessage: l10n.passwordError,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
 
-                      const SizedBox(height: 8),
+                    // Login Button
+                    ValueListenableBuilder<bool>(
+                      valueListenable: widget.viewModel.isFormValid,
+                      builder: (context, isValid, _) {
+                        return ListenableBuilder(
+                          listenable: widget.viewModel.login,
+                          builder: (context, _) {
+                            return SizedBox(
+                              width: double.infinity,
+                              child: TaskItPrimaryActionButton(
+                                text: l10n.login,
+                                onPressed: _handleLogin,
+                                enabled: isValid && !widget.viewModel.login.running,
+                                isLoading: widget.viewModel.login.running,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Login Button
-                      ValueListenableBuilder<bool>(
-                        valueListenable: widget.viewModel.isFormValid,
-                        builder: (context, isValid, _) {
-                          return ListenableBuilder(
-                            listenable: widget.viewModel.login,
-                            builder: (context, _) {
-                              return SizedBox(
-                                width: double.infinity,
-                                child: TaskItPrimaryActionButton(
-                                  text: l10n.login,
-                                  onPressed: _handleLogin,
-                                  enabled: isValid && !widget.viewModel.login.running,
-                                  isLoading: widget.viewModel.login.running,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-
-                      // Sign Up Link
-                      _LoginAccountLink(
-                        onLinkClick: () {
-                          context.go(AppRoutes.register);
-                        },
-                      ),
-                    ],
-                  ),
+                    // Sign Up Link
+                    _LoginAccountLink(
+                      onLinkClick: () {
+                        context.go(AppRoutes.register);
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
+      ),
     );
   }
 

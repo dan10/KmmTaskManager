@@ -39,9 +39,20 @@ class LoginViewModel {
     final emailValid = _isEmailValid(email);
     final passwordValid = _isPasswordValid(password);
 
-    emailHasError.value = email.isNotEmpty && !emailValid;
-    passwordHasError.value = password.isNotEmpty && !passwordValid;
-    isFormValid.value = emailValid && passwordValid;
+    final newEmailHasError = email.isNotEmpty && !emailValid;
+    final newPasswordHasError = password.isNotEmpty && !passwordValid;
+    final newIsFormValid = emailValid && passwordValid;
+
+    // Only update if values changed to prevent unnecessary rebuilds
+    if (emailHasError.value != newEmailHasError) {
+      emailHasError.value = newEmailHasError;
+    }
+    if (passwordHasError.value != newPasswordHasError) {
+      passwordHasError.value = newPasswordHasError;
+    }
+    if (isFormValid.value != newIsFormValid) {
+      isFormValid.value = newIsFormValid;
+    }
   }
 
   // Clear validation errors
