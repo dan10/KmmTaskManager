@@ -42,9 +42,8 @@ fun TrackItInputField(
     Column(modifier = modifier) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = state.text.toString(),
-            onValueChange = { value -> state.setText(value) },
-            singleLine = lineLimits == TextFieldLineLimits.SingleLine,
+            state = state,
+            lineLimits = lineLimits,
             label = { Text(text = label) },
             isError = isError,
             enabled = enabled,

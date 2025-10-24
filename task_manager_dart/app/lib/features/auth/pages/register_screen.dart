@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/applocalization.dart';
@@ -71,14 +72,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final l10n = AppLocalization.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Keep screen fixed when keyboard appears
       backgroundColor: theme.colorScheme.primaryContainer,
-      body: Center(
+      body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: FractionallySizedBox(
-              widthFactor: 0.9,
-              child: Card(
+          padding: EdgeInsets.only(
+            top: 16.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: 16.0 + MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height - 
+                         MediaQuery.of(context).padding.top - 
+                         MediaQuery.of(context).padding.bottom - 32.0,
+            ),
+            child: Center(
+              child: FractionallySizedBox(
+                widthFactor: 0.9,
+                child: Card(
                 elevation: 8,
                 color: theme.colorScheme.surface,
                 child: Padding(
@@ -91,10 +104,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // App Logo Icon
-                      Icon(
-                        Icons.task_alt_rounded,
-                        size: 64,
-                        color: theme.colorScheme.primary,
+                      SvgPicture.asset(
+                        'assets/icons/app_icon.svg',
+                        width: 64,
+                        height: 64,
                       ),
                       const SizedBox(height: 8),
 
@@ -206,6 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
               ),
+          ),
             ),
           ),
         ),

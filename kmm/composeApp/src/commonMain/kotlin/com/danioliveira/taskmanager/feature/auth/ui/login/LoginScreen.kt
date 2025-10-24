@@ -132,7 +132,6 @@ fun LoginScreen(
                     enabled = !state.isLoading
                 )
 
-                Spacer(modifier = Modifier.height(0.dp))
                 TaskItPrimaryActionButton(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(Res.string.title_login_button),

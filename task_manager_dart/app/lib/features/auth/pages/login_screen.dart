@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/applocalization.dart';
@@ -58,10 +59,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final l10n = AppLocalization.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Keep screen fixed when keyboard appears
       backgroundColor: theme.colorScheme.primaryContainer,
       body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
+        child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: FractionallySizedBox(
               widthFactor: 0.9,
@@ -76,14 +77,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 8.0,
                     children: [
                       // App Logo Icon
-                      Icon(
-                        Icons.task_alt_rounded,
-                        size: 80,
-                        color: theme.colorScheme.primary,
+                      SvgPicture.asset(
+                        'assets/icons/app_icon.svg',
+                        width: 108,
+                        height: 108,
+                        clipBehavior: Clip.none,
+                        allowDrawingOutsideViewBox: true,
+                        fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 8),
 
                       // App Name
                       Text(
@@ -92,7 +96,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: theme.colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 8),
 
                       // Email Field
                       ValueListenableBuilder<bool>(
@@ -109,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                       ),
-                      const SizedBox(height: 8),
 
                       // Password Field
                       ValueListenableBuilder<bool>(
@@ -126,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                       ),
+
                       const SizedBox(height: 8),
 
                       // Login Button
@@ -162,7 +165,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 

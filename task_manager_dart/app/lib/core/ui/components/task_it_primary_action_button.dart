@@ -22,9 +22,8 @@ class TaskItPrimaryActionButton extends StatelessWidget {
     return FilledButton(
       onPressed: (enabled && !isLoading) ? onPressed : null,
       style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(100), // Fully rounded like Material3
         ),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
