@@ -85,63 +85,72 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final shimmerGradientToUse = isDark ? shimmerGradientDark : shimmerGradient;
 
     return Scaffold(
-      appBar: _buildAppBar(viewModel),
-      body: Shimmer(
-        linearGradient: shimmerGradientToUse,
-        child: RefreshIndicator(
-          onRefresh: () => _handleRefresh(viewModel),
-          child: PagingListener<int, TaskDto>(
-            controller: viewModel.pagingController,
-            builder: (context, pagingState, fetchNextPage) => 
-              CustomScrollView(
-                slivers: [
-                  // Progress summary loaded independently
-                  ProgressSummarySliver(
-                    completedTasks: vmState.completedTasks,
-                    totalTasks: vmState.totalTasks,
-                    isLoading: vmState.isLoading,
-                  ),
-                  
-                  // Paginated task list
-                  PagedSliverList<int, TaskDto>(
-                    state: pagingState,
-                    fetchNextPage: fetchNextPage,
-                    builderDelegate: PagedChildBuilderDelegate<TaskDto>(
-                      itemBuilder: (context, task, index) => TaskListItemBuilder(
-                        task: task,
-                        onTap: () {
-                          // TODO: Navigate to task details
-                        },
-                        onStatusChanged: (status) {
-                          _viewModel.updateTaskStatus.execute((task.id, status));
-                        },
-                        onDelete: () {
-                          _viewModel.deleteTask.execute(task.id);
-                        },
-                      ),
-                      firstPageErrorIndicatorBuilder: (context) => 
-                        FirstPageErrorIndicator(
-                          errorMessage: vmState.errorMessage,
-                          onRetry: () => viewModel.pagingController.refresh(),
+      resizeToAvoidBottomInset: false, // Prevent shifting when keyboard appears
+      body: Column(
+        children: [
+          // TaskIt AppBar with search
+          _buildAppBar(viewModel),
+          // Body content - must be wrapped in Expanded
+          Expanded(
+            child: Shimmer(
+              linearGradient: shimmerGradientToUse,
+              child: RefreshIndicator(
+                onRefresh: () => _handleRefresh(viewModel),
+                child: PagingListener<int, TaskDto>(
+                  controller: viewModel.pagingController,
+                  builder: (context, pagingState, fetchNextPage) => 
+                    CustomScrollView(
+                      slivers: [
+                        // Progress summary loaded independently
+                        ProgressSummarySliver(
+                          completedTasks: vmState.completedTasks,
+                          totalTasks: vmState.totalTasks,
+                          isLoading: vmState.isLoading,
                         ),
-                      newPageErrorIndicatorBuilder: (context) => 
-                        NewPageErrorIndicator(
-                          onRetry: () => viewModel.pagingController.refresh(),
+                        
+                        // Paginated task list
+                        PagedSliverList<int, TaskDto>(
+                          state: pagingState,
+                          fetchNextPage: fetchNextPage,
+                          builderDelegate: PagedChildBuilderDelegate<TaskDto>(
+                            itemBuilder: (context, task, index) => TaskListItemBuilder(
+                              task: task,
+                              onTap: () {
+                                // TODO: Navigate to task details
+                              },
+                              onStatusChanged: (status) {
+                                _viewModel.updateTaskStatus.execute((task.id, status));
+                              },
+                              onDelete: () {
+                                _viewModel.deleteTask.execute(task.id);
+                              },
+                            ),
+                            firstPageErrorIndicatorBuilder: (context) => 
+                              FirstPageErrorIndicator(
+                                errorMessage: vmState.errorMessage,
+                                onRetry: () => viewModel.pagingController.refresh(),
+                              ),
+                            newPageErrorIndicatorBuilder: (context) => 
+                              NewPageErrorIndicator(
+                                onRetry: () => viewModel.pagingController.refresh(),
+                              ),
+                            firstPageProgressIndicatorBuilder: (context) => 
+                              const FirstPageProgressIndicator(),
+                            newPageProgressIndicatorBuilder: (context) => 
+                              const NewPageProgressIndicator(),
+                            noItemsFoundIndicatorBuilder: (context) => 
+                              const NoItemsFoundIndicator(),
+                            noMoreItemsIndicatorBuilder: (context) => 
+                              const NoMoreItemsIndicator(),
+                          ),
                         ),
-                      firstPageProgressIndicatorBuilder: (context) => 
-                        const FirstPageProgressIndicator(),
-                      newPageProgressIndicatorBuilder: (context) => 
-                        const NewPageProgressIndicator(),
-                      noItemsFoundIndicatorBuilder: (context) => 
-                        const NoItemsFoundIndicator(),
-                      noMoreItemsIndicatorBuilder: (context) => 
-                        const NoMoreItemsIndicator(),
+                      ],
                     ),
-                  ),
-                ],
+                ),
               ),
+            ),
           ),
-        ),
+        ],
       ),
       floatingActionButton: _buildFAB(),
     );
