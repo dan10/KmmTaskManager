@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:task_manager_shared/models.dart';
 
+import '../constants/api_routes.dart';
 import '../services/auth_service.dart';
 import '../services/jwt_service.dart';
 import '../util/shelf_helpers.dart';
@@ -15,7 +16,7 @@ class AuthRoutes {
   Router get router {
     final router = Router();
 
-    router.post('/register', (Request request) async {
+    router.post(ApiRoutes.authRegister, (Request request) async {
       final requestBody = await request.readJsonBody();
       final registerDto = RegisterRequestDto.fromJson(requestBody);
       
@@ -29,7 +30,7 @@ class AuthRoutes {
       return okJsonResponse(userDto.toJson());
     });
 
-    router.post('/login', (Request request) async {
+    router.post(ApiRoutes.authLogin, (Request request) async {
       final requestBody = await request.readJsonBody();
       final loginDto = LoginRequestDto.fromJson(requestBody);
       
@@ -44,7 +45,7 @@ class AuthRoutes {
       return okJsonResponse(response.toJson());
     });
 
-    router.post('/google-login', (Request request) async {
+    router.post(ApiRoutes.authGoogleLogin, (Request request) async {
       final requestBody = await request.readJsonBody();
       final googleLoginDto = GoogleLoginRequestDto.fromJson(requestBody);
       

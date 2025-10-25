@@ -29,8 +29,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await _secureStorage.storeToken(loginResponse.token);
       await _secureStorage.storeUser(loginResponse.user);
       return Result.ok(null);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -46,8 +46,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await _secureStorage.storeToken(loginResponse.token);
       await _secureStorage.storeUser(loginResponse.user);
       return Result.ok(null);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 }

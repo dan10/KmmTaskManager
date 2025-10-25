@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:task_manager_shared/models.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/api_routes.dart';
 
 /// Low-level API service for authentication HTTP calls
 abstract class AuthApiService {
@@ -30,7 +31,7 @@ class AuthApiServiceImpl implements AuthApiService {
   Future<LoginResponseDto> login(LoginRequestDto request) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiConstants.loginEndpoint}'),
+        Uri.parse('$_baseUrl${ApiRoutes.authLogin}'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -56,7 +57,7 @@ class AuthApiServiceImpl implements AuthApiService {
   Future<LoginResponseDto> register(RegisterRequestDto request) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiConstants.registerEndpoint}'),
+        Uri.parse('$_baseUrl${ApiRoutes.authRegister}'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -82,7 +83,7 @@ class AuthApiServiceImpl implements AuthApiService {
   Future<LoginResponseDto> googleLogin(GoogleLoginRequestDto request) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiConstants.googleLoginEndpoint}'),
+        Uri.parse('$_baseUrl${ApiRoutes.authGoogleLogin}'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -109,7 +110,7 @@ class AuthApiServiceImpl implements AuthApiService {
     try {
       // Optional server logout endpoint call
       await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiConstants.logoutEndpoint}'),
+        Uri.parse('$_baseUrl${ApiRoutes.authLogout}'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

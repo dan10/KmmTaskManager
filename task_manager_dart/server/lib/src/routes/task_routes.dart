@@ -1,6 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:uuid/uuid.dart';
+import '../constants/api_routes.dart';
 import '../middleware/auth_middleware.dart';
 import '../services/task_service.dart';
 import 'package:task_manager_shared/models.dart';
@@ -17,17 +18,17 @@ class TaskRoutes {
     final baseRouter = Router();
 
     baseRouter.get('/', _getAllTasks);
-    baseRouter.get('/progress', _getTaskProgress);
-    baseRouter.get('/created-by-me', _getTasksCreatedByMe);
-    baseRouter.get('/project/<projectId>', _getTasksByProject);
-    baseRouter.get('/<id>', _getTaskById);
+    baseRouter.get(ApiRoutes.tasksStats, _getTaskProgress);
+    baseRouter.get(ApiRoutes.tasksCreatedByMe, _getTasksCreatedByMe);
+    baseRouter.get(ApiRoutes.tasksByProject, _getTasksByProject);
+    baseRouter.get(ApiRoutes.taskById, _getTaskById);
     baseRouter.post('/', _createTask);
-    baseRouter.put('/<id>', _updateTask);
-    baseRouter.delete('/<id>', _deleteTask);
+    baseRouter.put(ApiRoutes.taskById, _updateTask);
+    baseRouter.delete(ApiRoutes.taskById, _deleteTask);
 
     // New routes for assigning and changing status
-    baseRouter.post('/<id>/assign', _assignTask);
-    baseRouter.post('/<id>/status', _changeTaskStatus);
+    baseRouter.post(ApiRoutes.taskAssign, _assignTask);
+    baseRouter.post(ApiRoutes.taskStatus, _changeTaskStatus);
 
     // Wrap the router with auth middleware using Pipeline
     final handler = Pipeline()

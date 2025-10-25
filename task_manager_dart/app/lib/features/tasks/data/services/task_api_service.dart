@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:task_manager_shared/models.dart';
 
-import '../../core/constants/api_constants.dart';
-import '../sources/local/secure_storage.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/api_routes.dart';
+import '../../../../data/sources/local/secure_storage.dart';
 
 abstract class TaskApiService {
   Future<PaginatedResponse<TaskDto>> getTasks({
@@ -43,16 +44,10 @@ class TaskApiServiceImpl implements TaskApiService {
     String? projectId,
   }) async {
     final headers = await _getHeaders();
-    
-    final queryParams = <String, String>{
-      'page': page.toString(),
-      'size': size.toString(),
-      if (query != null && query.isNotEmpty) 'query': query,
-      if (projectId != null) 'projectId': projectId,
-    };
 
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.assignedTasksEndpoint}')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.tasksAssignedWithParams(
+        page: page, size: size, query: query
+    )}');
     
     final response = await http.get(uri, headers: headers);
     
@@ -71,7 +66,7 @@ class TaskApiServiceImpl implements TaskApiService {
   Future<TaskProgress> getTaskProgress() async {
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}/progress');
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.tasksStats}');
     
     final response = await http.get(uri, headers: headers);
     
@@ -87,7 +82,7 @@ class TaskApiServiceImpl implements TaskApiService {
   Future<TaskDto> getTask(String id) async {
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}/$id');
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskById(id)}');
     
     final response = await http.get(uri, headers: headers);
     
@@ -105,7 +100,7 @@ class TaskApiServiceImpl implements TaskApiService {
   Future<TaskDto> createTask(TaskCreateRequestDto request) async {
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}');
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.tasks}');
     
     final response = await http.post(
       uri,
@@ -125,7 +120,7 @@ class TaskApiServiceImpl implements TaskApiService {
   Future<TaskDto> updateTask(String id, TaskUpdateRequestDto request) async {
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}/$id');
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskById(id)}');
     
     final response = await http.put(
       uri,
@@ -147,7 +142,7 @@ class TaskApiServiceImpl implements TaskApiService {
   Future<void> deleteTask(String id) async {
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}/$id');
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskById(id)}');
     
     final response = await http.delete(uri, headers: headers);
     
@@ -164,7 +159,7 @@ class TaskApiServiceImpl implements TaskApiService {
   Future<TaskDto> changeTaskStatus(String id, TaskStatusChangeRequestDto request) async {
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}/$id/status');
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskStatus(id)}');
     
     final response = await http.patch(
       uri,
@@ -186,7 +181,7 @@ class TaskApiServiceImpl implements TaskApiService {
   Future<TaskDto> assignTask(String id, TaskAssignRequestDto request) async {
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}/$id/assign');
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskAssign(id)}');
     
     final response = await http.patch(
       uri,

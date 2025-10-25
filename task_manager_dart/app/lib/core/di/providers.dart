@@ -1,7 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import '../../features/auth/data/services/auth_service.dart';
-import '../../data/services/task_api_service.dart';
+import '../../features/tasks/data/services/task_api_service.dart';
 import '../../data/services/project_api_service.dart';
 import '../../data/sources/local/secure_storage.dart';
 import '../constants/api_constants.dart';

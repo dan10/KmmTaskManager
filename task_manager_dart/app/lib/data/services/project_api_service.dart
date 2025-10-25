@@ -4,6 +4,7 @@ import 'package:task_manager_shared/models.dart';
 
 import '../sources/local/secure_storage.dart';
 import '../../core/constants/api_constants.dart';
+import '../../core/constants/api_routes.dart';
 
 class ProjectApiService {
   final SecureStorage _secureStorage;
@@ -33,7 +34,7 @@ class ProjectApiService {
       if (query != null && query.isNotEmpty) 'query': query,
     };
 
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}')
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projects}')
         .replace(queryParameters: queryParams);
 
     final response = await http.get(uri, headers: headers);
@@ -59,7 +60,7 @@ class ProjectApiService {
   // Get single project by ID
   Future<ProjectResponseDto> getProject(String projectId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}/$projectId');
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projectById(projectId)}');
 
     final response = await http.get(uri, headers: headers);
 
@@ -75,7 +76,7 @@ class ProjectApiService {
   // Create new project
   Future<ProjectResponseDto> createProject(CreateProjectRequestDto request) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}');
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projects}');
 
     final response = await http.post(
       uri,
@@ -95,7 +96,7 @@ class ProjectApiService {
   // Update existing project
   Future<ProjectResponseDto> updateProject(String projectId, ProjectUpdateRequestDto request) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}/$projectId');
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projectById(projectId)}');
 
     final response = await http.put(
       uri,
@@ -115,7 +116,7 @@ class ProjectApiService {
   // Delete project
   Future<void> deleteProject(String projectId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}/$projectId');
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projectById(projectId)}');
 
     final response = await http.delete(uri, headers: headers);
 
@@ -128,7 +129,7 @@ class ProjectApiService {
   // Add member to project
   Future<ProjectResponseDto> addMember(String projectId, String userId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}/$projectId/members');
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projectMembers(projectId)}');
 
     final response = await http.post(
       uri,
@@ -148,7 +149,7 @@ class ProjectApiService {
   // Remove member from project
   Future<ProjectResponseDto> removeMember(String projectId, String userId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}/$projectId/members/$userId');
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projectMemberById(projectId, userId)}');
 
     final response = await http.delete(uri, headers: headers);
 
@@ -164,7 +165,7 @@ class ProjectApiService {
   // Get project statistics
   Future<Map<String, dynamic>> getProjectStats(String projectId) async {
     final headers = await _getHeaders();
-    final uri = Uri.parse('$_baseUrl${ApiConstants.projectsEndpoint}/$projectId/stats');
+    final uri = Uri.parse('$_baseUrl${ApiRoutes.projectStats(projectId)}');
 
     final response = await http.get(uri, headers: headers);
 

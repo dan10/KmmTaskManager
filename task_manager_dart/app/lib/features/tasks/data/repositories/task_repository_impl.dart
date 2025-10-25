@@ -1,6 +1,6 @@
 import 'package:task_manager_shared/models.dart';
 import '../../domain/repositories/task_repository.dart';
-import '../../../../data/services/task_api_service.dart';
+import '../services/task_api_service.dart';
 
 /// Implementation of TaskRepository
 /// Matches KMM's TaskRepositoryImpl

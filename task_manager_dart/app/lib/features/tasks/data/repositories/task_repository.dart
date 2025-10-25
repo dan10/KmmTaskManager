@@ -1,6 +1,6 @@
 import 'package:task_manager_shared/models.dart';
 
-import '../../../../data/services/task_api_service.dart';
+import '../services/task_api_service.dart';
 import '../../../../core/utils/result.dart';
 
 abstract class TaskRepository {
@@ -23,8 +23,8 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       final res = await _apiService.getTasks(page: page, size: size, query: query, projectId: projectId);
       return Result.ok(res);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -33,8 +33,8 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       final res = await _apiService.getTaskProgress();
       return Result.ok(res);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -43,8 +43,8 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       final res = await _apiService.getTask(id);
       return Result.ok(res);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -53,8 +53,8 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       final res = await _apiService.createTask(request);
       return Result.ok(res);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -63,8 +63,8 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       final res = await _apiService.updateTask(id, request);
       return Result.ok(res);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -73,8 +73,8 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       await _apiService.deleteTask(id);
       return Result.ok(null);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -84,8 +84,8 @@ class TaskRepositoryImpl implements TaskRepository {
       final req = TaskStatusChangeRequestDto(status: status);
       final res = await _apiService.changeTaskStatus(id, req);
       return Result.ok(res);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception catch (e) {
+      return Result.error(e);
     }
   }
 
@@ -95,8 +95,8 @@ class TaskRepositoryImpl implements TaskRepository {
       final req = TaskAssignRequestDto(assigneeId: assigneeId);
       final res = await _apiService.assignTask(id, req);
       return Result.ok(res);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } on Exception  catch (e) {
+      return Result.error(e);
     }
   }
 }

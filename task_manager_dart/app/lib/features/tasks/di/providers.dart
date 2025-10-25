@@ -1,7 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
-import '../../../data/services/task_api_service.dart';
+import '../data/services/task_api_service.dart';
 import '../data/repositories/task_repository.dart';
 import '../domain/usecases/delete_task_usecase.dart';
 import '../domain/usecases/get_task_progress_usecase.dart';

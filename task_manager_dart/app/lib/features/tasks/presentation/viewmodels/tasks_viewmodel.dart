@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:logging/logging.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../domain/usecases/delete_task_usecase.dart';
@@ -17,6 +18,7 @@ class TasksViewModel extends ChangeNotifier {
   final GetTaskProgressUseCase _getTaskProgressUseCase;
   final UpdateTaskStatusUseCase _updateTaskStatusUseCase;
   final DeleteTaskUseCase _deleteTaskUseCase;
+  final _log = Logger('TasksViewModel');
 
   TasksViewModel({
     required GetTasksUseCase getTasksUseCase,
@@ -94,16 +96,20 @@ class TasksViewModel extends ChangeNotifier {
       notifyListeners();
     }
 
+    _log.info('Loading task progress...');
     final result = await _getTaskProgressUseCase();
 
     if (result is Ok<TaskProgress>) {
       final progress = result.value;
+      _log.info('Task progress loaded: ${progress.completedTasks}/${progress.totalTasks}');
       _state = _state.copyWith(
         isLoading: false,
         completedTasks: progress.completedTasks,
         totalTasks: progress.totalTasks,
       );
     } else {
+      final error = (result as Error).error;
+      _log.severe('Failed to load task progress: $error');
       _state = _state.copyWith(isLoading: false);
     }
     notifyListeners();

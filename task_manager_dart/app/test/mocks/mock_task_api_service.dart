@@ -1,6 +1,6 @@
 import 'package:task_manager_shared/models.dart';
 
-import 'package:task_manager_app/data/services/task_api_service.dart';
+import 'package:task_manager_app/features/tasks/data/services/task_api_service.dart';
 
 class MockTaskApiService implements TaskApiService {
   bool _shouldThrowError = false;
