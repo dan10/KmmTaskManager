@@ -35,7 +35,8 @@ class TasksViewModel extends ChangeNotifier {
       },
       fetchPage: _fetchPage,
     );
-    _loadTaskProgress();
+    // Load progress independently
+    loadTaskProgress();
   }
 
   // Pagination controller
@@ -77,8 +78,8 @@ class TasksViewModel extends ChangeNotifier {
     }
   }
 
-  // Load task progress
-  Future<void> _loadTaskProgress() async {
+  // Load task progress independently
+  Future<void> loadTaskProgress() async {
     _state = _state.copyWith(isLoading: true);
     notifyListeners();
 
@@ -103,7 +104,7 @@ class TasksViewModel extends ChangeNotifier {
     notifyListeners();
 
     _pagingController.refresh();
-    await _loadTaskProgress();
+    await loadTaskProgress();
 
     _state = _state.copyWith(isRefreshing: false);
     notifyListeners();

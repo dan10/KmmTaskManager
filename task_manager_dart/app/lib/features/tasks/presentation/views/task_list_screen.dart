@@ -5,12 +5,13 @@ import 'package:task_manager_shared/models.dart';
 
 import '../viewmodels/tasks_viewmodel.dart';
 import '../widgets/task_list_indicators.dart';
+import '../widgets/progress_summary_sliver.dart';
 import '../actions/tasks_action.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/ui/components/shimmer.dart';
 
 /// Task list screen with infinite scroll pagination
-/// Follows Flutter's best practices for UI events
+/// Uses CustomScrollView with slivers for better separation
 class TaskListScreen extends StatefulWidget {
   final String? projectId;
 
@@ -79,40 +80,48 @@ class _TaskListScreenState extends State<TaskListScreen> {
           child: PagingListener<int, TaskDto>(
             controller: viewModel.pagingController,
             builder: (context, pagingState, fetchNextPage) => 
-              PagedListView<int, TaskDto>.separated(
-                state: pagingState,
-                fetchNextPage: fetchNextPage,
-                separatorBuilder: (context, index) => const SizedBox(height: 0),
-                builderDelegate: PagedChildBuilderDelegate<TaskDto>(
-                  itemBuilder: (context, task, index) => TaskListItemBuilder(
-                    task: task,
-                    index: index,
-                    onTap: () {
-                      // TODO: Navigate to task details
-                    },
-                    onStatusChanged: (status) => _handleUpdateStatus(task.id, status),
-                    onDelete: () => _handleDeleteTask(task.id),
+              CustomScrollView(
+                slivers: [
+                  // Progress summary loaded independently
+                  ProgressSummarySliver(
                     completedTasks: vmState.completedTasks,
                     totalTasks: vmState.totalTasks,
+                    isLoading: vmState.isLoading,
                   ),
-                  firstPageErrorIndicatorBuilder: (context) => FirstPageErrorIndicator(
-                    errorMessage: vmState.errorMessage,
-                    onRetry: () => viewModel.pagingController.refresh(),
+                  
+                  // Paginated task list
+                  PagedSliverList<int, TaskDto>(
+                    state: pagingState,
+                    fetchNextPage: fetchNextPage,
+                    builderDelegate: PagedChildBuilderDelegate<TaskDto>(
+                      itemBuilder: (context, task, index) => TaskListItemBuilder(
+                        task: task,
+                        onTap: () {
+                          // TODO: Navigate to task details
+                        },
+                        onStatusChanged: (status) => _handleUpdateStatus(task.id, status),
+                        onDelete: () => _handleDeleteTask(task.id),
+                      ),
+                      firstPageErrorIndicatorBuilder: (context) => 
+                        FirstPageErrorIndicator(
+                          errorMessage: vmState.errorMessage,
+                          onRetry: () => viewModel.pagingController.refresh(),
+                        ),
+                      newPageErrorIndicatorBuilder: (context) => 
+                        NewPageErrorIndicator(
+                          onRetry: () => viewModel.pagingController.refresh(),
+                        ),
+                      firstPageProgressIndicatorBuilder: (context) => 
+                        const FirstPageProgressIndicator(),
+                      newPageProgressIndicatorBuilder: (context) => 
+                        const NewPageProgressIndicator(),
+                      noItemsFoundIndicatorBuilder: (context) => 
+                        const NoItemsFoundIndicator(),
+                      noMoreItemsIndicatorBuilder: (context) => 
+                        const NoMoreItemsIndicator(),
+                    ),
                   ),
-                  newPageErrorIndicatorBuilder: (context) => NewPageErrorIndicator(
-                    onRetry: () => viewModel.pagingController.refresh(),
-                  ),
-                  firstPageProgressIndicatorBuilder: (context) => 
-                    const FirstPageProgressIndicator(),
-                  newPageProgressIndicatorBuilder: (context) => 
-                    const NewPageProgressIndicator(),
-                  noItemsFoundIndicatorBuilder: (context) => NoItemsFoundIndicator(
-                    completedTasks: vmState.completedTasks,
-                    totalTasks: vmState.totalTasks,
-                  ),
-                  noMoreItemsIndicatorBuilder: (context) => 
-                    const NoMoreItemsIndicator(),
-                ),
+                ],
               ),
           ),
         ),
