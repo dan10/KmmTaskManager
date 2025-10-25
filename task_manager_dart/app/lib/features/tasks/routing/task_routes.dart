@@ -1,7 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:task_manager_app/features/tasks/pages/task_list_screen.dart';
 
+import '../presentation/views/task_list_screen.dart';
+import '../presentation/viewmodels/tasks_viewmodel.dart';
 import '../view_models/task_detail_viewmodel.dart';
 import '../view_models/task_create_edit_viewmodel.dart';
 import '../pages/task_detail_screen.dart';
@@ -12,8 +13,9 @@ final List<GoRoute> taskRoutes = [
   GoRoute(
     path: AppRoutes.tasks,
     builder: (context, state) {
-
-      return TaskListScreen();
+      // Ensure TasksViewModel is available
+      Provider.of<TasksViewModel>(context, listen: false);
+      return const TaskListScreen();
     }
   ),
   GoRoute(

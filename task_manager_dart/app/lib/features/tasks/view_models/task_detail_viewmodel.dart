@@ -3,8 +3,8 @@ import 'package:logging/logging.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../data/repositories/task_repository.dart';
-import '../../../utils/command.dart';
-import '../../../utils/result.dart';
+import '../../../core/utils/command.dart';
+import '../../../core/utils/result.dart';
 
 class TaskDetailState {
   const TaskDetailState({this.task, this.error});
@@ -39,18 +39,18 @@ class TaskDetailViewModel extends ChangeNotifier {
       if (res is Ok<TaskDto>) {
         state = state.copyWith(task: res.value, error: null);
         notifyListeners();
-        return Ok<void>(null);
+        return Result.ok(null);
       } else {
         final err = (res as Error).error.toString();
         state = state.copyWith(error: err);
         notifyListeners();
-        return Error<void>(Exception(err));
+        return Result.error(Exception(err));
       }
-    } catch (e, st) {
-      _log.severe('Load task failed', e, st);
+    } catch (e) {
+      _log.severe('Load task failed', e);
       state = state.copyWith(error: e.toString());
       notifyListeners();
-      return Error<void>(e, st);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -61,16 +61,16 @@ class TaskDetailViewModel extends ChangeNotifier {
       if (res is Ok<TaskDto>) {
         state = state.copyWith(task: res.value, error: null);
         notifyListeners();
-        return Ok<void>(null);
+        return Result.ok(null);
       } else {
         final err = (res as Error).error.toString();
         state = state.copyWith(error: err);
         notifyListeners();
-        return Error<void>(Exception(err));
+        return Result.error(Exception(err));
       }
-    } catch (e, st) {
-      _log.severe('Change task status failed', e, st);
-      return Error<void>(e, st);
+    } catch (e) {
+      _log.severe('Change task status failed', e);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -81,28 +81,27 @@ class TaskDetailViewModel extends ChangeNotifier {
       if (res is Ok<TaskDto>) {
         state = state.copyWith(task: res.value, error: null);
         notifyListeners();
-        return Ok<void>(null);
+        return Result.ok(null);
       } else {
         final err = (res as Error).error.toString();
         state = state.copyWith(error: err);
         notifyListeners();
-        return Error<void>(Exception(err));
+        return Result.error(Exception(err));
       }
-    } catch (e, st) {
-      _log.severe('Assign task failed', e, st);
-      return Error<void>(e, st);
+    } catch (e) {
+      _log.severe('Assign task failed', e);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
   Future<Result<void>> _delete(String id) async {
     try {
       final res = await _repository.deleteTask(id);
-      return res is Ok<void> ? Ok<void>(null) : Error<void>(Exception((res as Error).error.toString()));
-    } catch (e, st) {
-      _log.severe('Delete task failed', e, st);
-      return Error<void>(e, st);
+      return res is Ok ? Result.ok(null) : Result.error(Exception((res as Error).error.toString()));
+    } catch (e) {
+      _log.severe('Delete task failed', e);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 }
-
 

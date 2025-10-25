@@ -1,5 +1,6 @@
 import 'package:task_manager_shared/models.dart';
-import '../repositories/task_repository.dart';
+import '../../../../core/utils/result.dart';
+import '../../data/repositories/task_repository.dart';
 
 /// Use case for getting paginated tasks
 /// Matches KMM's GetTasksUseCase
@@ -8,7 +9,7 @@ class GetTasksUseCase {
 
   GetTasksUseCase(this._repository);
 
-  Future<PaginatedResponse<TaskDto>> call({
+  Future<Result<PaginatedResponse<TaskDto>>> call({
     int page = 0,
     int size = 20,
     String? query,

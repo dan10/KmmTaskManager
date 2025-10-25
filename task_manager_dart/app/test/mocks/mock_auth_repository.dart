@@ -1,5 +1,5 @@
 import 'package:task_manager_shared/models.dart';
-import 'package:task_manager_app/data/repositories/auth_repository.dart';
+import 'package:task_manager_app/features/auth/data/repositories/auth_repository.dart';
 
 /// Manual mock implementation of AuthRepository for testing
 class MockAuthRepository implements AuthRepository {

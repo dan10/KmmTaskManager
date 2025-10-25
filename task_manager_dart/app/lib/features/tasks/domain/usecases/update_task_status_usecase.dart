@@ -1,5 +1,6 @@
 import 'package:task_manager_shared/models.dart';
-import '../repositories/task_repository.dart';
+import '../../../../core/utils/result.dart';
+import '../../data/repositories/task_repository.dart';
 
 /// Use case for updating task status
 /// Matches KMM's UpdateTaskStatusUseCase
@@ -8,7 +9,7 @@ class UpdateTaskStatusUseCase {
 
   UpdateTaskStatusUseCase(this._repository);
 
-  Future<TaskDto> call(String taskId, TaskStatus status) async {
+  Future<Result<TaskDto>> call(String taskId, TaskStatus status) async {
     return await _repository.changeTaskStatus(taskId, status);
   }
 }

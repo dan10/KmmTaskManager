@@ -1,4 +1,5 @@
-import '../repositories/task_repository.dart';
+import '../../../../core/utils/result.dart';
+import '../../data/repositories/task_repository.dart';
 
 /// Use case for deleting a task
 /// Matches KMM's DeleteTaskUseCase
@@ -7,8 +8,8 @@ class DeleteTaskUseCase {
 
   DeleteTaskUseCase(this._repository);
 
-  Future<void> call(String taskId) async {
-    await _repository.deleteTask(taskId);
+  Future<Result<void>> call(String taskId) async {
+    return await _repository.deleteTask(taskId);
   }
 }
 

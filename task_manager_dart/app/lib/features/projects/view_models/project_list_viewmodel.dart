@@ -3,8 +3,8 @@ import 'package:logging/logging.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../data/repositories/project_repository.dart';
-import '../../../utils/command.dart';
-import '../../../utils/result.dart';
+import '../../../core/utils/command.dart';
+import '../../../core/utils/result.dart';
 
 class ProjectListState {
   const ProjectListState({
@@ -74,24 +74,24 @@ class ProjectListViewModel extends ChangeNotifier {
           error: null,
         );
         notifyListeners();
-        return Ok<void>(null);
+        return Result.ok(null);
       } else {
         final err = (res as Error).error.toString();
         state = state.copyWith(error: err);
         notifyListeners();
-        return Error<void>(Exception(err));
+        return Result.error(Exception(err));
       }
-    } catch (e, st) {
-      _log.severe('Load projects failed', e, st);
+    } catch (e) {
+      _log.severe('Load projects failed', e);
       state = state.copyWith(error: e.toString());
       notifyListeners();
-      return Error<void>(e, st);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
   Future<Result<void>> _loadMore() async {
     if (state.page >= state.totalPages) {
-      return Ok<void>(null);
+      return Result.ok(null);
     }
     try {
       final res = await _repository.getProjects(page: state.page, size: state.size, query: state.query);
@@ -105,18 +105,18 @@ class ProjectListViewModel extends ChangeNotifier {
           error: null,
         );
         notifyListeners();
-        return Ok<void>(null);
+        return Result.ok(null);
       } else {
         final err = (res as Error).error.toString();
         state = state.copyWith(error: err);
         notifyListeners();
-        return Error<void>(Exception(err));
+        return Result.error(Exception(err));
       }
-    } catch (e, st) {
-      _log.severe('Load more projects failed', e, st);
+    } catch (e) {
+      _log.severe('Load more projects failed', e);
       state = state.copyWith(error: e.toString());
       notifyListeners();
-      return Error<void>(e, st);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 }

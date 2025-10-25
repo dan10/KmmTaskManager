@@ -1,7 +1,7 @@
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../data/services/task_api_service.dart';
-import '../../../../utils/result.dart';
+import '../../../../core/utils/result.dart';
 
 abstract class TaskRepository {
   Future<Result<PaginatedResponse<TaskDto>>> getTasks({int page = 0, int size = 20, String? query, String? projectId});
@@ -21,9 +21,9 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Result<PaginatedResponse<TaskDto>>> getTasks({int page = 0, int size = 20, String? query, String? projectId}) async {
     try {
       final res = await _apiService.getTasks(page: page, size: size, query: query, projectId: projectId);
-      return Ok<PaginatedResponse<TaskDto>>(res);
-    } catch (e, st) {
-      return Error<PaginatedResponse<TaskDto>>(e, st);
+      return Result.ok(res);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -31,9 +31,9 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Result<TaskDto>> getTask(String id) async {
     try {
       final res = await _apiService.getTask(id);
-      return Ok<TaskDto>(res);
-    } catch (e, st) {
-      return Error<TaskDto>(e, st);
+      return Result.ok(res);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -41,9 +41,9 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Result<TaskDto>> createTask(TaskCreateRequestDto request) async {
     try {
       final res = await _apiService.createTask(request);
-      return Ok<TaskDto>(res);
-    } catch (e, st) {
-      return Error<TaskDto>(e, st);
+      return Result.ok(res);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -51,9 +51,9 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Result<TaskDto>> updateTask(String id, TaskUpdateRequestDto request) async {
     try {
       final res = await _apiService.updateTask(id, request);
-      return Ok<TaskDto>(res);
-    } catch (e, st) {
-      return Error<TaskDto>(e, st);
+      return Result.ok(res);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -61,9 +61,9 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Result<void>> deleteTask(String id) async {
     try {
       await _apiService.deleteTask(id);
-      return Ok<void>(null);
-    } catch (e, st) {
-      return Error<void>(e, st);
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -72,9 +72,9 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       final req = TaskStatusChangeRequestDto(status: status);
       final res = await _apiService.changeTaskStatus(id, req);
-      return Ok<TaskDto>(res);
-    } catch (e, st) {
-      return Error<TaskDto>(e, st);
+      return Result.ok(res);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -83,9 +83,9 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       final req = TaskAssignRequestDto(assigneeId: assigneeId);
       final res = await _apiService.assignTask(id, req);
-      return Ok<TaskDto>(res);
-    } catch (e, st) {
-      return Error<TaskDto>(e, st);
+      return Result.ok(res);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 }

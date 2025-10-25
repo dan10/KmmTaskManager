@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_app/features/auth/view_models/register_viewmodel.dart';
 import 'package:task_manager_app/features/auth/data/repositories/auth_repository.dart' as auth;
-import 'package:task_manager_app/utils/result.dart';
+import 'package:task_manager_app/core/utils/result.dart';
 
 class _FakeAuthRepo implements auth.AuthRepository {
   _FakeAuthRepo(this._loginResult, this._registerResult);
@@ -17,7 +17,7 @@ class _FakeAuthRepo implements auth.AuthRepository {
 
 void main() {
   test('RegisterViewModel completes on ok', () async {
-    final repo = _FakeAuthRepo(Ok<void>(null), Ok<void>(null));
+    final repo = _FakeAuthRepo(Result.ok(null), Result.ok(null));
     final vm = RegisterViewModel(authRepository: repo);
 
     await vm.register.execute(('John', 'a@b.com', 'pw'));
@@ -27,7 +27,7 @@ void main() {
   });
 
   test('RegisterViewModel errors on error', () async {
-    final repo = _FakeAuthRepo(Ok<void>(null), Error<void>(Exception('fail')));
+    final repo = _FakeAuthRepo(Result.ok(null), Result.error(Exception('fail')));
     final vm = RegisterViewModel(authRepository: repo);
 
     await vm.register.execute(('John', 'a@b.com', 'pw'));

@@ -1,12 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task_manager_shared/models.dart';
+import 'package:task_manager_app/core/utils/result.dart';
 
-import 'package:task_manager_app/data/repositories/task_repository.dart';
+import 'package:task_manager_app/features/tasks/data/repositories/task_repository.dart';
 import '../../mocks/mock_task_api_service.dart';
 
 void main() {
   group('TaskRepository', () {
-    late TaskRepository repository;
+    late TaskRepositoryImpl repository;
     late MockTaskApiService mockApiService;
 
     setUp(() {
@@ -54,12 +55,14 @@ void main() {
         final result = await repository.getTasks();
 
         // Assert
-        expect(result.items.length, 2);
-        expect(result.total, 2);
-        expect(result.page, 0);
-        expect(result.totalPages, 1);
-        expect(result.items[0].title, 'Test Task 1');
-        expect(result.items[1].title, 'Test Task 2');
+        expect(result, isA<Ok<PaginatedResponse<TaskDto>>>());
+        final data = (result as Ok<PaginatedResponse<TaskDto>>).value;
+        expect(data.items.length, 2);
+        expect(data.total, 2);
+        expect(data.page, 0);
+        expect(data.totalPages, 1);
+        expect(data.items[0].title, 'Test Task 1');
+        expect(data.items[1].title, 'Test Task 2');
       });
 
       test('should handle pagination parameters correctly', () async {
@@ -120,10 +123,12 @@ void main() {
         final result = await repository.getTask('1');
 
         // Assert
-        expect(result.id, '1');
-        expect(result.title, 'Test Task');
-        expect(result.status, TaskStatus.todo);
-        expect(result.priority, Priority.high);
+        expect(result, isA<Ok<TaskDto>>());
+        final task = (result as Ok<TaskDto>).value;
+        expect(task.id, '1');
+        expect(task.title, 'Test Task');
+        expect(task.status, TaskStatus.todo);
+        expect(task.priority, Priority.high);
       });
 
       test('should throw exception when task not found', () async {
@@ -170,11 +175,13 @@ void main() {
         final result = await repository.createTask(request);
 
         // Assert
-        expect(result.title, 'New Task');
-        expect(result.description, 'New Description');
-        expect(result.priority, Priority.medium);
-        expect(result.projectId, 'proj1');
-        expect(result.status, TaskStatus.todo);
+        expect(result, isA<Ok<TaskDto>>());
+        final task = (result as Ok<TaskDto>).value;
+        expect(task.title, 'New Task');
+        expect(task.description, 'New Description');
+        expect(task.priority, Priority.medium);
+        expect(task.projectId, 'proj1');
+        expect(task.status, TaskStatus.todo);
       });
 
       test('should throw validation exception for invalid request', () async {
@@ -244,9 +251,11 @@ void main() {
         final result = await repository.updateTask('1', request);
 
         // Assert
-        expect(result.title, 'Updated Task');
-        expect(result.description, 'Updated description that is long enough');
-        expect(result.priority, Priority.high);
+        expect(result, isA<Ok<TaskDto>>());
+        final task = (result as Ok<TaskDto>).value;
+        expect(task.title, 'Updated Task');
+        expect(task.description, 'Updated description that is long enough');
+        expect(task.priority, Priority.high);
       });
 
       test('should throw validation exception for invalid request', () async {
@@ -346,7 +355,9 @@ void main() {
         final result = await repository.changeTaskStatus('1', TaskStatus.done);
 
         // Assert
-        expect(result.status, TaskStatus.done);
+        expect(result, isA<Ok<TaskDto>>());
+        final task = (result as Ok<TaskDto>).value;
+        expect(task.status, TaskStatus.done);
         expect(mockApiService.lastStatusChangeRequest?.status, TaskStatus.done);
       });
 
@@ -387,7 +398,9 @@ void main() {
         final result = await repository.assignTask('1', 'user2');
 
         // Assert
-        expect(result.assigneeId, 'user2');
+        expect(result, isA<Ok<TaskDto>>());
+        final task = (result as Ok<TaskDto>).value;
+        expect(task.assigneeId, 'user2');
         expect(mockApiService.lastAssignRequest?.assigneeId, 'user2');
       });
 

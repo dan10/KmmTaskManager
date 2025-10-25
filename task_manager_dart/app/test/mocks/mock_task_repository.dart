@@ -1,6 +1,6 @@
 import 'package:task_manager_shared/models.dart';
 
-import 'package:task_manager_app/data/repositories/task_repository.dart';
+import 'package:task_manager_app/features/tasks/data/repositories/task_repository.dart';
 
 class MockTaskRepository implements TaskRepository {
   bool _shouldThrowError = false;

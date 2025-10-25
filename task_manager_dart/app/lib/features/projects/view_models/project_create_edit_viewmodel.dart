@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 import '../data/repositories/project_repository.dart';
-import '../../../utils/command.dart';
-import '../../../utils/result.dart';
+import '../../../core/utils/command.dart';
+import '../../../core/utils/result.dart';
 
 class ProjectCreateEditState {
   const ProjectCreateEditState({this.id, this.name = '', this.description = '', this.error});
@@ -40,18 +40,18 @@ class ProjectCreateEditViewModel extends ChangeNotifier {
     try {
       final res = await _repository.createProject(name: name, description: description);
       if (res is Ok) {
-        return Ok<void>(null);
+        return Result.ok(null);
       } else {
         final err = (res as Error).error.toString();
         state = state.copyWith(error: err);
         notifyListeners();
-        return Error<void>(Exception(err));
+        return Result.error(Exception(err));
       }
-    } catch (e, st) {
-      _log.severe('Create project failed', e, st);
+    } catch (e) {
+      _log.severe('Create project failed', e);
       state = state.copyWith(error: e.toString());
       notifyListeners();
-      return Error<void>(e, st);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -60,18 +60,18 @@ class ProjectCreateEditViewModel extends ChangeNotifier {
     try {
       final res = await _repository.updateProject(id, name: name, description: description);
       if (res is Ok) {
-        return Ok<void>(null);
+        return Result.ok(null);
       } else {
         final err = (res as Error).error.toString();
         state = state.copyWith(error: err);
         notifyListeners();
-        return Error<void>(Exception(err));
+        return Result.error(Exception(err));
       }
-    } catch (e, st) {
-      _log.severe('Update project failed', e, st);
+    } catch (e) {
+      _log.severe('Update project failed', e);
       state = state.copyWith(error: e.toString());
       notifyListeners();
-      return Error<void>(e, st);
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 }

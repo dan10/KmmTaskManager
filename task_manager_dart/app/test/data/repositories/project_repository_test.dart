@@ -1,12 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:task_manager_app/features/projects/data/repositories/project_repository.dart';
+import 'package:task_manager_app/core/utils/result.dart';
 import 'package:task_manager_shared/models.dart';
 
-import 'package:task_manager_app/data/repositories/project_repository.dart';
 import '../../mocks/mock_project_api_service.dart';
 
 void main() {
   group('ProjectRepositoryImpl', () {
-    late ProjectRepository repository;
+    late ProjectRepositoryImpl repository;
     late MockProjectApiService mockApiService;
 
     setUp(() {

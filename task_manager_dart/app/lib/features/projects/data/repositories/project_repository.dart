@@ -1,7 +1,7 @@
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../data/services/project_api_service.dart';
-import '../../../../utils/result.dart';
+import '../../../../core/utils/result.dart';
 
 abstract class ProjectRepository {
   Future<Result<PaginatedResponse<Project>>> getProjects({int page = 0, int size = 10, String? query});
@@ -26,9 +26,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
         total: response.total,
         totalPages: response.totalPages,
       );
-      return Ok<PaginatedResponse<Project>>(mapped);
-    } catch (e, st) {
-      return Error<PaginatedResponse<Project>>(e, st);
+      return Result.ok(mapped);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -36,9 +36,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<Result<Project>> getProject(String id) async {
     try {
       final dto = await _apiService.getProject(id);
-      return Ok<Project>(dto.toProject());
-    } catch (e, st) {
-      return Error<Project>(e, st);
+      return Result.ok(dto.toProject());
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -47,9 +47,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
     try {
       final req = CreateProjectRequestDto(name: name, description: description);
       final dto = await _apiService.createProject(req);
-      return Ok<Project>(dto.toProject());
-    } catch (e, st) {
-      return Error<Project>(e, st);
+      return Result.ok(dto.toProject());
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -58,9 +58,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
     try {
       final req = ProjectUpdateRequestDto(name: name, description: description);
       final dto = await _apiService.updateProject(id, req);
-      return Ok<Project>(dto.toProject());
-    } catch (e, st) {
-      return Error<Project>(e, st);
+      return Result.ok(dto.toProject());
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 
@@ -68,9 +68,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<Result<void>> deleteProject(String id) async {
     try {
       await _apiService.deleteProject(id);
-      return Ok<void>(null);
-    } catch (e, st) {
-      return Error<void>(e, st);
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 }

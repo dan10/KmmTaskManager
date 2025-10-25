@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 import '../data/repositories/auth_repository.dart';
-import '../../../utils/command.dart';
-import '../../../utils/result.dart';
+import '../../../core/utils/command.dart';
+import '../../../core/utils/result.dart';
 
 class LoginViewModel {
   LoginViewModel({required AuthRepository authRepository})
@@ -69,14 +69,14 @@ class LoginViewModel {
     validateForm(email, password);
     
     if (!isFormValid.value) {
-      return Error('Please fix validation errors');
+      return Result.error(Exception('Please fix validation errors'));
     }
 
     final result = await _authRepository.login(
       email: email,
       password: password,
     );
-    if (result is Error<void>) {
+    if (result is Error) {
       _log.warning('Login failed! ${result.error}');
     }
     return result;
