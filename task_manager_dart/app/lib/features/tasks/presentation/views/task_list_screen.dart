@@ -7,6 +7,7 @@ import '../viewmodels/tasks_viewmodel.dart';
 import '../widgets/task_list_indicators.dart';
 import '../widgets/progress_summary_sliver.dart';
 import '../../../../core/ui/components/shimmer.dart';
+import '../../../../core/ui/components/taskit_top_app_bar.dart';
 
 /// Task list screen with infinite scroll pagination
 /// Uses CustomScrollView with slivers for better separation
@@ -21,6 +22,7 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> {
   late TasksViewModel _viewModel;
+  bool _isSearchActive = false;
 
   @override
   void initState() {
@@ -83,7 +85,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final shimmerGradientToUse = isDark ? shimmerGradientDark : shimmerGradient;
 
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(viewModel),
       body: Shimmer(
         linearGradient: shimmerGradientToUse,
         child: RefreshIndicator(
@@ -145,23 +147,26 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: const Row(
-        children: [
-          Icon(Icons.checklist, size: 28),
-          SizedBox(width: 12),
-          Text('Tasks'),
-        ],
+  PreferredSizeWidget _buildAppBar(TasksViewModel viewModel) {
+    return TaskItTopAppBar(
+      title: 'Tasks',
+      searchState: TaskItSearchState(
+        query: viewModel.state.searchQuery,
+        onQueryChange: (query) {
+          viewModel.setSearchQuery(query);
+        },
+        isActive: _isSearchActive,
+        onActiveChange: (active) {
+          setState(() {
+            _isSearchActive = active;
+            if (!active) {
+              viewModel.clearSearch();
+            }
+          });
+        },
+        placeholder: 'Search tasks...',
+        enableClearOnClose: true,
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {
-            // TODO: Implement search
-          },
-        ),
-      ],
     );
   }
 

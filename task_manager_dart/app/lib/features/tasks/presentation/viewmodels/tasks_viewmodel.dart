@@ -88,6 +88,21 @@ class TasksViewModel extends ChangeNotifier {
     }
   }
 
+  // Search functionality
+  void setSearchQuery(String query) {
+    if (_state.searchQuery == query) return;
+    
+    _state = _state.copyWith(searchQuery: query);
+    notifyListeners();
+    
+    // Refresh pagination with new query
+    _pagingController.refresh();
+  }
+
+  void clearSearch() {
+    setSearchQuery('');
+  }
+
   // Load task progress independently
   Future<void> loadTaskProgress({bool isRefresh = false}) async {
     // Only set isLoading on initial load, not on refresh
