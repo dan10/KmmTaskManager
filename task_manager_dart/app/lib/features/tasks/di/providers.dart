@@ -8,7 +8,6 @@ import '../domain/usecases/get_task_progress_usecase.dart';
 import '../domain/usecases/get_tasks_usecase.dart';
 import '../domain/usecases/update_task_status_usecase.dart';
 import '../presentation/viewmodels/tasks_viewmodel.dart';
-import '../view_models/task_list_viewmodel.dart';
 import '../view_models/task_detail_viewmodel.dart';
 import '../view_models/task_create_edit_viewmodel.dart';
 
@@ -52,12 +51,6 @@ List<SingleChildWidget> get providers => [
   ),
 
   // Legacy ViewModels (kept for backward compatibility)
-  ChangeNotifierProxyProvider<TaskRepository, TaskListViewModel>(
-    create: (context) => TaskListViewModel(
-      repository: Provider.of<TaskRepository>(context, listen: false),
-    ),
-    update: (_, repo, previous) => previous ?? TaskListViewModel(repository: repo),
-  ),
   ChangeNotifierProxyProvider<TaskRepository, TaskDetailViewModel>(
     create: (context) => TaskDetailViewModel(
       repository: Provider.of<TaskRepository>(context, listen: false),

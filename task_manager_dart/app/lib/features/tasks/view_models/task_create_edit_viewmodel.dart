@@ -64,11 +64,11 @@ class TaskCreateEditViewModel extends ChangeNotifier {
         notifyListeners();
         return Result.error(Exception(err));
       }
-    } catch (e) {
+    } on Exception catch(e) {
       _log.severe('Update task failed', e);
       state = state.copyWith(error: e.toString());
       notifyListeners();
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+      return Result.error(e);
     }
   }
 }

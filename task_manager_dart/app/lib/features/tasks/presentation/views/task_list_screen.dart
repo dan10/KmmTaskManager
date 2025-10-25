@@ -6,8 +6,6 @@ import 'package:task_manager_shared/models.dart';
 import '../viewmodels/tasks_viewmodel.dart';
 import '../widgets/task_list_indicators.dart';
 import '../widgets/progress_summary_sliver.dart';
-import '../actions/tasks_action.dart';
-import '../../../../core/utils/result.dart';
 import '../../../../core/ui/components/shimmer.dart';
 
 /// Task list screen with infinite scroll pagination
@@ -22,6 +20,25 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
+  late TasksViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = context.read<TasksViewModel>();
+    
+    // Add listeners for commands
+    _viewModel.updateTaskStatus.addListener(_onUpdateStatusResult);
+    _viewModel.deleteTask.addListener(_onDeleteResult);
+  }
+
+  @override
+  void dispose() {
+    _viewModel.updateTaskStatus.removeListener(_onUpdateStatusResult);
+    _viewModel.deleteTask.removeListener(_onDeleteResult);
+    super.dispose();
+  }
+
   void _showSnackBar(String message, {bool isError = false}) {
     if (!mounted) return;
     
@@ -33,33 +50,27 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  // Handle delete with direct callback - Flutter pattern
-  Future<void> _handleDeleteTask(String taskId) async {
-    final viewModel = context.read<TasksViewModel>();
-    final result = await viewModel.deleteTask(taskId);
-    
-    if (!mounted) return;
-    
-    switch (result) {
-      case Ok():
-        _showSnackBar('Task deleted successfully');
-      case Error(:final error):
-        _showSnackBar('Failed to delete task: ${error.toString()}', isError: true);
+  void _onDeleteResult() {
+    if (_viewModel.deleteTask.completed) {
+      _viewModel.deleteTask.clearResult();
+      _showSnackBar('Task deleted successfully');
+    }
+
+    if (_viewModel.deleteTask.error) {
+      _viewModel.deleteTask.clearResult();
+      _showSnackBar('Failed to delete task', isError: true);
     }
   }
 
-  // Handle status update with direct callback - Flutter pattern
-  Future<void> _handleUpdateStatus(String taskId, TaskStatus status) async {
-    final viewModel = context.read<TasksViewModel>();
-    final result = await viewModel.updateTaskStatus(taskId, status);
-    
-    if (!mounted) return;
-    
-    switch (result) {
-      case Ok():
-        _showSnackBar('Task status updated');
-      case Error(:final error):
-        _showSnackBar('Failed to update task: ${error.toString()}', isError: true);
+  void _onUpdateStatusResult() {
+    if (_viewModel.updateTaskStatus.completed) {
+      _viewModel.updateTaskStatus.clearResult();
+      _showSnackBar('Task updated successfully');
+    }
+
+    if (_viewModel.updateTaskStatus.error) {
+      _viewModel.updateTaskStatus.clearResult();
+      _showSnackBar('Failed to update task', isError: true);
     }
   }
 
@@ -99,8 +110,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         onTap: () {
                           // TODO: Navigate to task details
                         },
-                        onStatusChanged: (status) => _handleUpdateStatus(task.id, status),
-                        onDelete: () => _handleDeleteTask(task.id),
+                        onStatusChanged: (status) {
+                          _viewModel.updateTaskStatus.execute((task.id, status));
+                        },
+                        onDelete: () {
+                          _viewModel.deleteTask.execute(task.id);
+                        },
                       ),
                       firstPageErrorIndicatorBuilder: (context) => 
                         FirstPageErrorIndicator(
@@ -161,7 +176,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Future<void> _handleRefresh(TasksViewModel viewModel) async {
-    viewModel.handleAction(const RefreshTasks());
+    viewModel.refresh();
     await Future.delayed(const Duration(milliseconds: 500));
   }
 }

@@ -6,12 +6,12 @@ import '../../domain/usecases/delete_task_usecase.dart';
 import '../../domain/usecases/get_task_progress_usecase.dart';
 import '../../domain/usecases/get_tasks_usecase.dart';
 import '../../domain/usecases/update_task_status_usecase.dart';
-import '../actions/tasks_action.dart';
 import '../state/tasks_state.dart';
 import '../../../../core/utils/result.dart';
+import '../../../../core/utils/command.dart';
 
 /// ViewModel for the Tasks screen
-/// Follows Flutter's best practices - no side effects system
+/// Follows Flutter's best practices with Command pattern
 class TasksViewModel extends ChangeNotifier {
   final GetTasksUseCase _getTasksUseCase;
   final GetTaskProgressUseCase _getTaskProgressUseCase;
@@ -27,6 +27,10 @@ class TasksViewModel extends ChangeNotifier {
         _getTaskProgressUseCase = getTaskProgressUseCase,
         _updateTaskStatusUseCase = updateTaskStatusUseCase,
         _deleteTaskUseCase = deleteTaskUseCase {
+    // Initialize commands
+    updateTaskStatus = Command1<void, (String, TaskStatus)>(_updateTaskStatus);
+    deleteTask = Command1<void, String>(_deleteTask);
+    
     // Initialize pagination controller
     _pagingController = PagingController<int, TaskDto>(
       getNextPageKey: (state) {
@@ -38,6 +42,10 @@ class TasksViewModel extends ChangeNotifier {
     // Load progress independently
     loadTaskProgress();
   }
+
+  // Commands
+  late Command1<void, (String, TaskStatus)> updateTaskStatus;
+  late Command1<void, String> deleteTask;
 
   // Pagination controller
   late final PagingController<int, TaskDto> _pagingController;
@@ -113,8 +121,9 @@ class TasksViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Public method: Update task status - returns Result for UI to handle
-  Future<Result<void>> updateTaskStatus(String taskId, TaskStatus status) async {
+  // Command: Update task status
+  Future<Result<void>> _updateTaskStatus((String, TaskStatus) params) async {
+    final (taskId, status) = params;
     final result = await _updateTaskStatusUseCase(taskId, status);
     
     // Refresh regardless of result
@@ -125,8 +134,8 @@ class TasksViewModel extends ChangeNotifier {
         : Result.error((result as Error).error);
   }
 
-  // Public method: Delete task - returns Result for UI to handle
-  Future<Result<void>> deleteTask(String taskId) async {
+  // Command: Delete task
+  Future<Result<void>> _deleteTask(String taskId) async {
     final result = await _deleteTaskUseCase(taskId);
     
     // Refresh regardless of result
@@ -138,40 +147,10 @@ class TasksViewModel extends ChangeNotifier {
   }
 
   // Search tasks
-  Future<void> searchTasks(String query) async {
+  void searchTasks(String query) {
     _state = _state.copyWith(searchQuery: query);
     notifyListeners();
-    await _refreshTasks();
-  }
-
-  // Handle actions
-  void handleAction(TasksAction action) {
-    switch (action) {
-      case LoadTasks():
-        _pagingController.refresh();
-        break;
-      case RefreshTasks():
-        _refreshTasks();
-        break;
-      case LoadMoreTasks():
-        // Handled automatically by PagingController
-        break;
-      case SearchTasks():
-        searchTasks(action.query);
-        break;
-      case OpenCreateTask():
-      case OpenTaskDetails():
-      case ConfirmTaskCompletion():
-      case ConfirmTaskDeletion():
-        // Navigation/dialogs handled in UI
-        break;
-      case UpdateTaskStatus():
-        updateTaskStatus(action.taskId, action.status);
-        break;
-      case DeleteTask():
-        deleteTask(action.taskId);
-        break;
-    }
+    _pagingController.refresh();
   }
 
   // Public refresh method
@@ -179,6 +158,8 @@ class TasksViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    updateTaskStatus.dispose();
+    deleteTask.dispose();
     _pagingController.dispose();
     super.dispose();
   }
