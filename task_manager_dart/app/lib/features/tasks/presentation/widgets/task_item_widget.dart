@@ -170,11 +170,11 @@ class TaskItemWidget extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          // Project (currently not in TaskDto, using projectId instead)
-                          if (task.projectId != null)
+                          // Project
+                          if (task.projectName != null)
                             _InfoChip(
                               icon: Icons.folder_outlined,
-                              label: 'Project: ${task.projectId!}',
+                              label: task.projectName!,
                               theme: theme,
                             ),
                           // Priority

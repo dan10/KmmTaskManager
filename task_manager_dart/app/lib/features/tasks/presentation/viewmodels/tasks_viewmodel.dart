@@ -79,9 +79,12 @@ class TasksViewModel extends ChangeNotifier {
   }
 
   // Load task progress independently
-  Future<void> loadTaskProgress() async {
-    _state = _state.copyWith(isLoading: true);
-    notifyListeners();
+  Future<void> loadTaskProgress({bool isRefresh = false}) async {
+    // Only set isLoading on initial load, not on refresh
+    if (!isRefresh) {
+      _state = _state.copyWith(isLoading: true);
+      notifyListeners();
+    }
 
     final result = await _getTaskProgressUseCase();
 
@@ -104,7 +107,7 @@ class TasksViewModel extends ChangeNotifier {
     notifyListeners();
 
     _pagingController.refresh();
-    await loadTaskProgress();
+    await loadTaskProgress(isRefresh: true);
 
     _state = _state.copyWith(isRefreshing: false);
     notifyListeners();

@@ -16,6 +16,7 @@ _TaskDto _$TaskDtoFromJson(Map<String, dynamic> json) => _TaskDto(
       ? null
       : DateTime.parse(json['dueDate'] as String),
   projectId: json['projectId'] as String?,
+  projectName: json['projectName'] as String?,
   assigneeId: json['assigneeId'] as String?,
   creatorId: json['creatorId'] as String,
   createdAt: json['createdAt'] == null
@@ -42,6 +43,7 @@ Map<String, dynamic> _$TaskDtoToJson(_TaskDto instance) => <String, dynamic>{
   'priority': _$PriorityEnumMap[instance.priority]!,
   'dueDate': instance.dueDate?.toIso8601String(),
   'projectId': instance.projectId,
+  'projectName': instance.projectName,
   'assigneeId': instance.assigneeId,
   'creatorId': instance.creatorId,
   'createdAt': instance.createdAt?.toIso8601String(),

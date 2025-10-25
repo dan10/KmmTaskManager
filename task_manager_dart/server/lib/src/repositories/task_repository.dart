@@ -40,29 +40,34 @@ class TaskRepository {
     };
 
     if (assigneeId != null) {
-      conditions.add('assignee_id = @assigneeId');
+      conditions.add('t.assignee_id = @assigneeId');
       parameters['assigneeId'] = assigneeId;
     }
     if (creatorId != null) {
-      conditions.add('creator_id = @creatorId');
+      conditions.add('t.creator_id = @creatorId');
       parameters['creatorId'] = creatorId;
     }
     if (projectId != null) {
-      conditions.add('project_id = @projectId');
+      conditions.add('t.project_id = @projectId');
       parameters['projectId'] = projectId;
     }
     if (query != null && query.isNotEmpty) {
       conditions
-          .add('(title ILIKE @searchQuery OR description ILIKE @searchQuery)');
+          .add('(t.title ILIKE @searchQuery OR t.description ILIKE @searchQuery)');
       parameters['searchQuery'] = '%$query%';
     }
 
-    var sql = 'SELECT * FROM tasks';
+    // Join with projects table to get project name
+    var sql = '''
+      SELECT t.*, p.name as project_name 
+      FROM tasks t 
+      LEFT JOIN projects p ON t.project_id = p.id
+    ''';
     if (conditions.isNotEmpty) {
       sql += ' WHERE ${conditions.join(' AND ')}';
     }
     sql +=
-        ' ORDER BY due_date ASC NULLS LAST, title ASC LIMIT @limit OFFSET @offset';
+        ' ORDER BY t.due_date ASC NULLS LAST, t.title ASC LIMIT @limit OFFSET @offset';
 
     final result = await _db.execute(Sql.named(sql), parameters: parameters);
     return result.map((row) => _mapTaskFromRow(row.toColumnMap())).toList();
@@ -70,7 +75,12 @@ class TaskRepository {
 
   Future<shared_models.TaskDto?> findById(String id) async {
     final result = await _db.execute(
-      Sql.named('SELECT * FROM tasks WHERE id = @id'),
+      Sql.named('''
+        SELECT t.*, p.name as project_name 
+        FROM tasks t 
+        LEFT JOIN projects p ON t.project_id = p.id
+        WHERE t.id = @id
+      '''),
       parameters: {'id': id},
     );
 
@@ -251,6 +261,7 @@ class TaskRepository {
       status: status,
       priority: priority,
       projectId: row['project_id'] as String?,
+      projectName: row['project_name'] as String?,
       assigneeId: row['assignee_id'] as String?,
       creatorId: row['creator_id'] as String,
       dueDate: dueDate,

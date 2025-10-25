@@ -33,6 +33,7 @@ abstract class TaskDto with _$TaskDto {
     required Priority priority,
     DateTime? dueDate,
     String? projectId,
+    String? projectName,
     String? assigneeId,
     required String creatorId,
     DateTime? createdAt,
