@@ -15,14 +15,16 @@ _ProjectResponseDto _$ProjectResponseDtoFromJson(Map<String, dynamic> json) =>
       inProgress: (json['inProgress'] as num?)?.toInt() ?? 0,
       total: (json['total'] as num?)?.toInt() ?? 0,
       creatorId: json['creatorId'] as String?,
-      memberIds: (json['memberIds'] as List<dynamic>?)
+      memberIds:
+          (json['memberIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
       creator: json['creator'] == null
           ? null
           : User.fromJson(json['creator'] as Map<String, dynamic>),
-      members: (json['members'] as List<dynamic>?)
+      members:
+          (json['members'] as List<dynamic>?)
               ?.map((e) => User.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],

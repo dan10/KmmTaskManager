@@ -26,3 +26,4 @@ export 'src/dto/task/task_status_change_request_dto.dart';
 export 'src/dto/task/task_create_request_dto.dart';
 export 'src/dto/task/task_update_request_dto.dart';
 export 'src/dto/task/task_dto.dart';
+export 'src/dto/task/task_progress_dto.dart';

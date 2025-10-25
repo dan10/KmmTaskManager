@@ -5,6 +5,7 @@ import '../../../../core/utils/result.dart';
 
 abstract class TaskRepository {
   Future<Result<PaginatedResponse<TaskDto>>> getTasks({int page = 0, int size = 20, String? query, String? projectId});
+  Future<Result<TaskProgress>> getTaskProgress();
   Future<Result<TaskDto>> getTask(String id);
   Future<Result<TaskDto>> createTask(TaskCreateRequestDto request);
   Future<Result<TaskDto>> updateTask(String id, TaskUpdateRequestDto request);
@@ -21,6 +22,16 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Result<PaginatedResponse<TaskDto>>> getTasks({int page = 0, int size = 20, String? query, String? projectId}) async {
     try {
       final res = await _apiService.getTasks(page: page, size: size, query: query, projectId: projectId);
+      return Result.ok(res);
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<TaskProgress>> getTaskProgress() async {
+    try {
+      final res = await _apiService.getTaskProgress();
       return Result.ok(res);
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));

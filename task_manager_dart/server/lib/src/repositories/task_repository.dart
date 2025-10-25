@@ -278,4 +278,30 @@ class TaskRepository {
         return 'HIGH';
     }
   }
+
+  Future<shared_models.TaskProgress> getTaskProgress(String userId) async {
+    // Count total tasks assigned to the user
+    final totalResult = await _db.execute(
+      Sql.named('SELECT COUNT(*) as total FROM tasks WHERE assignee_id = @userId'),
+      parameters: {'userId': userId},
+    );
+    final totalTasks = totalResult.first['total'] as int? ?? 0;
+
+    // Count completed tasks (status = DONE)
+    final completedResult = await _db.execute(
+      Sql.named(
+        'SELECT COUNT(*) as completed FROM tasks WHERE assignee_id = @userId AND status = @status'
+      ),
+      parameters: {
+        'userId': userId,
+        'status': 'DONE',
+      },
+    );
+    final completedTasks = completedResult.first['completed'] as int? ?? 0;
+
+    return shared_models.TaskProgress(
+      totalTasks: totalTasks,
+      completedTasks: completedTasks,
+    );
+  }
 }

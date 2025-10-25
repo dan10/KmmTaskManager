@@ -17,6 +17,7 @@ class TaskRoutes {
     final baseRouter = Router();
 
     baseRouter.get('/', _getAllTasks);
+    baseRouter.get('/progress', _getTaskProgress);
     baseRouter.get('/created-by-me', _getTasksCreatedByMe);
     baseRouter.get('/project/<projectId>', _getTasksByProject);
     baseRouter.get('/<id>', _getTaskById);
@@ -74,6 +75,12 @@ class TaskRoutes {
       size: size,
     );
     return okJsonResponse(tasks.map((t) => t.toJson()).toList());
+  }
+
+  Future<Response> _getTaskProgress(Request request) async {
+    final userId = request.context['userId'] as String;
+    final progress = await _service.getTaskProgress(userId);
+    return okJsonResponse(progress.toJson());
   }
 
   Future<Response> _assignTask(Request request) async {

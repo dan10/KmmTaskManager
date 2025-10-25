@@ -13,6 +13,7 @@ abstract class TaskApiService {
     String? projectId,
   });
   
+  Future<TaskProgress> getTaskProgress();
   Future<TaskDto> getTask(String id);
   Future<TaskDto> createTask(TaskCreateRequestDto request);
   Future<TaskDto> updateTask(String id, TaskUpdateRequestDto request);
@@ -63,6 +64,22 @@ class TaskApiServiceImpl implements TaskApiService {
       );
     } else {
       throw Exception('Failed to load tasks: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<TaskProgress> getTaskProgress() async {
+    final headers = await _getHeaders();
+    
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tasksEndpoint}/progress');
+    
+    final response = await http.get(uri, headers: headers);
+    
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body) as Map<String, dynamic>;
+      return TaskProgress.fromJson(jsonData);
+    } else {
+      throw Exception('Failed to load task progress: ${response.statusCode}');
     }
   }
 

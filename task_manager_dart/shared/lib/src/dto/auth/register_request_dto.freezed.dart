@@ -1,6 +1,5 @@
-// dart format width=80
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -15,52 +14,47 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$RegisterRequestDto {
-  String get displayName;
-  String get email;
-  String get password;
 
-  /// Create a copy of RegisterRequestDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $RegisterRequestDtoCopyWith<RegisterRequestDto> get copyWith =>
-      _$RegisterRequestDtoCopyWithImpl<RegisterRequestDto>(
-          this as RegisterRequestDto, _$identity);
+ String get displayName; String get email; String get password;
+/// Create a copy of RegisterRequestDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RegisterRequestDtoCopyWith<RegisterRequestDto> get copyWith => _$RegisterRequestDtoCopyWithImpl<RegisterRequestDto>(this as RegisterRequestDto, _$identity);
 
   /// Serializes this RegisterRequestDto to a JSON map.
   Map<String, dynamic> toJson();
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is RegisterRequestDto &&
-            (identical(other.displayName, displayName) ||
-                other.displayName == displayName) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.password, password) ||
-                other.password == password));
-  }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, displayName, email, password);
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RegisterRequestDto&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password));
+}
 
-  @override
-  String toString() {
-    return 'RegisterRequestDto(displayName: $displayName, email: $email, password: $password)';
-  }
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,displayName,email,password);
+
+@override
+String toString() {
+  return 'RegisterRequestDto(displayName: $displayName, email: $email, password: $password)';
+}
+
+
 }
 
 /// @nodoc
-abstract mixin class $RegisterRequestDtoCopyWith<$Res> {
-  factory $RegisterRequestDtoCopyWith(
-          RegisterRequestDto value, $Res Function(RegisterRequestDto) _then) =
-      _$RegisterRequestDtoCopyWithImpl;
-  @useResult
-  $Res call({String displayName, String email, String password});
-}
+abstract mixin class $RegisterRequestDtoCopyWith<$Res>  {
+  factory $RegisterRequestDtoCopyWith(RegisterRequestDto value, $Res Function(RegisterRequestDto) _then) = _$RegisterRequestDtoCopyWithImpl;
+@useResult
+$Res call({
+ String displayName, String email, String password
+});
 
+
+
+
+}
 /// @nodoc
 class _$RegisterRequestDtoCopyWithImpl<$Res>
     implements $RegisterRequestDtoCopyWith<$Res> {
@@ -69,95 +63,201 @@ class _$RegisterRequestDtoCopyWithImpl<$Res>
   final RegisterRequestDto _self;
   final $Res Function(RegisterRequestDto) _then;
 
-  /// Create a copy of RegisterRequestDto
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? displayName = null,
-    Object? email = null,
-    Object? password = null,
-  }) {
-    return _then(_self.copyWith(
-      displayName: null == displayName
-          ? _self.displayName
-          : displayName // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _self.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      password: null == password
-          ? _self.password
-          : password // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
+/// Create a copy of RegisterRequestDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? displayName = null,Object? email = null,Object? password = null,}) {
+  return _then(_self.copyWith(
+displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RegisterRequestDto].
+extension RegisterRequestDtoPatterns on RegisterRequestDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RegisterRequestDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RegisterRequestDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RegisterRequestDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _RegisterRequestDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RegisterRequestDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RegisterRequestDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String displayName,  String email,  String password)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RegisterRequestDto() when $default != null:
+return $default(_that.displayName,_that.email,_that.password);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String displayName,  String email,  String password)  $default,) {final _that = this;
+switch (_that) {
+case _RegisterRequestDto():
+return $default(_that.displayName,_that.email,_that.password);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String displayName,  String email,  String password)?  $default,) {final _that = this;
+switch (_that) {
+case _RegisterRequestDto() when $default != null:
+return $default(_that.displayName,_that.email,_that.password);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
+
 class _RegisterRequestDto implements RegisterRequestDto {
-  const _RegisterRequestDto(
-      {required this.displayName, required this.email, required this.password});
-  factory _RegisterRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$RegisterRequestDtoFromJson(json);
+  const _RegisterRequestDto({required this.displayName, required this.email, required this.password});
+  factory _RegisterRequestDto.fromJson(Map<String, dynamic> json) => _$RegisterRequestDtoFromJson(json);
 
-  @override
-  final String displayName;
-  @override
-  final String email;
-  @override
-  final String password;
+@override final  String displayName;
+@override final  String email;
+@override final  String password;
 
-  /// Create a copy of RegisterRequestDto
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$RegisterRequestDtoCopyWith<_RegisterRequestDto> get copyWith =>
-      __$RegisterRequestDtoCopyWithImpl<_RegisterRequestDto>(this, _$identity);
+/// Create a copy of RegisterRequestDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RegisterRequestDtoCopyWith<_RegisterRequestDto> get copyWith => __$RegisterRequestDtoCopyWithImpl<_RegisterRequestDto>(this, _$identity);
 
-  @override
-  Map<String, dynamic> toJson() {
-    return _$RegisterRequestDtoToJson(
-      this,
-    );
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$RegisterRequestDtoToJson(this, );
+}
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _RegisterRequestDto &&
-            (identical(other.displayName, displayName) ||
-                other.displayName == displayName) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.password, password) ||
-                other.password == password));
-  }
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RegisterRequestDto&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password));
+}
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, displayName, email, password);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,displayName,email,password);
 
-  @override
-  String toString() {
-    return 'RegisterRequestDto(displayName: $displayName, email: $email, password: $password)';
-  }
+@override
+String toString() {
+  return 'RegisterRequestDto(displayName: $displayName, email: $email, password: $password)';
+}
+
+
 }
 
 /// @nodoc
-abstract mixin class _$RegisterRequestDtoCopyWith<$Res>
-    implements $RegisterRequestDtoCopyWith<$Res> {
-  factory _$RegisterRequestDtoCopyWith(
-          _RegisterRequestDto value, $Res Function(_RegisterRequestDto) _then) =
-      __$RegisterRequestDtoCopyWithImpl;
-  @override
-  @useResult
-  $Res call({String displayName, String email, String password});
-}
+abstract mixin class _$RegisterRequestDtoCopyWith<$Res> implements $RegisterRequestDtoCopyWith<$Res> {
+  factory _$RegisterRequestDtoCopyWith(_RegisterRequestDto value, $Res Function(_RegisterRequestDto) _then) = __$RegisterRequestDtoCopyWithImpl;
+@override @useResult
+$Res call({
+ String displayName, String email, String password
+});
 
+
+
+
+}
 /// @nodoc
 class __$RegisterRequestDtoCopyWithImpl<$Res>
     implements _$RegisterRequestDtoCopyWith<$Res> {
@@ -166,30 +266,18 @@ class __$RegisterRequestDtoCopyWithImpl<$Res>
   final _RegisterRequestDto _self;
   final $Res Function(_RegisterRequestDto) _then;
 
-  /// Create a copy of RegisterRequestDto
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? displayName = null,
-    Object? email = null,
-    Object? password = null,
-  }) {
-    return _then(_RegisterRequestDto(
-      displayName: null == displayName
-          ? _self.displayName
-          : displayName // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _self.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      password: null == password
-          ? _self.password
-          : password // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
+/// Create a copy of RegisterRequestDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? displayName = null,Object? email = null,Object? password = null,}) {
+  return _then(_RegisterRequestDto(
+displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
 }
 
 // dart format on

@@ -22,6 +22,7 @@ abstract class TaskService {
       String taskId, String assigneeId); // New
   Future<shared_models.TaskDto> changeTaskStatus(
       String taskId, shared_models.TaskStatus newStatus); // New
+  Future<shared_models.TaskProgress> getTaskProgress(String userId); // New
 }
 
 class TaskServiceImpl implements TaskService {
@@ -109,5 +110,10 @@ class TaskServiceImpl implements TaskService {
     // Repository now throws TaskNotFoundException
     return _repository.changeTaskStatus(taskId, newStatus);
     // No need to check for null if repo guarantees to throw or return valid object.
+  }
+
+  @override
+  Future<shared_models.TaskProgress> getTaskProgress(String userId) async {
+    return _repository.getTaskProgress(userId);
   }
 }

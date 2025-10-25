@@ -7,13 +7,9 @@ part of 'google_login_request_dto.dart';
 // **************************************************************************
 
 _GoogleLoginRequestDto _$GoogleLoginRequestDtoFromJson(
-        Map<String, dynamic> json) =>
-    _GoogleLoginRequestDto(
-      idToken: json['idToken'] as String,
-    );
+  Map<String, dynamic> json,
+) => _GoogleLoginRequestDto(idToken: json['idToken'] as String);
 
 Map<String, dynamic> _$GoogleLoginRequestDtoToJson(
-        _GoogleLoginRequestDto instance) =>
-    <String, dynamic>{
-      'idToken': instance.idToken,
-    };
+  _GoogleLoginRequestDto instance,
+) => <String, dynamic>{'idToken': instance.idToken};
