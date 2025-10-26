@@ -18,7 +18,7 @@ class DependencyProviders {
 
         // Singleton ApiClient - shared by all authenticated services
         ProxyProvider<SecureStorage, ApiClient>(
-          update: (context, secureStorage, __) {
+          update: (context, secureStorage, _) {
             // Parse the base URL to extract host, port, and scheme
             final uri = Uri.parse(ApiConstants.baseUrl);
             

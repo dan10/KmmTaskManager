@@ -67,17 +67,26 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     final viewModel = context.watch<TaskDetailsViewModel>();
     final state = viewModel.state;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: _TaskDetailsAppBar(
-        isDeleting: state.isDeleting,
-        onNavigateBack: viewModel.handleNavigateBack,
-        onEdit: viewModel.handleEditTask,
-        onDelete: () => viewModel.deleteTask.execute(),
-      ),
-      body: _TaskDetailsBody(
-        state: state,
-        onRefresh: () => _viewModel.refresh(),
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) {
+          // Clean up when user navigates back via gesture or back button
+          // The ViewModel disposal is handled by Provider automatically
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F5),
+        appBar: _TaskDetailsAppBar(
+          isDeleting: state.isDeleting,
+          onNavigateBack: viewModel.handleNavigateBack,
+          onEdit: viewModel.handleEditTask,
+          onDelete: () => viewModel.deleteTask.execute(),
+        ),
+        body: _TaskDetailsBody(
+          state: state,
+          onRefresh: () => _viewModel.refresh(),
+        ),
       ),
     );
   }

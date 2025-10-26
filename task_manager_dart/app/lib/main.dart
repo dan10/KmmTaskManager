@@ -35,10 +35,11 @@ class MyApp extends StatelessWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         themeMode: ThemeMode.system,
-        theme:TaskItTheme.light(),
+        theme: TaskItTheme.light(),
         darkTheme: TaskItTheme.dark(),
         supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: appRouter,
-    ));
+      ),
+    );
   }
 } 
