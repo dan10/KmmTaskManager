@@ -1,201 +1,108 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:task_manager_shared/models.dart';
 
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/api_routes.dart';
-import '../../../../data/sources/local/secure_storage.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/utils/result.dart';
 
 abstract class TaskApiService {
-  Future<PaginatedResponse<TaskDto>> getTasks({
+  Future<Result<PaginatedResponse<TaskDto>>> getTasks({
     int page = 0,
     int size = 20,
     String? query,
     String? projectId,
   });
   
-  Future<TaskProgress> getTaskProgress();
-  Future<TaskDto> getTask(String id);
-  Future<TaskDto> createTask(TaskCreateRequestDto request);
-  Future<TaskDto> updateTask(String id, TaskUpdateRequestDto request);
-  Future<void> deleteTask(String id);
-  Future<TaskDto> changeTaskStatus(String id, TaskStatusChangeRequestDto request);
-  Future<TaskDto> assignTask(String id, TaskAssignRequestDto request);
+  Future<Result<TaskProgress>> getTaskProgress();
+  Future<Result<TaskDto>> getTask(String id);
+  Future<Result<TaskDto>> createTask(TaskCreateRequestDto request);
+  Future<Result<TaskDto>> updateTask(String id, TaskUpdateRequestDto request);
+  Future<Result<void>> deleteTask(String id);
+  Future<Result<TaskDto>> changeTaskStatus(String id, TaskStatusChangeRequestDto request);
+  Future<Result<TaskDto>> assignTask(String id, TaskAssignRequestDto request);
 }
 
 class TaskApiServiceImpl implements TaskApiService {
-  final SecureStorage _secureStorage;
+  final ApiClient _client;
 
-  TaskApiServiceImpl(this._secureStorage);
-
-  Future<Map<String, String>> _getHeaders() async {
-    final token = await _secureStorage.getToken();
-    return {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    };
-  }
+  TaskApiServiceImpl(this._client);
 
   @override
-  Future<PaginatedResponse<TaskDto>> getTasks({
+  Future<Result<PaginatedResponse<TaskDto>>> getTasks({
     int page = 0,
     int size = 20,
     String? query,
     String? projectId,
   }) async {
-    final headers = await _getHeaders();
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'size': size.toString(),
+      if (query != null && query.isNotEmpty) 'query': query,
+    };
 
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.tasksAssignedWithParams(
-        page: page, size: size, query: query
-    )}');
-    
-    final response = await http.get(uri, headers: headers);
-    
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return PaginatedResponse<TaskDto>.fromJson(
-        jsonData,
+    return _client.get<PaginatedResponse<TaskDto>>(
+      ApiRoutes.tasksAssigned,
+      queryParameters: queryParams,
+      fromJson: (json) => PaginatedResponse<TaskDto>.fromJson(
+        json,
         (item) => TaskDto.fromJson(item as Map<String, dynamic>),
-      );
-    } else {
-      throw Exception('Failed to load tasks: ${response.statusCode}');
-    }
-  }
-
-  @override
-  Future<TaskProgress> getTaskProgress() async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.tasksStats}');
-    
-    final response = await http.get(uri, headers: headers);
-    
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return TaskProgress.fromJson(jsonData);
-    } else {
-      throw Exception('Failed to load task progress: ${response.statusCode}');
-    }
-  }
-
-  @override
-  Future<TaskDto> getTask(String id) async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskById(id)}');
-    
-    final response = await http.get(uri, headers: headers);
-    
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return TaskDto.fromJson(jsonData);
-    } else if (response.statusCode == 404) {
-      throw Exception('Task not found');
-    } else {
-      throw Exception('Failed to load task: ${response.statusCode}');
-    }
-  }
-
-  @override
-  Future<TaskDto> createTask(TaskCreateRequestDto request) async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.tasks}');
-    
-    final response = await http.post(
-      uri,
-      headers: headers,
-      body: json.encode(request.toJson()),
+      ),
     );
-    
-    if (response.statusCode == 201) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return TaskDto.fromJson(jsonData);
-    } else {
-      throw Exception('Failed to create task: ${response.statusCode}');
-    }
   }
 
   @override
-  Future<TaskDto> updateTask(String id, TaskUpdateRequestDto request) async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskById(id)}');
-    
-    final response = await http.put(
-      uri,
-      headers: headers,
-      body: json.encode(request.toJson()),
+  Future<Result<TaskProgress>> getTaskProgress() async {
+    return _client.get<TaskProgress>(
+      ApiRoutes.tasksStats,
+      fromJson: (json) => TaskProgress.fromJson(json as Map<String, dynamic>),
     );
-    
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return TaskDto.fromJson(jsonData);
-    } else if (response.statusCode == 404) {
-      throw Exception('Task not found');
-    } else {
-      throw Exception('Failed to update task: ${response.statusCode}');
-    }
   }
 
   @override
-  Future<void> deleteTask(String id) async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskById(id)}');
-    
-    final response = await http.delete(uri, headers: headers);
-    
-    if (response.statusCode != 204) {
-      if (response.statusCode == 404) {
-        throw Exception('Task not found');
-      } else {
-        throw Exception('Failed to delete task: ${response.statusCode}');
-      }
-    }
-  }
-
-  @override
-  Future<TaskDto> changeTaskStatus(String id, TaskStatusChangeRequestDto request) async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskStatus(id)}');
-    
-    final response = await http.post(
-      uri,
-      headers: headers,
-      body: json.encode(request.toJson()),
+  Future<Result<TaskDto>> getTask(String id) async {
+    return _client.get<TaskDto>(
+      ApiRoutes.taskById(id),
+      fromJson: (json) => TaskDto.fromJson(json as Map<String, dynamic>),
     );
-    
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return TaskDto.fromJson(jsonData);
-    } else if (response.statusCode == 404) {
-      throw Exception('Task not found');
-    } else {
-      throw Exception('Failed to change task status: ${response.statusCode}');
-    }
   }
 
   @override
-  Future<TaskDto> assignTask(String id, TaskAssignRequestDto request) async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskAssign(id)}');
-    
-    final response = await http.patch(
-      uri,
-      headers: headers,
-      body: json.encode(request.toJson()),
+  Future<Result<TaskDto>> createTask(TaskCreateRequestDto request) async {
+    return _client.post<TaskDto>(
+      ApiRoutes.tasks,
+      body: request.toJson(),
+      fromJson: (json) => TaskDto.fromJson(json as Map<String, dynamic>),
     );
-    
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return TaskDto.fromJson(jsonData);
-    } else if (response.statusCode == 404) {
-      throw Exception('Task not found');
-    } else {
-      throw Exception('Failed to assign task: ${response.statusCode}');
-    }
+  }
+
+  @override
+  Future<Result<TaskDto>> updateTask(String id, TaskUpdateRequestDto request) async {
+    return _client.put<TaskDto>(
+      ApiRoutes.taskById(id),
+      body: request.toJson(),
+      fromJson: (json) => TaskDto.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<Result<void>> deleteTask(String id) async {
+    return _client.delete(ApiRoutes.taskById(id));
+  }
+
+  @override
+  Future<Result<TaskDto>> changeTaskStatus(String id, TaskStatusChangeRequestDto request) async {
+    return _client.post<TaskDto>(
+      ApiRoutes.taskStatus(id),
+      body: request.toJson(),
+      fromJson: (json) => TaskDto.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<Result<TaskDto>> assignTask(String id, TaskAssignRequestDto request) async {
+    return _client.patch<TaskDto>(
+      ApiRoutes.taskAssign(id),
+      body: request.toJson(),
+      fromJson: (json) => TaskDto.fromJson(json as Map<String, dynamic>),
+    );
   }
 } 

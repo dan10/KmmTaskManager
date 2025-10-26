@@ -1,10 +1,9 @@
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import '../../features/auth/data/services/auth_service.dart';
-import '../../features/tasks/data/services/task_api_service.dart';
-import '../../data/services/project_api_service.dart';
 import '../../data/sources/local/secure_storage.dart';
 import '../constants/api_constants.dart';
+import '../network/api_client.dart';
 
 // Feature providers
 import '../../features/auth/di/providers.dart' as auth_di;
@@ -13,35 +12,38 @@ import '../../features/tasks/di/providers.dart' as tasks_di;
 
 class DependencyProviders {
   static List<SingleChildWidget> get providers => [
-        // Core services
+        // Core services only
         Provider<SecureStorage>(
           create: (_) => SecureStorage(),
         ),
 
-        // API Services
-        Provider<AuthApiService>(
-          create: (_) {
+        // Singleton ApiClient - shared by all authenticated services
+        ProxyProvider<SecureStorage, ApiClient>(
+          update: (context, secureStorage, __) {
             // Parse the base URL to extract host, port, and scheme
             final uri = Uri.parse(ApiConstants.baseUrl);
-            return AuthApiServiceImpl(
+            
+            // Create singleton ApiClient with proper configuration and 401 handling
+            return ApiClient(
               host: uri.host,
               port: uri.port,
               scheme: uri.scheme,
+              authTokenProvider: () => secureStorage.getToken(),
+              unauthorizedHandler: () {
+                // Clear token and redirect to login on 401
+                secureStorage.deleteToken();
+                if (context.mounted) {
+                  context.go('/login');
+                }
+              },
+              enableLogging: true,
             );
           },
         ),
 
-        ProxyProvider<SecureStorage, TaskApiService>(
-          update: (_, secureStorage, __) => TaskApiServiceImpl(secureStorage),
-        ),
-
-        ProxyProvider<SecureStorage, ProjectApiService>(
-          update: (_, secureStorage, __) => ProjectApiService(secureStorage),
-        ),
-
-        // Feature providers
+        // Feature-specific providers (services, repositories, etc.)
         ...auth_di.providers,
-        ...projects_di.providers,
         ...tasks_di.providers,
+        ...projects_di.providers,
       ];
 } 

@@ -20,84 +20,44 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<Result<PaginatedResponse<TaskDto>>> getTasks({int page = 0, int size = 20, String? query, String? projectId}) async {
-    try {
-      final res = await _apiService.getTasks(page: page, size: size, query: query, projectId: projectId);
-      return Result.ok(res);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    return _apiService.getTasks(page: page, size: size, query: query, projectId: projectId);
   }
 
   @override
   Future<Result<TaskProgress>> getTaskProgress() async {
-    try {
-      final res = await _apiService.getTaskProgress();
-      return Result.ok(res);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    return _apiService.getTaskProgress();
   }
 
   @override
   Future<Result<TaskDto>> getTask(String id) async {
-    try {
-      final res = await _apiService.getTask(id);
-      return Result.ok(res);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    return _apiService.getTask(id);
   }
 
   @override
   Future<Result<TaskDto>> createTask(TaskCreateRequestDto request) async {
-    try {
-      final res = await _apiService.createTask(request);
-      return Result.ok(res);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    return _apiService.createTask(request);
   }
 
   @override
   Future<Result<TaskDto>> updateTask(String id, TaskUpdateRequestDto request) async {
-    try {
-      final res = await _apiService.updateTask(id, request);
-      return Result.ok(res);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    return _apiService.updateTask(id, request);
   }
 
   @override
   Future<Result<void>> deleteTask(String id) async {
-    try {
-      await _apiService.deleteTask(id);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    return _apiService.deleteTask(id);
   }
 
   @override
   Future<Result<TaskDto>> changeTaskStatus(String id, TaskStatus status) async {
-    try {
-      final req = TaskStatusChangeRequestDto(status: status);
-      final res = await _apiService.changeTaskStatus(id, req);
-      return Result.ok(res);
-    } on Exception catch (e) {
-      return Result.error(e);
-    }
+    final req = TaskStatusChangeRequestDto(status: status);
+    return _apiService.changeTaskStatus(id, req);
   }
 
   @override
   Future<Result<TaskDto>> assignTask(String id, String assigneeId) async {
-    try {
-      final req = TaskAssignRequestDto(assigneeId: assigneeId);
-      final res = await _apiService.assignTask(id, req);
-      return Result.ok(res);
-    } on Exception  catch (e) {
-      return Result.error(e);
-    }
+    final req = TaskAssignRequestDto(assigneeId: assigneeId);
+    return _apiService.assignTask(id, req);
   }
 }
 

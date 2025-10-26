@@ -4,11 +4,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:pretty_http_logger/pretty_http_logger.dart';
 
 import '../utils/result.dart';
-import 'middleware/auth_interceptor.dart';
 import 'middleware/unauthorized_interceptor.dart';
 
 /// Function type for providing authentication token
@@ -71,12 +69,13 @@ class ApiClient {
         headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
       }
     }
-    
+
     return headers;
   }
 
   /// Build URI for API endpoint
-  Uri _buildUri(String path, {Map<String, dynamic>? queryParameters}) {
+  /// Query parameters must have String or Iterable<String> values
+  Uri _buildUri(String path, {Map<String, String>? queryParameters}) {
     return Uri(
       scheme: _scheme,
       host: _host,
@@ -97,7 +96,7 @@ class ApiClient {
   /// Generic GET request
   Future<Result<T>> get<T>(
     String path, {
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     required T Function(dynamic json) fromJson,
   }) async {
     try {
@@ -126,7 +125,7 @@ class ApiClient {
   /// Generic GET request for lists
   Future<Result<List<T>>> getList<T>(
     String path, {
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     required T Function(dynamic json) fromJson,
   }) async {
     try {
@@ -156,7 +155,7 @@ class ApiClient {
   Future<Result<T>> post<T>(
     String path, {
     dynamic body,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     required T Function(dynamic json) fromJson,
   }) async {
     try {
@@ -193,7 +192,7 @@ class ApiClient {
   Future<Result<T>> put<T>(
     String path, {
     dynamic body,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     required T Function(dynamic json) fromJson,
   }) async {
     try {
@@ -223,7 +222,7 @@ class ApiClient {
   /// Generic DELETE request
   Future<Result<void>> delete(
     String path, {
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
   }) async {
     try {
       final uri = _buildUri(path, queryParameters: queryParameters);
@@ -252,7 +251,7 @@ class ApiClient {
   Future<Result<T>> patch<T>(
     String path, {
     dynamic body,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     required T Function(dynamic json) fromJson,
   }) async {
     try {

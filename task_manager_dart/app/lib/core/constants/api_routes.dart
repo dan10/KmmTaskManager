@@ -23,15 +23,7 @@ class ApiRoutes {
   // Project routes
   static const String projects = '$v1/projects';
   static String projectById(String projectId) => '$projects/$projectId';
-  static String projectTasks(String projectId, {int page = 0, int size = 10, String? searchText}) {
-    final query = <String, String>{
-      'page': page.toString(),
-      'size': size.toString(),
-      if (searchText != null && searchText.isNotEmpty) 'searchText': searchText,
-    };
-    final queryString = Uri(queryParameters: query).query;
-    return '$projects/$projectId/tasks?$queryString';
-  }
+  static String projectTasks(String projectId) => '$projects/$projectId/tasks';
   static String projectMembers(String projectId) => '$projects/$projectId/members';
   static String projectMemberById(String projectId, String userId) => '$projects/$projectId/members/$userId';
   static String projectStats(String projectId) => '$projects/$projectId/stats';
@@ -49,20 +41,5 @@ class ApiRoutes {
   static const String tasksOwned = '$tasks/owned';
   static const String tasksAssigned = '$tasks/assigned';
   static const String tasksStats = '$tasks/stats';
-  
-  // Task query with parameters
-  static String tasksOwnedWithParams({int page = 0, int size = 10}) {
-    return '$tasksOwned?page=$page&size=$size';
-  }
-  
-  static String tasksAssignedWithParams({int page = 0, int size = 10, String? query}) {
-    final params = <String, String>{
-      'page': page.toString(),
-      'size': size.toString(),
-      if (query != null && query.isNotEmpty) 'query': query,
-    };
-    final queryString = Uri(queryParameters: params).query;
-    return '$tasksAssigned?$queryString';
-  }
 }
 

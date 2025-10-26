@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import '../../../core/network/api_client.dart';
 import '../data/services/task_api_service.dart';
 import '../data/repositories/task_repository.dart';
 import '../domain/usecases/delete_task_usecase.dart';
@@ -12,7 +13,12 @@ import '../view_models/task_detail_viewmodel.dart';
 import '../view_models/task_create_edit_viewmodel.dart';
 
 List<SingleChildWidget> get providers => [
-  // Repository
+  // Task API Service - uses shared ApiClient from core
+  ProxyProvider<ApiClient, TaskApiService>(
+    update: (_, apiClient, __) => TaskApiServiceImpl(apiClient),
+  ),
+
+  // Task Repository
   ProxyProvider<TaskApiService, TaskRepository>(
     update: (_, api, __) => TaskRepositoryImpl(api),
   ),

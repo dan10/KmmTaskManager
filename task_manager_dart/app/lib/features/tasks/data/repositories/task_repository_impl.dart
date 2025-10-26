@@ -1,4 +1,5 @@
 import 'package:task_manager_shared/models.dart';
+import '../../../../core/utils/result.dart';
 import '../../domain/repositories/task_repository.dart';
 import '../services/task_api_service.dart';
 
@@ -16,27 +17,30 @@ class TaskRepositoryImpl implements TaskRepository {
     String? query,
     String? projectId,
   }) async {
-    try {
-      final response = await _apiService.getTasks(
-        page: page,
-        size: size,
-        query: query,
-        projectId: projectId,
-      );
-      
-      return response;
-    } catch (e) {
-      throw Exception('Failed to load tasks: ${e.toString()}');
+    final result = await _apiService.getTasks(
+      page: page,
+      size: size,
+      query: query,
+      projectId: projectId,
+    );
+    
+    switch (result) {
+      case Ok<PaginatedResponse<TaskDto>>():
+        return result.value;
+      case Error<PaginatedResponse<TaskDto>>():
+        throw Exception('Failed to load tasks: ${result.error}');
     }
   }
 
   @override
   Future<TaskDto> getTask(String id) async {
-    try {
-      final response = await _apiService.getTask(id);
-      return response;
-    } catch (e) {
-      throw Exception('Failed to load task: ${e.toString()}');
+    final result = await _apiService.getTask(id);
+    
+    switch (result) {
+      case Ok<TaskDto>():
+        return result.value;
+      case Error<TaskDto>():
+        throw Exception('Failed to load task: ${result.error}');
     }
   }
 
@@ -49,11 +53,13 @@ class TaskRepositoryImpl implements TaskRepository {
       throw Exception('Validation failed: $errorMessage');
     }
 
-    try {
-      final response = await _apiService.createTask(request);
-      return response;
-    } catch (e) {
-      throw Exception('Failed to create task: ${e.toString()}');
+    final result = await _apiService.createTask(request);
+    
+    switch (result) {
+      case Ok<TaskDto>():
+        return result.value;
+      case Error<TaskDto>():
+        throw Exception('Failed to create task: ${result.error}');
     }
   }
 
@@ -71,42 +77,51 @@ class TaskRepositoryImpl implements TaskRepository {
       throw Exception('No updates provided');
     }
 
-    try {
-      final response = await _apiService.updateTask(id, request);
-      return response;
-    } catch (e) {
-      throw Exception('Failed to update task: ${e.toString()}');
+    final result = await _apiService.updateTask(id, request);
+    
+    switch (result) {
+      case Ok<TaskDto>():
+        return result.value;
+      case Error<TaskDto>():
+        throw Exception('Failed to update task: ${result.error}');
     }
   }
 
   @override
   Future<void> deleteTask(String id) async {
-    try {
-      await _apiService.deleteTask(id);
-    } catch (e) {
-      throw Exception('Failed to delete task: ${e.toString()}');
+    final result = await _apiService.deleteTask(id);
+    
+    switch (result) {
+      case Ok<void>():
+        return;
+      case Error<void>():
+        throw Exception('Failed to delete task: ${result.error}');
     }
   }
 
   @override
   Future<TaskDto> changeTaskStatus(String id, TaskStatus status) async {
-    try {
-      final request = TaskStatusChangeRequestDto(status: status);
-      final response = await _apiService.changeTaskStatus(id, request);
-      return response;
-    } catch (e) {
-      throw Exception('Failed to change task status: ${e.toString()}');
+    final request = TaskStatusChangeRequestDto(status: status);
+    final result = await _apiService.changeTaskStatus(id, request);
+    
+    switch (result) {
+      case Ok<TaskDto>():
+        return result.value;
+      case Error<TaskDto>():
+        throw Exception('Failed to change task status: ${result.error}');
     }
   }
 
   @override
   Future<TaskDto> assignTask(String id, String assigneeId) async {
-    try {
-      final request = TaskAssignRequestDto(assigneeId: assigneeId);
-      final response = await _apiService.assignTask(id, request);
-      return response;
-    } catch (e) {
-      throw Exception('Failed to assign task: ${e.toString()}');
+    final request = TaskAssignRequestDto(assigneeId: assigneeId);
+    final result = await _apiService.assignTask(id, request);
+    
+    switch (result) {
+      case Ok<TaskDto>():
+        return result.value;
+      case Error<TaskDto>():
+        throw Exception('Failed to assign task: ${result.error}');
     }
   }
 }

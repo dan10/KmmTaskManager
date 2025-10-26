@@ -19,7 +19,6 @@ final List<GoRoute> authRoutes = [
   ),
   GoRoute(
     path: AppRoutes.register,
-    name: 'register',
     builder: (context, state) {
       final repo = Provider.of<feature_auth.AuthRepository>(context, listen: false);
       final vm = RegisterViewModel(authRepository: repo);
