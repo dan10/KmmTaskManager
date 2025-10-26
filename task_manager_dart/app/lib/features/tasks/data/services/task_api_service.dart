@@ -161,7 +161,7 @@ class TaskApiServiceImpl implements TaskApiService {
     
     final uri = Uri.parse('${ApiConstants.baseUrl}${ApiRoutes.taskStatus(id)}');
     
-    final response = await http.patch(
+    final response = await http.post(
       uri,
       headers: headers,
       body: json.encode(request.toJson()),

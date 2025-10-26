@@ -8,7 +8,7 @@ import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../viewmodels/tasks_viewmodel.dart';
 import '../widgets/progress_summary_sliver.dart';
 import '../widgets/task_create_bottom_sheet.dart';
-import '../widgets/task_item_widget.dart';
+import '../widgets/task_item_swipeable.dart';
 import '../widgets/task_list_indicators.dart';
 
 /// Task list screen with infinite scroll pagination
@@ -110,12 +110,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           isLoading: vmState.isLoading,
                         ),
                         
-                        // Paginated task list
+                        // Paginated task list with swipeable items
                         PagedSliverList<int, TaskDto>(
                           state: pagingState,
                           fetchNextPage: fetchNextPage,
                           builderDelegate: PagedChildBuilderDelegate<TaskDto>(
-                            itemBuilder: (context, task, index) => TaskListItemBuilder(
+                            itemBuilder: (context, task, index) => TaskItemSwipeable(
                               task: task,
                               onTap: () {
                                 // TODO: Navigate to task details
