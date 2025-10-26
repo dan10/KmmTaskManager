@@ -253,6 +253,7 @@ class _TaskHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Hero(
       tag: 'task_card_${task.id}',
+      transitionOnUserGestures: true,
       child: Material(
         type: MaterialType.transparency,
         child: SizedBox(
