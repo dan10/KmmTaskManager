@@ -1,13 +1,13 @@
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/routing/app_router.dart';
+import '../di/providers.dart';
+import '../pages/task_create_edit_screen.dart';
+import '../presentation/views/task_details_screen.dart';
 import '../presentation/views/task_list_screen.dart';
 import '../presentation/viewmodels/tasks_viewmodel.dart';
-import '../view_models/task_detail_viewmodel.dart';
 import '../view_models/task_create_edit_viewmodel.dart';
-import '../pages/task_detail_screen.dart';
-import '../pages/task_create_edit_screen.dart';
-import '../../../core/routing/app_router.dart';
 
 final List<GoRoute> taskRoutes = [
   GoRoute(
@@ -21,12 +21,21 @@ final List<GoRoute> taskRoutes = [
   GoRoute(
     path: AppRoutes.taskDetail,
     builder: (context, state) {
-      final vm = Provider.of<TaskDetailViewModel>(context, listen: false);
       final taskId = state.pathParameters['taskId']!;
-      if (vm.state.task == null && !vm.load.running) {
-        vm.load.execute(taskId);
-      }
-      return TaskDetailScreen(taskId: taskId);
+      final viewModel = createTaskDetailsViewModel(
+        context: context,
+        taskId: taskId,
+      );
+      // Set navigation callbacks
+      viewModel.onBack = () => context.pop();
+      viewModel.onEditTask = (id) => context.push(
+        AppRoutes.taskEdit.replaceFirst(':taskId', id),
+      );
+
+      return ChangeNotifierProvider.value(
+        value: viewModel,
+        child: TaskDetailsScreen(taskId: taskId),
+      );
     },
   ),
   GoRoute(

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -6,8 +7,10 @@ import '../data/services/task_api_service.dart';
 import '../data/repositories/task_repository.dart';
 import '../domain/usecases/delete_task_usecase.dart';
 import '../domain/usecases/get_task_progress_usecase.dart';
+import '../domain/usecases/get_task_usecase.dart';
 import '../domain/usecases/get_tasks_usecase.dart';
 import '../domain/usecases/update_task_status_usecase.dart';
+import '../presentation/viewmodels/task_details_viewmodel.dart';
 import '../presentation/viewmodels/tasks_viewmodel.dart';
 import '../view_models/task_detail_viewmodel.dart';
 import '../view_models/task_create_edit_viewmodel.dart';
@@ -24,6 +27,9 @@ List<SingleChildWidget> get providers => [
   ),
   
   // Use Cases
+  ProxyProvider<TaskApiService, GetTaskUseCase>(
+    update: (_, api, __) => GetTaskUseCase(api),
+  ),
   ProxyProvider<TaskRepository, GetTasksUseCase>(
     update: (_, repo, __) => GetTasksUseCase(repo),
   ),
@@ -70,5 +76,20 @@ List<SingleChildWidget> get providers => [
     update: (_, repo, previous) => previous ?? TaskCreateEditViewModel(repository: repo),
   ),
 ];
+
+/// Factory function to create TaskDetailsViewModel
+/// Note: TaskDetailsViewModel requires a taskId parameter, so it cannot be
+/// provided globally. Instead, use this factory function with ChangeNotifierProvider.value
+/// or create it directly when navigating to the details screen.
+TaskDetailsViewModel createTaskDetailsViewModel({
+  required BuildContext context,
+  required String taskId,
+}) {
+  return TaskDetailsViewModel(
+    getTaskUseCase: Provider.of<GetTaskUseCase>(context, listen: false),
+    deleteTaskUseCase: Provider.of<DeleteTaskUseCase>(context, listen: false),
+    taskId: taskId,
+  );
+}
 
 

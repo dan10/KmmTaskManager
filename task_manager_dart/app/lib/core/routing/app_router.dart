@@ -58,7 +58,7 @@ final GoRouter appRouter = GoRouter(
           },
       branches: [
         // Branch 0: Tasks
-        StatefulShellBranch(routes: taskRoutes),
+        StatefulShellBranch(routes: taskRoutes, observers: [HeroController()]),
         // Branch 1: Calendar (middle)
         StatefulShellBranch(
           routes: [

@@ -91,21 +91,27 @@ class TaskItemWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Priority indicator
-              Container(
-                width: 4,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      indicatorColor.withOpacity(0.95),
-                      indicatorColor.withOpacity(0.65),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
+              // Priority indicator with Hero animation
+              Hero(
+                tag: 'task_indicator_${task.id}',
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    width: 4,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          indicatorColor.withOpacity(0.95),
+                          indicatorColor.withOpacity(0.65),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        bottomLeft: Radius.circular(8),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -120,33 +126,42 @@ class TaskItemWidget extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              task.title,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: titleColor,
-                                decoration: task.status == TaskStatus.done
-                                    ? TextDecoration.lineThrough
-                                    : null,
+                            child: Hero(
+                              tag: 'task_title_${task.id}',
+                              child: Material(
+                                color: Colors.transparent,
+                                child: Text(
+                                  task.title,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: titleColor,
+                                    decoration: task.status == TaskStatus.done
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              _formatStatus(),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: statusColor,
+                          Hero(
+                            tag: 'task_status_${task.id}',
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                _formatStatus(),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: statusColor,
+                                ),
                               ),
                             ),
                           ),
@@ -155,13 +170,19 @@ class TaskItemWidget extends StatelessWidget {
                       // Description
                       if (task.description.isNotEmpty) ...[
                         const SizedBox(height: 6),
-                        Text(
-                          task.description,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: descriptionColor,
+                        Hero(
+                          tag: 'task_description_${task.id}',
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Text(
+                              task.description,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: descriptionColor,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                       const SizedBox(height: 12),

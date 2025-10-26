@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/ui/components/shimmer.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../viewmodels/tasks_viewmodel.dart';
@@ -117,9 +119,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           builderDelegate: PagedChildBuilderDelegate<TaskDto>(
                             itemBuilder: (context, task, index) => TaskItemSwipeable(
                               task: task,
-                              onTap: () {
-                                // TODO: Navigate to task details
-                              },
+                              onTap: () => _navigateToTaskDetails(context, task.id),
                               onStatusChanged: (status) {
                                 _viewModel.updateTaskStatus.execute((task.id, status));
                               },
@@ -199,5 +199,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Future<void> _handleRefresh(TasksViewModel viewModel) async {
     viewModel.refresh();
     await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  void _navigateToTaskDetails(BuildContext context, String taskId) {
+    context.push(
+      AppRoutes.taskDetail.replaceFirst(':taskId', taskId),
+    ).then((_) {
+      // Refresh list when returning from details
+      _viewModel.refresh();
+    });
   }
 }
