@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:task_manager_shared/models.dart';
 
 import '../../../core/routing/app_router.dart';
 import '../di/providers.dart';
@@ -22,10 +23,14 @@ final List<GoRoute> taskRoutes = [
     path: AppRoutes.taskDetail,
     builder: (context, state) {
       final taskId = state.pathParameters['taskId']!;
+      final initialTask = state.extra as TaskDto?; // Get passed task
+      
       final viewModel = createTaskDetailsViewModel(
         context: context,
         taskId: taskId,
+        initialTask: initialTask,
       );
+      
       // Set navigation callbacks
       viewModel.onBack = () => context.pop();
       viewModel.onEditTask = (id) => context.push(
@@ -34,7 +39,10 @@ final List<GoRoute> taskRoutes = [
 
       return ChangeNotifierProvider.value(
         value: viewModel,
-        child: TaskDetailsScreen(taskId: taskId),
+        child: TaskDetailsScreen(
+          taskId: taskId,
+          initialTask: initialTask,
+        ),
       );
     },
   ),

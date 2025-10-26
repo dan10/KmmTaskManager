@@ -202,8 +202,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   void _navigateToTaskDetails(BuildContext context, String taskId) {
+    // Find the task from current list to pass for Hero animation
+    TaskDto? task;
+    try {
+      final items = _viewModel.pagingController.value.items;
+      if (items != null && items.isNotEmpty) {
+        task = items.firstWhere(
+          (t) => t.id == taskId,
+          orElse: () => items.first,
+        );
+      }
+    } catch (e) {
+      // Task not found, will load from API
+      task = null;
+    }
+
     context.push(
       AppRoutes.taskDetail.replaceFirst(':taskId', taskId),
+      extra: task, // Pass task for instant display
     ).then((_) {
       // Refresh list when returning from details
       _viewModel.refresh();

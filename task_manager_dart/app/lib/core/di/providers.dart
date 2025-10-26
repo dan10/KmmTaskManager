@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import '../../data/sources/local/secure_storage.dart';
@@ -29,12 +28,10 @@ class DependencyProviders {
               port: uri.port,
               scheme: uri.scheme,
               authTokenProvider: () => secureStorage.getToken(),
-              unauthorizedHandler: () {
-                // Clear token and redirect to login on 401
-                secureStorage.deleteToken();
-                if (context.mounted) {
-                  context.go('/login');
-                }
+              unauthorizedHandler: () async {
+                // Clear token on 401 - this will trigger auth state change
+                // and the router will automatically redirect to login
+                await secureStorage.deleteToken();
               },
               enableLogging: true,
             );

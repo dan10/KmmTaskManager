@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:task_manager_shared/models.dart';
 
 import '../../../core/network/api_client.dart';
 import '../data/services/task_api_service.dart';
@@ -84,11 +85,13 @@ List<SingleChildWidget> get providers => [
 TaskDetailsViewModel createTaskDetailsViewModel({
   required BuildContext context,
   required String taskId,
+  TaskDto? initialTask,
 }) {
   return TaskDetailsViewModel(
     getTaskUseCase: Provider.of<GetTaskUseCase>(context, listen: false),
     deleteTaskUseCase: Provider.of<DeleteTaskUseCase>(context, listen: false),
     taskId: taskId,
+    initialTask: initialTask,
   );
 }
 

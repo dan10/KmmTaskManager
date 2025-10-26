@@ -23,13 +23,19 @@ class TaskDetailsViewModel extends ChangeNotifier {
     required GetTaskUseCase getTaskUseCase,
     required DeleteTaskUseCase deleteTaskUseCase,
     required String taskId,
+    TaskDto? initialTask,
   })  : _getTaskUseCase = getTaskUseCase,
         _deleteTaskUseCase = deleteTaskUseCase,
         _taskId = taskId {
     // Initialize commands
     deleteTask = Command0<void>(_deleteTask);
     
-    // Load task details
+    // Set initial task if provided (for Hero animation)
+    if (initialTask != null) {
+      _state = _state.copyWith(task: initialTask, isLoading: false);
+    }
+    
+    // Load task details (will update if initial task was provided)
     _loadTaskDetails();
   }
 
@@ -44,8 +50,11 @@ class TaskDetailsViewModel extends ChangeNotifier {
 
   /// Load task details
   Future<void> _loadTaskDetails() async {
-    _state = _state.copyWith(isLoading: true, errorMessage: null);
-    notifyListeners();
+    // Only show loading if we don't have task data yet
+    if (_state.task == null) {
+      _state = _state.copyWith(isLoading: true, errorMessage: null);
+      notifyListeners();
+    }
 
     _log.info('Loading task details for taskId: $_taskId');
     final result = await _getTaskUseCase(_taskId);

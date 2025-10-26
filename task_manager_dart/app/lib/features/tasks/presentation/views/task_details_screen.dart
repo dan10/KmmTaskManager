@@ -11,10 +11,12 @@ import '../viewmodels/task_details_viewmodel.dart';
 /// Follows Flutter's best practices and matches KMM's TaskDetailsScreen
 class TaskDetailsScreen extends StatefulWidget {
   final String taskId;
+  final TaskDto? initialTask;
 
   const TaskDetailsScreen({
     super.key,
     required this.taskId,
+    this.initialTask,
   });
 
   @override
