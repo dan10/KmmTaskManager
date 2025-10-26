@@ -62,6 +62,37 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     }
   }
 
+  Future<void> _showDeleteConfirmationDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Task'),
+          content: const Text(
+            'Are you sure you want to delete this task? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      _viewModel.deleteTask.execute();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<TaskDetailsViewModel>();
@@ -81,7 +112,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
           isDeleting: state.isDeleting,
           onNavigateBack: viewModel.handleNavigateBack,
           onEdit: viewModel.handleEditTask,
-          onDelete: () => viewModel.deleteTask.execute(),
+          onDelete: _showDeleteConfirmationDialog,
         ),
         body: _TaskDetailsBody(
           state: state,
