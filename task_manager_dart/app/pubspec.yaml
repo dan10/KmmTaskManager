@@ -25,6 +25,7 @@ dependencies:
   # HTTP Client
   dio: ^5.9.0
   http: ^1.5.0
+  pretty_http_logger: ^1.0.5
 
   # JSON Serialization
   json_annotation: ^4.9.0

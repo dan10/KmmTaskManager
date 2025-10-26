@@ -19,35 +19,43 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Result<void>> login({required String email, required String password}) async {
-    try {
-      final request = LoginRequestDto(email: email, password: password);
-      if (!request.isValid) {
-        final validationErrors = request.validate();
-        return Result.error(Exception(validationErrors.values.first));
-      }
-      final loginResponse = await _apiService.login(request);
-      await _secureStorage.storeToken(loginResponse.token);
-      await _secureStorage.storeUser(loginResponse.user);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
+    final request = LoginRequestDto(email: email, password: password);
+    if (!request.isValid) {
+      final validationErrors = request.validate();
+      return Result.error(Exception(validationErrors.values.first));
+    }
+
+    final result = await _apiService.login(request);
+
+    switch (result) {
+      case Ok<LoginResponseDto>():
+        final loginResponse = result.value;
+        await _secureStorage.storeToken(loginResponse.token);
+        await _secureStorage.storeUser(loginResponse.user);
+        return const Result.ok(null);
+      case Error<LoginResponseDto>():
+        return Result.error(result.error);
     }
   }
 
   @override
   Future<Result<void>> register({required String name, required String email, required String password}) async {
-    try {
-      final request = RegisterRequestDto(displayName: name, email: email, password: password);
-      if (!request.isValid) {
-        final validationErrors = request.validate();
-        return Result.error(Exception(validationErrors.values.first));
-      }
-      final loginResponse = await _apiService.register(request);
-      await _secureStorage.storeToken(loginResponse.token);
-      await _secureStorage.storeUser(loginResponse.user);
-      return Result.ok(null);
-    } on Exception catch (e) {
-      return Result.error(e);
+    final request = RegisterRequestDto(displayName: name, email: email, password: password);
+    if (!request.isValid) {
+      final validationErrors = request.validate();
+      return Result.error(Exception(validationErrors.values.first));
+    }
+
+    final result = await _apiService.register(request);
+
+    switch (result) {
+      case Ok<LoginResponseDto>():
+        final loginResponse = result.value;
+        await _secureStorage.storeToken(loginResponse.token);
+        await _secureStorage.storeUser(loginResponse.user);
+        return const Result.ok(null);
+      case Error<LoginResponseDto>():
+        return Result.error(result.error);
     }
   }
 }

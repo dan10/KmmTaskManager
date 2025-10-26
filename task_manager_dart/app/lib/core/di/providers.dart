@@ -20,10 +20,15 @@ class DependencyProviders {
 
         // API Services
         Provider<AuthApiService>(
-          create: (_) =>
-              AuthApiServiceImpl(
-                baseUrl: ApiConstants.baseUrl,
-              ),
+          create: (_) {
+            // Parse the base URL to extract host, port, and scheme
+            final uri = Uri.parse(ApiConstants.baseUrl);
+            return AuthApiServiceImpl(
+              host: uri.host,
+              port: uri.port,
+              scheme: uri.scheme,
+            );
+          },
         ),
 
         ProxyProvider<SecureStorage, TaskApiService>(

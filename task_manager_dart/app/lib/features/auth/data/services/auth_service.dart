@@ -1,129 +1,85 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:task_manager_shared/models.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/api_routes.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/utils/result.dart';
 
 /// Low-level API service for authentication HTTP calls
 abstract class AuthApiService {
-  Future<LoginResponseDto> login(LoginRequestDto request);
+  Future<Result<LoginResponseDto>> login(LoginRequestDto request);
 
-  Future<LoginResponseDto> register(RegisterRequestDto request);
+  Future<Result<LoginResponseDto>> register(RegisterRequestDto request);
 
-  Future<LoginResponseDto> googleLogin(GoogleLoginRequestDto request);
+  Future<Result<LoginResponseDto>> googleLogin(GoogleLoginRequestDto request);
 
-  Future<void> logout(String token);
+  Future<Result<void>> logout(String token);
 }
 
 class AuthApiServiceImpl implements AuthApiService {
-  final String _baseUrl;
-  final http.Client _httpClient;
+  final ApiClient _client;
 
   AuthApiServiceImpl({
-    required String baseUrl,
-    http.Client? httpClient,
-  })
-      : _baseUrl = baseUrl,
-        _httpClient = httpClient ?? http.Client();
+    String? host,
+    int? port,
+    String? scheme,
+  }) : _client = ApiClient(
+          host: host ?? const String.fromEnvironment('API_HOST', defaultValue: 'localhost'),
+          port: port ?? const int.fromEnvironment('API_PORT', defaultValue: 8081),
+          scheme: scheme ?? const String.fromEnvironment('API_SCHEME', defaultValue: 'http'),
+          // No auth token provider needed for auth endpoints
+          authTokenProvider: null,
+          // No unauthorized handler needed for auth endpoints
+          unauthorizedHandler: null,
+          enableLogging: true,
+        );
 
   @override
-  Future<LoginResponseDto> login(LoginRequestDto request) async {
-    try {
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiRoutes.authLogin}'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(request.toJson()),
-      );
-
-      if (response.statusCode == 200) {
-        return LoginResponseDto.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>,
-        );
-      } else {
-        final errorResponse = ErrorResponseDto.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>,
-        );
-        throw Exception(errorResponse.message);
-      }
-    } catch (e) {
-      throw Exception('Login API call failed: ${e.toString()}');
-    }
+  Future<Result<LoginResponseDto>> login(LoginRequestDto request) async {
+    return _client.post<LoginResponseDto>(
+      ApiRoutes.authLogin,
+      body: request.toJson(),
+      fromJson: (json) => LoginResponseDto.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   @override
-  Future<LoginResponseDto> register(RegisterRequestDto request) async {
-    try {
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiRoutes.authRegister}'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(request.toJson()),
-      );
-
-      if (response.statusCode == 200) {
-        return LoginResponseDto.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>,
-        );
-      } else {
-        final errorResponse = ErrorResponseDto.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>,
-        );
-        throw Exception(errorResponse.message);
-      }
-    } catch (e) {
-      throw Exception('Registration API call failed: ${e.toString()}');
-    }
+  Future<Result<LoginResponseDto>> register(RegisterRequestDto request) async {
+    return _client.post<LoginResponseDto>(
+      ApiRoutes.authRegister,
+      body: request.toJson(),
+      fromJson: (json) => LoginResponseDto.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   @override
-  Future<LoginResponseDto> googleLogin(GoogleLoginRequestDto request) async {
-    try {
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiRoutes.authGoogleLogin}'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(request.toJson()),
-      );
-
-      if (response.statusCode == 200) {
-        return LoginResponseDto.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>,
-        );
-      } else {
-        final errorResponse = ErrorResponseDto.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>,
-        );
-        throw Exception(errorResponse.message);
-      }
-    } catch (e) {
-      throw Exception('Google login API call failed: ${e.toString()}');
-    }
+  Future<Result<LoginResponseDto>> googleLogin(GoogleLoginRequestDto request) async {
+    return _client.post<LoginResponseDto>(
+      ApiRoutes.authGoogleLogin,
+      body: request.toJson(),
+      fromJson: (json) => LoginResponseDto.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   @override
-  Future<void> logout(String token) async {
-    try {
-      // Optional server logout endpoint call
-      await _httpClient.post(
-        Uri.parse('$_baseUrl${ApiRoutes.authLogout}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-    } catch (e) {
-      // Don't throw on logout API failure - local logout should still work
-      debugPrint('Logout API call failed: ${e.toString()}');
-    }
-  }
+  Future<Result<void>> logout(String token) async {
+    // Create a temporary client with token for logout
+    final clientWithToken = ApiClient(
+      host: const String.fromEnvironment('API_HOST', defaultValue: 'localhost'),
+      port: const int.fromEnvironment('API_PORT', defaultValue: 8081),
+      scheme: const String.fromEnvironment('API_SCHEME', defaultValue: 'http'),
+      authTokenProvider: () async => token,
+      unauthorizedHandler: null,
+      enableLogging: true,
+    );
 
-  void dispose() {
-    _httpClient.close();
+    // Call logout endpoint - don't fail if it doesn't work
+    final result = await clientWithToken.post<void>(
+      ApiRoutes.authLogout,
+      body: null,
+      fromJson: (_) => null,
+    );
+
+    // Always return success - local logout should work even if server call fails
+    return const Result.ok(null);
   }
 }
 
