@@ -95,9 +95,11 @@ class TaskItemWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _TaskIndicatorHero(
-                taskId: task.id,
-                indicatorColor: indicatorColor,
+              Hero(
+                tag: 'task_indicator_${task.id}',
+                child: _TaskIndicator(
+                  indicatorColor: indicatorColor,
+                ),
               ),
               Expanded(
                 child: Padding(
@@ -115,8 +117,7 @@ class TaskItemWidget extends StatelessWidget {
                       ),
                       if (task.description.isNotEmpty) ...[
                         const SizedBox(height: 6),
-                        _TaskDescriptionHero(
-                          taskId: task.id,
+                        _TaskDescription(
                           description: task.description,
                           style: textTheme.bodyMedium?.copyWith(
                             color: descriptionColor,
@@ -143,37 +144,29 @@ class TaskItemWidget extends StatelessWidget {
   }
 }
 
-class _TaskIndicatorHero extends StatelessWidget {
-  final String taskId;
+class _TaskIndicator extends StatelessWidget {
   final Color indicatorColor;
 
-  const _TaskIndicatorHero({
-    required this.taskId,
+  const _TaskIndicator({
     required this.indicatorColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: 'task_indicator_$taskId',
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: 4,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                indicatorColor.withOpacity(0.95),
-                indicatorColor.withOpacity(0.65),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              bottomLeft: Radius.circular(8),
-            ),
-          ),
+    return Container(
+      width: 4,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            indicatorColor.withOpacity(0.95),
+            indicatorColor.withOpacity(0.65),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(8),
+          bottomLeft: Radius.circular(8),
         ),
       ),
     );
@@ -211,37 +204,38 @@ class _TaskHeaderRow extends StatelessWidget {
         Expanded(
           child: Hero(
             tag: 'task_title_${task.id}',
-            child: Material(
-              color: Colors.transparent,
-              child: Text(
-                task.title,
-                style: resolvedTitleStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+            flightShuttleBuilder: (context, animation, direction, fromContext, toContext) => DefaultTextStyle(
+              style: resolvedTitleStyle,
+              child: Text(task.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            child: Text(
+              task.title,
+              style: resolvedTitleStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
         const SizedBox(width: 8),
-        _TaskStatusHero(
-          taskId: task.id,
-          label: statusLabel,
-          statusColor: statusColor,
-          textStyle: statusTextStyle,
+        Hero(
+          tag: 'task_status_${task.id}',
+          child: _TaskStatusBadge(
+            label: statusLabel,
+            statusColor: statusColor,
+            textStyle: statusTextStyle,
+          ),
         ),
       ],
     );
   }
 }
 
-class _TaskStatusHero extends StatelessWidget {
-  final String taskId;
+class _TaskStatusBadge extends StatelessWidget {
   final String label;
   final Color statusColor;
   final TextStyle? textStyle;
 
-  const _TaskStatusHero({
-    required this.taskId,
+  const _TaskStatusBadge({
     required this.label,
     required this.statusColor,
     required this.textStyle,
@@ -253,30 +247,22 @@ class _TaskStatusHero extends StatelessWidget {
       color: statusColor,
     );
 
-    return Hero(
-      tag: 'task_status_$taskId',
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(label, style: resolvedStyle),
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(4),
       ),
+      child: Text(label, style: resolvedStyle),
     );
   }
 }
 
-class _TaskDescriptionHero extends StatelessWidget {
-  final String taskId;
+class _TaskDescription extends StatelessWidget {
   final String description;
   final TextStyle? style;
 
-  const _TaskDescriptionHero({
-    required this.taskId,
+  const _TaskDescription({
     required this.description,
     required this.style,
   });
@@ -285,17 +271,11 @@ class _TaskDescriptionHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final resolvedStyle = style ?? const TextStyle(fontSize: 14);
 
-    return Hero(
-      tag: 'task_description_$taskId',
-      child: Material(
-        color: Colors.transparent,
-        child: Text(
-          description,
-          style: resolvedStyle,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+    return Text(
+      description,
+      style: resolvedStyle,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

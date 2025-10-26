@@ -240,59 +240,38 @@ class _TaskHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 1,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _TaskIndicatorHero(taskId: task.id),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _TaskTitleHero(taskId: task.id, title: task.title),
-                    const SizedBox(height: 8),
-                    _TaskHeaderMetadata(
-                      taskId: task.id,
-                      status: task.status,
-                      priority: task.priority,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TaskIndicatorHero extends StatelessWidget {
-  final String taskId;
-
-  const _TaskIndicatorHero({required this.taskId});
-
-  @override
-  Widget build(BuildContext context) {
     return Hero(
-      tag: 'task_indicator_$taskId',
+      tag: 'task_card_${task.id}',
       child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: 4,
-          decoration: const BoxDecoration(
-            color: Color(0xFFFDB022),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(12),
-              bottomLeft: Radius.circular(12),
+        type: MaterialType.transparency,
+        child: Card(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 1,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _TaskIndicator(),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _TaskTitle(title: task.title),
+                        const SizedBox(height: 8),
+                        _TaskHeaderMetadata(
+                          status: task.status,
+                          priority: task.priority,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -301,41 +280,49 @@ class _TaskIndicatorHero extends StatelessWidget {
   }
 }
 
-class _TaskTitleHero extends StatelessWidget {
-  final String taskId;
+class _TaskIndicator extends StatelessWidget {
+  const _TaskIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 4,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFDB022),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12),
+          bottomLeft: Radius.circular(12),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskTitle extends StatelessWidget {
   final String title;
 
-  const _TaskTitleHero({
-    required this.taskId,
+  const _TaskTitle({
     required this.title,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: 'task_title_$taskId',
-      child: Material(
-        color: Colors.transparent,
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
-          ),
-        ),
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1A1A1A),
       ),
     );
   }
 }
 
 class _TaskHeaderMetadata extends StatelessWidget {
-  final String taskId;
   final TaskStatus status;
   final Priority priority;
 
   const _TaskHeaderMetadata({
-    required this.taskId,
     required this.status,
     required this.priority,
   });
@@ -347,7 +334,7 @@ class _TaskHeaderMetadata extends StatelessWidget {
       runSpacing: 4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        _TaskStatusHero(taskId: taskId, status: status),
+        _TaskStatusBadge(status: status),
         const Icon(
           Icons.edit,
           size: 16,
@@ -361,27 +348,6 @@ class _TaskHeaderMetadata extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _TaskStatusHero extends StatelessWidget {
-  final String taskId;
-  final TaskStatus status;
-
-  const _TaskStatusHero({
-    required this.taskId,
-    required this.status,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Hero(
-      tag: 'task_status_$taskId',
-      child: Material(
-        color: Colors.transparent,
-        child: _TaskStatusBadge(status: status),
-      ),
     );
   }
 }
@@ -438,18 +404,12 @@ class _TaskDescriptionCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Hero(
-              tag: 'task_description_${task.id}',
-              child: Material(
-                color: Colors.transparent,
-                child: Text(
-                  task.description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF6B7280),
-                    height: 1.5,
-                  ),
-                ),
+            Text(
+              task.description,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF6B7280),
+                height: 1.5,
               ),
             ),
           ],
