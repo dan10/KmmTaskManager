@@ -83,60 +83,72 @@ class TaskItemWidget extends StatelessWidget {
     final statusLabel = _formatStatus();
     final priorityLabel = _formatPriority();
 
-    return Card(
-      color: containerColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Hero(
-                tag: 'task_indicator_${task.id}',
-                child: _TaskIndicator(
-                  indicatorColor: indicatorColor,
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return Hero(
+      tag: 'task_card_${task.id}',
+      child: Material(
+        type: MaterialType.transparency,
+        child: SizedBox(
+          width: double.infinity,
+          child: Card(
+            color: containerColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(8),
+              child: ClipRect(
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _TaskHeaderRow(
-                        task: task,
-                        titleColor: titleColor,
-                        statusColor: statusColor,
-                        statusLabel: statusLabel,
-                        titleStyle: textTheme.titleMedium,
-                        statusTextStyle: textTheme.labelSmall,
-                      ),
-                      if (task.description.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        _TaskDescription(
-                          description: task.description,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: descriptionColor,
+                    _TaskIndicator(
+                      indicatorColor: indicatorColor,
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _TaskHeaderRow(
+                                task: task,
+                                titleColor: titleColor,
+                                statusColor: statusColor,
+                                statusLabel: statusLabel,
+                                titleStyle: textTheme.titleMedium,
+                                statusTextStyle: textTheme.labelSmall,
+                              ),
+                              if (task.description.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                _TaskDescription(
+                                  description: task.description,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: descriptionColor,
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 12),
+                              _TaskMetadataChips(
+                                task: task,
+                                theme: theme,
+                                priorityColor: priorityColor,
+                                priorityLabel: priorityLabel,
+                                isOverdue: isOverdue,
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 12),
-                      _TaskMetadataChips(
-                        task: task,
-                        theme: theme,
-                        priorityColor: priorityColor,
-                        priorityLabel: priorityLabel,
-                        isOverdue: isOverdue,
                       ),
+                    ),
                     ],
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -202,28 +214,18 @@ class _TaskHeaderRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Hero(
-            tag: 'task_title_${task.id}',
-            flightShuttleBuilder: (context, animation, direction, fromContext, toContext) => DefaultTextStyle(
-              style: resolvedTitleStyle,
-              child: Text(task.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-            child: Text(
-              task.title,
-              style: resolvedTitleStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+          child: Text(
+            task.title,
+            style: resolvedTitleStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         const SizedBox(width: 8),
-        Hero(
-          tag: 'task_status_${task.id}',
-          child: _TaskStatusBadge(
-            label: statusLabel,
-            statusColor: statusColor,
-            textStyle: statusTextStyle,
-          ),
+        _TaskStatusBadge(
+          label: statusLabel,
+          statusColor: statusColor,
+          textStyle: statusTextStyle,
         ),
       ],
     );

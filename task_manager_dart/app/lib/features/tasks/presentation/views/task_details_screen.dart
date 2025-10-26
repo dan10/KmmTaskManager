@@ -255,34 +255,43 @@ class _TaskHeaderCard extends StatelessWidget {
       tag: 'task_card_${task.id}',
       child: Material(
         type: MaterialType.transparency,
-        child: Card(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 1,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+        child: SizedBox(
+          width: double.infinity,
+          child: Card(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 1,
+            child: ClipRect(
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                 _TaskIndicator(),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _TaskTitle(title: task.title),
-                        const SizedBox(height: 8),
-                        _TaskHeaderMetadata(
-                          status: task.status,
-                          priority: task.priority,
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _TaskTitle(title: task.title),
+                          const SizedBox(height: 8),
+                          _TaskHeaderMetadata(
+                            status: task.status,
+                            priority: task.priority,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
         ),
