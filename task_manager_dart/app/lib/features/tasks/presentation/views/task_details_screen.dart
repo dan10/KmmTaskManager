@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
+import '../state/task_details_state.dart';
 import '../viewmodels/task_details_viewmodel.dart';
 
 /// Task details screen with Hero animations
@@ -27,8 +28,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   void initState() {
     super.initState();
     _viewModel = context.read<TaskDetailsViewModel>();
-    
-    // Add listener for delete command
     _viewModel.deleteTask.addListener(_onDeleteResult);
   }
 
@@ -40,7 +39,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
   void _showSnackBar(String message, {bool isError = false}) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -68,25 +67,49 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      appBar: _buildAppBar(viewModel, state),
-      body: _buildBody(state),
+      appBar: _TaskDetailsAppBar(
+        isDeleting: state.isDeleting,
+        onNavigateBack: viewModel.handleNavigateBack,
+        onEdit: viewModel.handleEditTask,
+        onDelete: () => viewModel.deleteTask.execute(),
+      ),
+      body: _TaskDetailsBody(
+        state: state,
+        onRefresh: () => _viewModel.refresh(),
+      ),
     );
   }
+}
 
-  PreferredSizeWidget _buildAppBar(TaskDetailsViewModel viewModel, state) {
+class _TaskDetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final bool isDeleting;
+  final VoidCallback onNavigateBack;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _TaskDetailsAppBar({
+    required this.isDeleting,
+    required this.onNavigateBack,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
     return TaskItTopAppBar(
       title: 'Task Details',
       showNavigationIcon: true,
-      onNavigateBack: () => viewModel.handleNavigateBack(),
+      onNavigateBack: onNavigateBack,
       actions: [
-        // Edit button
         IconButton(
           icon: const Icon(Icons.edit),
-          onPressed: () => viewModel.handleEditTask(),
+          onPressed: onEdit,
         ),
-        // Delete button
         IconButton(
-          icon: state.isDeleting
+          icon: isDeleting
               ? const SizedBox(
                   width: 24,
                   height: 24,
@@ -95,71 +118,128 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   ),
                 )
               : const Icon(Icons.delete),
-          onPressed: state.isDeleting
-              ? null
-              : () => viewModel.deleteTask.execute(),
+          onPressed: isDeleting ? null : onDelete,
         ),
       ],
     );
   }
+}
 
-  Widget _buildBody(state) {
+class _TaskDetailsBody extends StatelessWidget {
+  final TaskDetailsState state;
+  final Future<void> Function() onRefresh;
+
+  const _TaskDetailsBody({
+    required this.state,
+    required this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     if (state.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const _TaskDetailsLoading();
     }
 
     if (state.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      );
+      return _TaskDetailsError(message: state.errorMessage!);
     }
 
-    if (state.task == null) {
-      return const Center(
-        child: Text('Task not found'),
-      );
+    final task = state.task;
+    if (task == null) {
+      return const _TaskDetailsEmpty();
     }
 
     return RefreshIndicator(
-      onRefresh: () => _viewModel.refresh(),
+      onRefresh: onRefresh,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTaskHeaderCard(state.task!),
-            const SizedBox(height: 16),
-            if (state.task!.description.isNotEmpty) ...[
-              _buildDescriptionCard(state.task!),
-              const SizedBox(height: 16),
-            ],
-            _buildTaskInformationCard(state.task!),
-            const SizedBox(height: 16),
-            _buildDatesCard(state.task!),
-          ],
-        ),
+        child: _TaskDetailsContent(task: task),
       ),
     );
   }
+}
 
-  Widget _buildTaskHeaderCard(TaskDto task) {
+class _TaskDetailsLoading extends StatelessWidget {
+  const _TaskDetailsLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+}
+
+class _TaskDetailsError extends StatelessWidget {
+  final String message;
+
+  const _TaskDetailsError({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TaskDetailsEmpty extends StatelessWidget {
+  const _TaskDetailsEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('Task not found'),
+    );
+  }
+}
+
+class _TaskDetailsContent extends StatelessWidget {
+  final TaskDto task;
+
+  const _TaskDetailsContent({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _TaskHeaderCard(task: task),
+        const SizedBox(height: 16),
+        if (task.description.isNotEmpty) ...[
+          _TaskDescriptionCard(task: task),
+          const SizedBox(height: 16),
+        ],
+        _TaskInformationCard(task: task),
+        const SizedBox(height: 16),
+        _TaskDatesCard(task: task),
+      ],
+    );
+  }
+}
+
+class _TaskHeaderCard extends StatelessWidget {
+  final TaskDto task;
+
+  const _TaskHeaderCard({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -170,68 +250,19 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Yellow left border with Hero animation
-            Hero(
-              tag: 'task_indicator_${task.id}',
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  width: 4,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFDB022),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Content
+            _TaskIndicatorHero(taskId: task.id),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title with Hero animation
-                    Hero(
-                      tag: 'task_title_${task.id}',
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Text(
-                          task.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A1A1A),
-                          ),
-                        ),
-                      ),
-                    ),
+                    _TaskTitleHero(taskId: task.id, title: task.title),
                     const SizedBox(height: 8),
-                    // Status and Priority
-                    Row(
-                      children: [
-                        Hero(
-                          tag: 'task_status_${task.id}',
-                          child: _buildStatusBadge(task.status),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.edit,
-                          size: 16,
-                          color: Color(0xFF6B7280),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${_formatPriority(task.priority)} Priority',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                      ],
+                    _TaskHeaderMetadata(
+                      taskId: task.id,
+                      status: task.status,
+                      priority: task.priority,
                     ),
                   ],
                 ),
@@ -242,8 +273,126 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildStatusBadge(TaskStatus status) {
+class _TaskIndicatorHero extends StatelessWidget {
+  final String taskId;
+
+  const _TaskIndicatorHero({required this.taskId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: 'task_indicator_$taskId',
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: 4,
+          decoration: const BoxDecoration(
+            color: Color(0xFFFDB022),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(12),
+              bottomLeft: Radius.circular(12),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskTitleHero extends StatelessWidget {
+  final String taskId;
+  final String title;
+
+  const _TaskTitleHero({
+    required this.taskId,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: 'task_title_$taskId',
+      child: Material(
+        color: Colors.transparent,
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A1A),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskHeaderMetadata extends StatelessWidget {
+  final String taskId;
+  final TaskStatus status;
+  final Priority priority;
+
+  const _TaskHeaderMetadata({
+    required this.taskId,
+    required this.status,
+    required this.priority,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _TaskStatusHero(taskId: taskId, status: status),
+        const Icon(
+          Icons.edit,
+          size: 16,
+          color: Color(0xFF6B7280),
+        ),
+        Text(
+          '${_priorityLabel(priority)} Priority',
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TaskStatusHero extends StatelessWidget {
+  final String taskId;
+  final TaskStatus status;
+
+  const _TaskStatusHero({
+    required this.taskId,
+    required this.status,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: 'task_status_$taskId',
+      child: Material(
+        color: Colors.transparent,
+        child: _TaskStatusBadge(status: status),
+      ),
+    );
+  }
+}
+
+class _TaskStatusBadge extends StatelessWidget {
+  final TaskStatus status;
+
+  const _TaskStatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -251,7 +400,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        _formatStatus(status),
+        _statusLabel(status),
         style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
@@ -260,8 +409,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildDescriptionCard(TaskDto task) {
+class _TaskDescriptionCard extends StatelessWidget {
+  final TaskDto task;
+
+  const _TaskDescriptionCard({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -301,8 +457,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildTaskInformationCard(TaskDto task) {
+class _TaskInformationCard extends StatelessWidget {
+  final TaskDto task;
+
+  const _TaskInformationCard({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -323,7 +486,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow(
+            _TaskInfoRow(
               icon: Icons.calendar_today_outlined,
               label: 'Due Date',
               value: task.dueDate != null
@@ -331,24 +494,31 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   : 'No due date',
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(
+            _TaskInfoRow(
               icon: Icons.edit_outlined,
               label: 'Status',
-              value: _formatStatus(task.status),
+              value: _statusLabel(task.status),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(
+            _TaskInfoRow(
               icon: Icons.flag_outlined,
               label: 'Priority',
-              value: _formatPriority(task.priority),
+              value: _priorityLabel(task.priority),
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildDatesCard(TaskDto task) {
+class _TaskDatesCard extends StatelessWidget {
+  final TaskDto task;
+
+  const _TaskDatesCard({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -369,7 +539,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildDateRow(
+            _TaskDateRow(
               icon: Icons.add,
               label: 'Created',
               value: task.createdAt != null
@@ -377,7 +547,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   : 'N/A',
             ),
             const SizedBox(height: 12),
-            _buildDateRow(
+            _TaskDateRow(
               icon: Icons.date_range,
               label: 'Last Updated',
               value: task.updatedAt != null
@@ -391,13 +561,23 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildInfoRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
+class _TaskInfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _TaskInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           icon,
@@ -415,23 +595,34 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
             ),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1A1A1A),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A1A1A),
+            ),
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildDateRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
+class _TaskDateRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _TaskDateRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Icon(
@@ -450,32 +641,34 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
             ),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1A1A1A),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A1A1A),
+            ),
           ),
         ),
       ],
     );
   }
+}
 
-  String _formatStatus(TaskStatus status) {
-    return switch (status) {
-      TaskStatus.todo => 'To Do',
-      TaskStatus.inProgress => 'In Progress',
-      TaskStatus.done => 'Done',
-    };
-  }
+String _statusLabel(TaskStatus status) {
+  return switch (status) {
+    TaskStatus.todo => 'To Do',
+    TaskStatus.inProgress => 'In Progress',
+    TaskStatus.done => 'Done',
+  };
+}
 
-  String _formatPriority(Priority priority) {
-    return switch (priority) {
-      Priority.high => 'High',
-      Priority.medium => 'Medium',
-      Priority.low => 'Low',
-    };
-  }
+String _priorityLabel(Priority priority) {
+  return switch (priority) {
+    Priority.high => 'High',
+    Priority.medium => 'Medium',
+    Priority.low => 'Low',
+  };
 }
 

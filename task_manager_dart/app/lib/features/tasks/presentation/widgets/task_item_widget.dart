@@ -60,6 +60,7 @@ class TaskItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     final isOverdue = _isOverdue();
     final priorityColor = _getPriorityColor();
     final statusColor = _getStatusColor();
@@ -79,6 +80,9 @@ class TaskItemWidget extends StatelessWidget {
         ? theme.colorScheme.onSurfaceVariant.withOpacity(0.6)
         : theme.colorScheme.onSurfaceVariant;
 
+    final statusLabel = _formatStatus();
+    final priorityLabel = _formatPriority();
+
     return Card(
       color: containerColor,
       shape: RoundedRectangleBorder(
@@ -91,129 +95,41 @@ class TaskItemWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Priority indicator with Hero animation
-              Hero(
-                tag: 'task_indicator_${task.id}',
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    width: 4,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          indicatorColor.withOpacity(0.95),
-                          indicatorColor.withOpacity(0.65),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        bottomLeft: Radius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
+              _TaskIndicatorHero(
+                taskId: task.id,
+                indicatorColor: indicatorColor,
               ),
-              // Content
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title and status
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Hero(
-                              tag: 'task_title_${task.id}',
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Text(
-                                  task.title,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: titleColor,
-                                    decoration: task.status == TaskStatus.done
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Hero(
-                            tag: 'task_status_${task.id}',
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                _formatStatus(),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: statusColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      _TaskHeaderRow(
+                        task: task,
+                        titleColor: titleColor,
+                        statusColor: statusColor,
+                        statusLabel: statusLabel,
+                        titleStyle: textTheme.titleMedium,
+                        statusTextStyle: textTheme.labelSmall,
                       ),
-                      // Description
                       if (task.description.isNotEmpty) ...[
                         const SizedBox(height: 6),
-                        Hero(
-                          tag: 'task_description_${task.id}',
-                          child: Material(
-                            color: Colors.transparent,
-                            child: Text(
-                              task.description,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: descriptionColor,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                        _TaskDescriptionHero(
+                          taskId: task.id,
+                          description: task.description,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: descriptionColor,
                           ),
                         ),
                       ],
                       const SizedBox(height: 12),
-                      // Project, priority, and due date
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          // Project
-                          if (task.projectName != null)
-                            _InfoChip(
-                              icon: Icons.folder_outlined,
-                              label: task.projectName!,
-                              theme: theme,
-                            ),
-                          // Priority
-                          _InfoChip(
-                            icon: Icons.flag_outlined,
-                            label: _formatPriority(),
-                            theme: theme,
-                            color: priorityColor,
-                          ),
-                          // Due date
-                          if (task.dueDate != null)
-                            _InfoChip(
-                              icon: isOverdue ? Icons.warning_outlined : Icons.calendar_today_outlined,
-                              label: DateFormat('MMM d, y').format(task.dueDate!),
-                              theme: theme,
-                              color: isOverdue ? const Color(0xFFEF4444) : null,
-                            ),
-                        ],
+                      _TaskMetadataChips(
+                        task: task,
+                        theme: theme,
+                        priorityColor: priorityColor,
+                        priorityLabel: priorityLabel,
+                        isOverdue: isOverdue,
                       ),
                     ],
                   ),
@@ -223,6 +139,209 @@ class TaskItemWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TaskIndicatorHero extends StatelessWidget {
+  final String taskId;
+  final Color indicatorColor;
+
+  const _TaskIndicatorHero({
+    required this.taskId,
+    required this.indicatorColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: 'task_indicator_$taskId',
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: 4,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                indicatorColor.withOpacity(0.95),
+                indicatorColor.withOpacity(0.65),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              bottomLeft: Radius.circular(8),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskHeaderRow extends StatelessWidget {
+  final TaskDto task;
+  final Color titleColor;
+  final Color statusColor;
+  final String statusLabel;
+  final TextStyle? titleStyle;
+  final TextStyle? statusTextStyle;
+
+  const _TaskHeaderRow({
+    required this.task,
+    required this.titleColor,
+    required this.statusColor,
+    required this.statusLabel,
+    required this.titleStyle,
+    required this.statusTextStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedTitleStyle = (titleStyle ?? const TextStyle()).copyWith(
+      fontWeight: FontWeight.w600,
+      color: titleColor,
+      decoration:
+          task.status == TaskStatus.done ? TextDecoration.lineThrough : null,
+    );
+
+    return Row(
+      children: [
+        Expanded(
+          child: Hero(
+            tag: 'task_title_${task.id}',
+            child: Material(
+              color: Colors.transparent,
+              child: Text(
+                task.title,
+                style: resolvedTitleStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        _TaskStatusHero(
+          taskId: task.id,
+          label: statusLabel,
+          statusColor: statusColor,
+          textStyle: statusTextStyle,
+        ),
+      ],
+    );
+  }
+}
+
+class _TaskStatusHero extends StatelessWidget {
+  final String taskId;
+  final String label;
+  final Color statusColor;
+  final TextStyle? textStyle;
+
+  const _TaskStatusHero({
+    required this.taskId,
+    required this.label,
+    required this.statusColor,
+    required this.textStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedStyle = (textStyle ?? const TextStyle(fontSize: 12)).copyWith(
+      color: statusColor,
+    );
+
+    return Hero(
+      tag: 'task_status_$taskId',
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: statusColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(label, style: resolvedStyle),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskDescriptionHero extends StatelessWidget {
+  final String taskId;
+  final String description;
+  final TextStyle? style;
+
+  const _TaskDescriptionHero({
+    required this.taskId,
+    required this.description,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedStyle = style ?? const TextStyle(fontSize: 14);
+
+    return Hero(
+      tag: 'task_description_$taskId',
+      child: Material(
+        color: Colors.transparent,
+        child: Text(
+          description,
+          style: resolvedStyle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskMetadataChips extends StatelessWidget {
+  final TaskDto task;
+  final ThemeData theme;
+  final Color priorityColor;
+  final String priorityLabel;
+  final bool isOverdue;
+
+  const _TaskMetadataChips({
+    required this.task,
+    required this.theme,
+    required this.priorityColor,
+    required this.priorityLabel,
+    required this.isOverdue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        if (task.projectName != null)
+          _InfoChip(
+            icon: Icons.folder_outlined,
+            label: task.projectName!,
+            theme: theme,
+          ),
+        _InfoChip(
+          icon: Icons.flag_outlined,
+          label: priorityLabel,
+          theme: theme,
+          color: priorityColor,
+        ),
+        if (task.dueDate != null)
+          _InfoChip(
+            icon:
+                isOverdue ? Icons.warning_outlined : Icons.calendar_today_outlined,
+            label: DateFormat('MMM d, y').format(task.dueDate!),
+            theme: theme,
+            color: isOverdue ? const Color(0xFFEF4444) : null,
+          ),
+      ],
     );
   }
 }
