@@ -3,11 +3,13 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
-import '../viewmodels/tasks_viewmodel.dart';
-import '../widgets/task_list_indicators.dart';
-import '../widgets/progress_summary_sliver.dart';
 import '../../../../core/ui/components/shimmer.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
+import '../viewmodels/tasks_viewmodel.dart';
+import '../widgets/progress_summary_sliver.dart';
+import '../widgets/task_create_bottom_sheet.dart';
+import '../widgets/task_item_widget.dart';
+import '../widgets/task_list_indicators.dart';
 
 /// Task list screen with infinite scroll pagination
 /// Uses CustomScrollView with slivers for better separation
@@ -182,9 +184,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Widget _buildFAB() {
     return FloatingActionButton(
       heroTag: 'add_task_fab',
-      onPressed: () {
-        // TODO: Navigate to create task
-      },
+      onPressed: () => showTaskCreateBottomSheet(
+        context: context,
+        onDismiss: (shouldRefresh) {
+          if (shouldRefresh) {
+            _viewModel.refresh();
+          }
+        },
+      ),
       child: const Icon(Icons.add),
     );
   }
