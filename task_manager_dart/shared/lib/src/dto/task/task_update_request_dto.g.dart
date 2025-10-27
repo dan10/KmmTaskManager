@@ -16,7 +16,6 @@ _TaskUpdateRequestDto _$TaskUpdateRequestDtoFromJson(
   dueDate: json['dueDate'] == null
       ? null
       : DateTime.parse(json['dueDate'] as String),
-  projectId: json['projectId'] as String?,
   assigneeId: json['assigneeId'] as String?,
 );
 
@@ -28,7 +27,6 @@ Map<String, dynamic> _$TaskUpdateRequestDtoToJson(
   'status': _$TaskStatusEnumMap[instance.status],
   'priority': _$PriorityEnumMap[instance.priority],
   'dueDate': instance.dueDate?.toIso8601String(),
-  'projectId': instance.projectId,
   'assigneeId': instance.assigneeId,
 };
 
