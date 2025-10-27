@@ -27,6 +27,13 @@ abstract class ProjectApiService {
   Future<Result<ProjectResponseDto>> removeMember(String projectId, String userId);
 
   Future<Result<Map<String, dynamic>>> getProjectStats(String projectId);
+  
+  Future<Result<PaginatedResponse<TaskDto>>> getProjectTasks({
+    required String projectId,
+    int page = 0,
+    int size = 10,
+    String? query,
+  });
 }
 
 class ProjectApiServiceImpl implements ProjectApiService {
@@ -150,6 +157,56 @@ class ProjectApiServiceImpl implements ProjectApiService {
     return _client.get<Map<String, dynamic>>(
       ApiRoutes.projectStats(projectId),
       fromJson: (json) => json as Map<String, dynamic>,
+    );
+  }
+
+  @override
+  Future<Result<PaginatedResponse<TaskDto>>> getProjectTasks({
+    required String projectId,
+    int page = 0,
+    int size = 10,
+    String? query,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'size': size.toString(),
+      if (query != null && query.isNotEmpty) 'searchText': query,
+    };
+
+    return _client.get<PaginatedResponse<TaskDto>>(
+      ApiRoutes.projectTasks(projectId),
+      queryParameters: queryParams,
+      fromJson: (json) {
+        // Parse items list
+        final items = (json['items'] as List?)
+            ?.map((item) => TaskDto.fromJson(item as Map<String, dynamic>))
+            .toList() ?? [];
+        
+        // Server sends: currentPage, pageSize, total, totalPages
+        final page = json['currentPage'] is int 
+            ? json['currentPage'] as int 
+            : int.tryParse(json['currentPage']?.toString() ?? '0') ?? 0;
+        
+        final size = json['pageSize'] is int 
+            ? json['pageSize'] as int 
+            : int.tryParse(json['pageSize']?.toString() ?? '0') ?? 0;
+        
+        final total = json['total'] is int 
+            ? json['total'] as int 
+            : int.tryParse(json['total']?.toString() ?? '0') ?? 0;
+        
+        final totalPages = json['totalPages'] is int 
+            ? json['totalPages'] as int 
+            : int.tryParse(json['totalPages']?.toString() ?? '0') ?? 0;
+        
+        return PaginatedResponse<TaskDto>(
+          items: items,
+          page: page,
+          size: size,
+          total: total,
+          totalPages: totalPages,
+        );
+      },
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../view_models/project_detail_viewmodel.dart';
-import '../view_models/project_create_edit_viewmodel.dart';
 import '../presentation/views/project_list_screen.dart';
-import '../pages/project_detail_screen.dart';
-import '../pages/project_create_edit_screen.dart';
+import '../presentation/views/project_detail_screen.dart';
+import '../presentation/viewmodels/project_tasks_viewmodel.dart';
 import '../../../core/routing/app_router.dart';
+import '../data/repositories/project_repository.dart';
+import '../../tasks/domain/usecases/update_task_status_usecase.dart';
 
 final List<GoRoute> projectRoutes = [
   GoRoute(
@@ -17,29 +17,15 @@ final List<GoRoute> projectRoutes = [
     path: AppRoutes.projectDetail,
     name: 'project-detail',
     builder: (context, state) {
-      final vm = Provider.of<ProjectDetailViewModel>(context, listen: false);
       final projectId = state.pathParameters['projectId']!;
-      if (vm.state.project == null && !vm.load.running) {
-        vm.load.execute(projectId);
-      }
-      return ProjectDetailScreen(projectId: projectId);
-    },
-  ),
-  GoRoute(
-    path: AppRoutes.projectCreate,
-    name: 'project-create',
-    builder: (context, state) {
-      Provider.of<ProjectCreateEditViewModel>(context, listen: false);
-      return const ProjectCreateEditScreen();
-    },
-  ),
-  GoRoute(
-    path: AppRoutes.projectEdit,
-    name: 'project-edit',
-    builder: (context, state) {
-      Provider.of<ProjectCreateEditViewModel>(context, listen: false);
-      final projectId = state.pathParameters['projectId']!;
-      return ProjectCreateEditScreen(projectId: projectId);
+      return ChangeNotifierProvider(
+        create: (context) => ProjectTasksViewModel(
+          projectRepository: Provider.of<ProjectRepository>(context, listen: false),
+          updateTaskStatusUseCase: Provider.of<UpdateTaskStatusUseCase>(context, listen: false),
+          projectId: projectId,
+        ),
+        child: ProjectDetailScreen(projectId: projectId),
+      );
     },
   ),
 ];

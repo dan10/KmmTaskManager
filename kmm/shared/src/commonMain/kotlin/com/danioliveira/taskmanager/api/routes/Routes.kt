@@ -24,7 +24,7 @@ internal object Routes {
     const val ALL_PROJECT_ASSIGNMENTS = "v1/assignments"
     const val BY_PROJECT_ASSIGNMENT_ID = "{assignmentId}"
 
-    const val PROJECT_TASKS = "v1/projects/{projectId}/tasks"
+    const val PROJECT_TASKS = "tasks"
 
     // Auth routes
     const val AUTH = "v1/auth"

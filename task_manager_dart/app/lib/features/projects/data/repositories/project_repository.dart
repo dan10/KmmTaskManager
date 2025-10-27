@@ -9,6 +9,7 @@ abstract class ProjectRepository {
   Future<Result<Project>> createProject({required String name, String? description});
   Future<Result<Project>> updateProject(String id, {String? name, String? description});
   Future<Result<void>> deleteProject(String id);
+  Future<Result<PaginatedResponse<TaskDto>>> getProjectTasks({required String projectId, int page = 0, int size = 10, String? query});
 }
 
 class ProjectRepositoryImpl implements ProjectRepository {
@@ -72,6 +73,11 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<Result<void>> deleteProject(String id) async {
     return await _apiService.deleteProject(id);
+  }
+
+  @override
+  Future<Result<PaginatedResponse<TaskDto>>> getProjectTasks({required String projectId, int page = 0, int size = 10, String? query}) async {
+    return await _apiService.getProjectTasks(projectId: projectId, page: page, size: size, query: query);
   }
 }
 
