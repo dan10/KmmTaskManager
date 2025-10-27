@@ -4,11 +4,10 @@ import 'package:task_manager_shared/models.dart';
 
 import '../../../core/routing/app_router.dart';
 import '../di/providers.dart';
-import '../pages/task_create_edit_screen.dart';
 import '../presentation/views/task_details_screen.dart';
+import '../presentation/views/task_edit_screen.dart';
 import '../presentation/views/task_list_screen.dart';
 import '../presentation/viewmodels/tasks_viewmodel.dart';
-import '../view_models/task_create_edit_viewmodel.dart';
 
 final List<GoRoute> taskRoutes = [
   GoRoute(
@@ -47,19 +46,28 @@ final List<GoRoute> taskRoutes = [
     },
   ),
   GoRoute(
-    path: AppRoutes.taskCreate,
-    builder: (context, state) {
-      Provider.of<TaskCreateEditViewModel>(context, listen: false);
-      final projectId = state.uri.queryParameters['projectId'];
-      return TaskCreateEditScreen(projectId: projectId);
-    },
-  ),
-  GoRoute(
     path: AppRoutes.taskEdit,
     builder: (context, state) {
-      Provider.of<TaskCreateEditViewModel>(context, listen: false);
       final taskId = state.pathParameters['taskId']!;
-      return TaskCreateEditScreen(taskId: taskId);
+      
+      final viewModel = createTaskEditViewModel(
+        context: context,
+        taskId: taskId,
+      );
+      
+      // Set navigation callbacks
+      viewModel.onBack = () => context.pop();
+      viewModel.onTaskUpdated = () => context.pop();
+      viewModel.onTaskDeleted = () {
+        // Pop twice: once from edit screen, once from details screen
+        context.pop();
+        context.pop();
+      };
+
+      return ChangeNotifierProvider.value(
+        value: viewModel,
+        child: TaskEditScreen(taskId: taskId),
+      );
     },
   ),
 ];

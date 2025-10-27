@@ -11,7 +11,9 @@ import '../domain/usecases/get_task_progress_usecase.dart';
 import '../domain/usecases/get_task_usecase.dart';
 import '../domain/usecases/get_tasks_usecase.dart';
 import '../domain/usecases/update_task_status_usecase.dart';
+import '../domain/usecases/update_task_usecase.dart';
 import '../presentation/viewmodels/task_details_viewmodel.dart';
+import '../presentation/viewmodels/task_edit_viewmodel.dart';
 import '../presentation/viewmodels/tasks_viewmodel.dart';
 import '../view_models/task_detail_viewmodel.dart';
 import '../view_models/task_create_edit_viewmodel.dart';
@@ -30,6 +32,9 @@ List<SingleChildWidget> get providers => [
   // Use Cases
   ProxyProvider<TaskApiService, GetTaskUseCase>(
     update: (_, api, __) => GetTaskUseCase(api),
+  ),
+  ProxyProvider<TaskApiService, UpdateTaskUseCase>(
+    update: (_, api, __) => UpdateTaskUseCase(api),
   ),
   ProxyProvider<TaskRepository, GetTasksUseCase>(
     update: (_, repo, __) => GetTasksUseCase(repo),
@@ -92,6 +97,22 @@ TaskDetailsViewModel createTaskDetailsViewModel({
     deleteTaskUseCase: Provider.of<DeleteTaskUseCase>(context, listen: false),
     taskId: taskId,
     initialTask: initialTask,
+  );
+}
+
+/// Factory function to create TaskEditViewModel
+/// Note: TaskEditViewModel requires a taskId parameter, so it cannot be
+/// provided globally. Instead, use this factory function with ChangeNotifierProvider.value
+/// or create it directly when navigating to the edit screen.
+TaskEditViewModel createTaskEditViewModel({
+  required BuildContext context,
+  required String taskId,
+}) {
+  return TaskEditViewModel(
+    getTaskUseCase: Provider.of<GetTaskUseCase>(context, listen: false),
+    updateTaskUseCase: Provider.of<UpdateTaskUseCase>(context, listen: false),
+    deleteTaskUseCase: Provider.of<DeleteTaskUseCase>(context, listen: false),
+    taskId: taskId,
   );
 }
 
