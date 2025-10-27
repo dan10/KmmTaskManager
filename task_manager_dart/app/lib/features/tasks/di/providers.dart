@@ -15,8 +15,7 @@ import '../domain/usecases/update_task_usecase.dart';
 import '../presentation/viewmodels/task_details_viewmodel.dart';
 import '../presentation/viewmodels/task_edit_viewmodel.dart';
 import '../presentation/viewmodels/tasks_viewmodel.dart';
-import '../view_models/task_detail_viewmodel.dart';
-import '../view_models/task_create_edit_viewmodel.dart';
+
 
 List<SingleChildWidget> get providers => [
   // Task API Service - uses shared ApiClient from core
@@ -66,20 +65,6 @@ List<SingleChildWidget> get providers => [
           updateTaskStatusUseCase: updateStatus,
           deleteTaskUseCase: deleteTask,
         ),
-  ),
-
-  // Legacy ViewModels (kept for backward compatibility)
-  ChangeNotifierProxyProvider<TaskRepository, TaskDetailViewModel>(
-    create: (context) => TaskDetailViewModel(
-      repository: Provider.of<TaskRepository>(context, listen: false),
-    ),
-    update: (_, repo, previous) => previous ?? TaskDetailViewModel(repository: repo),
-  ),
-  ChangeNotifierProxyProvider<TaskRepository, TaskCreateEditViewModel>(
-    create: (context) => TaskCreateEditViewModel(
-      repository: Provider.of<TaskRepository>(context, listen: false),
-    ),
-    update: (_, repo, previous) => previous ?? TaskCreateEditViewModel(repository: repo),
   ),
 ];
 
