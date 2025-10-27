@@ -1,7 +1,7 @@
 import 'package:task_manager_shared/models.dart';
 
+import '../../../../core/data/local/secure_storage.dart';
 import '../services/auth_service.dart';
-import '../../../../data/sources/local/secure_storage.dart';
 import '../../../../core/utils/result.dart';
 
 abstract class AuthRepository {

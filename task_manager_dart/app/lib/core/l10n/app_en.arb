@@ -386,5 +386,87 @@
   "commonNA": "N/A",
   "@commonNA": {
     "description": "Not available abbreviation"
+  },
+  
+  "@@context": "Project feature strings",
+  "projectsTitle": "Projects",
+  "@projectsTitle": {
+    "description": "Title for projects screen"
+  },
+  "projectsSearchPlaceholder": "Search projects...",
+  "@projectsSearchPlaceholder": {
+    "description": "Placeholder text for project search field"
+  },
+  "projectsEmptyTitle": "No Projects Yet",
+  "@projectsEmptyTitle": {
+    "description": "Title shown when project list is empty"
+  },
+  "projectsEmptySubtitle": "Create your first project to organize your tasks",
+  "@projectsEmptySubtitle": {
+    "description": "Subtitle shown when project list is empty"
+  },
+  "projectsLoadError": "Failed to load projects",
+  "@projectsLoadError": {
+    "description": "Error message when projects fail to load"
+  },
+  "projectsLoadMoreError": "Failed to load more projects",
+  "@projectsLoadMoreError": {
+    "description": "Error message when loading more projects fails"
+  },
+  "projectDeletedSuccess": "Project deleted successfully",
+  "@projectDeletedSuccess": {
+    "description": "Success message after deleting a project"
+  },
+  "projectDeletedError": "Failed to delete project",
+  "@projectDeletedError": {
+    "description": "Error message when deleting a project fails"
+  },
+  "projectCreatedSuccess": "Project created successfully",
+  "@projectCreatedSuccess": {
+    "description": "Success message after creating a project"
+  },
+  "projectCreatedError": "Failed to create project",
+  "@projectCreatedError": {
+    "description": "Error message when creating a project fails"
+  },
+  "projectUpdatedSuccess": "Project updated successfully",
+  "@projectUpdatedSuccess": {
+    "description": "Success message after updating a project"
+  },
+  "projectUpdatedError": "Failed to update project",
+  "@projectUpdatedError": {
+    "description": "Error message when updating a project fails"
+  },
+  "projectDetailsTitle": "Project Details",
+  "@projectDetailsTitle": {
+    "description": "Title for project details screen"
+  },
+  "projectCreateTitle": "Create Project",
+  "@projectCreateTitle": {
+    "description": "Title for create project screen"
+  },
+  "projectEditTitle": "Edit Project",
+  "@projectEditTitle": {
+    "description": "Title for edit project screen"
+  },
+  "projectNameLabel": "Project Name",
+  "@projectNameLabel": {
+    "description": "Label for project name field"
+  },
+  "projectNameHint": "Enter project name",
+  "@projectNameHint": {
+    "description": "Hint text for project name field"
+  },
+  "projectDescriptionLabel": "Description",
+  "@projectDescriptionLabel": {
+    "description": "Label for project description field"
+  },
+  "projectDescriptionHint": "Enter project description (optional)",
+  "@projectDescriptionHint": {
+    "description": "Hint text for project description field"
+  },
+  "projectNameRequired": "Project name is required",
+  "@projectNameRequired": {
+    "description": "Error message when project name is empty"
   }
 }

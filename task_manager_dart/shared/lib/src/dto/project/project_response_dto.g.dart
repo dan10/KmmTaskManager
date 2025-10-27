@@ -13,7 +13,7 @@ _ProjectResponseDto _$ProjectResponseDtoFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       completed: (json['completed'] as num?)?.toInt() ?? 0,
       inProgress: (json['inProgress'] as num?)?.toInt() ?? 0,
-      total: (json['total'] as num?)?.toInt() ?? 0,
+      total: (json['totalTasks'] as num?)?.toInt() ?? 0,
       creatorId: json['creatorId'] as String?,
       memberIds:
           (json['memberIds'] as List<dynamic>?)
@@ -43,7 +43,7 @@ Map<String, dynamic> _$ProjectResponseDtoToJson(_ProjectResponseDto instance) =>
       'description': instance.description,
       'completed': instance.completed,
       'inProgress': instance.inProgress,
-      'total': instance.total,
+      'totalTasks': instance.total,
       'creatorId': instance.creatorId,
       'memberIds': instance.memberIds,
       'creator': instance.creator,

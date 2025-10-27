@@ -278,6 +278,68 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get commonNA => 'N/D';
+
+  @override
+  String get projectsTitle => 'Projetos';
+
+  @override
+  String get projectsSearchPlaceholder => 'Pesquisar projetos...';
+
+  @override
+  String get projectsEmptyTitle => 'Ainda Sem Projetos';
+
+  @override
+  String get projectsEmptySubtitle =>
+      'Crie o seu primeiro projeto para organizar as suas tarefas';
+
+  @override
+  String get projectsLoadError => 'Falha ao carregar projetos';
+
+  @override
+  String get projectsLoadMoreError => 'Falha ao carregar mais projetos';
+
+  @override
+  String get projectDeletedSuccess => 'Projeto eliminado com sucesso';
+
+  @override
+  String get projectDeletedError => 'Falha ao eliminar projeto';
+
+  @override
+  String get projectCreatedSuccess => 'Projeto criado com sucesso';
+
+  @override
+  String get projectCreatedError => 'Falha ao criar projeto';
+
+  @override
+  String get projectUpdatedSuccess => 'Projeto actualizado com sucesso';
+
+  @override
+  String get projectUpdatedError => 'Falha ao actualizar projeto';
+
+  @override
+  String get projectDetailsTitle => 'Detalhes do Projeto';
+
+  @override
+  String get projectCreateTitle => 'Criar Projeto';
+
+  @override
+  String get projectEditTitle => 'Editar Projeto';
+
+  @override
+  String get projectNameLabel => 'Nome do Projeto';
+
+  @override
+  String get projectNameHint => 'Introduza o nome do projeto';
+
+  @override
+  String get projectDescriptionLabel => 'Descrição';
+
+  @override
+  String get projectDescriptionHint =>
+      'Introduza a descrição do projeto (opcional)';
+
+  @override
+  String get projectNameRequired => 'Nome do projeto é obrigatório';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -554,4 +616,66 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get commonNA => 'N/D';
+
+  @override
+  String get projectsTitle => 'Projetos';
+
+  @override
+  String get projectsSearchPlaceholder => 'Buscar projetos...';
+
+  @override
+  String get projectsEmptyTitle => 'Nenhum Projeto Ainda';
+
+  @override
+  String get projectsEmptySubtitle =>
+      'Crie seu primeiro projeto para organizar suas tarefas';
+
+  @override
+  String get projectsLoadError => 'Falha ao carregar projetos';
+
+  @override
+  String get projectsLoadMoreError => 'Falha ao carregar mais projetos';
+
+  @override
+  String get projectDeletedSuccess => 'Projeto excluído com sucesso';
+
+  @override
+  String get projectDeletedError => 'Falha ao excluir projeto';
+
+  @override
+  String get projectCreatedSuccess => 'Projeto criado com sucesso';
+
+  @override
+  String get projectCreatedError => 'Falha ao criar projeto';
+
+  @override
+  String get projectUpdatedSuccess => 'Projeto atualizado com sucesso';
+
+  @override
+  String get projectUpdatedError => 'Falha ao atualizar projeto';
+
+  @override
+  String get projectDetailsTitle => 'Detalhes do Projeto';
+
+  @override
+  String get projectCreateTitle => 'Criar Projeto';
+
+  @override
+  String get projectEditTitle => 'Editar Projeto';
+
+  @override
+  String get projectNameLabel => 'Nome do Projeto';
+
+  @override
+  String get projectNameHint => 'Digite o nome do projeto';
+
+  @override
+  String get projectDescriptionLabel => 'Descrição';
+
+  @override
+  String get projectDescriptionHint =>
+      'Digite a descrição do projeto (opcional)';
+
+  @override
+  String get projectNameRequired => 'Nome do projeto é obrigatório';
 }

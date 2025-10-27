@@ -1,7 +1,7 @@
 import 'package:task_manager_shared/models.dart';
 
-import '../../../../data/services/project_api_service.dart';
 import '../../../../core/utils/result.dart';
+import '../services/project_api_service.dart';
 
 abstract class ProjectRepository {
   Future<Result<PaginatedResponse<Project>>> getProjects({int page = 0, int size = 10, String? query});
@@ -17,8 +17,10 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
   @override
   Future<Result<PaginatedResponse<Project>>> getProjects({int page = 0, int size = 10, String? query}) async {
-    try {
-      final response = await _apiService.getProjects(page: page, size: size, query: query);
+    final result = await _apiService.getProjects(page: page, size: size, query: query);
+    
+    if (result is Ok<PaginatedResponse<ProjectResponseDto>>) {
+      final response = result.value;
       final mapped = PaginatedResponse<Project>(
         items: response.items.map((dto) => dto.toProject()).toList(),
         page: response.page,
@@ -27,51 +29,49 @@ class ProjectRepositoryImpl implements ProjectRepository {
         totalPages: response.totalPages,
       );
       return Result.ok(mapped);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } else {
+      return Result.error((result as Error).error);
     }
   }
 
   @override
   Future<Result<Project>> getProject(String id) async {
-    try {
-      final dto = await _apiService.getProject(id);
-      return Result.ok(dto.toProject());
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    final result = await _apiService.getProject(id);
+    
+    if (result is Ok<ProjectResponseDto>) {
+      return Result.ok(result.value.toProject());
+    } else {
+      return Result.error((result as Error).error);
     }
   }
 
   @override
   Future<Result<Project>> createProject({required String name, String? description}) async {
-    try {
-      final req = CreateProjectRequestDto(name: name, description: description);
-      final dto = await _apiService.createProject(req);
-      return Result.ok(dto.toProject());
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    final req = CreateProjectRequestDto(name: name, description: description);
+    final result = await _apiService.createProject(req);
+    
+    if (result is Ok<ProjectResponseDto>) {
+      return Result.ok(result.value.toProject());
+    } else {
+      return Result.error((result as Error).error);
     }
   }
 
   @override
   Future<Result<Project>> updateProject(String id, {String? name, String? description}) async {
-    try {
-      final req = ProjectUpdateRequestDto(name: name, description: description);
-      final dto = await _apiService.updateProject(id, req);
-      return Result.ok(dto.toProject());
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    final req = ProjectUpdateRequestDto(name: name, description: description);
+    final result = await _apiService.updateProject(id, req);
+    
+    if (result is Ok<ProjectResponseDto>) {
+      return Result.ok(result.value.toProject());
+    } else {
+      return Result.error((result as Error).error);
     }
   }
 
   @override
   Future<Result<void>> deleteProject(String id) async {
-    try {
-      await _apiService.deleteProject(id);
-      return Result.ok(null);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
-    }
+    return await _apiService.deleteProject(id);
   }
 }
 

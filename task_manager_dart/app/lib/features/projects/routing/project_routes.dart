@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../view_models/project_detail_viewmodel.dart';
 import '../view_models/project_create_edit_viewmodel.dart';
-import '../pages/project_list_screen.dart';
+import '../presentation/views/project_list_screen.dart';
 import '../pages/project_detail_screen.dart';
 import '../pages/project_create_edit_screen.dart';
 import '../../../core/routing/app_router.dart';

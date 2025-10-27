@@ -1,6 +1,6 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import '../../data/sources/local/secure_storage.dart';
+import '../data/local/secure_storage.dart';
 import '../constants/api_constants.dart';
 import '../network/api_client.dart';
 

@@ -279,4 +279,65 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get commonNA => 'N/D';
+
+  @override
+  String get projectsTitle => 'Projects';
+
+  @override
+  String get projectsSearchPlaceholder => 'Search projects...';
+
+  @override
+  String get projectsEmptyTitle => 'No Projects Yet';
+
+  @override
+  String get projectsEmptySubtitle =>
+      'Create your first project to organize your tasks';
+
+  @override
+  String get projectsLoadError => 'Failed to load projects';
+
+  @override
+  String get projectsLoadMoreError => 'Failed to load more projects';
+
+  @override
+  String get projectDeletedSuccess => 'Project deleted successfully';
+
+  @override
+  String get projectDeletedError => 'Failed to delete project';
+
+  @override
+  String get projectCreatedSuccess => 'Project created successfully';
+
+  @override
+  String get projectCreatedError => 'Failed to create project';
+
+  @override
+  String get projectUpdatedSuccess => 'Project updated successfully';
+
+  @override
+  String get projectUpdatedError => 'Failed to update project';
+
+  @override
+  String get projectDetailsTitle => 'Project Details';
+
+  @override
+  String get projectCreateTitle => 'Create Project';
+
+  @override
+  String get projectEditTitle => 'Edit Project';
+
+  @override
+  String get projectNameLabel => 'Project Name';
+
+  @override
+  String get projectNameHint => 'Enter project name';
+
+  @override
+  String get projectDescriptionLabel => 'Description';
+
+  @override
+  String get projectDescriptionHint => 'Enter project description (optional)';
+
+  @override
+  String get projectNameRequired => 'Project name is required';
 }

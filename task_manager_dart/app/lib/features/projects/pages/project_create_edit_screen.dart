@@ -4,8 +4,13 @@ import 'package:provider/provider.dart';
 import '../view_models/project_create_edit_viewmodel.dart';
 
 class ProjectCreateEditScreen extends StatefulWidget {
-  const ProjectCreateEditScreen({super.key, this.projectId});
+  const ProjectCreateEditScreen({
+    super.key, 
+    this.projectId,
+    this.onDismiss,
+  });
   final String? projectId;
+  final Function(bool shouldRefresh)? onDismiss;
 
   @override
   State<ProjectCreateEditScreen> createState() => _ProjectCreateEditScreenState();

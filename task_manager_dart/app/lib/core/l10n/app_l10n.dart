@@ -604,6 +604,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'N/A'**
   String get commonNA;
+
+  /// Title for projects screen
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get projectsTitle;
+
+  /// Placeholder text for project search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search projects...'**
+  String get projectsSearchPlaceholder;
+
+  /// Title shown when project list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No Projects Yet'**
+  String get projectsEmptyTitle;
+
+  /// Subtitle shown when project list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first project to organize your tasks'**
+  String get projectsEmptySubtitle;
+
+  /// Error message when projects fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load projects'**
+  String get projectsLoadError;
+
+  /// Error message when loading more projects fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load more projects'**
+  String get projectsLoadMoreError;
+
+  /// Success message after deleting a project
+  ///
+  /// In en, this message translates to:
+  /// **'Project deleted successfully'**
+  String get projectDeletedSuccess;
+
+  /// Error message when deleting a project fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete project'**
+  String get projectDeletedError;
+
+  /// Success message after creating a project
+  ///
+  /// In en, this message translates to:
+  /// **'Project created successfully'**
+  String get projectCreatedSuccess;
+
+  /// Error message when creating a project fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create project'**
+  String get projectCreatedError;
+
+  /// Success message after updating a project
+  ///
+  /// In en, this message translates to:
+  /// **'Project updated successfully'**
+  String get projectUpdatedSuccess;
+
+  /// Error message when updating a project fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update project'**
+  String get projectUpdatedError;
+
+  /// Title for project details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Project Details'**
+  String get projectDetailsTitle;
+
+  /// Title for create project screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create Project'**
+  String get projectCreateTitle;
+
+  /// Title for edit project screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Project'**
+  String get projectEditTitle;
+
+  /// Label for project name field
+  ///
+  /// In en, this message translates to:
+  /// **'Project Name'**
+  String get projectNameLabel;
+
+  /// Hint text for project name field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter project name'**
+  String get projectNameHint;
+
+  /// Label for project description field
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get projectDescriptionLabel;
+
+  /// Hint text for project description field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter project description (optional)'**
+  String get projectDescriptionHint;
+
+  /// Error message when project name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Project name is required'**
+  String get projectNameRequired;
 }
 
 class _AppLocalizationsDelegate

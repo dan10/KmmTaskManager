@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProjectResponseDto {
 
- String get id; String get name; String? get description; int get completed; int get inProgress; int get total; String? get creatorId; List<String> get memberIds; User? get creator; List<User> get members; DateTime? get createdAt; DateTime? get updatedAt;
+ String get id; String get name; String? get description; int get completed; int get inProgress;@JsonKey(name: 'totalTasks') int get total; String? get creatorId; List<String> get memberIds; User? get creator; List<User> get members; DateTime? get createdAt; DateTime? get updatedAt;
 /// Create a copy of ProjectResponseDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $ProjectResponseDtoCopyWith<$Res>  {
   factory $ProjectResponseDtoCopyWith(ProjectResponseDto value, $Res Function(ProjectResponseDto) _then) = _$ProjectResponseDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String? description, int completed, int inProgress, int total, String? creatorId, List<String> memberIds, User? creator, List<User> members, DateTime? createdAt, DateTime? updatedAt
+ String id, String name, String? description, int completed, int inProgress,@JsonKey(name: 'totalTasks') int total, String? creatorId, List<String> memberIds, User? creator, List<User> members, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -176,7 +176,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  int completed,  int inProgress,  int total,  String? creatorId,  List<String> memberIds,  User? creator,  List<User> members,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  int completed,  int inProgress, @JsonKey(name: 'totalTasks')  int total,  String? creatorId,  List<String> memberIds,  User? creator,  List<User> members,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProjectResponseDto() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.completed,_that.inProgress,_that.total,_that.creatorId,_that.memberIds,_that.creator,_that.members,_that.createdAt,_that.updatedAt);case _:
@@ -197,7 +197,7 @@ return $default(_that.id,_that.name,_that.description,_that.completed,_that.inPr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  int completed,  int inProgress,  int total,  String? creatorId,  List<String> memberIds,  User? creator,  List<User> members,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? description,  int completed,  int inProgress, @JsonKey(name: 'totalTasks')  int total,  String? creatorId,  List<String> memberIds,  User? creator,  List<User> members,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _ProjectResponseDto():
 return $default(_that.id,_that.name,_that.description,_that.completed,_that.inProgress,_that.total,_that.creatorId,_that.memberIds,_that.creator,_that.members,_that.createdAt,_that.updatedAt);case _:
@@ -217,7 +217,7 @@ return $default(_that.id,_that.name,_that.description,_that.completed,_that.inPr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? description,  int completed,  int inProgress,  int total,  String? creatorId,  List<String> memberIds,  User? creator,  List<User> members,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? description,  int completed,  int inProgress, @JsonKey(name: 'totalTasks')  int total,  String? creatorId,  List<String> memberIds,  User? creator,  List<User> members,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _ProjectResponseDto() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.completed,_that.inProgress,_that.total,_that.creatorId,_that.memberIds,_that.creator,_that.members,_that.createdAt,_that.updatedAt);case _:
@@ -232,7 +232,7 @@ return $default(_that.id,_that.name,_that.description,_that.completed,_that.inPr
 @JsonSerializable()
 
 class _ProjectResponseDto implements ProjectResponseDto {
-  const _ProjectResponseDto({required this.id, required this.name, this.description, this.completed = 0, this.inProgress = 0, this.total = 0, this.creatorId, final  List<String> memberIds = const [], this.creator, final  List<User> members = const [], this.createdAt, this.updatedAt}): _memberIds = memberIds,_members = members;
+  const _ProjectResponseDto({required this.id, required this.name, this.description, this.completed = 0, this.inProgress = 0, @JsonKey(name: 'totalTasks') this.total = 0, this.creatorId, final  List<String> memberIds = const [], this.creator, final  List<User> members = const [], this.createdAt, this.updatedAt}): _memberIds = memberIds,_members = members;
   factory _ProjectResponseDto.fromJson(Map<String, dynamic> json) => _$ProjectResponseDtoFromJson(json);
 
 @override final  String id;
@@ -240,7 +240,7 @@ class _ProjectResponseDto implements ProjectResponseDto {
 @override final  String? description;
 @override@JsonKey() final  int completed;
 @override@JsonKey() final  int inProgress;
-@override@JsonKey() final  int total;
+@override@JsonKey(name: 'totalTasks') final  int total;
 @override final  String? creatorId;
  final  List<String> _memberIds;
 @override@JsonKey() List<String> get memberIds {
@@ -293,7 +293,7 @@ abstract mixin class _$ProjectResponseDtoCopyWith<$Res> implements $ProjectRespo
   factory _$ProjectResponseDtoCopyWith(_ProjectResponseDto value, $Res Function(_ProjectResponseDto) _then) = __$ProjectResponseDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String? description, int completed, int inProgress, int total, String? creatorId, List<String> memberIds, User? creator, List<User> members, DateTime? createdAt, DateTime? updatedAt
+ String id, String name, String? description, int completed, int inProgress,@JsonKey(name: 'totalTasks') int total, String? creatorId, List<String> memberIds, User? creator, List<User> members, DateTime? createdAt, DateTime? updatedAt
 });
 
 

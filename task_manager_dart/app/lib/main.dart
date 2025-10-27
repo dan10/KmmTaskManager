@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_app/core/theme/theme.dart';
 
+import 'core/data/local/secure_storage.dart';
 import 'core/di/providers.dart';
 import 'core/l10n/app_l10n.dart';
 import 'core/routing/app_router.dart';
@@ -24,21 +25,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: DependencyProviders.providers,
-      child: MaterialApp.router(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        themeMode: ThemeMode.system,
-        theme: TaskItTheme.light(),
-        darkTheme: TaskItTheme.dark(),
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: appRouter,
+      // Use Builder to get context with providers
+      child: Builder(
+        builder: (context) {
+          final secureStorage = Provider.of<SecureStorage>(context, listen: false);
+          
+          return MaterialApp.router(
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            themeMode: ThemeMode.system,
+            theme: TaskItTheme.light(),
+            darkTheme: TaskItTheme.dark(),
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: createAppRouter(secureStorage),
+          );
+        },
       ),
     );
   }

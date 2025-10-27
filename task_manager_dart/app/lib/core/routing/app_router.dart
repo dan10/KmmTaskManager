@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import '../../data/sources/local/secure_storage.dart';
 import '../../features/auth/routing/auth_routes.dart';
 import '../../features/projects/routing/project_routes.dart';
 import '../../features/tasks/routing/task_routes.dart';
+import '../data/local/secure_storage.dart';
 
 // It's good practice to have your route paths as constants
 class AppRoutes {
@@ -31,11 +30,13 @@ class AppRoutes {
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-final GoRouter appRouter = GoRouter(
-  navigatorKey: _rootNavigatorKey,
-  initialLocation: AppRoutes.login,
-  redirect: _authRedirect,
-  routes: [
+/// Create GoRouter with SecureStorage for auth redirect
+GoRouter createAppRouter(SecureStorage secureStorage) {
+  return GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: AppRoutes.login,
+    redirect: (context, state) => _authRedirect(secureStorage, state),
+    routes: [
     // Auth routes
     ...authRoutes,
 
@@ -73,13 +74,13 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(routes: projectRoutes),
       ],
     ),
-  ],
-  errorBuilder: (context, state) =>
-      Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
-);
+    ],
+    errorBuilder: (context, state) =>
+        Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
+  );
+}
 
-Future<String?> _authRedirect(BuildContext context, GoRouterState state) async {
-  final secureStorage = Provider.of<SecureStorage>(context, listen: false);
+Future<String?> _authRedirect(SecureStorage secureStorage, GoRouterState state) async {
   final token = await secureStorage.getToken();
   final loggedIn = token != null && token.isNotEmpty;
 
