@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../state/task_details_state.dart';
 import '../viewmodels/task_details_viewmodel.dart';
@@ -53,35 +54,36 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   void _onDeleteResult() {
     if (_viewModel.deleteTask.completed) {
       _viewModel.deleteTask.clearResult();
-      _showSnackBar('Task deleted successfully');
+      final l10n = AppLocalizations.of(context)!;
+      _showSnackBar(l10n.taskDeletedSuccess);
     }
 
     if (_viewModel.deleteTask.error) {
       _viewModel.deleteTask.clearResult();
-      _showSnackBar('Failed to delete task', isError: true);
+      final l10n = AppLocalizations.of(context)!;
+      _showSnackBar(l10n.taskDeletedError, isError: true);
     }
   }
 
   Future<void> _showDeleteConfirmationDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Task'),
-          content: const Text(
-            'Are you sure you want to delete this task? This action cannot be undone.',
-          ),
+          title: Text(l10n.taskDeleteDialogTitle),
+          content: Text(l10n.taskDeleteDialogMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
-              child: const Text('Delete'),
+              child: Text(l10n.commonDelete),
             ),
           ],
         );
@@ -141,8 +143,9 @@ class _TaskDetailsAppBar extends StatelessWidget implements PreferredSizeWidget 
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return TaskItTopAppBar(
-      title: 'Task Details',
+      title: l10n.taskDetailsTitle,
       showNavigationIcon: true,
       onNavigateBack: onNavigateBack,
       actions: [
@@ -245,8 +248,9 @@ class _TaskDetailsEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Task not found'),
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: Text(l10n.taskNotFound),
     );
   }
 }
@@ -381,6 +385,7 @@ class _TaskHeaderMetadata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 4,
@@ -393,7 +398,7 @@ class _TaskHeaderMetadata extends StatelessWidget {
           color: Color(0xFF6B7280),
         ),
         Text(
-          '${_priorityLabel(priority)} Priority',
+          l10n.taskPriorityText(_priorityLabel(priority, l10n)),
           style: const TextStyle(
             fontSize: 14,
             color: Color(0xFF6B7280),
@@ -411,6 +416,7 @@ class _TaskStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -418,7 +424,7 @@ class _TaskStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        _statusLabel(status),
+        _statusLabel(status, l10n),
         style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
@@ -436,6 +442,7 @@ class _TaskDescriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -447,9 +454,9 @@ class _TaskDescriptionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Description',
-              style: TextStyle(
+            Text(
+              l10n.taskDescriptionLabel,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A1A1A),
@@ -478,6 +485,7 @@ class _TaskInformationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -489,9 +497,9 @@ class _TaskInformationCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Task Information',
-              style: TextStyle(
+            Text(
+              l10n.taskInformationLabel,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A1A1A),
@@ -500,22 +508,22 @@ class _TaskInformationCard extends StatelessWidget {
             const SizedBox(height: 16),
             _TaskInfoRow(
               icon: Icons.calendar_today_outlined,
-              label: 'Due Date',
+              label: l10n.taskDueDateLabel,
               value: task.dueDate != null
                   ? DateFormat('MMM d, y').format(task.dueDate!)
-                  : 'No due date',
+                  : l10n.taskNoDueDate,
             ),
             const SizedBox(height: 12),
             _TaskInfoRow(
               icon: Icons.edit_outlined,
-              label: 'Status',
-              value: _statusLabel(task.status),
+              label: l10n.taskStatusLabel,
+              value: _statusLabel(task.status, l10n),
             ),
             const SizedBox(height: 12),
             _TaskInfoRow(
               icon: Icons.flag_outlined,
-              label: 'Priority',
-              value: _priorityLabel(task.priority),
+              label: l10n.taskPriorityLabel,
+              value: _priorityLabel(task.priority, l10n),
             ),
           ],
         ),
@@ -531,6 +539,7 @@ class _TaskDatesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -542,9 +551,9 @@ class _TaskDatesCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Dates',
-              style: TextStyle(
+            Text(
+              l10n.taskDatesLabel,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A1A1A),
@@ -553,20 +562,20 @@ class _TaskDatesCard extends StatelessWidget {
             const SizedBox(height: 16),
             _TaskDateRow(
               icon: Icons.add,
-              label: 'Created',
+              label: l10n.taskCreatedAtLabel,
               value: task.createdAt != null
                   ? DateFormat('MMM d, y').format(task.createdAt!)
-                  : 'N/A',
+                  : l10n.commonNA,
             ),
             const SizedBox(height: 12),
             _TaskDateRow(
               icon: Icons.date_range,
-              label: 'Last Updated',
+              label: l10n.taskUpdatedAtLabel,
               value: task.updatedAt != null
                   ? DateFormat('MMM d, y').format(task.updatedAt!)
                   : task.createdAt != null
                       ? DateFormat('MMM d, y').format(task.createdAt!)
-                      : 'N/A',
+                      : l10n.commonNA,
             ),
           ],
         ),
@@ -668,19 +677,19 @@ class _TaskDateRow extends StatelessWidget {
   }
 }
 
-String _statusLabel(TaskStatus status) {
+String _statusLabel(TaskStatus status, AppLocalizations l10n) {
   return switch (status) {
-    TaskStatus.todo => 'To Do',
-    TaskStatus.inProgress => 'In Progress',
-    TaskStatus.done => 'Done',
+    TaskStatus.todo => l10n.taskStatusTodo,
+    TaskStatus.inProgress => l10n.taskStatusInProgress,
+    TaskStatus.done => l10n.taskStatusDone,
   };
 }
 
-String _priorityLabel(Priority priority) {
+String _priorityLabel(Priority priority, AppLocalizations l10n) {
   return switch (priority) {
-    Priority.high => 'High',
-    Priority.medium => 'Medium',
-    Priority.low => 'Low',
+    Priority.high => l10n.taskPriorityHigh,
+    Priority.medium => l10n.taskPriorityMedium,
+    Priority.low => l10n.taskPriorityLow,
   };
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
@@ -59,24 +60,28 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void _onDeleteResult() {
     if (_viewModel.deleteTask.completed) {
       _viewModel.deleteTask.clearResult();
-      _showSnackBar('Task deleted successfully');
+      final l10n = AppLocalizations.of(context)!;
+      _showSnackBar(l10n.taskDeletedSuccess);
     }
 
     if (_viewModel.deleteTask.error) {
       _viewModel.deleteTask.clearResult();
-      _showSnackBar('Failed to delete task', isError: true);
+      final l10n = AppLocalizations.of(context)!;
+      _showSnackBar(l10n.taskDeletedError, isError: true);
     }
   }
 
   void _onUpdateStatusResult() {
     if (_viewModel.updateTaskStatus.completed) {
       _viewModel.updateTaskStatus.clearResult();
-      _showSnackBar('Task updated successfully');
+      final l10n = AppLocalizations.of(context)!;
+      _showSnackBar(l10n.taskUpdatedSuccess);
     }
 
     if (_viewModel.updateTaskStatus.error) {
       _viewModel.updateTaskStatus.clearResult();
-      _showSnackBar('Failed to update task', isError: true);
+      final l10n = AppLocalizations.of(context)!;
+      _showSnackBar(l10n.taskUpdatedError, isError: true);
     }
   }
 
@@ -159,8 +164,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(TasksViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
     return TaskItTopAppBar(
-      title: 'Tasks',
+      title: l10n.taskListTitle,
       searchState: TaskItSearchState(
         query: viewModel.state.searchQuery,
         onQueryChange: (query) {
@@ -175,7 +181,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             }
           });
         },
-        placeholder: 'Search tasks...',
+        placeholder: l10n.taskSearchPlaceholder,
         enableClearOnClose: true,
       ),
     );

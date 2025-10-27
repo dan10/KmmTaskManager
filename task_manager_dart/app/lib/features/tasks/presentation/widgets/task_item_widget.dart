@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:task_manager_shared/models.dart';
 import 'package:intl/intl.dart';
+import 'package:task_manager_shared/models.dart';
+
+import '../../../../core/l10n/app_l10n.dart';
 
 /// Task item widget
 /// Simplified version of KMM's TaskItem (without swipe and shared transitions)
@@ -34,19 +36,21 @@ class TaskItemWidget extends StatelessWidget {
     };
   }
 
-  String _formatStatus() {
+  String _formatStatus(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return switch (task.status) {
-      TaskStatus.todo => 'To Do',
-      TaskStatus.inProgress => 'In Progress',
-      TaskStatus.done => 'Done',
+      TaskStatus.todo => l10n.taskStatusTodo,
+      TaskStatus.inProgress => l10n.taskStatusInProgress,
+      TaskStatus.done => l10n.taskStatusDone,
     };
   }
 
-  String _formatPriority() {
+  String _formatPriority(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return switch (task.priority) {
-      Priority.high => 'High',
-      Priority.medium => 'Medium',
-      Priority.low => 'Low',
+      Priority.high => l10n.taskPriorityHigh,
+      Priority.medium => l10n.taskPriorityMedium,
+      Priority.low => l10n.taskPriorityLow,
     };
   }
 
@@ -67,21 +71,21 @@ class TaskItemWidget extends StatelessWidget {
     final indicatorColor = isOverdue ? const Color(0xFFEF4444) : priorityColor;
 
     final containerColor = switch (task.status) {
-      TaskStatus.done => theme.colorScheme.surfaceVariant.withOpacity(0.45),
+      TaskStatus.done => theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
       _ when isOverdue => const Color(0xFFFFF1F2),
       _ => theme.colorScheme.surface,
     };
 
     final titleColor = task.status == TaskStatus.done
-        ? theme.colorScheme.onSurface.withOpacity(0.65)
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.65)
         : theme.colorScheme.onSurface;
 
     final descriptionColor = task.status == TaskStatus.done
-        ? theme.colorScheme.onSurfaceVariant.withOpacity(0.6)
+        ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6)
         : theme.colorScheme.onSurfaceVariant;
 
-    final statusLabel = _formatStatus();
-    final priorityLabel = _formatPriority();
+    final statusLabel = _formatStatus(context);
+    final priorityLabel = _formatPriority(context);
 
     return Hero(
       tag: 'task_card_${task.id}',
@@ -171,8 +175,8 @@ class _TaskIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            indicatorColor.withOpacity(0.95),
-            indicatorColor.withOpacity(0.65),
+            indicatorColor.withValues(alpha: 0.95),
+            indicatorColor.withValues(alpha: 0.65),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -253,7 +257,7 @@ class _TaskStatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.12),
+        color: statusColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(label, style: resolvedStyle),
@@ -349,7 +353,7 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.1),
+        color: chipColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(

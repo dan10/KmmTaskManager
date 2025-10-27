@@ -12,95 +12,271 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appName => 'TaskIt';
 
   @override
-  String get authAppName => 'Task Manager';
+  String get authAppName => 'Gestor de Tareas';
 
   @override
-  String get authLoginTitle => 'Welcome Back';
+  String get authLoginTitle => 'Bienvenido de Vuelta';
 
   @override
-  String get authRegisterTitle => 'Create Account';
+  String get authRegisterTitle => 'Crear Cuenta';
 
   @override
-  String get authEmail => 'Email';
+  String get authEmail => 'Correo Electrónico';
 
   @override
-  String get authEmailHint => 'Enter your email';
+  String get authEmailHint => 'Ingresa tu correo electrónico';
 
   @override
-  String get authPassword => 'Password';
+  String get authPassword => 'Contraseña';
 
   @override
-  String get authPasswordHint => 'Enter your password';
+  String get authPasswordHint => 'Ingresa tu contraseña';
 
   @override
-  String get authConfirmPassword => 'Confirm Password';
+  String get authConfirmPassword => 'Confirmar Contraseña';
 
   @override
-  String get authName => 'Name';
+  String get authName => 'Nombre';
 
   @override
-  String get authNameHint => 'Enter your full name';
+  String get authNameHint => 'Ingresa tu nombre completo';
 
   @override
-  String get authLoginButton => 'Login';
+  String get authLoginButton => 'Iniciar Sesión';
 
   @override
-  String get authRegisterButton => 'Create Account';
+  String get authRegisterButton => 'Crear Cuenta';
 
   @override
-  String get authSignUp => 'Sign Up';
+  String get authSignUp => 'Registrarse';
 
   @override
-  String get authSignIn => 'Sign In';
+  String get authSignIn => 'Iniciar Sesión';
 
   @override
-  String get authWithoutAccount => 'Don\'t have an account?';
+  String get authWithoutAccount => '¿No tienes una cuenta?';
 
   @override
-  String get authAlreadyHaveAccount => 'Already have an account?';
+  String get authAlreadyHaveAccount => '¿Ya tienes una cuenta?';
 
   @override
-  String get authEmailError => 'Please enter a valid email address';
+  String get authEmailError =>
+      'Por favor, ingresa una dirección de correo electrónico válida';
 
   @override
-  String get authPasswordError => 'Password must be at least 8 characters';
+  String get authPasswordError =>
+      'La contraseña debe tener al menos 8 caracteres';
 
   @override
   String authPasswordTooShort(int minLength) {
-    return 'Password must be at least $minLength characters';
+    return 'La contraseña debe tener al menos $minLength caracteres';
   }
 
   @override
-  String get authNameError => 'Name should not be empty';
+  String get authNameError => 'El nombre no debe estar vacío';
 
   @override
-  String get authNameTooShort => 'Name must be at least 2 characters';
+  String get authNameTooShort => 'El nombre debe tener al menos 2 caracteres';
 
   @override
-  String get authConfirmPasswordError => 'Passwords do not match';
+  String get authConfirmPasswordError => 'Las contraseñas no coinciden';
 
   @override
   String authLoginError(String error) {
-    return 'Login failed: $error';
+    return 'Error al iniciar sesión: $error';
   }
 
   @override
   String authRegisterError(String error) {
-    return 'Registration failed: $error';
+    return 'Error al registrarse: $error';
   }
 
   @override
-  String get authForgotPassword => 'Forgot Password?';
+  String get authForgotPassword => '¿Olvidaste tu contraseña?';
 
   @override
-  String get authResetPassword => 'Reset Password';
+  String get authResetPassword => 'Restablecer Contraseña';
 
   @override
-  String get authLogout => 'Logout';
+  String get authLogout => 'Cerrar Sesión';
 
   @override
-  String get authLoggingIn => 'Logging in...';
+  String get authLoggingIn => 'Iniciando sesión...';
 
   @override
-  String get authCreatingAccount => 'Creating account...';
+  String get authCreatingAccount => 'Creando cuenta...';
+
+  @override
+  String get taskDetailsTitle => 'Detalles de la Tarea';
+
+  @override
+  String get taskEditTitle => 'Editar Tarea';
+
+  @override
+  String get taskListTitle => 'Tareas';
+
+  @override
+  String get taskSearchPlaceholder => 'Buscar tareas...';
+
+  @override
+  String get taskNotFound => 'Tarea no encontrada';
+
+  @override
+  String get taskLoadError => 'Error al cargar los detalles de la tarea';
+
+  @override
+  String get taskDeletedSuccess => 'Tarea eliminada con éxito';
+
+  @override
+  String get taskDeletedError => 'Error al eliminar la tarea';
+
+  @override
+  String get taskUpdatedSuccess => 'Tarea actualizada con éxito';
+
+  @override
+  String get taskUpdatedError => 'Error al actualizar la tarea';
+
+  @override
+  String get taskCreatedSuccess => 'Tarea creada con éxito';
+
+  @override
+  String taskCreatedError(String error) {
+    return 'Error al crear la tarea: $error';
+  }
+
+  @override
+  String get taskDeleteDialogTitle => 'Eliminar Tarea';
+
+  @override
+  String get taskDeleteDialogMessage =>
+      '¿Estás seguro de que quieres eliminar esta tarea? Esta acción no se puede deshacer.';
+
+  @override
+  String get taskDescriptionLabel => 'Descripción';
+
+  @override
+  String get taskInformationLabel => 'Información de la Tarea';
+
+  @override
+  String get taskDatesLabel => 'Fechas';
+
+  @override
+  String get taskDueDateLabel => 'Fecha de Vencimiento';
+
+  @override
+  String get taskNoDueDate => 'Sin fecha de vencimiento';
+
+  @override
+  String get taskSetDueDate => 'Establecer fecha de vencimiento';
+
+  @override
+  String get taskStatusLabel => 'Estado';
+
+  @override
+  String get taskPriorityLabel => 'Prioridad';
+
+  @override
+  String taskPriorityText(String priority) {
+    return 'Prioridad $priority';
+  }
+
+  @override
+  String get taskCreatedAtLabel => 'Creada';
+
+  @override
+  String get taskUpdatedAtLabel => 'Última Actualización';
+
+  @override
+  String get taskTitleLabel => 'Título';
+
+  @override
+  String get taskTitleHint => 'Ingresa el título de la tarea';
+
+  @override
+  String get taskDescriptionHint => 'Ingresa la descripción de la tarea';
+
+  @override
+  String get taskDescriptionOptionalHint =>
+      'Ingresa la descripción de la tarea (opcional)';
+
+  @override
+  String get taskDueDateOptionalHint =>
+      'Selecciona la fecha de vencimiento (opcional)';
+
+  @override
+  String get taskTitleRequired => 'Título *';
+
+  @override
+  String get taskStatusTodo => 'Por Hacer';
+
+  @override
+  String get taskStatusInProgress => 'En Progreso';
+
+  @override
+  String get taskStatusDone => 'Completada';
+
+  @override
+  String get taskPriorityHigh => 'Alta';
+
+  @override
+  String get taskPriorityMedium => 'Media';
+
+  @override
+  String get taskPriorityLow => 'Baja';
+
+  @override
+  String get taskCreateTitle => 'Crear Tarea';
+
+  @override
+  String get taskEmptyTitle => 'Aún No Hay Tareas';
+
+  @override
+  String get taskEmptySubtitle => 'Crea tu primera tarea para comenzar';
+
+  @override
+  String get taskEmptyTip1 => '• Toca el botón + para crear una tarea';
+
+  @override
+  String get taskEmptyTip2 => '• Agrega un título y descripción';
+
+  @override
+  String get taskEmptyTip3 => '• Establece la prioridad y fecha de vencimiento';
+
+  @override
+  String get taskProgressTitle => 'Tu Progreso';
+
+  @override
+  String get taskProgressNoTasks => 'Aún no hay tareas';
+
+  @override
+  String taskProgressCompleted(int completed, int total) {
+    return '$completed de $total completadas';
+  }
+
+  @override
+  String taskProgressCount(int completed, int total) {
+    return '$completed/$total';
+  }
+
+  @override
+  String get taskProgressWelcome => '¡Bienvenido! Agreguemos tu primera tarea.';
+
+  @override
+  String get taskProgressEncouragement =>
+      'Estás haciendo un progreso constante';
+
+  @override
+  String get commonCancel => 'Cancelar';
+
+  @override
+  String get commonDelete => 'Eliminar';
+
+  @override
+  String get commonUpdate => 'Actualizar';
+
+  @override
+  String get commonRetry => 'Reintentar';
+
+  @override
+  String get commonNA => 'N/D';
 }

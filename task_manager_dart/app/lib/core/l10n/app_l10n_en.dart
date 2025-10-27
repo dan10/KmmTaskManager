@@ -103,4 +103,175 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authCreatingAccount => 'Creating account...';
+
+  @override
+  String get taskDetailsTitle => 'Task Details';
+
+  @override
+  String get taskEditTitle => 'Edit Task';
+
+  @override
+  String get taskListTitle => 'Tasks';
+
+  @override
+  String get taskSearchPlaceholder => 'Search tasks...';
+
+  @override
+  String get taskNotFound => 'Task not found';
+
+  @override
+  String get taskLoadError => 'Failed to load task details';
+
+  @override
+  String get taskDeletedSuccess => 'Task deleted successfully';
+
+  @override
+  String get taskDeletedError => 'Failed to delete task';
+
+  @override
+  String get taskUpdatedSuccess => 'Task updated successfully';
+
+  @override
+  String get taskUpdatedError => 'Failed to update task';
+
+  @override
+  String get taskCreatedSuccess => 'Task created successfully';
+
+  @override
+  String taskCreatedError(String error) {
+    return 'Failed to create task: $error';
+  }
+
+  @override
+  String get taskDeleteDialogTitle => 'Delete Task';
+
+  @override
+  String get taskDeleteDialogMessage =>
+      'Are you sure you want to delete this task? This action cannot be undone.';
+
+  @override
+  String get taskDescriptionLabel => 'Description';
+
+  @override
+  String get taskInformationLabel => 'Task Information';
+
+  @override
+  String get taskDatesLabel => 'Dates';
+
+  @override
+  String get taskDueDateLabel => 'Due Date';
+
+  @override
+  String get taskNoDueDate => 'No due date';
+
+  @override
+  String get taskSetDueDate => 'Set due date';
+
+  @override
+  String get taskStatusLabel => 'Status';
+
+  @override
+  String get taskPriorityLabel => 'Priority';
+
+  @override
+  String taskPriorityText(String priority) {
+    return '$priority Priority';
+  }
+
+  @override
+  String get taskCreatedAtLabel => 'Created';
+
+  @override
+  String get taskUpdatedAtLabel => 'Last Updated';
+
+  @override
+  String get taskTitleLabel => 'Title';
+
+  @override
+  String get taskTitleHint => 'Enter task title';
+
+  @override
+  String get taskDescriptionHint => 'Enter task description';
+
+  @override
+  String get taskDescriptionOptionalHint => 'Enter task description (optional)';
+
+  @override
+  String get taskDueDateOptionalHint => 'Select due date (optional)';
+
+  @override
+  String get taskTitleRequired => 'Title *';
+
+  @override
+  String get taskStatusTodo => 'To Do';
+
+  @override
+  String get taskStatusInProgress => 'In Progress';
+
+  @override
+  String get taskStatusDone => 'Done';
+
+  @override
+  String get taskPriorityHigh => 'High';
+
+  @override
+  String get taskPriorityMedium => 'Medium';
+
+  @override
+  String get taskPriorityLow => 'Low';
+
+  @override
+  String get taskCreateTitle => 'Create Task';
+
+  @override
+  String get taskEmptyTitle => 'No Tasks Yet';
+
+  @override
+  String get taskEmptySubtitle => 'Create your first task to get started';
+
+  @override
+  String get taskEmptyTip1 => '• Tap the + button to create a task';
+
+  @override
+  String get taskEmptyTip2 => '• Add a title and description';
+
+  @override
+  String get taskEmptyTip3 => '• Set priority and due date';
+
+  @override
+  String get taskProgressTitle => 'Your Progress';
+
+  @override
+  String get taskProgressNoTasks => 'No tasks yet';
+
+  @override
+  String taskProgressCompleted(int completed, int total) {
+    return '$completed of $total completed';
+  }
+
+  @override
+  String taskProgressCount(int completed, int total) {
+    return '$completed/$total';
+  }
+
+  @override
+  String get taskProgressWelcome => 'Welcome! Let\'s add your first task.';
+
+  @override
+  String get taskProgressEncouragement => 'You\'re making steady progress';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get commonUpdate => 'Update';
+
+  @override
+  String get commonRetry => 'Retry';
+
+  @override
+  String get commonNA => 'N/A';
 }

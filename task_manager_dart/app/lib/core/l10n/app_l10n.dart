@@ -280,6 +280,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Creating account...'**
   String get authCreatingAccount;
+
+  /// Title for task details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Task Details'**
+  String get taskDetailsTitle;
+
+  /// Title for task edit screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Task'**
+  String get taskEditTitle;
+
+  /// Title for task list screen
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get taskListTitle;
+
+  /// Placeholder text for task search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search tasks...'**
+  String get taskSearchPlaceholder;
+
+  /// Message when task cannot be found
+  ///
+  /// In en, this message translates to:
+  /// **'Task not found'**
+  String get taskNotFound;
+
+  /// Error message when task details fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load task details'**
+  String get taskLoadError;
+
+  /// Success message after deleting a task
+  ///
+  /// In en, this message translates to:
+  /// **'Task deleted successfully'**
+  String get taskDeletedSuccess;
+
+  /// Error message when deleting a task fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete task'**
+  String get taskDeletedError;
+
+  /// Success message after updating a task
+  ///
+  /// In en, this message translates to:
+  /// **'Task updated successfully'**
+  String get taskUpdatedSuccess;
+
+  /// Error message when updating a task fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update task'**
+  String get taskUpdatedError;
+
+  /// Success message after creating a task
+  ///
+  /// In en, this message translates to:
+  /// **'Task created successfully'**
+  String get taskCreatedSuccess;
+
+  /// Error message when creating a task fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create task: {error}'**
+  String taskCreatedError(String error);
+
+  /// Title for delete task confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Task'**
+  String get taskDeleteDialogTitle;
+
+  /// Message for delete task confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this task? This action cannot be undone.'**
+  String get taskDeleteDialogMessage;
+
+  /// Label for task description section
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get taskDescriptionLabel;
+
+  /// Label for task information section
+  ///
+  /// In en, this message translates to:
+  /// **'Task Information'**
+  String get taskInformationLabel;
+
+  /// Label for task dates section
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get taskDatesLabel;
+
+  /// Label for task due date field
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get taskDueDateLabel;
+
+  /// Text shown when task has no due date
+  ///
+  /// In en, this message translates to:
+  /// **'No due date'**
+  String get taskNoDueDate;
+
+  /// Placeholder text for setting due date
+  ///
+  /// In en, this message translates to:
+  /// **'Set due date'**
+  String get taskSetDueDate;
+
+  /// Label for task status field
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get taskStatusLabel;
+
+  /// Label for task priority field
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get taskPriorityLabel;
+
+  /// Text showing task priority level
+  ///
+  /// In en, this message translates to:
+  /// **'{priority} Priority'**
+  String taskPriorityText(String priority);
+
+  /// Label for task created date
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get taskCreatedAtLabel;
+
+  /// Label for task last updated date
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated'**
+  String get taskUpdatedAtLabel;
+
+  /// Label for task title field
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get taskTitleLabel;
+
+  /// Hint text for task title field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter task title'**
+  String get taskTitleHint;
+
+  /// Hint text for task description field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter task description'**
+  String get taskDescriptionHint;
+
+  /// Hint text for optional task description field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter task description (optional)'**
+  String get taskDescriptionOptionalHint;
+
+  /// Hint text for optional due date field
+  ///
+  /// In en, this message translates to:
+  /// **'Select due date (optional)'**
+  String get taskDueDateOptionalHint;
+
+  /// Label indicating title is required
+  ///
+  /// In en, this message translates to:
+  /// **'Title *'**
+  String get taskTitleRequired;
+
+  /// Label for todo task status
+  ///
+  /// In en, this message translates to:
+  /// **'To Do'**
+  String get taskStatusTodo;
+
+  /// Label for in progress task status
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get taskStatusInProgress;
+
+  /// Label for done task status
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get taskStatusDone;
+
+  /// Label for high priority
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get taskPriorityHigh;
+
+  /// Label for medium priority
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get taskPriorityMedium;
+
+  /// Label for low priority
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get taskPriorityLow;
+
+  /// Title for create task bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Create Task'**
+  String get taskCreateTitle;
+
+  /// Title shown when task list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No Tasks Yet'**
+  String get taskEmptyTitle;
+
+  /// Subtitle shown when task list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first task to get started'**
+  String get taskEmptySubtitle;
+
+  /// First tip in empty task list
+  ///
+  /// In en, this message translates to:
+  /// **'• Tap the + button to create a task'**
+  String get taskEmptyTip1;
+
+  /// Second tip in empty task list
+  ///
+  /// In en, this message translates to:
+  /// **'• Add a title and description'**
+  String get taskEmptyTip2;
+
+  /// Third tip in empty task list
+  ///
+  /// In en, this message translates to:
+  /// **'• Set priority and due date'**
+  String get taskEmptyTip3;
+
+  /// Title for progress summary section
+  ///
+  /// In en, this message translates to:
+  /// **'Your Progress'**
+  String get taskProgressTitle;
+
+  /// Text shown when there are no tasks
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks yet'**
+  String get taskProgressNoTasks;
+
+  /// Text showing how many tasks are completed
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} completed'**
+  String taskProgressCompleted(int completed, int total);
+
+  /// Short format showing completed tasks count
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{total}'**
+  String taskProgressCount(int completed, int total);
+
+  /// Welcome message when there are no tasks
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome! Let\'s add your first task.'**
+  String get taskProgressWelcome;
+
+  /// Encouragement message when making progress
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re making steady progress'**
+  String get taskProgressEncouragement;
+
+  /// Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// Update button text
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get commonUpdate;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get commonRetry;
+
+  /// Not available abbreviation
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get commonNA;
 }
 
 class _AppLocalizationsDelegate

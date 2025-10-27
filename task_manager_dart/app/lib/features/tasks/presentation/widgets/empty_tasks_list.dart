@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
+
 /// Empty state widget for tasks list
 /// Matches KMM's EmptyTasksList
 class EmptyTasksList extends StatelessWidget {
@@ -8,6 +10,7 @@ class EmptyTasksList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -18,12 +21,12 @@ class EmptyTasksList extends StatelessWidget {
           Icon(
             Icons.task_alt_outlined,
             size: 120,
-            color: theme.colorScheme.primary.withOpacity(0.4),
+            color: theme.colorScheme.primary.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 24),
           // Title
           Text(
-            'No Tasks Yet',
+            l10n.taskEmptyTitle,
             style: theme.textTheme.titleLarge?.copyWith(
               color: theme.colorScheme.onSurface,
             ),
@@ -32,7 +35,7 @@ class EmptyTasksList extends StatelessWidget {
           const SizedBox(height: 8),
           // Message
           Text(
-            'Create your first task to get started',
+            l10n.taskEmptySubtitle,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -44,17 +47,17 @@ class EmptyTasksList extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _SuggestionItem(
-                text: '• Tap the + button to create a task',
+                text: l10n.taskEmptyTip1,
                 theme: theme,
               ),
               const SizedBox(height: 8),
               _SuggestionItem(
-                text: '• Add a title and description',
+                text: l10n.taskEmptyTip2,
                 theme: theme,
               ),
               const SizedBox(height: 8),
               _SuggestionItem(
-                text: '• Set priority and due date',
+                text: l10n.taskEmptyTip3,
                 theme: theme,
               ),
             ],

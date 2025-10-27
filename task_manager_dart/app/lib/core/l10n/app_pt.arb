@@ -1,137 +1,89 @@
 {
   "@@locale": "pt",
-  "authAppName": "Task Manager",
-  "@authAppName": {
-    "description": "App name displayed on auth screens"
-  },
-  "authLoginTitle": "Welcome Back",
-  "@authLoginTitle": {
-    "description": "Login screen title"
-  },
-  "authRegisterTitle": "Create Account",
-  "@authRegisterTitle": {
-    "description": "Register screen title"
-  },
-  "authEmail": "Email",
-  "@authEmail": {
-    "description": "Email field label"
-  },
-  "authEmailHint": "Enter your email",
-  "@authEmailHint": {
-    "description": "Email field hint text"
-  },
-  "authPassword": "Password",
-  "@authPassword": {
-    "description": "Password field label"
-  },
-  "authPasswordHint": "Enter your password",
-  "@authPasswordHint": {
-    "description": "Password field hint text"
-  },
-  "authConfirmPassword": "Confirm Password",
-  "@authConfirmPassword": {
-    "description": "Confirm password field label"
-  },
-  "authName": "Name",
-  "@authName": {
-    "description": "Name field label for registration"
-  },
-  "authNameHint": "Enter your full name",
-  "@authNameHint": {
-    "description": "Name field hint text"
-  },
-  "authLoginButton": "Login",
-  "@authLoginButton": {
-    "description": "Login button text"
-  },
-  "authRegisterButton": "Create Account",
-  "@authRegisterButton": {
-    "description": "Register button text"
-  },
-  "authSignUp": "Sign Up",
-  "@authSignUp": {
-    "description": "Sign up link text"
-  },
-  "authSignIn": "Sign In",
-  "@authSignIn": {
-    "description": "Sign in link text"
-  },
-  "authWithoutAccount": "Don't have an account?",
-  "@authWithoutAccount": {
-    "description": "Text asking if user doesn't have an account"
-  },
-  "authAlreadyHaveAccount": "Already have an account?",
-  "@authAlreadyHaveAccount": {
-    "description": "Text asking if user already has an account"
-  },
-  "authEmailError": "Please enter a valid email address",
-  "@authEmailError": {
-    "description": "Error message for invalid email"
-  },
-  "authPasswordError": "Password must be at least 8 characters",
-  "@authPasswordError": {
-    "description": "Error message for invalid password"
-  },
-  "authPasswordTooShort": "Password must be at least {minLength} characters",
-  "@authPasswordTooShort": {
-    "description": "Error message when password is too short",
-    "placeholders": {
-      "minLength": {
-        "type": "int",
-        "example": "8"
-      }
-    }
-  },
-  "authNameError": "Name should not be empty",
-  "@authNameError": {
-    "description": "Error message for empty name field"
-  },
-  "authNameTooShort": "Name must be at least 2 characters",
-  "@authNameTooShort": {
-    "description": "Error message when name is too short"
-  },
-  "authConfirmPasswordError": "Passwords do not match",
-  "@authConfirmPasswordError": {
-    "description": "Error message when passwords don't match"
-  },
-  "authLoginError": "Login failed: {error}",
-  "@authLoginError": {
-    "description": "Generic login error message",
-    "placeholders": {
-      "error": {
-        "type": "String",
-        "example": "Invalid credentials"
-      }
-    }
-  },
-  "authRegisterError": "Registration failed: {error}",
-  "@authRegisterError": {
-    "description": "Generic registration error message",
-    "placeholders": {
-      "error": {
-        "type": "String",
-        "example": "Email already exists"
-      }
-    }
-  },
-  "authForgotPassword": "Forgot Password?",
-  "@authForgotPassword": {
-    "description": "Forgot password link text"
-  },
-  "authResetPassword": "Reset Password",
-  "@authResetPassword": {
-    "description": "Reset password button text"
-  },
-  "authLogout": "Logout",
-  "@authLogout": {
-    "description": "Logout button text"
-  },
-  "authLoggingIn": "Logging in...",
-  "@authLoggingIn": {
-    "description": "Loading text while logging in"
-  },
-  "authCreatingAccount": "Creating account...",
-  "@authCreatingAccount": {
-    "description": "Loading text while creating account"
-  }
+  "appName": "TaskIt",
+  
+  "authAppName": "Gestor de Tarefas",
+  "authLoginTitle": "Bem-vindo",
+  "authRegisterTitle": "Criar Conta",
+  "authEmail": "E-mail",
+  "authEmailHint": "Digite o seu e-mail",
+  "authPassword": "Palavra-passe",
+  "authPasswordHint": "Digite a sua palavra-passe",
+  "authConfirmPassword": "Confirmar Palavra-passe",
+  "authName": "Nome",
+  "authNameHint": "Digite o seu nome completo",
+  "authLoginButton": "Entrar",
+  "authRegisterButton": "Criar Conta",
+  "authSignUp": "Registar",
+  "authSignIn": "Entrar",
+  "authWithoutAccount": "Não tem uma conta?",
+  "authAlreadyHaveAccount": "Já tem uma conta?",
+  "authEmailError": "Por favor, insira um endereço de e-mail válido",
+  "authPasswordError": "A palavra-passe deve ter pelo menos 8 caracteres",
+  "authPasswordTooShort": "A palavra-passe deve ter pelo menos {minLength} caracteres",
+  "authNameError": "O nome não deve estar vazio",
+  "authNameTooShort": "O nome deve ter pelo menos 2 caracteres",
+  "authConfirmPasswordError": "As palavras-passe não coincidem",
+  "authLoginError": "Falha no início de sessão: {error}",
+  "authRegisterError": "Falha no registo: {error}",
+  "authForgotPassword": "Esqueceu-se da palavra-passe?",
+  "authResetPassword": "Redefinir Palavra-passe",
+  "authLogout": "Sair",
+  "authLoggingIn": "A entrar...",
+  "authCreatingAccount": "A criar conta...",
+  
+  "taskDetailsTitle": "Detalhes da Tarefa",
+  "taskEditTitle": "Editar Tarefa",
+  "taskListTitle": "Tarefas",
+  "taskSearchPlaceholder": "Pesquisar tarefas...",
+  "taskNotFound": "Tarefa não encontrada",
+  "taskLoadError": "Falha ao carregar detalhes da tarefa",
+  "taskDeletedSuccess": "Tarefa eliminada com sucesso",
+  "taskDeletedError": "Falha ao eliminar tarefa",
+  "taskUpdatedSuccess": "Tarefa atualizada com sucesso",
+  "taskUpdatedError": "Falha ao atualizar tarefa",
+  "taskCreatedSuccess": "Tarefa criada com sucesso",
+  "taskCreatedError": "Falha ao criar tarefa: {error}",
+  "taskDeleteDialogTitle": "Eliminar Tarefa",
+  "taskDeleteDialogMessage": "Tem a certeza de que deseja eliminar esta tarefa? Esta ação não pode ser revertida.",
+  "taskDescriptionLabel": "Descrição",
+  "taskInformationLabel": "Informações da Tarefa",
+  "taskDatesLabel": "Datas",
+  "taskDueDateLabel": "Data de Vencimento",
+  "taskNoDueDate": "Sem data de vencimento",
+  "taskSetDueDate": "Definir data de vencimento",
+  "taskStatusLabel": "Estado",
+  "taskPriorityLabel": "Prioridade",
+  "taskPriorityText": "Prioridade {priority}",
+  "taskCreatedAtLabel": "Criada em",
+  "taskUpdatedAtLabel": "Última Actualização",
+  "taskTitleLabel": "Título",
+  "taskTitleHint": "Digite o título da tarefa",
+  "taskDescriptionHint": "Digite a descrição da tarefa",
+  "taskDescriptionOptionalHint": "Digite a descrição da tarefa (opcional)",
+  "taskDueDateOptionalHint": "Seleccione a data de vencimento (opcional)",
+  "taskTitleRequired": "Título *",
+  "taskStatusTodo": "Por Fazer",
+  "taskStatusInProgress": "Em Progresso",
+  "taskStatusDone": "Concluída",
+  "taskPriorityHigh": "Alta",
+  "taskPriorityMedium": "Média",
+  "taskPriorityLow": "Baixa",
+  "taskCreateTitle": "Criar Tarefa",
+  "taskEmptyTitle": "Ainda Sem Tarefas",
+  "taskEmptySubtitle": "Crie a sua primeira tarefa para começar",
+  "taskEmptyTip1": "• Toque no botão + para criar uma tarefa",
+  "taskEmptyTip2": "• Adicione um título e descrição",
+  "taskEmptyTip3": "• Defina a prioridade e data de vencimento",
+  "taskProgressTitle": "O Seu Progresso",
+  "taskProgressNoTasks": "Ainda sem tarefas",
+  "taskProgressCompleted": "{completed} de {total} concluídas",
+  "taskProgressCount": "{completed}/{total}",
+  "taskProgressWelcome": "Bem-vindo! Vamos adicionar a sua primeira tarefa.",
+  "taskProgressEncouragement": "Está a fazer um progresso constante",
+  "commonCancel": "Cancelar",
+  "commonDelete": "Eliminar",
+  "commonUpdate": "Actualizar",
+  "commonRetry": "Tentar Novamente",
+  "commonNA": "N/D"
 }

@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "appName": "TaskIt",
+  
   "@@context": "Authentication feature strings",
   "authAppName": "Task Manager",
   "@authAppName": {
@@ -135,5 +136,255 @@
   "authCreatingAccount": "Creating account...",
   "@authCreatingAccount": {
     "description": "Loading text while creating account"
+  },
+  
+  "@@context": "Task feature strings",
+  "taskDetailsTitle": "Task Details",
+  "@taskDetailsTitle": {
+    "description": "Title for task details screen"
+  },
+  "taskEditTitle": "Edit Task",
+  "@taskEditTitle": {
+    "description": "Title for task edit screen"
+  },
+  "taskListTitle": "Tasks",
+  "@taskListTitle": {
+    "description": "Title for task list screen"
+  },
+  "taskSearchPlaceholder": "Search tasks...",
+  "@taskSearchPlaceholder": {
+    "description": "Placeholder text for task search field"
+  },
+  "taskNotFound": "Task not found",
+  "@taskNotFound": {
+    "description": "Message when task cannot be found"
+  },
+  "taskLoadError": "Failed to load task details",
+  "@taskLoadError": {
+    "description": "Error message when task details fail to load"
+  },
+  "taskDeletedSuccess": "Task deleted successfully",
+  "@taskDeletedSuccess": {
+    "description": "Success message after deleting a task"
+  },
+  "taskDeletedError": "Failed to delete task",
+  "@taskDeletedError": {
+    "description": "Error message when deleting a task fails"
+  },
+  "taskUpdatedSuccess": "Task updated successfully",
+  "@taskUpdatedSuccess": {
+    "description": "Success message after updating a task"
+  },
+  "taskUpdatedError": "Failed to update task",
+  "@taskUpdatedError": {
+    "description": "Error message when updating a task fails"
+  },
+  "taskCreatedSuccess": "Task created successfully",
+  "@taskCreatedSuccess": {
+    "description": "Success message after creating a task"
+  },
+  "taskCreatedError": "Failed to create task: {error}",
+  "@taskCreatedError": {
+    "description": "Error message when creating a task fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "taskDeleteDialogTitle": "Delete Task",
+  "@taskDeleteDialogTitle": {
+    "description": "Title for delete task confirmation dialog"
+  },
+  "taskDeleteDialogMessage": "Are you sure you want to delete this task? This action cannot be undone.",
+  "@taskDeleteDialogMessage": {
+    "description": "Message for delete task confirmation dialog"
+  },
+  "taskDescriptionLabel": "Description",
+  "@taskDescriptionLabel": {
+    "description": "Label for task description section"
+  },
+  "taskInformationLabel": "Task Information",
+  "@taskInformationLabel": {
+    "description": "Label for task information section"
+  },
+  "taskDatesLabel": "Dates",
+  "@taskDatesLabel": {
+    "description": "Label for task dates section"
+  },
+  "taskDueDateLabel": "Due Date",
+  "@taskDueDateLabel": {
+    "description": "Label for task due date field"
+  },
+  "taskNoDueDate": "No due date",
+  "@taskNoDueDate": {
+    "description": "Text shown when task has no due date"
+  },
+  "taskSetDueDate": "Set due date",
+  "@taskSetDueDate": {
+    "description": "Placeholder text for setting due date"
+  },
+  "taskStatusLabel": "Status",
+  "@taskStatusLabel": {
+    "description": "Label for task status field"
+  },
+  "taskPriorityLabel": "Priority",
+  "@taskPriorityLabel": {
+    "description": "Label for task priority field"
+  },
+  "taskPriorityText": "{priority} Priority",
+  "@taskPriorityText": {
+    "description": "Text showing task priority level",
+    "placeholders": {
+      "priority": {
+        "type": "String",
+        "example": "High"
+      }
+    }
+  },
+  "taskCreatedAtLabel": "Created",
+  "@taskCreatedAtLabel": {
+    "description": "Label for task created date"
+  },
+  "taskUpdatedAtLabel": "Last Updated",
+  "@taskUpdatedAtLabel": {
+    "description": "Label for task last updated date"
+  },
+  "taskTitleLabel": "Title",
+  "@taskTitleLabel": {
+    "description": "Label for task title field"
+  },
+  "taskTitleHint": "Enter task title",
+  "@taskTitleHint": {
+    "description": "Hint text for task title field"
+  },
+  "taskDescriptionHint": "Enter task description",
+  "@taskDescriptionHint": {
+    "description": "Hint text for task description field"
+  },
+  "taskDescriptionOptionalHint": "Enter task description (optional)",
+  "@taskDescriptionOptionalHint": {
+    "description": "Hint text for optional task description field"
+  },
+  "taskDueDateOptionalHint": "Select due date (optional)",
+  "@taskDueDateOptionalHint": {
+    "description": "Hint text for optional due date field"
+  },
+  "taskTitleRequired": "Title *",
+  "@taskTitleRequired": {
+    "description": "Label indicating title is required"
+  },
+  "taskStatusTodo": "To Do",
+  "@taskStatusTodo": {
+    "description": "Label for todo task status"
+  },
+  "taskStatusInProgress": "In Progress",
+  "@taskStatusInProgress": {
+    "description": "Label for in progress task status"
+  },
+  "taskStatusDone": "Done",
+  "@taskStatusDone": {
+    "description": "Label for done task status"
+  },
+  "taskPriorityHigh": "High",
+  "@taskPriorityHigh": {
+    "description": "Label for high priority"
+  },
+  "taskPriorityMedium": "Medium",
+  "@taskPriorityMedium": {
+    "description": "Label for medium priority"
+  },
+  "taskPriorityLow": "Low",
+  "@taskPriorityLow": {
+    "description": "Label for low priority"
+  },
+  "taskCreateTitle": "Create Task",
+  "@taskCreateTitle": {
+    "description": "Title for create task bottom sheet"
+  },
+  "taskEmptyTitle": "No Tasks Yet",
+  "@taskEmptyTitle": {
+    "description": "Title shown when task list is empty"
+  },
+  "taskEmptySubtitle": "Create your first task to get started",
+  "@taskEmptySubtitle": {
+    "description": "Subtitle shown when task list is empty"
+  },
+  "taskEmptyTip1": "• Tap the + button to create a task",
+  "@taskEmptyTip1": {
+    "description": "First tip in empty task list"
+  },
+  "taskEmptyTip2": "• Add a title and description",
+  "@taskEmptyTip2": {
+    "description": "Second tip in empty task list"
+  },
+  "taskEmptyTip3": "• Set priority and due date",
+  "@taskEmptyTip3": {
+    "description": "Third tip in empty task list"
+  },
+  "taskProgressTitle": "Your Progress",
+  "@taskProgressTitle": {
+    "description": "Title for progress summary section"
+  },
+  "taskProgressNoTasks": "No tasks yet",
+  "@taskProgressNoTasks": {
+    "description": "Text shown when there are no tasks"
+  },
+  "taskProgressCompleted": "{completed} of {total} completed",
+  "@taskProgressCompleted": {
+    "description": "Text showing how many tasks are completed",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "5"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "taskProgressCount": "{completed}/{total}",
+  "@taskProgressCount": {
+    "description": "Short format showing completed tasks count",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "5"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "taskProgressWelcome": "Welcome! Let's add your first task.",
+  "@taskProgressWelcome": {
+    "description": "Welcome message when there are no tasks"
+  },
+  "taskProgressEncouragement": "You're making steady progress",
+  "@taskProgressEncouragement": {
+    "description": "Encouragement message when making progress"
+  },
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Cancel button text"
+  },
+  "commonDelete": "Delete",
+  "@commonDelete": {
+    "description": "Delete button text"
+  },
+  "commonUpdate": "Update",
+  "@commonUpdate": {
+    "description": "Update button text"
+  },
+  "commonRetry": "Retry",
+  "@commonRetry": {
+    "description": "Retry button text"
+  },
+  "commonNA": "N/A",
+  "@commonNA": {
+    "description": "Not available abbreviation"
   }
 }

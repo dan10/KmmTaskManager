@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
+
 /// Progress summary widget showing completed/total tasks
 /// Matches KMM's ProgressSummaryItem
 class ProgressSummaryItem extends StatelessWidget {
@@ -15,6 +17,7 @@ class ProgressSummaryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final progress = totalTasks > 0 ? (completedTasks / totalTasks) : 0.0;
 
     return Card(
@@ -36,7 +39,7 @@ class ProgressSummaryItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Your Progress',
+                      l10n.taskProgressTitle,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -44,8 +47,8 @@ class ProgressSummaryItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       totalTasks == 0
-                          ? 'No tasks yet'
-                          : '$completedTasks of $totalTasks completed',
+                          ? l10n.taskProgressNoTasks
+                          : l10n.taskProgressCompleted(completedTasks, totalTasks),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -55,7 +58,7 @@ class ProgressSummaryItem extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(0.15),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -78,7 +81,7 @@ class ProgressSummaryItem extends StatelessWidget {
                   child: Container(
                     height: 14,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant.withOpacity(0.65),
+                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: FractionallySizedBox(
@@ -88,8 +91,8 @@ class ProgressSummaryItem extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              theme.colorScheme.primary.withOpacity(0.95),
-                              theme.colorScheme.primary.withOpacity(0.75),
+                              theme.colorScheme.primary.withValues(alpha: 0.95),
+                              theme.colorScheme.primary.withValues(alpha: 0.75),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(10),
@@ -108,8 +111,8 @@ class ProgressSummaryItem extends StatelessWidget {
                 Expanded(
                   child: Text(
                     totalTasks == 0
-                        ? "Welcome! Let's add your first task."
-                        : "You're making steady progress",
+                        ? l10n.taskProgressWelcome
+                        : l10n.taskProgressEncouragement,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

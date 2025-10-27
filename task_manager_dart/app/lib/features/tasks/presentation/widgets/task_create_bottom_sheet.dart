@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
 import '../../data/repositories/task_repository.dart';
 import '../viewmodels/task_create_viewmodel.dart';
 
@@ -75,13 +76,14 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
     if (_viewModel.createTask.completed) {
       // Success - dismiss and refresh
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         Navigator.of(context).pop();
         widget.onDismiss(true);
         
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Task created successfully'),
+          SnackBar(
+            content: Text(l10n.taskCreatedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -89,13 +91,14 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
     } else if (_viewModel.createTask.error) {
       // Error - show snackbar with retry option
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         final error = (_viewModel.createTask.result as dynamic).error;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create task: ${error.toString()}'),
+            content: Text(l10n.taskCreatedError(error.toString())),
             backgroundColor: Colors.red,
             action: SnackBarAction(
-              label: 'Retry',
+              label: l10n.commonRetry,
               textColor: Colors.white,
               onPressed: () => _viewModel.createTask.execute(),
             ),
@@ -131,6 +134,7 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
@@ -152,7 +156,7 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -164,7 +168,7 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Create Task',
+                      l10n.taskCreateTitle,
                       style: theme.textTheme.headlineSmall,
                     ),
                     IconButton(
@@ -192,8 +196,8 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                           return TextField(
                             controller: _titleController,
                             decoration: InputDecoration(
-                              labelText: 'Title *',
-                              hintText: 'Enter task title',
+                              labelText: l10n.taskTitleRequired,
+                              hintText: l10n.taskTitleHint,
                               border: const OutlineInputBorder(),
                               errorText: error,
                             ),
@@ -211,8 +215,8 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                           return TextField(
                             controller: _descriptionController,
                             decoration: InputDecoration(
-                              labelText: 'Description',
-                              hintText: 'Enter task description (optional)',
+                              labelText: l10n.taskDescriptionLabel,
+                              hintText: l10n.taskDescriptionHint,
                               border: const OutlineInputBorder(),
                               errorText: error,
                             ),
@@ -229,10 +233,10 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                         valueListenable: _viewModel.priority,
                         builder: (context, selectedPriority, _) {
                           return DropdownButtonFormField<Priority>(
-                            value: selectedPriority,
-                            decoration: const InputDecoration(
-                              labelText: 'Priority',
-                              border: OutlineInputBorder(),
+                            initialValue: selectedPriority,
+                            decoration: InputDecoration(
+                              labelText: l10n.taskPriorityLabel,
+                              border: const OutlineInputBorder(),
                             ),
                             items: Priority.values.map((priority) {
                               return DropdownMenuItem(
@@ -257,9 +261,9 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                         builder: (context, selectedDate, _) {
                           return TextField(
                             decoration: InputDecoration(
-                              labelText: 'Due Date',
+                              labelText: l10n.taskDueDateLabel,
                               hintText: selectedDate == null
-                                  ? 'Select due date (optional)'
+                                  ? l10n.taskSetDueDate
                                   : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
                               border: const OutlineInputBorder(),
                               suffixIcon: const Icon(Icons.calendar_today),
@@ -293,7 +297,7 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                           ),
                                         )
-                                      : const Text('Create Task'),
+                                      : Text(l10n.taskCreateTitle),
                                 ),
                               );
                             },
