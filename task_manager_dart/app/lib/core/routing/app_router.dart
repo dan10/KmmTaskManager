@@ -46,7 +46,7 @@ GoRouter createAppRouter(SecureStorage secureStorage) {
       redirect: (context, state) => AppRoutes.tasks,
     ),
 
-    // Bottom-navigation shell
+    // Bottom-navigation shell (only main list screens)
     StatefulShellRoute(
       builder: (context, state, navigationShell) {
         return navigationShell;
@@ -58,8 +58,8 @@ GoRouter createAppRouter(SecureStorage secureStorage) {
             );
           },
       branches: [
-        // Branch 0: Tasks
-        StatefulShellBranch(routes: taskRoutes, observers: [HeroController()]),
+        // Branch 0: Tasks (only list screen)
+        StatefulShellBranch(routes: taskListRoutes, observers: [HeroController()]),
         // Branch 1: Calendar (middle)
         StatefulShellBranch(
           routes: [
@@ -70,14 +70,20 @@ GoRouter createAppRouter(SecureStorage secureStorage) {
             ),
           ],
         ),
-        // Branch 2: Projects (with task details injected)
+        // Branch 2: Projects (only list screen)
         StatefulShellBranch(
-          routes: projectsSection(
-            taskDetailsRoutes: taskDetailsRoutes,
-          ),
+          routes: projectListRoutes,
           observers: [HeroController()],
         ),
       ],
+    ),
+
+    // Full-screen routes (no bottom bar) - Task details and edit
+    ...taskDetailsRoutes(),
+
+    // Full-screen routes (no bottom bar) - Project details with nested task routes
+    ...projectDetailRoutes(
+      taskDetailsRoutes: taskDetailsRoutes,
     ),
     ],
     errorBuilder: (context, state) =>

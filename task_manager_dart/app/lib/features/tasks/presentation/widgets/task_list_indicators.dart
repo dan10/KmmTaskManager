@@ -159,29 +159,26 @@ class NoItemsFoundIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SliverFillRemaining(
-      hasScrollBody: false,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No tasks found',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
+          SizedBox(height: 16),
+          Text(
+            'No tasks found',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
             ),
-            SizedBox(height: 8),
-            Text(
-              'Create a task to get started',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Create a task to get started',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
       ),
     );
   }

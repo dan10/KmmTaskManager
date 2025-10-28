@@ -8,18 +8,22 @@ import '../../../core/routing/app_router.dart';
 import '../data/repositories/project_repository.dart';
 import '../../tasks/domain/usecases/update_task_status_usecase.dart';
 
-/// Projects section with nested task details
+/// Project list route (with bottom bar)
+final List<GoRoute> projectListRoutes = [
+  GoRoute(
+    path: AppRoutes.projects,
+    builder: (context, state) => const ProjectListScreen(),
+  ),
+];
+
+/// Project detail routes (no bottom bar)
 /// Similar to ProjectsNavigation.kt in KMM version
 /// 
 /// [taskDetailsRoutes] - Function that provides task detail/edit routes to be included in this section
-List<GoRoute> projectsSection({
+List<GoRoute> projectDetailRoutes({
   required List<GoRoute> Function() taskDetailsRoutes,
 }) {
   return [
-    GoRoute(
-      path: AppRoutes.projects,
-      builder: (context, state) => const ProjectListScreen(),
-    ),
     GoRoute(
       path: AppRoutes.projectDetail,
       name: 'project-detail',
@@ -38,5 +42,16 @@ List<GoRoute> projectsSection({
     // Include task details routes in the projects section
     // This allows navigating to task details from project detail screen
     ...taskDetailsRoutes(),
+  ];
+}
+
+/// Legacy export for backwards compatibility
+@Deprecated('Use projectListRoutes and projectDetailRoutes separately')
+List<GoRoute> projectsSection({
+  required List<GoRoute> Function() taskDetailsRoutes,
+}) {
+  return [
+    ...projectListRoutes,
+    ...projectDetailRoutes(taskDetailsRoutes: taskDetailsRoutes),
   ];
 }

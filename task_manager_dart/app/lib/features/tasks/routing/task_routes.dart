@@ -9,8 +9,8 @@ import '../presentation/views/task_edit_screen.dart';
 import '../presentation/views/task_list_screen.dart';
 import '../presentation/viewmodels/tasks_viewmodel.dart';
 
-/// Main task routes for the tasks tab
-final List<GoRoute> taskRoutes = [
+/// Main task list route for the tasks tab (with bottom bar)
+final List<GoRoute> taskListRoutes = [
   GoRoute(
     path: AppRoutes.tasks,
     builder: (context, state) {
@@ -19,7 +19,12 @@ final List<GoRoute> taskRoutes = [
       return const TaskListScreen();
     }
   ),
-  // Include task detail and edit routes
+];
+
+/// Legacy export for backwards compatibility
+@Deprecated('Use taskListRoutes and taskDetailsRoutes separately')
+final List<GoRoute> taskRoutes = [
+  ...taskListRoutes,
   ...taskDetailsRoutes(),
 ];
 
