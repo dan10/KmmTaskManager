@@ -15,12 +15,14 @@ class TaskItemSwipeable extends StatefulWidget {
     required this.onTap,
     required this.onStatusChanged,
     required this.onDelete,
+    this.showProjectName = true,
   });
 
   final TaskDto task;
   final VoidCallback onTap;
   final void Function(TaskStatus status) onStatusChanged;
   final VoidCallback onDelete;
+  final bool showProjectName;
 
   @override
   State<TaskItemSwipeable> createState() => _TaskItemSwipeableState();
@@ -64,6 +66,7 @@ class _TaskItemSwipeableState extends State<TaskItemSwipeable> {
         onTap: widget.onTap,
         onStatusChanged: widget.onStatusChanged,
         onDelete: widget.onDelete,
+        showProjectName: widget.showProjectName,
       ),
     );
   }

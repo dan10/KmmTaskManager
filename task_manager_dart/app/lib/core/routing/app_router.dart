@@ -70,8 +70,13 @@ GoRouter createAppRouter(SecureStorage secureStorage) {
             ),
           ],
         ),
-        // Branch 2: Projects
-        StatefulShellBranch(routes: projectRoutes, observers: [HeroController()]),
+        // Branch 2: Projects (with task details injected)
+        StatefulShellBranch(
+          routes: projectsSection(
+            taskDetailsRoutes: taskDetailsRoutes,
+          ),
+          observers: [HeroController()],
+        ),
       ],
     ),
     ],

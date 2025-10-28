@@ -6,13 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/routing/app_router.dart';
-import '../../../../core/ui/components/shimmer.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../state/project_detail_state.dart';
 import '../viewmodels/project_tasks_viewmodel.dart';
 import '../../../tasks/presentation/widgets/task_create_bottom_sheet.dart';
-import '../../../tasks/presentation/widgets/task_item_swipeable.dart';
-import '../../../tasks/presentation/widgets/task_list_indicators.dart';
+import '../../../tasks/presentation/widgets/paginated_task_list.dart';
 
 /// Project detail screen showing project info and its tasks
 class ProjectDetailScreen extends StatefulWidget {
@@ -74,9 +72,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<ProjectTasksViewModel>();
     final vmState = viewModel.state;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final shimmerGradientToUse = isDark ? shimmerGradientDark : shimmerGradient;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -92,66 +87,19 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         // Project header with progress
                         _ProjectHeader(project: vmState.project!),
                         
-                        // Tasks section title
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Tasks',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         
-                        // Task list
+                        
+                        // Task list - using shared component
                         Expanded(
-                          child: Shimmer(
-                            linearGradient: shimmerGradientToUse,
-                            child: RefreshIndicator(
-                              onRefresh: () => _handleRefresh(viewModel),
-                              child: PagingListener<int, TaskDto>(
-                                controller: viewModel.pagingController,
-                                builder: (context, pagingState, fetchNextPage) => 
-                                  PagedListView<int, TaskDto>(
-                                    state: pagingState,
-                                    fetchNextPage: fetchNextPage,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    builderDelegate: PagedChildBuilderDelegate<TaskDto>(
-                                      itemBuilder: (context, task, index) => TaskItemSwipeable(
-                                        task: task,
-                                        onTap: () => _navigateToTaskDetails(context, task.id),
-                                        onStatusChanged: (status) {
-                                          _viewModel.updateTaskStatus.execute((task.id, status));
-                                        },
-                                        onDelete: () {
-                                          // Delete functionality can be added here
-                                        },
-                                      ),
-                                      firstPageErrorIndicatorBuilder: (context) => 
-                                        FirstPageErrorIndicator(
-                                          errorMessage: null,
-                                          onRetry: () => viewModel.pagingController.refresh(),
-                                        ),
-                                      newPageErrorIndicatorBuilder: (context) => 
-                                        NewPageErrorIndicator(
-                                          onRetry: () => viewModel.pagingController.refresh(),
-                                        ),
-                                      firstPageProgressIndicatorBuilder: (context) => 
-                                        const FirstPageProgressIndicator(),
-                                      newPageProgressIndicatorBuilder: (context) => 
-                                        const NewPageProgressIndicator(),
-                                      noItemsFoundIndicatorBuilder: (context) => 
-                                        _buildEmptyTasks(),
-                                      noMoreItemsIndicatorBuilder: (context) => 
-                                        const NoMoreItemsIndicator(),
-                                    ),
-                                  ),
-                              ),
-                            ),
+                          child: PaginatedTaskList(
+                            pagingController: viewModel.pagingController,
+                            onTaskTap: (taskId) => _navigateToTaskDetails(context, taskId),
+                            onTaskStatusChanged: (taskId, status) {
+                              _viewModel.updateTaskStatus.execute((taskId, status));
+                            },
+                            onRefresh: () => _handleRefresh(viewModel),
+                            emptyStateWidget: _buildEmptyTasks(),
+                            showProjectName: false, // Hide project name since we're in project detail
                           ),
                         ),
                       ],
@@ -204,7 +152,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             Icon(
               Icons.task_outlined,
               size: 80,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
@@ -247,8 +195,24 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   }
 
   void _navigateToTaskDetails(BuildContext context, String taskId) {
+    // Find the task from current list to pass for Hero animation
+    TaskDto? task;
+    try {
+      final items = _viewModel.pagingController.value.items;
+      if (items != null && items.isNotEmpty) {
+        task = items.firstWhere(
+          (t) => t.id == taskId,
+          orElse: () => items.first,
+        );
+      }
+    } catch (e) {
+      // Task not found, will load from API
+      task = null;
+    }
+
     context.push(
       AppRoutes.taskDetail.replaceFirst(':taskId', taskId),
+      extra: task, // Pass task for Hero animation
     ).then((_) {
       // Refresh list when returning from details
       _viewModel.refresh();
@@ -257,6 +221,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
 }
 
 /// Project header widget showing progress
+/// Matches the design from the screenshot - compact layout with just statistics and progress bar
 class _ProjectHeader extends StatelessWidget {
   final Project project;
 
@@ -264,125 +229,41 @@ class _ProjectHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progressPercentage = project.total > 0
-        ? ((project.completed / project.total) * 100).toInt()
-        : 0;
-
     return Container(
       width: double.infinity,
       color: Colors.white,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Project name
-          Text(
-            project.name,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+          // Statistics row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Completed
+              Expanded(
+                child: _StatisticItem(
+                  label: 'Completed',
+                  value: '${project.completed}',
+                  color: Colors.green,
+                ),
+              ),
+              
+              // In Progress
+              Expanded(
+                child: _StatisticItem(
+                  label: 'In Progress',
+                  value: '${project.inProgress}',
+                  color: Colors.orange,
+                ),
+              ),
+              
+              // Total
+              Expanded(
+                child: _StatisticItem(
+                  label: 'Total',
+                  value: '${project.total}',
                   color: const Color(0xFF1A1A1A),
                 ),
-          ),
-          
-          // Description
-          if (project.description != null && project.description!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              project.description!,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: const Color(0xFF6B7280),
-                  ),
-            ),
-          ],
-          
-          const SizedBox(height: 20),
-          
-          // Progress section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Completed tasks
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Completed',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF6B7280),
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${project.completed}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                  ),
-                ],
-              ),
-              
-              // In Progress tasks
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'In Progress',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF6B7280),
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${project.inProgress}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
-                        ),
-                  ),
-                ],
-              ),
-              
-              // Total tasks
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Total',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF6B7280),
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${project.total}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1A1A1A),
-                        ),
-                  ),
-                ],
-              ),
-              
-              // Progress percentage
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Progress',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF6B7280),
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$progressPercentage%',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
               ),
             ],
           ),
@@ -391,10 +272,10 @@ class _ProjectHeader extends StatelessWidget {
           
           // Progress bar
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: project.total > 0 ? project.completed / project.total : 0,
-              minHeight: 12,
+              minHeight: 6,
               backgroundColor: const Color(0xFFE5E7EB),
               valueColor: AlwaysStoppedAnimation<Color>(
                 Theme.of(context).colorScheme.primary,
@@ -403,6 +284,43 @@ class _ProjectHeader extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Individual statistic item widget
+class _StatisticItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatisticItem({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF6B7280),
+              ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }

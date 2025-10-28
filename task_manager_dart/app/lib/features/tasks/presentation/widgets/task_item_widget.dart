@@ -11,6 +11,7 @@ class TaskItemWidget extends StatelessWidget {
   final VoidCallback onTap;
   final Function(TaskStatus)? onStatusChanged;
   final VoidCallback? onDelete;
+  final bool showProjectName;
 
   const TaskItemWidget({
     super.key,
@@ -18,6 +19,7 @@ class TaskItemWidget extends StatelessWidget {
     required this.onTap,
     this.onStatusChanged,
     this.onDelete,
+    this.showProjectName = true,
   });
 
   Color _getPriorityColor() {
@@ -143,6 +145,7 @@ class TaskItemWidget extends StatelessWidget {
                                 priorityColor: priorityColor,
                                 priorityLabel: priorityLabel,
                                 isOverdue: isOverdue,
+                                showProjectName: showProjectName,
                               ),
                             ],
                           ),
@@ -293,6 +296,7 @@ class _TaskMetadataChips extends StatelessWidget {
   final Color priorityColor;
   final String priorityLabel;
   final bool isOverdue;
+  final bool showProjectName;
 
   const _TaskMetadataChips({
     required this.task,
@@ -300,6 +304,7 @@ class _TaskMetadataChips extends StatelessWidget {
     required this.priorityColor,
     required this.priorityLabel,
     required this.isOverdue,
+    required this.showProjectName,
   });
 
   @override
@@ -308,7 +313,7 @@ class _TaskMetadataChips extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        if (task.projectName != null)
+        if (showProjectName && task.projectName != null)
           _InfoChip(
             icon: Icons.folder_outlined,
             label: task.projectName!,
