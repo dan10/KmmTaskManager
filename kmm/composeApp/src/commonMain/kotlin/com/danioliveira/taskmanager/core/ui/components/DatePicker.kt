@@ -1,6 +1,7 @@
 package com.danioliveira.taskmanager.core.ui.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -8,12 +9,14 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,25 +48,35 @@ fun DatePickerFieldToModal(
     onDateSelected: (LocalDateTime) -> Unit
 ) {
     var showModal by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
 
     val formattedDate = selectedDate?.let { formatDate(it) } ?: ""
+    
+    // Handle clicks on the text field
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Release) {
+                showModal = true
+            }
+        }
+    }
 
     OutlinedTextField(
         value = formattedDate,
         onValueChange = { },
-        label = { Text(label, style = MaterialTheme.typography.labelMedium) },
-        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium) },
+        readOnly = true,
+        label = { Text(label) },
+        placeholder = { Text(placeholder) },
         trailingIcon = {
-            Icon(
-                Icons.Default.DateRange,
-                contentDescription = stringResource(Res.string.date_picker_select_date),
-                modifier = Modifier.clickable { showModal = true }
-            )
+            IconButton(onClick = { showModal = true }) {
+                Icon(
+                    Icons.Default.DateRange,
+                    contentDescription = stringResource(Res.string.date_picker_select_date)
+                )
+            }
         },
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { showModal = true },
-        enabled = false
+        interactionSource = interactionSource,
+        modifier = modifier.fillMaxWidth()
     )
 
     if (showModal) {
