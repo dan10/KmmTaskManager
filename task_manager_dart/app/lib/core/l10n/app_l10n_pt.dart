@@ -224,6 +224,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get taskPriorityLow => 'Baixa';
 
   @override
+  String get taskPriorityNone => 'Nenhuma';
+
+  @override
   String get taskCreateTitle => 'Criar Tarefa';
 
   @override
@@ -559,6 +562,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get taskPriorityLow => 'Baixa';
+
+  @override
+  String get taskPriorityNone => 'Nenhuma';
 
   @override
   String get taskCreateTitle => 'Criar Tarefa';

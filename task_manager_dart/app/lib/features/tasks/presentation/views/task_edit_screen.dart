@@ -442,6 +442,7 @@ class _TaskEditForm extends StatelessWidget {
 
   Color _getPriorityColor(Priority priority) {
     return switch (priority) {
+      Priority.none => const Color(0xFF9CA3AF),
       Priority.high => const Color(0xFFEF4444),
       Priority.medium => const Color(0xFFF59E0B),
       Priority.low => const Color(0xFF10B981),
@@ -532,6 +533,7 @@ String _statusLabel(TaskStatus status, AppLocalizations l10n) {
 
 String _priorityLabel(Priority priority, AppLocalizations l10n) {
   return switch (priority) {
+    Priority.none => l10n.taskPriorityNone,
     Priority.high => l10n.taskPriorityHigh,
     Priority.medium => l10n.taskPriorityMedium,
     Priority.low => l10n.taskPriorityLow,

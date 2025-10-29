@@ -687,6 +687,7 @@ String _statusLabel(TaskStatus status, AppLocalizations l10n) {
 
 String _priorityLabel(Priority priority, AppLocalizations l10n) {
   return switch (priority) {
+    Priority.none => l10n.taskPriorityNone,
     Priority.high => l10n.taskPriorityHigh,
     Priority.medium => l10n.taskPriorityMedium,
     Priority.low => l10n.taskPriorityLow,

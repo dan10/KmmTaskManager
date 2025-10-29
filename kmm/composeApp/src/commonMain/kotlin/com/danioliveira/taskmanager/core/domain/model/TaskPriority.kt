@@ -6,6 +6,10 @@ enum class TaskPriority(
     val color: Color,
     val backgroundColor: Color
 ) {
+    NONE(
+        color = Color(0xFF6B7280),          // Gray
+        backgroundColor = Color(0xFFF3F4F6), // Light Gray
+    ),
     HIGH(
         color = Color(0xFFDC2626),          // Bright Red
         backgroundColor = Color(0xFFFFE4E4), // Light Red
@@ -22,6 +26,7 @@ enum class TaskPriority(
 
 fun Priority.toTaskPriority(): TaskPriority {
     return when (this) {
+        Priority.NONE -> TaskPriority.NONE
         Priority.HIGH -> TaskPriority.HIGH
         Priority.MEDIUM -> TaskPriority.MEDIUM
         Priority.LOW -> TaskPriority.LOW

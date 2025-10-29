@@ -503,6 +503,12 @@ abstract class AppLocalizations {
   /// **'Low'**
   String get taskPriorityLow;
 
+  /// Label for no priority
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get taskPriorityNone;
+
   /// Title for create task bottom sheet
   ///
   /// In en, this message translates to:

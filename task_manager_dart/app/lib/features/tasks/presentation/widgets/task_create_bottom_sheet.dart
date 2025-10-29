@@ -276,33 +276,53 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                       
                       const SizedBox(height: 24),
                       
-                      // Create button with validation and loading state
-                      ValueListenableBuilder<bool>(
-                        valueListenable: _viewModel.isFormValid,
-                        builder: (context, isValid, _) {
-                          return ListenableBuilder(
-                            listenable: _viewModel.createTask,
-                            builder: (context, _) {
-                              final isRunning = _viewModel.createTask.running;
-                              return FilledButton(
-                                onPressed: isValid && !isRunning ? _handleCreate : null,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  child: isRunning
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        )
-                                      : Text(l10n.taskCreateTitle),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                      // Action buttons - side by side
+                      Row(
+                        children: [
+                          // Cancel button
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _handleCancel,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                child: Text(l10n.commonCancel),
+                              ),
+                            ),
+                          ),
+                          
+                          const SizedBox(width: 12),
+                          
+                          // Create button with validation and loading state
+                          Expanded(
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: _viewModel.isFormValid,
+                              builder: (context, isValid, _) {
+                                return ListenableBuilder(
+                                  listenable: _viewModel.createTask,
+                                  builder: (context, _) {
+                                    final isRunning = _viewModel.createTask.running;
+                                    return FilledButton(
+                                      onPressed: isValid && !isRunning ? _handleCreate : null,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        child: isRunning
+                                            ? const SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                ),
+                                              )
+                                            : Text(l10n.taskCreateTitle),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

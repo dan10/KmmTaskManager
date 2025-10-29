@@ -29,7 +29,7 @@ class TaskCreateViewModel {
   // Form field controllers state (using ValueNotifiers like auth)
   final ValueNotifier<String> title = ValueNotifier<String>('');
   final ValueNotifier<String> description = ValueNotifier<String>('');
-  final ValueNotifier<Priority> priority = ValueNotifier<Priority>(Priority.medium);
+  final ValueNotifier<Priority> priority = ValueNotifier<Priority>(Priority.none);
   final ValueNotifier<TaskStatus> status = ValueNotifier<TaskStatus>(TaskStatus.todo);
   final ValueNotifier<DateTime?> dueDate = ValueNotifier<DateTime?>(null);
 
@@ -99,7 +99,7 @@ class TaskCreateViewModel {
   void clearForm() {
     title.value = '';
     description.value = '';
-    priority.value = Priority.medium;
+    priority.value = Priority.none;
     status.value = TaskStatus.todo;
     dueDate.value = null;
     clearValidation();

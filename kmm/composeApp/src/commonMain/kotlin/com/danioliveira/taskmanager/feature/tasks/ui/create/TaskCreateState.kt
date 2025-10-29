@@ -11,7 +11,7 @@ import kotlinx.datetime.LocalDateTime
 data class TaskCreateState(
     val titleFieldState: TextFieldState = TextFieldState(),
     val descriptionFieldState: TextFieldState = TextFieldState(),
-    val selectedPriority: Priority = Priority.MEDIUM,
+    val selectedPriority: Priority = Priority.NONE,
     val selectedStatus: TaskStatus = TaskStatus.TODO,
     val selectedDueDate: LocalDateTime? = null,
     val projectId: String? = null,

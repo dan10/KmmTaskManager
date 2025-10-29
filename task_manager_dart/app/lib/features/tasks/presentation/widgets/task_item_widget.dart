@@ -24,6 +24,7 @@ class TaskItemWidget extends StatelessWidget {
 
   Color _getPriorityColor() {
     return switch (task.priority) {
+      Priority.none => const Color(0xFF9CA3AF),
       Priority.high => const Color(0xFFEF4444),
       Priority.medium => const Color(0xFFF59E0B),
       Priority.low => const Color(0xFF10B981),
@@ -50,6 +51,7 @@ class TaskItemWidget extends StatelessWidget {
   String _formatPriority(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return switch (task.priority) {
+      Priority.none => l10n.taskPriorityNone,
       Priority.high => l10n.taskPriorityHigh,
       Priority.medium => l10n.taskPriorityMedium,
       Priority.low => l10n.taskPriorityLow,

@@ -151,6 +151,7 @@
     <string name="date_picker_placeholder">DD/MM/AAAA</string>
 
     <!-- Priority strings -->
+    <string name="priority_none">Nenhuma</string>
     <string name="priority_high">Alta</string>
     <string name="priority_medium">Média</string>
     <string name="priority_low">Baixa</string>

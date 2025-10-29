@@ -31,9 +31,7 @@ import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.DatePickerFieldToModal
 import com.danioliveira.taskmanager.core.ui.components.TaskItCreateEditButtons
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorMessage
-import com.danioliveira.taskmanager.core.ui.components.TaskItFieldLabel
 import com.danioliveira.taskmanager.core.ui.components.TaskItPriorityDropdown
-import com.danioliveira.taskmanager.core.ui.components.TaskItStatusDropdown
 import com.danioliveira.taskmanager.core.ui.components.TrackItInputField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -91,7 +89,6 @@ private fun TaskCreateContent(
     onCancel: () -> Unit
 ) {
     var priorityDropdownExpanded by remember { mutableStateOf(false) }
-    var statusDropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -125,7 +122,6 @@ private fun TaskCreateContent(
                 .padding(bottom = 16.dp)
         ) {
             // Title Field
-            TaskItFieldLabel(stringResource(Res.string.task_title_label))
             TrackItInputField(
                 state = state.titleFieldState,
                 label = "Task Title",
@@ -138,7 +134,6 @@ private fun TaskCreateContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Description Field
-            TaskItFieldLabel("Description")
             TrackItInputField(
                 state = state.descriptionFieldState,
                 label = "Description (optional)",
@@ -152,7 +147,6 @@ private fun TaskCreateContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Priority Dropdown
-            TaskItFieldLabel("Priority")
             TaskItPriorityDropdown(
                 currentPriority = state.selectedPriority,
                 onPrioritySelected = { onAction(TaskCreateAction.UpdatePriority(it)) },
@@ -162,19 +156,7 @@ private fun TaskCreateContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Status Dropdown
-            TaskItFieldLabel("Status")
-            TaskItStatusDropdown(
-                currentStatus = state.selectedStatus,
-                onStatusSelected = { onAction(TaskCreateAction.UpdateStatus(it)) },
-                expanded = statusDropdownExpanded,
-                onExpandedChange = { statusDropdownExpanded = it }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Due Date Picker
-            TaskItFieldLabel("Due Date")
             DatePickerFieldToModal(
                 selectedDate = state.selectedDueDate,
                 onDateSelected = { onAction(TaskCreateAction.UpdateDueDate(it)) },
@@ -201,7 +183,7 @@ private fun TaskCreateContentPreview() {
     TaskItTheme {
         TaskCreateContent(
             state = TaskCreateState(
-                selectedPriority = Priority.HIGH,
+                selectedPriority = Priority.NONE,
                 selectedStatus = TaskStatus.TODO,
                 selectedDueDate = LocalDateTime.parse("2023-12-31T00:00:00")
             ),

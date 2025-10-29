@@ -6,6 +6,7 @@ import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.priority_high
 import kmmtaskmanager.composeapp.generated.resources.priority_low
 import kmmtaskmanager.composeapp.generated.resources.priority_medium
+import kmmtaskmanager.composeapp.generated.resources.priority_none
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -22,6 +23,7 @@ object PriorityFormatter {
     @Composable
     fun formatPriority(priority: Priority): String {
         return when (priority) {
+            Priority.NONE -> stringResource(Res.string.priority_none)
             Priority.HIGH -> stringResource(Res.string.priority_high)
             Priority.MEDIUM -> stringResource(Res.string.priority_medium)
             Priority.LOW -> stringResource(Res.string.priority_low)

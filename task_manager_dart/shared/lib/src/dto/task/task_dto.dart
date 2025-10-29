@@ -15,6 +15,8 @@ enum TaskStatus {
 }
 
 enum Priority {
+  @JsonValue('NONE')
+  none,
   @JsonValue('LOW')
   low,
   @JsonValue('MEDIUM')

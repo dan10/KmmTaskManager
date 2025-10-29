@@ -299,6 +299,10 @@
   "@taskPriorityLow": {
     "description": "Label for low priority"
   },
+  "taskPriorityNone": "None",
+  "@taskPriorityNone": {
+    "description": "Label for no priority"
+  },
   "taskCreateTitle": "Create Task",
   "@taskCreateTitle": {
     "description": "Title for create task bottom sheet"

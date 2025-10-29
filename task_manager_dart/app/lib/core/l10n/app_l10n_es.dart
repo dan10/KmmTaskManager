@@ -225,6 +225,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get taskPriorityLow => 'Baja';
 
   @override
+  String get taskPriorityNone => 'Ninguna';
+
+  @override
   String get taskCreateTitle => 'Crear Tarea';
 
   @override

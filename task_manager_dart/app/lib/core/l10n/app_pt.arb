@@ -69,6 +69,7 @@
   "taskPriorityHigh": "Alta",
   "taskPriorityMedium": "Média",
   "taskPriorityLow": "Baixa",
+  "taskPriorityNone": "Nenhuma",
   "taskCreateTitle": "Criar Tarefa",
   "taskEmptyTitle": "Ainda Sem Tarefas",
   "taskEmptySubtitle": "Crie a sua primeira tarefa para começar",

@@ -22,6 +22,8 @@ class TaskItTaskCard extends StatelessWidget {
   Color _priorityColor(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     switch (task.priority) {
+      case Priority.none:
+        return colors.outline;
       case Priority.low:
         return colors.tertiary;
       case Priority.medium:
@@ -33,6 +35,8 @@ class TaskItTaskCard extends StatelessWidget {
 
   IconData _priorityIcon() {
     switch (task.priority) {
+      case Priority.none:
+        return Icons.remove_rounded;
       case Priority.low:
         return Icons.arrow_downward_rounded;
       case Priority.medium:
@@ -222,6 +226,8 @@ class _PriorityPill extends StatelessWidget {
 
   String get _label {
     switch (priority) {
+      case Priority.none:
+        return 'None';
       case Priority.low:
         return 'Low';
       case Priority.medium:

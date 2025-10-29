@@ -221,6 +221,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskPriorityLow => 'Low';
 
   @override
+  String get taskPriorityNone => 'None';
+
+  @override
   String get taskCreateTitle => 'Create Task';
 
   @override
