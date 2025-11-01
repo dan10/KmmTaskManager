@@ -42,15 +42,6 @@ if (composeAppDir.exists() && composeAppDir.isDirectory) {
 include(":server")
 include(":shared")
 
-// Conditionally include the paging-compose subproject only when its directory exists to
-// avoid build failures in environments where the folder is absent (e.g., CI or Docker).
-val pagingComposeDir = File(rootDir, "paging-compose")
-if (pagingComposeDir.exists() && pagingComposeDir.isDirectory) {
-    include(":paging-compose")
-} else {
-    logger.lifecycle("Skipping :paging-compose - directory '${pagingComposeDir.absolutePath}' not found.")
-}
-
 // Conditionally include the appium subproject only when its directory exists to
 // avoid build failures in environments where the folder is absent (e.g., CI or Docker).
 val appiumDir = File(rootDir, "appium")

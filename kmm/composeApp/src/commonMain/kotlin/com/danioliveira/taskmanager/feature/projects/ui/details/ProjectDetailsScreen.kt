@@ -42,6 +42,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.LoadState
 import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.Project
 import com.danioliveira.taskmanager.core.domain.model.Task
@@ -54,10 +58,6 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.TaskItem
 import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
-import com.danioliveira.taskmanager.paging.compose.LazyPagingItems
-import com.danioliveira.taskmanager.paging.compose.collectAsLazyPagingItems
-import com.danioliveira.taskmanager.paging.compose.itemContentType
-import com.danioliveira.taskmanager.paging.compose.itemKey
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
