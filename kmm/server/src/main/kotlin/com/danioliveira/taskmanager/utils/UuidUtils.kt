@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.utils
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
