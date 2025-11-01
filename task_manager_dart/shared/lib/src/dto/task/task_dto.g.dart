@@ -59,6 +59,7 @@ const _$TaskStatusEnumMap = {
 };
 
 const _$PriorityEnumMap = {
+  Priority.none: 'NONE',
   Priority.low: 'LOW',
   Priority.medium: 'MEDIUM',
   Priority.high: 'HIGH',
