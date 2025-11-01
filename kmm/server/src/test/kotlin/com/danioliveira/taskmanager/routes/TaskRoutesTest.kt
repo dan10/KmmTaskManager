@@ -12,8 +12,8 @@ import com.danioliveira.taskmanager.api.routes.Projects
 import com.danioliveira.taskmanager.api.routes.Tasks
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.createTestUser
-import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.generateTestToken
 import com.danioliveira.taskmanager.withAuth
 import io.ktor.client.call.body

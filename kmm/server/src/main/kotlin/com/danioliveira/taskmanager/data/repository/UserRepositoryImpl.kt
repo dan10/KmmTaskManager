@@ -12,9 +12,12 @@ import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.selectAll
-import java.util.UUID
 import kotlin.time.ExperimentalTime
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
+@OptIn(ExperimentalUuidApi::class)
 internal class UserRepositoryImpl : UserRepository {
 
     context(transaction: R2dbcTransaction)
@@ -27,19 +30,19 @@ internal class UserRepositoryImpl : UserRepository {
     }
 
     context(transaction: R2dbcTransaction)
-    override suspend fun findById(id: UUID): UserWithPassword? = with(transaction) {
+    override suspend fun findById(id: Uuid): UserWithPassword? = with(transaction) {
         return UsersTable
             .selectAll()
-            .where { UsersTable.id eq id }
+            .where { UsersTable.id eq id.toJavaUuid() }
             .singleOrNull()
             ?.toDomain()
     }
 
     context(transaction: R2dbcTransaction)
-    override suspend fun existsById(id: UUID): Boolean = with(transaction) {
+    override suspend fun existsById(id: Uuid): Boolean = with(transaction) {
         return UsersTable
             .select(UsersTable.id)
-            .where { UsersTable.id eq id }
+            .where { UsersTable.id eq id.toJavaUuid() }
             .singleOrNull() != null
     }
 

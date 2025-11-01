@@ -7,26 +7,28 @@ import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 internal interface TaskRepository {
     context(transaction: R2dbcTransaction)
     suspend fun findAllByProjectId(
-        projectId: UUID,
+        projectId: Uuid,
         page: Int = 0,
         size: Int = 10
     ): PaginatedResponse<TaskResponse>
 
     context(transaction: R2dbcTransaction)
     suspend fun findAllByOwnerId(
-        ownerId:  UUID,
+        ownerId:  Uuid,
         page: Int = 0,
         size: Int = 10
     ): PaginatedResponse<TaskResponse>
 
     context(transaction: R2dbcTransaction)
     suspend fun findAllByAssigneeId(
-        assigneeId: UUID,
+        assigneeId: Uuid,
         page: Int = 0,
         size: Int = 10,
         query: String? = null
@@ -42,9 +44,9 @@ internal interface TaskRepository {
     suspend fun create(
         title: String,
         description: String?,
-        projectId: UUID?,
-        assigneeId: UUID?,
-        creatorId: UUID,
+        projectId: Uuid?,
+        assigneeId: Uuid?,
+        creatorId: Uuid,
         status: TaskStatus,
         priority: Priority,
         dueDate: LocalDateTime?
@@ -58,14 +60,14 @@ internal interface TaskRepository {
         status: TaskStatus,
         priority: Priority,
         dueDate: LocalDateTime?,
-        assigneeId: UUID?
+        assigneeId: Uuid?
     ): TaskResponse?
 
     context(transaction: R2dbcTransaction)
-    suspend fun delete(id: UUID): Boolean
+    suspend fun delete(id: Uuid): Boolean
 
     context(transaction: R2dbcTransaction)
-    suspend fun findAllTasksForUser(userId: UUID, page: Int, size: Int): PaginatedResponse<TaskResponse>
+    suspend fun findAllTasksForUser(userId: Uuid, page: Int, size: Int): PaginatedResponse<TaskResponse>
 
     /**
      * Get the task progress for a user.
@@ -73,5 +75,5 @@ internal interface TaskRepository {
      * @return The task progress for the user.
      */
     context(transaction: R2dbcTransaction)
-    suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse
+    suspend fun getUserTaskProgress(userId: Uuid): TaskProgressResponse
 }

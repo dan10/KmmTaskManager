@@ -12,11 +12,13 @@ import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
-import com.danioliveira.taskmanager.routes.toUUID
+import com.danioliveira.taskmanager.utils.toUuid
 import org.jetbrains.exposed.v1.core.Slf4jSqlDebugLogger
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 internal class TaskService(
     private val repository: TaskRepository,
     private val projectAssignmentRepository: ProjectAssignmentRepository,
@@ -27,7 +29,7 @@ internal class TaskService(
         page: Int = 0,
         size: Int = 10
     ): PaginatedResponse<TaskResponse> = dbQuery {
-        val uuid = UUID.fromString(projectId)
+        val uuid = projectId.toUuid()
         repository.findAllByProjectId(uuid, page, size)
     }
 
@@ -36,11 +38,11 @@ internal class TaskService(
         page: Int = 0,
         size: Int = 10
     ): PaginatedResponse<TaskResponse> = dbQuery {
-        repository.findAllByOwnerId(ownerId.toUUID(), page, size)
+        repository.findAllByOwnerId(ownerId.toUuid(), page, size)
     }
 
     suspend fun findAllByAssigneeId(
-        assigneeId: UUID,
+        assigneeId: Uuid,
         page: Int = 0,
         size: Int = 10,
         query: String? = null
@@ -62,7 +64,7 @@ internal class TaskService(
      * A user can be assigned if they are either the project owner or already assigned to the project.
      */
     context(_: R2dbcTransaction)
-    private suspend fun validateUserCanBeAssignedToProject(projectId: UUID, userId: UUID) = with(this) {
+    private suspend fun validateUserCanBeAssignedToProject(projectId: Uuid, userId: Uuid) = with(this) {
         val project = projectRepository.findById(projectId)
         val isOwner = project.ownerId == userId.toString()
         if (isOwner) return@with
@@ -73,9 +75,9 @@ internal class TaskService(
     }
 
     suspend fun create(request: TaskCreateRequest, creatorId: String): TaskResponse = dbQuery {
-        val creatorUUID = UUID.fromString(creatorId)
-        val assigneeUUID = request.assigneeId?.toUUID() ?: creatorUUID
-        val projectUUID = request.projectId?.toUUID()
+        val creatorUUID = creatorId.toUuid()
+        val assigneeUUID = request.assigneeId?.toUuid() ?: creatorUUID
+        val projectUUID = request.projectId?.toUuid()
 
         // Validate project access if project is specified
         projectUUID?.let { projectId ->
@@ -87,7 +89,7 @@ internal class TaskService(
             description = request.description,
             projectId = projectUUID,
             assigneeId = assigneeUUID,
-            creatorId = creatorId.toUUID(),
+            creatorId = creatorId.toUuid(),
             status = TaskStatus.TODO,
             priority = request.priority,
             dueDate = request.dueDate
@@ -101,8 +103,9 @@ internal class TaskService(
             // If assignee is being changed and task has a project, validate that new assignee is part of the project or is the project owner
             val newAssigneeId = request.assigneeId
             if (newAssigneeId != null && newAssigneeId != current.assigneeId && current.projectId != null) {
-                val assigneeUUID = UUID.fromString(newAssigneeId)
-                val projectUUID = UUID.fromString(current.projectId)
+                val assigneeUUID = newAssigneeId.toUuid()
+                val currentProjectId = current.projectId // Create local variable to enable smart cast
+                val projectUUID = currentProjectId!!.toUuid()
 
                 validateUserCanBeAssignedToProject(projectUUID, assigneeUUID)
             }
@@ -114,7 +117,7 @@ internal class TaskService(
                 status = request.status ?: current.status,
                 priority = request.priority ?: current.priority,
                 dueDate = request.dueDate ?: current.dueDate,
-                assigneeId = newAssigneeId?.toUUID() ?: current.assigneeId?.toUUID()
+                assigneeId = newAssigneeId?.toUuid() ?: current.assigneeId?.toUuid()
             )
             updated ?: throw NotFoundException("Task", id)
         }
@@ -122,16 +125,17 @@ internal class TaskService(
 
     suspend fun delete(id: String): Boolean = dbQuery {
         // TODO: Validate that the user has permission to delete the task (e.g., is the creator or participant in the project of the task)
-        repository.delete(id.toUUID())
+        repository.delete(id.toUuid())
     }
 
     suspend fun assign(id: String, assigneeId: String): TaskResponse = dbQuery {
         val current = with(repository) { findById(id) } ?: throw NotFoundException("Task", id)
 
         // Validate that assignee is part of the project or is the project owner if the task has a project
-        val assigneeUUID = UUID.fromString(assigneeId)
+        val assigneeUUID = assigneeId.toUuid()
         if (current.projectId != null) {
-            val projectUUID = UUID.fromString(current.projectId)
+            val currentProjectId = current.projectId // Create local variable to enable smart cast
+            val projectUUID = currentProjectId!!.toUuid()
             validateUserCanBeAssignedToProject(projectUUID, assigneeUUID)
         }
 
@@ -143,7 +147,7 @@ internal class TaskService(
                 status = current.status,
                 priority = current.priority,
                 dueDate = current.dueDate,
-                assigneeId = assigneeId.toUUID()
+                assigneeId = assigneeId.toUuid()
             )
             updated ?: throw NotFoundException("Task", id)
         }
@@ -158,7 +162,7 @@ internal class TaskService(
             status = TaskStatus.valueOf(status),
             priority = current.priority,
             dueDate = current.dueDate,
-            assigneeId = current.assigneeId?.toUUID()
+            assigneeId = current.assigneeId?.toUuid()
         ) ?: throw NotFoundException("Task", id)
     }
 
@@ -167,7 +171,7 @@ internal class TaskService(
      * @param userId The ID of the user.
      * @return The task progress for the user.
      */
-    suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse = dbQuery {
+    suspend fun getUserTaskProgress(userId: Uuid): TaskProgressResponse = dbQuery {
         with(this) {
             repository.getUserTaskProgress(userId)
         }

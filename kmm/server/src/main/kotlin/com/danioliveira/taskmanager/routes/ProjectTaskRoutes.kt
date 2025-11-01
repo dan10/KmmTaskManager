@@ -12,6 +12,7 @@ import io.ktor.server.resources.post
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
+import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Routes for project-task relationships following the pattern:
@@ -19,6 +20,7 @@ import org.koin.ktor.ext.inject
  * POST /v1/projects/{projectId}/tasks - Create task in a project
  * PUT /v1/projects/{projectId}/tasks/{taskId} - Update task in a project
  */
+@OptIn(ExperimentalUuidApi::class)
 fun Route.projectTaskRoutes() {
     val taskService by inject<TaskService>()
 

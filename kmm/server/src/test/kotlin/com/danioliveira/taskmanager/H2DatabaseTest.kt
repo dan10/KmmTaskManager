@@ -12,13 +12,19 @@ import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import com.danioliveira.taskmanager.utils.toUuid
+import com.danioliveira.taskmanager.utils.randomV7
 
 /**
  * This test demonstrates how to use H2 in-memory database for testing.
  */
+@OptIn(ExperimentalUuidApi::class)
 class H2DatabaseTest {
 
     @Before
@@ -67,7 +73,7 @@ class H2DatabaseTest {
 
         // Verify the user was created
         val user = suspendTransaction {
-            val row = UsersTable.selectAll().where { UsersTable.id eq UUID.fromString(userId) }.singleOrNull()
+            val row = UsersTable.selectAll().where { UsersTable.id eq userId.toUuid().toJavaUuid() }.singleOrNull()
             assertNotNull(row)
 
             // Convert to domain model

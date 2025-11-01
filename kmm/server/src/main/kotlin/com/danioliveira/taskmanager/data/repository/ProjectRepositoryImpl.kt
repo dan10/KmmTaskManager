@@ -29,10 +29,12 @@ import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.update
-import java.util.UUID
 import kotlin.math.ceil
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
 /**
  * Implementation of the ProjectRepository interface.
@@ -42,37 +44,38 @@ import kotlin.time.ExperimentalTime
  * 2. Using proper transaction context for all database operations
  * 3. Implementing efficient pagination with proper sorting
  */
+@OptIn(ExperimentalUuidApi::class)
 class ProjectRepositoryImpl : ProjectRepository {
 
     @OptIn(ExperimentalTime::class)
     context(transaction: R2dbcTransaction)
-    override suspend fun create(name: String, description: String?, ownerId: UUID): ProjectResponse = with(transaction) {
+    override suspend fun create(name: String, description: String?, ownerId: Uuid): ProjectResponse = with(transaction) {
        return ProjectsTable.insertReturning {
             it[this.name] = name
             it[this.description] = description
-            it[this.ownerId] = ownerId
+            it[this.ownerId] = ownerId.toJavaUuid()
         }
            .map { it.toResponse() }
            .single()
     }
 
     context(transaction: R2dbcTransaction)
-    override suspend fun findById(id: UUID): ProjectResponse = with(transaction) {
-        val searchQuery = ProjectsTable.id eq id
+    override suspend fun findById(id: Uuid): ProjectResponse = with(transaction) {
+        val searchQuery = ProjectsTable.id eq id.toJavaUuid()
         val query = buildProjectQuery(ownerId = null, searchQuery, null, null)
         return query.first.firstOrNull() ?: throw NotFoundException("Project", id.toString())
     }
 
-    override suspend fun existsById(id: UUID): Boolean {
+    override suspend fun existsById(id: Uuid): Boolean {
         return ProjectsTable
             .select(ProjectsTable.id)
-            .where { ProjectsTable.id eq id }
+            .where { ProjectsTable.id eq id.toJavaUuid() }
             .firstOrNull() != null
     }
 
     context(transaction: R2dbcTransaction)
     override suspend fun findAllByOwner(
-        ownerId: UUID,
+        ownerId: Uuid,
         page: Int,
         size: Int,
         query: String?
@@ -97,7 +100,7 @@ class ProjectRepositoryImpl : ProjectRepository {
 
     @OptIn(ExperimentalTime::class)
     private suspend fun buildProjectQuery(
-        ownerId: UUID?,
+        ownerId: Uuid?,
         subQuery: Op<Boolean>?,
         page: Int?,
         size: Int?,
@@ -122,7 +125,7 @@ class ProjectRepositoryImpl : ProjectRepository {
 
         val query = (ProjectsTable leftJoin TasksTable)
             .select(ProjectsTable.fields + list)
-            .apply { if (ownerId != null) andWhere { ProjectsTable.ownerId eq ownerId } }
+            .apply { if (ownerId != null) andWhere { ProjectsTable.ownerId eq ownerId.toJavaUuid() } }
             .apply { if (subQuery != null) andWhere { subQuery } }
             .apply { groupBy(ProjectsTable.id) }
             .apply { if (page != null) orderBy(ProjectsTable.createdAt, SortOrder.DESC) }
@@ -147,8 +150,8 @@ class ProjectRepositoryImpl : ProjectRepository {
 
     @OptIn(ExperimentalTime::class)
     context(transaction: R2dbcTransaction)
-    override suspend fun update(id: UUID, name: String, description: String?): Boolean = with(transaction) {
-        return ProjectsTable.update({ ProjectsTable.id eq id }) {
+    override suspend fun update(id: Uuid, name: String, description: String?): Boolean = with(transaction) {
+        return ProjectsTable.update({ ProjectsTable.id eq id.toJavaUuid() }) {
             it[this.name] = name
             it[this.description] = description
             it[this.updatedAt] = Clock.System.now()
@@ -156,8 +159,8 @@ class ProjectRepositoryImpl : ProjectRepository {
     }
 
     context(transaction: R2dbcTransaction)
-    override suspend fun delete(id: UUID): Boolean = with(transaction) {
-        return ProjectsTable.deleteWhere { ProjectsTable.id eq id } > 0
+    override suspend fun delete(id: Uuid): Boolean = with(transaction) {
+        return ProjectsTable.deleteWhere { ProjectsTable.id eq id.toJavaUuid() } > 0
     }
 
     @OptIn(ExperimentalTime::class)

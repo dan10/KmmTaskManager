@@ -3,8 +3,10 @@ package com.danioliveira.taskmanager.domain.repository
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.ProjectResponse
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 interface ProjectRepository {
 
     /**
@@ -16,7 +18,7 @@ interface ProjectRepository {
      * @return the newly created project
      */
     context(transaction: R2dbcTransaction)
-    suspend fun create(name: String, description: String?, ownerId: UUID): ProjectResponse
+    suspend fun create(name: String, description: String?, ownerId: Uuid): ProjectResponse
 
     /**
      * Finds a project by id.
@@ -25,9 +27,9 @@ interface ProjectRepository {
      * @return the project [ProjectResponse] with the given id, or null if no such project exists
      */
     context(transaction: R2dbcTransaction)
-    suspend fun findById(id: UUID): ProjectResponse
+    suspend fun findById(id: Uuid): ProjectResponse
 
-    suspend fun existsById(id: UUID): Boolean
+    suspend fun existsById(id: Uuid): Boolean
 
     /**
      * Finds all projects owned by the given user with pagination.
@@ -40,7 +42,7 @@ interface ProjectRepository {
      */
     context(transaction: R2dbcTransaction)
     suspend fun findAllByOwner(
-        ownerId: UUID,
+        ownerId: Uuid,
         page: Int = 0,
         size: Int = 10,
         query: String? = null
@@ -55,7 +57,7 @@ interface ProjectRepository {
      * @return true if the project was updated, false otherwise
      */
     context(transaction: R2dbcTransaction)
-    suspend fun update(id: UUID, name: String, description: String?): Boolean
+    suspend fun update(id: Uuid, name: String, description: String?): Boolean
 
     /**
      * Deletes a project by id.
@@ -64,5 +66,5 @@ interface ProjectRepository {
      * @return true if the project was deleted, false otherwise
      */
     context(transaction: R2dbcTransaction)
-    suspend fun delete(id: UUID): Boolean
+    suspend fun delete(id: Uuid): Boolean
 }

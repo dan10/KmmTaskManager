@@ -11,13 +11,19 @@ import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.koin.test.inject
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import com.danioliveira.taskmanager.utils.toUuid
+import com.danioliveira.taskmanager.utils.randomV7
 
+@OptIn(ExperimentalUuidApi::class)
 class UserServiceTest : BaseServiceTest() {
     private val userService: UserService by inject()
 
@@ -56,14 +62,14 @@ class UserServiceTest : BaseServiceTest() {
         val displayName = "Test User"
         val passwordHash = "hashed-password"
 
-        val userId = UUID.fromString(createTestUser(email, passwordHash, displayName))
+        val userId = createTestUser(email, passwordHash, displayName)
 
         // Find the user by ID
-        val user = userService.findById(userId)
+        val user = userService.findById(userId.toUuid())
 
         // Verify the user was found
         assertNotNull(user)
-        assertEquals(userId, UUID.fromString(user.id))
+        assertEquals(userId, user.id)
         assertEquals(email, user.email)
         assertEquals(displayName, user.displayName)
     }
@@ -72,7 +78,7 @@ class UserServiceTest : BaseServiceTest() {
     fun `test find by id - non-existent user`() = runTest {
         // Try to find a user that doesn't exist
         try {
-            userService.findById(UUID.randomUUID())
+            userService.findById(Uuid.randomV7())
             fail("Expected NotFoundException was not thrown")
         } catch (e: NotFoundException) {
             // Expected exception
@@ -108,8 +114,8 @@ class UserServiceTest : BaseServiceTest() {
         val displayName = "Test User"
         val passwordHash = "hashed-password"
 
-        val userId = UUID.fromString(createTestUser(email, passwordHash, displayName))
-        val user = userService.findById(userId)
+        val userId = createTestUser(email, passwordHash, displayName)
+        val user = userService.findById(userId.toUuid())
 
         // Convert to safe user
         val safeUser = userService.toSafeUser(user)

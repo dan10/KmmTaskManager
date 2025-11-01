@@ -2,9 +2,9 @@ package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
-import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
+import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
@@ -13,18 +13,24 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import com.danioliveira.taskmanager.utils.toUuid
+import com.danioliveira.taskmanager.utils.randomV7
 
+@OptIn(ExperimentalUuidApi::class)
 class ProjectRepositoryImplTest {
     private lateinit var projectRepository: ProjectRepository
     private lateinit var userRepository: UserRepository
     private lateinit var taskRepository: TaskRepository
-    private lateinit var testUserId: UUID
+    private lateinit var testUserId: Uuid
 
     @Before
     fun setUp() = runBlocking {
@@ -40,7 +46,7 @@ class ProjectRepositoryImplTest {
                 create("test_withp@example.com", "password", "Test User", null)
             }
         }
-        testUserId = UUID.fromString(user.id)
+        testUserId = user.id.toUuid()
     }
 
     @After
@@ -69,7 +75,7 @@ class ProjectRepositoryImplTest {
 
         // Find the project by ID
         val foundProject = dbQuery {
-            projectRepository.findById(UUID.fromString(project.id))
+            projectRepository.findById(project.id.toUuid())
         }
 
         // Verify the project was found
@@ -94,7 +100,7 @@ class ProjectRepositoryImplTest {
         val otherUser = dbQuery {
             userRepository.create("other@example.com", "password", "Other User", null)
         }
-        val otherUserId = UUID.fromString(otherUser.id)
+        val otherUserId = otherUser.id.toUuid()
 
         dbQuery {
             projectRepository.create("Other Project", "Other Description", otherUserId)
@@ -124,7 +130,7 @@ class ProjectRepositoryImplTest {
         // Update the project
         val updated = dbQuery {
             with(projectRepository) {
-                update(UUID.fromString(project.id), "Updated Name", "Updated Description")
+                update(project.id.toUuid(), "Updated Name", "Updated Description")
             }
         }
 
@@ -134,7 +140,7 @@ class ProjectRepositoryImplTest {
         // Find the project to verify the changes
         val updatedProject = dbQuery {
             with(projectRepository) {
-                findById(UUID.fromString(project.id))
+                findById(project.id.toUuid())
             }
         }
 
@@ -157,13 +163,13 @@ class ProjectRepositoryImplTest {
 
         // Verify the project exists
         val foundProject = dbQuery {
-            projectRepository.findById(UUID.fromString(project.id))
+            projectRepository.findById(project.id.toUuid())
         }
         assertNotNull(foundProject)
 
         // Delete the project
         val deleted = dbQuery {
-            projectRepository.delete(UUID.fromString(project.id))
+            projectRepository.delete(project.id.toUuid())
         }
 
         // Verify the deletion was successful
@@ -173,7 +179,7 @@ class ProjectRepositoryImplTest {
 
         assertFailsWith<NotFoundException> {
             dbQuery {
-                projectRepository.findById(UUID.fromString(project.id))
+                projectRepository.findById(project.id.toUuid())
             }
         }
     }
@@ -182,7 +188,7 @@ class ProjectRepositoryImplTest {
     fun `test update non-existent project`() = runTest {
         // Try to update a project that doesn't exist
         val updated = dbQuery {
-            projectRepository.update(UUID.randomUUID(), "Updated Name", "Updated Description")
+            projectRepository.update(Uuid.randomV7(), "Updated Name", "Updated Description")
         }
 
         // Verify the update failed
@@ -192,7 +198,7 @@ class ProjectRepositoryImplTest {
     @Test
     fun `test delete non-existent project`() = runTest {
         // Try to delete a project that doesn't exist
-        val deleted = dbQuery { projectRepository.delete(UUID.randomUUID()) }
+        val deleted = dbQuery { projectRepository.delete(Uuid.randomV7()) }
         // Verify the deletion failed
         assertFalse(deleted)
     }
@@ -208,7 +214,7 @@ class ProjectRepositoryImplTest {
             )
         }
 
-        val projectId = UUID.fromString(project.id)
+        val projectId = project.id.toUuid()
 
         // Create tasks with different statuses
         // 2 TODO tasks

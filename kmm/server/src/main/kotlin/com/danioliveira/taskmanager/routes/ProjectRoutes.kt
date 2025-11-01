@@ -7,6 +7,7 @@ import com.danioliveira.taskmanager.api.routes.UserProjects
 import com.danioliveira.taskmanager.auth.UserPrincipal
 import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.domain.service.ProjectService
+import com.danioliveira.taskmanager.utils.toUuid
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.principal
@@ -19,8 +20,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.RoutingContext
 import org.koin.ktor.ext.inject
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 fun Route.projectRoutes() {
     val service by inject<ProjectService>()
 
@@ -40,7 +43,7 @@ fun Route.projectRoutes() {
 
         get<Projects.Id> {
             val userId = userPrincipal()
-            val projectUuid = UUID.fromString(it.projectId)
+            val projectUuid = it.projectId.toUuid()
 
             val project = service.getProjectById(id = projectUuid, userId)
             call.respond(project)
@@ -49,7 +52,7 @@ fun Route.projectRoutes() {
         put<Projects.Id> { res ->
             val userId = userPrincipal()
             val request = call.receive<ProjectUpdateRequest>()
-            val updated = service.updateProject(res.projectId.toUUID(), userId, request)
+            val updated = service.updateProject(res.projectId.toUuid(), userId, request)
             if (updated) {
                 call.respond(HttpStatusCode.OK)
             } else {
@@ -68,7 +71,7 @@ fun Route.projectRoutes() {
         // Delete project by id: DELETE v1/projects/{projectId}
         delete<Projects.Id> { res ->
             val userId = userPrincipal()
-            val deleted = service.deleteProject(res.projectId.toUUID(), userId)
+            val deleted = service.deleteProject(res.projectId.toUuid(), userId)
             if (deleted) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
@@ -79,12 +82,7 @@ fun Route.projectRoutes() {
     }
 }
 
-fun RoutingContext.userPrincipal(): UUID {
+@OptIn(ExperimentalUuidApi::class)
+fun RoutingContext.userPrincipal(): Uuid {
     return call.principal<UserPrincipal>()?.userId ?: throw UnauthorizedException()
-}
-
-fun String.toUUID(): UUID = try {
-    UUID.fromString(this)
-} catch (_: IllegalArgumentException) {
-    throw UnauthorizedException("Invalid UUID format")
 }

@@ -2,12 +2,11 @@ package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
-import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import com.danioliveira.taskmanager.routes.toUUID
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
@@ -19,20 +18,26 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import com.danioliveira.taskmanager.utils.toUuid
+import com.danioliveira.taskmanager.utils.randomV7
 
+@OptIn(ExperimentalUuidApi::class)
 class TaskRepositoryImplTest : KoinTest {
 
     private val taskRepository: TaskRepository by inject()
     private val userRepository: UserRepository by inject()
     private val projectRepository: ProjectRepository by inject()
 
-    private lateinit var testUserId: UUID
-    private lateinit var testProjectId: UUID
+    private lateinit var testUserId: Uuid
+    private lateinit var testProjectId: Uuid
 
     @Before
     fun setUp() = runTest {
@@ -54,14 +59,14 @@ class TaskRepositoryImplTest : KoinTest {
                 create("test@example.com", "password", "Test User", null)
             }
         }
-        testUserId = UUID.fromString(user.id)
+        testUserId = user.id.toUuid()
 
         val project = dbQuery {
             with(projectRepository) {
                 create("Test Project", "Test Description", testUserId)
             }
         }
-        testProjectId = UUID.fromString(project.id)
+        testProjectId = project.id.toUuid()
     }
 
     @After
@@ -174,7 +179,7 @@ class TaskRepositoryImplTest : KoinTest {
         val secondUser = dbQuery {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Create tasks with different creators
         val task1 = dbQuery {
@@ -245,7 +250,7 @@ class TaskRepositoryImplTest : KoinTest {
         val secondUser = dbQuery {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Create tasks with different assignees
         val task1 = dbQuery {
@@ -365,7 +370,7 @@ class TaskRepositoryImplTest : KoinTest {
 
         // Delete the task
         val deleted = dbQuery {
-            taskRepository.delete(task.id.toUUID())
+            taskRepository.delete(task.id.toUuid())
         }
 
         // Verify the task was deleted
@@ -384,7 +389,7 @@ class TaskRepositoryImplTest : KoinTest {
     fun `test delete non-existent task`() = runBlocking {
         // Try to delete a task that doesn't exist
         val deleted = dbQuery {
-            taskRepository.delete(UUID.randomUUID())
+            taskRepository.delete(Uuid.randomV7())
         }
 
         // Verify the deletion failed
@@ -397,7 +402,7 @@ class TaskRepositoryImplTest : KoinTest {
         val secondUser = dbQuery {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Create tasks with different titles
         val task1 = dbQuery {
@@ -465,7 +470,7 @@ class TaskRepositoryImplTest : KoinTest {
                 googleId = null
             )
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Create tasks with different statuses
         // 2 TODO tasks

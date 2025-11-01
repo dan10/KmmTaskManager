@@ -34,11 +34,16 @@ import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.update
-import java.util.UUID
+import com.danioliveira.taskmanager.utils.randomV7
+import com.danioliveira.taskmanager.utils.toUuid
 import kotlin.math.ceil
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
+@OptIn(ExperimentalUuidApi::class)
 internal class TaskRepositoryImpl : TaskRepository {
 
     context(transaction: R2dbcTransaction)
@@ -49,9 +54,9 @@ internal class TaskRepositoryImpl : TaskRepository {
         status: TaskStatus,
         priority: Priority,
         dueDate: LocalDateTime?,
-        assigneeId: UUID?
+        assigneeId: Uuid?
     ): TaskResponse? = with(transaction) {
-        val taskId = UUID.fromString(id)
+        val taskId = id.toUuid().toJavaUuid()
         // Perform update using Exposed DSL
         TasksTable.update(where = { TasksTable.id eq taskId }) {
             it[TasksTable.title] = title
@@ -59,7 +64,9 @@ internal class TaskRepositoryImpl : TaskRepository {
             it[TasksTable.status] = status
             it[TasksTable.priority] = priority
             it[TasksTable.dueDate] = dueDate
-            it[TasksTable.assigneeId] = assigneeId
+            assigneeId?.let { assignee ->
+                it[TasksTable.assigneeId] = assignee.toJavaUuid()
+            }
             it[TasksTable.updatedAt] = Clock.System.now()
         }
         // Return the updated task by querying it again
@@ -67,13 +74,13 @@ internal class TaskRepositoryImpl : TaskRepository {
     }
 
     context(transaction: R2dbcTransaction)
-    override suspend fun delete(id: UUID): Boolean = with(transaction) {
-        return TasksTable.deleteWhere { TasksTable.id eq id } > 0
+    override suspend fun delete(id: Uuid): Boolean = with(transaction) {
+        return TasksTable.deleteWhere { TasksTable.id eq id.toJavaUuid() } > 0
     }
 
     context(transaction: R2dbcTransaction)
     override suspend fun findById(id: String): TaskResponse? = with(transaction) {
-        val uuid = UUID.fromString(id)
+        val uuid = id.toUuid().toJavaUuid()
         return TasksTable
             .leftJoin(ProjectsTable,
                 onColumn = { TasksTable.projectId },
@@ -87,36 +94,36 @@ internal class TaskRepositoryImpl : TaskRepository {
 
     context(transaction: R2dbcTransaction)
     override suspend fun findAllByProjectId(
-        projectId: UUID,
+        projectId: Uuid,
         page: Int,
         size: Int
     ): PaginatedResponse<TaskResponse> = with(transaction) {
         return queryWithPagination(
             limit = size,
             offset = page * size
-        ) { TasksTable.projectId eq projectId }
+        ) { TasksTable.projectId eq projectId.toJavaUuid() }
     }
 
     context(transaction: R2dbcTransaction)
     override suspend fun findAllByOwnerId(
-        ownerId: UUID,
+        ownerId: Uuid,
         page: Int,
         size: Int
     ): PaginatedResponse<TaskResponse> = with(transaction) {
         return queryWithPagination(
             limit = size,
             offset = page * size
-        ) { TasksTable.creatorId eq ownerId }
+        ) { TasksTable.creatorId eq ownerId.toJavaUuid() }
     }
 
     context(transaction: R2dbcTransaction)
     override suspend fun findAllByAssigneeId(
-        assigneeId: UUID,
+        assigneeId: Uuid,
         page: Int,
         size: Int,
         query: String?
     ): PaginatedResponse<TaskResponse> = with(transaction) {
-        var condition: Op<Boolean> = TasksTable.assigneeId eq assigneeId
+        var condition: Op<Boolean> = TasksTable.assigneeId eq assigneeId.toJavaUuid()
         if (!query.isNullOrBlank()) {
             val searchQuery = "%${query.lowercase()}%"
             condition = condition and (
@@ -134,15 +141,15 @@ internal class TaskRepositoryImpl : TaskRepository {
     }
 
     context(transaction: R2dbcTransaction)
-    override suspend fun findAllTasksForUser(userId: UUID, page: Int, size: Int): PaginatedResponse<TaskResponse> = with(transaction) {
+    override suspend fun findAllTasksForUser(userId: Uuid, page: Int, size: Int): PaginatedResponse<TaskResponse> = with(transaction) {
         return queryWithPagination(
             limit = size,
             offset = page * size
-        ) { (TasksTable.creatorId eq userId) or (TasksTable.assigneeId eq userId) }
+        ) { (TasksTable.creatorId eq userId.toJavaUuid()) or (TasksTable.assigneeId eq userId.toJavaUuid()) }
     }
 
     context(transaction: R2dbcTransaction)
-    override suspend fun getUserTaskProgress(userId: UUID): TaskProgressResponse = with(transaction) {
+    override suspend fun getUserTaskProgress(userId: Uuid): TaskProgressResponse = with(transaction) {
         val totalTasks = TasksTable.id.count().alias("total_tasks")
         val completedTasks = Case()
             .When(TasksTable.status eq TaskStatus.DONE, intLiteral(1))
@@ -152,7 +159,7 @@ internal class TaskRepositoryImpl : TaskRepository {
         
         val result = TasksTable
             .select(totalTasks, completedTasks)
-            .where { (TasksTable.creatorId eq userId) or (TasksTable.assigneeId eq userId) }
+            .where { (TasksTable.creatorId eq userId.toJavaUuid()) or (TasksTable.assigneeId eq userId.toJavaUuid()) }
             .singleOrNull()
 
 
@@ -167,14 +174,14 @@ internal class TaskRepositoryImpl : TaskRepository {
     override suspend fun create(
         title: String,
         description: String?,
-        projectId: UUID?,
-        assigneeId: UUID?,
-        creatorId: UUID,
+        projectId: Uuid?,
+        assigneeId: Uuid?,
+        creatorId: Uuid,
         status: TaskStatus,
         priority: Priority,
         dueDate: LocalDateTime?
     ): TaskResponse = with(transaction) {
-        val id = UUID.randomUUID()
+        val id = Uuid.randomV7().toJavaUuid()
 
        val row = TasksTable.insertReturning(
             listOf(TasksTable.createdAt, TasksTable.updatedAt)
@@ -182,9 +189,9 @@ internal class TaskRepositoryImpl : TaskRepository {
             it[TasksTable.id] = id
             it[TasksTable.title] = title
             it[TasksTable.description] = description
-            it[TasksTable.projectId] = projectId
-            it[TasksTable.assigneeId] = assigneeId
-            it[TasksTable.creatorId] = creatorId
+            it[TasksTable.projectId] = projectId?.toJavaUuid()
+            it[TasksTable.assigneeId] = assigneeId?.toJavaUuid()
+            it[TasksTable.creatorId] = creatorId.toJavaUuid()
             it[TasksTable.status] = status
             it[TasksTable.priority] = priority
             it[TasksTable.dueDate] = dueDate
