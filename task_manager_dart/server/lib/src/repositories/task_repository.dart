@@ -236,6 +236,9 @@ class TaskRepository {
     try {
       final priorityString = row['priority'] as String;
       switch (priorityString) {
+        case 'NONE':
+          priority = shared_models.Priority.none;
+          break;
         case 'LOW':
           priority = shared_models.Priority.low;
           break;
@@ -246,12 +249,12 @@ class TaskRepository {
           priority = shared_models.Priority.high;
           break;
         default:
-          print("Error mapping priority: $priorityString, using default Priority.low");
-          priority = shared_models.Priority.low;
+          print("Error mapping priority: $priorityString, using default Priority.none");
+          priority = shared_models.Priority.none;
       }
     } catch (e) {
-      print("Error mapping priority: ${row['priority']}, using default Priority.low");
-      priority = shared_models.Priority.low; // Default on error
+      print("Error mapping priority: ${row['priority']}, using default Priority.none");
+      priority = shared_models.Priority.none; // Default on error
     }
 
     return shared_models.TaskDto(
@@ -281,6 +284,8 @@ class TaskRepository {
 
   String _mapPriorityToString(shared_models.Priority priority) {
     switch (priority) {
+      case shared_models.Priority.none:
+        return 'NONE';
       case shared_models.Priority.low:
         return 'LOW';
       case shared_models.Priority.medium:
@@ -296,7 +301,8 @@ class TaskRepository {
       Sql.named('SELECT COUNT(*) as total FROM tasks WHERE assignee_id = @userId'),
       parameters: {'userId': userId},
     );
-    final totalTasks = totalResult.first['total'] as int? ?? 0;
+    final totalValue = totalResult.first.toColumnMap()['total'];
+    final totalTasks = (totalValue is int) ? totalValue : int.parse(totalValue.toString());
 
     // Count completed tasks (status = DONE)
     final completedResult = await _db.execute(
@@ -308,7 +314,8 @@ class TaskRepository {
         'status': 'DONE',
       },
     );
-    final completedTasks = completedResult.first['completed'] as int? ?? 0;
+    final completedValue = completedResult.first.toColumnMap()['completed'];
+    final completedTasks = (completedValue is int) ? completedValue : int.parse(completedValue.toString());
 
     return shared_models.TaskProgress(
       totalTasks: totalTasks,

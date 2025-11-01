@@ -53,7 +53,6 @@ This is a Kotlin Multiplatform project with these main modules:
 - `/composeApp` - Shared UI code using Compose Multiplatform (Android/iOS/Desktop)
 - `/server` - Ktor server application with REST API
 - `/shared` - Shared business logic between client and server
-- `/paging-compose` - Custom paging library for Compose
 - `/iosApp` - iOS-specific entry point
 
 ### UI Architecture Pattern
@@ -118,9 +117,9 @@ Uses Koin with feature-based modules:
 - Screen routes defined in `navigation/AppNavigation.kt`
 - Uses sealed classes for route definitions
 
-### Custom Paging
-- Custom paging implementation in `/paging-compose` module
-- Integration with Compose for pagination handling
+### Paging
+- Uses androidx.paging 3.4.0-alpha03 with official KMP support
+- LazyPagingItems integration with Compose for pagination handling
 - Works with the State-Action-Effect pattern
 
 ## Key Patterns to Follow

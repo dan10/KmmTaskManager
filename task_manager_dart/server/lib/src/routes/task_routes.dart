@@ -1,9 +1,9 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:uuid/uuid.dart';
 import '../constants/api_routes.dart';
 import '../middleware/auth_middleware.dart';
 import '../services/task_service.dart';
+import '../utils/uuid_utils.dart';
 import 'package:task_manager_shared/models.dart';
 import '../util/shelf_helpers.dart';
 import '../exceptions/custom_exceptions.dart';
@@ -213,7 +213,7 @@ class TaskRoutes {
     }
 
     // Convert to Task model for service layer
-    final taskId = const Uuid().v4();
+    final taskId = UuidUtils.generate();
     final task = TaskDto(
       id: taskId,
       title: createRequest.title,

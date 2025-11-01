@@ -1,6 +1,7 @@
 import 'package:postgres/postgres.dart';
 import 'package:task_manager_shared/models.dart' as shared_models;
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
+import '../utils/uuid_utils.dart';
 
 abstract class ProjectRepository {
   Future<List<shared_models.Project>> getProjects({
@@ -204,7 +205,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         VALUES (@id, @projectId, @userId, @assignedBy)
         '''),
         parameters: {
-          'id': '${project.id}-$memberId', // Generate unique ID
+          'id': UuidUtils.generate(), // Generate unique UUIDv7
           'projectId': project.id,
           'userId': memberId,
           'assignedBy': project.creatorId, // Creator assigns members
@@ -254,7 +255,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         VALUES (@id, @projectId, @userId, @assignedBy)
         '''),
         parameters: {
-          'id': '${project.id}-$memberId',
+          'id': UuidUtils.generate(), // Generate unique UUIDv7
           'projectId': project.id,
           'userId': memberId,
           'assignedBy': project.creatorId,
@@ -296,7 +297,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
           message: 'User $userId is already assigned to project $projectId.');
     }
 
-    final assignmentId = '$projectId-$userId-${DateTime.now().millisecondsSinceEpoch}';
+    final assignmentId = UuidUtils.generate(); // Generate unique UUIDv7
     await _db.execute(
       Sql.named('''
       INSERT INTO project_assignments (id, project_id, user_id, assigned_by)

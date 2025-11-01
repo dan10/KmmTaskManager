@@ -1,5 +1,6 @@
 package com.danioliveira.taskmanager.core.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -286,61 +287,64 @@ private fun TaskMetaChip(
     }
 }
 
-//@OptIn(ExperimentalUuidApi::class)
-//@Preview
-//@Composable
-//fun TaskItemPreview() {
-//    TaskItTheme {
-//        Column(
-//            modifier = Modifier
-//                .padding(16.dp)
-//                .fillMaxWidth(),
-//            verticalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            TaskItem(
-//                task = Task(
-//                    id = Uuid.random(),
-//                    title = "Urgent Meeting",
-//                    description = "Prepare presentation for client meeting",
-//                    status = TaskStatus.TODO,
-//                    priority = Priority.HIGH,
-//                    dueDate = LocalDateTime.parse("2024-11-25T00:00:00"),
-//                    projectName = "Website Redesign",
-//                    createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
-//                ),
-//                onClick = {},
-//                    onCheckedChange = {}
-//            )
-//
-//            TaskItem(
-//                task = Task(
-//                    id = Uuid.random(),
-//                    title = "Review Code",
-//                    description = "Review pull requests for feature branch",
-//                    status = TaskStatus.IN_PROGRESS,
-//                    priority = Priority.MEDIUM,
-//                    dueDate = LocalDateTime.parse("2024-11-26T00:00:00"),
-//                    projectName = "Website Redesign",
-//                    createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
-//                ),
-//                onClick = {},
-//                    onCheckedChange = {}
-//            )
-//
-//            TaskItem(
-//                task = Task(
-//                    id = Uuid.random(),
-//                    title = "Update Documentation",
-//                    description = "Update project wiki with new features",
-//                    status = TaskStatus.DONE,
-//                    priority = Priority.LOW,
-//                    dueDate = LocalDateTime.parse("2024-11-30T00:00:00"),
-//                    projectName = null,
-//                    createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
-//                ),
-//                onClick = {},
-//                    onCheckedChange = {}
-//            )
-//        }
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun TaskItemPreview() {
+    TaskItTheme {
+        SharedTransitionScope {
+            AnimatedVisibility(true) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TaskItem(
+                        task = Task(
+                            id = Uuid.random(),
+                            title = "Urgent Meeting",
+                            description = "Prepare presentation for client meeting",
+                            status = TaskStatus.TODO,
+                            priority = Priority.HIGH,
+                            dueDate = LocalDateTime.parse("2024-11-25T00:00:00"),
+                            projectName = "Website Redesign",
+                            createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
+                        ),
+                        onClick = {},
+                        onCheckedChange = {}
+                    )
+
+                    TaskItem(
+                        task = Task(
+                            id = Uuid.random(),
+                            title = "Review Code",
+                            description = "Review pull requests for feature branch",
+                            status = TaskStatus.IN_PROGRESS,
+                            priority = Priority.MEDIUM,
+                            dueDate = LocalDateTime.parse("2024-11-26T00:00:00"),
+                            projectName = "Website Redesign",
+                            createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
+                        ),
+                        onClick = {},
+                        onCheckedChange = {}
+                    )
+
+                    TaskItem(
+                        task = Task(
+                            id = Uuid.random(),
+                            title = "Update Documentation",
+                            description = "Update project wiki with new features",
+                            status = TaskStatus.DONE,
+                            priority = Priority.LOW,
+                            dueDate = LocalDateTime.parse("2024-11-30T00:00:00"),
+                            projectName = null,
+                            createdAt = LocalDateTime.parse("2024-11-20T10:00:00")
+                        ),
+                        onClick = {},
+                        onCheckedChange = {}
+                    )
+                }
+            }
+        }
+    }
+}
