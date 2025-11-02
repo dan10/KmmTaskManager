@@ -29,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.ui.components.TaskItCreateEditButtons
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorMessage
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
-import com.danioliveira.taskmanager.util.HapticFeedbackType
-import com.danioliveira.taskmanager.util.rememberHapticFeedback
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_delete
 import kmmtaskmanager.composeapp.generated.resources.edit_task
@@ -47,17 +45,13 @@ fun EditTaskScreen(
     onBack: () -> Unit,
     viewModel: EditTaskViewModel = koinViewModel(key = "edit-task-$taskId") { parametersOf(taskId) }
 ) {
-    val haptic = rememberHapticFeedback()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle effects
     EditTaskEffectHandler(
         viewModel = viewModel,
         snackbarHostState = snackbarHostState,
-        onTaskUpdated = {
-            haptic.performHapticFeedback(HapticFeedbackType.Success)
-            onBack()
-        },
+        onTaskUpdated = onBack,
         onTaskDeleted = onBack
     )
 
@@ -73,7 +67,6 @@ fun EditTaskScreen(
                     onNavigateBack = onBack,
                     actions = {
                         IconButton(onClick = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.Error)
                             viewModel.handleActions(EditTaskAction.DeleteTask) 
                         }) {
                             Icon(
@@ -109,17 +102,14 @@ fun EditTaskScreen(
                         priorityDropdownExpanded = priorityDropdownExpanded,
                         onPriorityDropdownExpandedChange = { priorityDropdownExpanded = it },
                         onPrioritySelected = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.Click)
                             viewModel.handleActions(EditTaskAction.SetPriority(it)) 
                         },
                         statusDropdownExpanded = statusDropdownExpanded,
                         onStatusDropdownExpandedChange = { statusDropdownExpanded = it },
                         onStatusSelected = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.Click)
                             viewModel.handleActions(EditTaskAction.SetStatus(it)) 
                         },
                         onDateSelected = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.Click)
                             viewModel.handleActions(EditTaskAction.SetDate(it)) 
                         }
                     )
@@ -131,12 +121,8 @@ fun EditTaskScreen(
                         isCreating = false,
                         isLoading = state.isLoading,
                         isButtonEnabled = state.isButtonEnabled,
-                        onCancel = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Click)
-                            onBack()
-                        },
+                        onCancel = onBack,
                         onCreateOrUpdate = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Success)
                             viewModel.handleActions(EditTaskAction.UpdateTask)
                         }
                     )

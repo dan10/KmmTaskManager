@@ -43,9 +43,6 @@ import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementKey
 import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementType
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
-import com.danioliveira.taskmanager.util.HapticFeedback
-import com.danioliveira.taskmanager.util.HapticFeedbackType
-import com.danioliveira.taskmanager.util.rememberHapticFeedback
 import com.danioliveira.taskmanager.utils.PriorityFormatter
 import com.danioliveira.taskmanager.utils.TaskStatusFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -104,8 +101,6 @@ private fun TaskItemContent(
     showProjectName: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    val haptic = rememberHapticFeedback()
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -123,7 +118,6 @@ private fun TaskItemContent(
 
         TaskItemCheckbox(
             state = state,
-            haptic = haptic,
             onCheckedChange = onCheckedChange
         )
     }
@@ -313,19 +307,11 @@ private fun TaskProjectChip(projectName: String) {
 @Composable
 private fun TaskItemCheckbox(
     state: TaskItemState,
-    haptic: HapticFeedback,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Checkbox(
         checked = state.task.status == TaskStatus.DONE,
-        onCheckedChange = { isChecked ->
-            if (isChecked) {
-                haptic.performHapticFeedback(HapticFeedbackType.Success)
-            } else {
-                haptic.performHapticFeedback(HapticFeedbackType.Click)
-            }
-            onCheckedChange(isChecked)
-        },
+        onCheckedChange = onCheckedChange,
         colors = CheckboxDefaults.colors(
             checkedColor = state.colors.indicator,
             uncheckedColor = Color(0xFFD1D5DB),
