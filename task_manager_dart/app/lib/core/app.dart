@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_app/core/routing/app_router.dart';
+import 'package:task_manager_app/core/theme/theme.dart';
 
 import '../core/data/local/secure_storage.dart';
-import 'theme/app_theme.dart';
 
 class TaskManagerApp extends StatelessWidget {
   const TaskManagerApp({super.key});
@@ -14,8 +14,8 @@ class TaskManagerApp extends StatelessWidget {
     
     return MaterialApp.router(
       title: 'Task Manager',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: TaskItTheme.light(),
+      darkTheme: TaskItTheme.dark(),
       themeMode: ThemeMode.system,
       routerConfig: createAppRouter(secureStorage),
       debugShowCheckedModeBanner: false,
