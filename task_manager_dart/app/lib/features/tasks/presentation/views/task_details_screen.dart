@@ -308,7 +308,7 @@ class _TaskHeaderCard extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _TaskIndicator(),
+                      _TaskIndicator(priority: task.priority),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -342,14 +342,24 @@ class _TaskHeaderCard extends StatelessWidget {
 }
 
 class _TaskIndicator extends StatelessWidget {
-  const _TaskIndicator();
+  final Priority priority;
+
+  const _TaskIndicator({required this.priority});
 
   @override
   Widget build(BuildContext context) {
+    final ext = context.extColors;
+    final priorityColor = switch (priority) {
+      Priority.none => ext.priorityNoneText,
+      Priority.high => ext.priorityHighText,
+      Priority.medium => ext.priorityMediumText,
+      Priority.low => ext.priorityLowText,
+    };
+    
     return Container(
       width: 4,
       decoration: BoxDecoration(
-        color: context.extColors.priorityMediumText,
+        color: priorityColor,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           bottomLeft: Radius.circular(12),
@@ -391,6 +401,14 @@ class _TaskHeaderMetadata extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final ext = context.extColors;
+    final priorityColor = switch (priority) {
+      Priority.none => ext.priorityNoneText,
+      Priority.high => ext.priorityHighText,
+      Priority.medium => ext.priorityMediumText,
+      Priority.low => ext.priorityLowText,
+    };
+    
     return Wrap(
       spacing: 8,
       runSpacing: 4,
@@ -406,7 +424,8 @@ class _TaskHeaderMetadata extends StatelessWidget {
           l10n.taskPriorityText(_priorityLabel(priority, l10n)),
           style: TextStyle(
             fontSize: 14,
-            color: context.extColors.textSecondary,
+            color: priorityColor,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -548,6 +567,7 @@ class _TaskInformationCard extends StatelessWidget {
               icon: Icons.flag_outlined,
               label: l10n.taskPriorityLabel,
               value: _priorityLabel(task.priority, l10n),
+              valueColor: _getPriorityColor(context, task.priority),
             ),
               ],
             ),
@@ -619,11 +639,13 @@ class _TaskInfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final Color? valueColor;
 
   const _TaskInfoRow({
     required this.icon,
     required this.label,
     required this.value,
+    this.valueColor,
   });
 
   @override
@@ -653,7 +675,7 @@ class _TaskInfoRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: context.extColors.textPrimary,
+              color: valueColor ?? context.extColors.textPrimary,
             ),
           ),
         ),
@@ -722,6 +744,16 @@ String _priorityLabel(Priority priority, AppLocalizations l10n) {
     Priority.high => l10n.taskPriorityHigh,
     Priority.medium => l10n.taskPriorityMedium,
     Priority.low => l10n.taskPriorityLow,
+  };
+}
+
+Color _getPriorityColor(BuildContext context, Priority priority) {
+  final ext = context.extColors;
+  return switch (priority) {
+    Priority.none => ext.priorityNoneText,
+    Priority.high => ext.priorityHighText,
+    Priority.medium => ext.priorityMediumText,
+    Priority.low => ext.priorityLowText,
   };
 }
 
