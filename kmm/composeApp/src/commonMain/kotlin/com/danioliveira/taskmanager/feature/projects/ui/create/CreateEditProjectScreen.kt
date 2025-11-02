@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.ui.project.create
+package com.danioliveira.taskmanager.feature.projects.ui.create
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,8 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.ui.components.TaskItCreateEditButtons
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorMessage
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
-import com.danioliveira.taskmanager.core.ui.components.TrackItInputField
-import com.danioliveira.taskmanager.feature.projects.ui.create.create.CreateEditProjectViewModel
+import com.danioliveira.taskmanager.core.ui.components.TaskItInputField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.create_project
@@ -191,7 +190,7 @@ private fun CreateEditProjectScreen(
 private fun ProjectFormFields(
     state: CreateEditProjectState
 ) {
-    TrackItInputField(
+    TaskItInputField(
         state = state.projectName,
         label = stringResource(Res.string.project_name_label),
         isError = state.projectNameHasError,
@@ -202,7 +201,7 @@ private fun ProjectFormFields(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    TrackItInputField(
+    TaskItInputField(
         state = state.description,
         label = stringResource(Res.string.project_description_label),
         isError = false,

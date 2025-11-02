@@ -6,9 +6,17 @@
     <string name="content_description_show_password_icon">Show password</string>
     <string name="content_description_hide_password_icon">Hide password</string>
     <string name="content_description_back">Back</string>
+    <string name="content_description_navigate_back">Navigate back</string>
     <string name="content_description_delete">Delete</string>
-    <string name="content_description_add_task">Add Task</string>
+    <string name="content_description_add_task">Add new task</string>
+    <string name="content_description_add_project">Add new project</string>
     <string name="content_description_search">Search</string>
+    <string name="content_description_close">Close</string>
+    <string name="content_description_close_search">Close search</string>
+    <string name="content_description_select_priority">Select priority</string>
+    <string name="content_description_select_status">Select status</string>
+    <string name="content_description_select_date">Select date</string>
+    <string name="content_description_dropdown_arrow">Dropdown arrow</string>
 
     <!-- LoginScreen strings -->
     <string name="title_without_account">Don't have an account?</string>

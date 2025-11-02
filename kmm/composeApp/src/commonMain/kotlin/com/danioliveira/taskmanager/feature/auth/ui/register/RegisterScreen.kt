@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.ui.components.TaskItPrimaryActionButton
-import com.danioliveira.taskmanager.core.ui.components.TrackItInputField
-import com.danioliveira.taskmanager.core.ui.components.TrackItPasswordField
+import com.danioliveira.taskmanager.core.ui.components.TaskItInputField
+import com.danioliveira.taskmanager.core.ui.components.TaskItPasswordField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.app_name
@@ -146,7 +146,7 @@ private fun RegisterForm(
     buttonEnabled: () -> Boolean,
     onRegisterClick: () -> Unit
 ) {
-    TrackItInputField(
+    TaskItInputField(
         state = name,
         label = stringResource(Res.string.title_name),
         enabled = !isLoading,
@@ -155,7 +155,7 @@ private fun RegisterForm(
         errorMessage = stringResource(Res.string.title_name_error),
     )
 
-    TrackItInputField(
+    TaskItInputField(
         state = email,
         label = stringResource(Res.string.title_email),
         enabled = !isLoading,
@@ -164,7 +164,7 @@ private fun RegisterForm(
         errorMessage = stringResource(Res.string.title_email_error),
     )
 
-    TrackItPasswordField(
+    TaskItPasswordField(
         state = password,
         label = stringResource(Res.string.title_password),
         enabled = !isLoading,
@@ -172,7 +172,7 @@ private fun RegisterForm(
         errorMessage = stringResource(Res.string.title_password_error),
     )
 
-    TrackItPasswordField(
+    TaskItPasswordField(
         state = confirmPassword,
         label = stringResource(Res.string.title_confirm_password),
         enabled = !isLoading,

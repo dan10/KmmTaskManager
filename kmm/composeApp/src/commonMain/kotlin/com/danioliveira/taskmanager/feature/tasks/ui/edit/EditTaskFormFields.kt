@@ -14,7 +14,7 @@ import com.danioliveira.taskmanager.core.ui.components.DatePickerFieldToModal
 import com.danioliveira.taskmanager.core.ui.components.TaskItFieldLabel
 import com.danioliveira.taskmanager.core.ui.components.TaskItPriorityDropdown
 import com.danioliveira.taskmanager.core.ui.components.TaskItStatusDropdown
-import com.danioliveira.taskmanager.core.ui.components.TrackItInputField
+import com.danioliveira.taskmanager.core.ui.components.TaskItInputField
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.project_name_label
 import kmmtaskmanager.composeapp.generated.resources.task_description_label
@@ -36,23 +36,51 @@ fun EditTaskFormFields(
     onStatusSelected: (TaskStatus) -> Unit,
     onDateSelected: (LocalDateTime) -> Unit
 ) {
-    // Project field (if project is associated)
     if (state.projectName != null) {
-        TaskItFieldLabel(stringResource(Res.string.project_name_label))
-
-        OutlinedTextField(
-            value = state.projectName,
-            onValueChange = { /* Read-only field */ },
-            readOnly = true,
-            enabled = false,
-            modifier = Modifier.fillMaxWidth()
-        )
-
+        ProjectNameField(state.projectName)
         Spacer(modifier = Modifier.height(16.dp))
     }
 
-    // Title field
-    TrackItInputField(
+    TitleField(state)
+    Spacer(modifier = Modifier.height(16.dp))
+
+    DescriptionField(state)
+    Spacer(modifier = Modifier.height(16.dp))
+
+    PriorityField(
+        state = state,
+        priorityDropdownExpanded = priorityDropdownExpanded,
+        onPriorityDropdownExpandedChange = onPriorityDropdownExpandedChange,
+        onPrioritySelected = onPrioritySelected
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+
+    StatusField(
+        state = state,
+        statusDropdownExpanded = statusDropdownExpanded,
+        onStatusDropdownExpandedChange = onStatusDropdownExpandedChange,
+        onStatusSelected = onStatusSelected
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+
+    DueDateField(state, onDateSelected)
+}
+
+@Composable
+private fun ProjectNameField(projectName: String) {
+    TaskItFieldLabel(stringResource(Res.string.project_name_label))
+    OutlinedTextField(
+        value = projectName,
+        onValueChange = { /* Read-only field */ },
+        readOnly = true,
+        enabled = false,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun TitleField(state: EditTaskState) {
+    TaskItInputField(
         state = state.title,
         label = stringResource(Res.string.task_title_label),
         isError = state.titleHasError,
@@ -60,11 +88,11 @@ fun EditTaskFormFields(
         enabled = !state.isLoading,
         lineLimits = TextFieldLineLimits.SingleLine
     )
+}
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Description field
-    TrackItInputField(
+@Composable
+private fun DescriptionField(state: EditTaskState) {
+    TaskItInputField(
         state = state.description,
         label = stringResource(Res.string.task_description_label),
         isError = false,
@@ -72,34 +100,42 @@ fun EditTaskFormFields(
         enabled = !state.isLoading,
         lineLimits = TextFieldLineLimits.Default
     )
+}
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Priority dropdown
+@Composable
+private fun PriorityField(
+    state: EditTaskState,
+    priorityDropdownExpanded: Boolean,
+    onPriorityDropdownExpandedChange: (Boolean) -> Unit,
+    onPrioritySelected: (Priority) -> Unit
+) {
     TaskItFieldLabel(stringResource(Res.string.task_priority_label))
-
     TaskItPriorityDropdown(
         currentPriority = state.priority,
         expanded = priorityDropdownExpanded,
         onExpandedChange = onPriorityDropdownExpandedChange,
         onPrioritySelected = onPrioritySelected
     )
+}
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Status dropdown
+@Composable
+private fun StatusField(
+    state: EditTaskState,
+    statusDropdownExpanded: Boolean,
+    onStatusDropdownExpandedChange: (Boolean) -> Unit,
+    onStatusSelected: (TaskStatus) -> Unit
+) {
     TaskItFieldLabel(stringResource(Res.string.task_status_label))
-
     TaskItStatusDropdown(
         currentStatus = state.status,
         expanded = statusDropdownExpanded,
         onExpandedChange = onStatusDropdownExpandedChange,
         onStatusSelected = onStatusSelected
     )
+}
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Due date field
+@Composable
+private fun DueDateField(state: EditTaskState, onDateSelected: (LocalDateTime) -> Unit) {
     DatePickerFieldToModal(
         selectedDate = state.dueDate,
         onDateSelected = onDateSelected,

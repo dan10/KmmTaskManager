@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
@@ -47,6 +48,10 @@ import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.app_name
+import kmmtaskmanager.composeapp.generated.resources.content_description_close
+import kmmtaskmanager.composeapp.generated.resources.content_description_close_search
+import kmmtaskmanager.composeapp.generated.resources.content_description_navigate_back
+import kmmtaskmanager.composeapp.generated.resources.content_description_search
 import kmmtaskmanager.composeapp.generated.resources.global_search_placeholder
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -72,7 +77,6 @@ fun TaskItTopAppBar(
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-
     val isSearchActive = searchState?.isActive == true
 
     LaunchedEffect(isSearchActive) {
@@ -85,93 +89,150 @@ fun TaskItTopAppBar(
 
     TopAppBar(
         modifier = modifier,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-            actionIconContentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        navigationIcon = {
-            if (showNavigationIcon && onNavigateBack != null) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            }
-        },
-        title = {
-            AnimatedContent(
-                targetState = isSearchActive,
-                transitionSpec = {
-                    if (targetState) {
-                        (slideInHorizontally { it } + fadeIn()) togetherWith
-                                (slideOutHorizontally { -it } + fadeOut())
-                    } else {
-                        (slideInHorizontally { -it } + fadeIn()) togetherWith
-                                (slideOutHorizontally { it } + fadeOut())
-                    }
-                },
-                label = "TaskItTopAppBarTitle"
-            ) { active ->
-                if (active && searchState != null) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester),
-                        value = searchState.query,
-                        onValueChange = searchState.onQueryChange,
-                        placeholder = { Text(text = searchState.placeholder) },
-                        singleLine = true,
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                        },
-                        trailingIcon = {
-                            if (searchState.query.isNotEmpty()) {
-                                IconButton(onClick = { searchState.onQueryChange("") }) {
-                                    Icon(imageVector = Icons.Default.Close, contentDescription = null)
-                                }
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
-                    )
-                } else {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
+        colors = topAppBarColors(),
+        navigationIcon = { NavigationIcon(showNavigationIcon, onNavigateBack) },
+        title = { 
+            TopAppBarTitle(
+                title = title,
+                isSearchActive = isSearchActive,
+                searchState = searchState,
+                focusRequester = focusRequester,
+                focusManager = focusManager
+            )
         },
         actions = {
             actions()
             if (searchState != null) {
-                AnimatedContent(
-                    targetState = isSearchActive,
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "TaskItTopAppBarSearchIcon"
-                ) { active ->
-                    if (active) {
-                        IconButton(onClick = {
-                            if (searchState.enableClearOnClose) {
-                                searchState.onQueryChange("")
-                            }
-                            searchState.onActiveChange(false)
-                        }) {
-                            Icon(imageVector = Icons.Default.Close, contentDescription = null)
-                        }
-                    } else {
-                        IconButton(onClick = { searchState.onActiveChange(true) }) {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                        }
-                    }
-                }
+                SearchActionIcon(isSearchActive, searchState)
             }
         }
     )
+}
+
+@Composable
+private fun topAppBarColors() = TopAppBarDefaults.topAppBarColors(
+    containerColor = MaterialTheme.colorScheme.surface,
+    titleContentColor = MaterialTheme.colorScheme.onSurface,
+    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+    actionIconContentColor = MaterialTheme.colorScheme.onSurface
+)
+
+@Composable
+private fun NavigationIcon(
+    showNavigationIcon: Boolean,
+    onNavigateBack: (() -> Unit)?
+) {
+    if (showNavigationIcon && onNavigateBack != null) {
+        IconButton(onClick = onNavigateBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.content_description_navigate_back)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun TopAppBarTitle(
+    title: String,
+    isSearchActive: Boolean,
+    searchState: TaskItSearchState?,
+    focusRequester: FocusRequester,
+    focusManager: FocusManager
+) {
+    AnimatedContent(
+        targetState = isSearchActive,
+        transitionSpec = {
+            if (targetState) {
+                (slideInHorizontally { it } + fadeIn()) togetherWith
+                        (slideOutHorizontally { -it } + fadeOut())
+            } else {
+                (slideInHorizontally { -it } + fadeIn()) togetherWith
+                        (slideOutHorizontally { it } + fadeOut())
+            }
+        },
+        label = "TaskItTopAppBarTitle"
+    ) { active ->
+        if (active && searchState != null) {
+            SearchTextField(searchState, focusRequester, focusManager)
+        } else {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchTextField(
+    searchState: TaskItSearchState,
+    focusRequester: FocusRequester,
+    focusManager: FocusManager
+) {
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
+        value = searchState.query,
+        onValueChange = searchState.onQueryChange,
+        placeholder = { Text(text = searchState.placeholder) },
+        singleLine = true,
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = stringResource(Res.string.content_description_search)
+            )
+        },
+        trailingIcon = {
+            if (searchState.query.isNotEmpty()) {
+                IconButton(onClick = { searchState.onQueryChange("") }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(Res.string.content_description_close)
+                    )
+                }
+            }
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
+    )
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun SearchActionIcon(
+    isSearchActive: Boolean,
+    searchState: TaskItSearchState
+) {
+    AnimatedContent(
+        targetState = isSearchActive,
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        label = "TaskItTopAppBarSearchIcon"
+    ) { active ->
+        if (active) {
+            IconButton(onClick = {
+                if (searchState.enableClearOnClose) {
+                    searchState.onQueryChange("")
+                }
+                searchState.onActiveChange(false)
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(Res.string.content_description_close_search)
+                )
+            }
+        } else {
+            IconButton(onClick = { searchState.onActiveChange(true) }) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(Res.string.content_description_search)
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -195,7 +256,10 @@ fun PrincipalTaskItTopAppBar(
             },
             actions = {
                 IconButton(onClick = { showSearch = !showSearch }) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(Res.string.content_description_search)
+                    )
                 }
             }
         )
@@ -210,11 +274,17 @@ fun PrincipalTaskItTopAppBar(
                 state = textFieldState,
                 placeholder = { Text(text = stringResource(Res.string.global_search_placeholder)) },
                 leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(Res.string.content_description_search)
+                    )
                 },
                 trailingIcon = {
                     IconButton(onClick = { showSearch = false }) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(Res.string.content_description_close)
+                        )
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

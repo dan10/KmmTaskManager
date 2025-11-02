@@ -38,14 +38,26 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/**
+ * Date picker field that opens a modal date picker dialog.
+ *
+ * Displays a read-only text field that opens a Material3 date picker
+ * dialog when clicked. Manages modal visibility state internally.
+ *
+ * @param selectedDate Currently selected date, or null if none selected
+ * @param onDateSelected Callback invoked when a date is selected
+ * @param modifier Modifier to be applied to the field
+ * @param label Label text for the field
+ * @param placeholder Placeholder text when no date is selected
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerFieldToModal(
+    selectedDate: LocalDateTime?,
+    onDateSelected: (LocalDateTime) -> Unit,
     modifier: Modifier = Modifier,
     label: String = stringResource(Res.string.task_due_date_label),
-    placeholder: String = stringResource(Res.string.date_picker_placeholder),
-    selectedDate: LocalDateTime? = null,
-    onDateSelected: (LocalDateTime) -> Unit
+    placeholder: String = stringResource(Res.string.date_picker_placeholder)
 ) {
     var showModal by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }

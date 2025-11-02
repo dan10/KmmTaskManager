@@ -7,7 +7,7 @@ import com.danioliveira.taskmanager.feature.projects.domain.usecase.CreateEditPr
 import com.danioliveira.taskmanager.feature.projects.domain.usecase.GetProjectDetailsUseCase
 import com.danioliveira.taskmanager.feature.projects.domain.usecase.GetProjectTasksUseCase
 import com.danioliveira.taskmanager.feature.projects.domain.usecase.GetProjectsUseCase
-import com.danioliveira.taskmanager.feature.projects.ui.create.create.CreateEditProjectViewModel
+import com.danioliveira.taskmanager.feature.projects.ui.create.CreateEditProjectViewModel
 import com.danioliveira.taskmanager.feature.projects.ui.details.ProjectDetailsViewModel
 import com.danioliveira.taskmanager.feature.projects.ui.list.ProjectsViewModel
 import org.koin.core.module.dsl.bind

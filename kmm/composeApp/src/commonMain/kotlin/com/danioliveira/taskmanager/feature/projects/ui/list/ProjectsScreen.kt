@@ -51,8 +51,9 @@ import com.danioliveira.taskmanager.core.domain.model.Project
 import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.ProjectItemSkeleton
 import com.danioliveira.taskmanager.core.ui.components.TaskItEmptyState
+import com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
 import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
-import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectBottomSheet
+import com.danioliveira.taskmanager.feature.projects.ui.create.CreateEditProjectBottomSheet
 import com.danioliveira.taskmanager.ui.projects.ProjectsAction
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -234,11 +235,7 @@ private fun ProjectsList(
 @Composable
 fun ProjectCard(project: Project, onClick: () -> Unit) {
     val extendedColors = TaskItThemeExt.colors
-    val progressPercentage = if (project.total > 0) {
-        ((project.completed.toFloat() / project.total) * 100).toInt()
-    } else {
-        0
-    }
+    val progressPercentage = calculateProgressPercentage(project.completed, project.total)
 
     Card(
         modifier = Modifier
@@ -250,64 +247,106 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
             containerColor = extendedColors.surfaceCard
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            // Project name
-            Text(
-                text = project.name,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = extendedColors.textPrimary
-            )
-            
-            // Project description (if available)
-            if (!project.description.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = project.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = extendedColors.textSecondary
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Progress text and percentage
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${project.completed} of ${project.total} tasks",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = extendedColors.textSecondary
-                )
-                Text(
-                    text = "$progressPercentage%",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = extendedColors.textPrimary
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Progress bar
-            LinearProgressIndicator(
-                progress = { if (project.total > 0) project.completed.toFloat() / project.total else 0f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = extendedColors.trackNeutral,
-                strokeCap = StrokeCap.Round,
-            )
-        }
+        ProjectCardContent(
+            project = project,
+            progressPercentage = progressPercentage,
+            extendedColors = extendedColors
+        )
     }
+}
+
+private fun calculateProgressPercentage(completed: Int, total: Int): Int {
+    return if (total > 0) {
+        ((completed.toFloat() / total) * 100).toInt()
+    } else {
+        0
+    }
+}
+
+@Composable
+private fun ProjectCardContent(
+    project: Project,
+    progressPercentage: Int,
+    extendedColors: TaskItExtendedColors
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp)
+    ) {
+        ProjectHeader(project, extendedColors)
+        
+        if (!project.description.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            ProjectDescription(project.description, extendedColors)
+        }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        ProjectProgress(
+            completed = project.completed,
+            total = project.total,
+            progressPercentage = progressPercentage,
+            extendedColors = extendedColors
+        )
+    }
+}
+
+@Composable
+private fun ProjectHeader(project: Project, extendedColors: TaskItExtendedColors) {
+    Text(
+        text = project.name,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+        color = extendedColors.textPrimary
+    )
+}
+
+@Composable
+private fun ProjectDescription(description: String, extendedColors: TaskItExtendedColors) {
+    Text(
+        text = description,
+        style = MaterialTheme.typography.bodyMedium,
+        color = extendedColors.textSecondary
+    )
+}
+
+@Composable
+private fun ProjectProgress(
+    completed: Int,
+    total: Int,
+    progressPercentage: Int,
+    extendedColors: TaskItExtendedColors
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$completed of $total tasks",
+            style = MaterialTheme.typography.bodyMedium,
+            color = extendedColors.textSecondary
+        )
+        Text(
+            text = "$progressPercentage%",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = extendedColors.textPrimary
+        )
+    }
+    
+    Spacer(modifier = Modifier.height(8.dp))
+    
+    LinearProgressIndicator(
+        progress = { if (total > 0) completed.toFloat() / total else 0f },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(8.dp),
+        color = MaterialTheme.colorScheme.primary,
+        trackColor = extendedColors.trackNeutral,
+        strokeCap = StrokeCap.Round,
+    )
 }
 
 @Preview

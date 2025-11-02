@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.ui.components.TaskItPrimaryActionButton
-import com.danioliveira.taskmanager.core.ui.components.TrackItInputField
-import com.danioliveira.taskmanager.core.ui.components.TrackItPasswordField
+import com.danioliveira.taskmanager.core.ui.components.TaskItInputField
+import com.danioliveira.taskmanager.core.ui.components.TaskItPasswordField
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.app_name
@@ -114,7 +114,7 @@ fun LoginScreen(
                     style = MaterialTheme.typography.headlineLarge
                 )
 
-                TrackItInputField(
+                TaskItInputField(
                     state = email,
                     label = stringResource(Res.string.title_email),
                     lineLimits = TextFieldLineLimits.SingleLine,
@@ -123,7 +123,7 @@ fun LoginScreen(
                     errorMessage = stringResource(Res.string.title_email_error)
                 )
 
-                TrackItPasswordField(
+                TaskItPasswordField(
                     modifier = Modifier.fillMaxWidth(),
                     state = password,
                     label = stringResource(Res.string.title_password),

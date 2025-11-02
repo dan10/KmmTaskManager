@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.feature.projects.ui.create.create
+package com.danioliveira.taskmanager.feature.projects.ui.create
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.SavedStateHandle
@@ -7,8 +7,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.danioliveira.taskmanager.feature.projects.domain.usecase.CreateEditProjectUseCase
 import com.danioliveira.taskmanager.navigation.Screen
-import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectAction
-import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectState
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.project_create_error
 import kmmtaskmanager.composeapp.generated.resources.project_load_error
@@ -35,7 +33,7 @@ class CreateEditProjectViewModel(
 
     var onProjectCreated: () -> Unit = {}
     var onProjectUpdated: () -> Unit = {}
-    
+
     private var isInitialized = false
 
     init {

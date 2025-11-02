@@ -51,6 +51,7 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.content_description_add_task
 import kmmtaskmanager.composeapp.generated.resources.empty_task_list
 import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
 import kmmtaskmanager.composeapp.generated.resources.tasks_empty_subtitle
@@ -203,41 +204,6 @@ private fun TaskList(
     }
 }
 
-//@Preview
-//@Composable
-//private fun TasksScreenV2Preview() {
-//    val fakeData = List(10) { index ->
-//        Task(
-//            id = Uuid.parse("00000000-0000-0000-0000-00000000000$index"),
-//            title = "Preview Task $index",
-//            description = "This is a preview task description",
-//            projectName = "Preview Project",
-//            status = if (index < 3) TaskStatus.DONE else TaskStatus.TODO,
-//            priority = when (index % 3) {
-//                0 -> Priority.HIGH
-//                1 -> Priority.MEDIUM
-//                else -> Priority.LOW
-//            },
-//            dueDate = LocalDateTime.parse("2023-12-31T00:00:00"),
-//            createdAt = LocalDateTime.parse("2023-01-01T00:00:00")
-//        )
-//    }
-//    // create pagingData from a list of fake data
-//    val pagingData = PagingData.from(fakeData)
-//    // pass pagingData containing fake data to a MutableStateFlow
-//    val fakeDataFlow = MutableStateFlow(pagingData)
-//
-//    TaskItTheme {
-//        TasksContent(
-//            pagingItems = fakeDataFlow.collectAsLazyPagingItems(),
-//            state = TasksState(
-//                totalTasks = 10,
-//                completedTasks = 3
-//            ),
-//            onAction = {}
-//        )
-//    }
-//}
 @Composable
 fun EmptyTasksList() {
     Column(
@@ -311,7 +277,7 @@ fun AddTaskButton(
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add Task",
+                contentDescription = stringResource(Res.string.content_description_add_task),
                 tint = MaterialTheme.colorScheme.onPrimary
             )
         }

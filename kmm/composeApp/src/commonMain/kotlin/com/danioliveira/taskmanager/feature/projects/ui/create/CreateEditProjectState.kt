@@ -1,4 +1,4 @@
-package com.danioliveira.taskmanager.ui.project.create
+package com.danioliveira.taskmanager.feature.projects.ui.create
 
 import androidx.compose.foundation.text.input.TextFieldState
 
