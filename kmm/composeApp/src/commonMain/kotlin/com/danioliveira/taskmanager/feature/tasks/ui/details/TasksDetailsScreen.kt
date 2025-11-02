@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.core.domain.model.toTaskPriority
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorState
 import com.danioliveira.taskmanager.core.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
@@ -243,6 +244,8 @@ private fun TaskHeaderCard(
     priority: Priority,
     status: TaskStatus
 ) {
+    val priorityColor = priority.toTaskPriority().color
+    
     with(sts) {
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -256,12 +259,12 @@ private fun TaskHeaderCard(
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Yellow left border
+                // Priority color left border
                 Box(
                     modifier = Modifier
                         .width(4.dp)
                         .height(100.dp)
-                        .background(Color(0xFFFDB022))
+                        .background(priorityColor)
                         .sharedElement(
                             rememberSharedContentState(key = "task_indicator_$taskId"),
                             animatedVisibilityScope = avs

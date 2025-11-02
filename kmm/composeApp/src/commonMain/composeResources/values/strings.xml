@@ -184,4 +184,10 @@
     <string name="task_edit_title">Edit Task</string>
     <string name="task_edit_save">Save Changes</string>
     <string name="task_edit_cancel">Cancel</string>
+    
+    <!-- Task Info Chip strings -->
+    <string name="task_chip_due_date" >📅 %1$s</string>
+    <string name="task_chip_due_date_overdue">⚠️ %1$s</string>
+    <string name="task_chip_priority">🏴 %1$s</string>
+    <string name="task_chip_project">📁 %1$s</string>
 </resources>
