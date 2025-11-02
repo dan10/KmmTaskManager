@@ -46,17 +46,18 @@ fun TaskItPriorityBadge(
     modifier: Modifier = Modifier
 ) {
     val taskPriority = priority.toTaskPriority()
+    val priorityColors = taskPriority.getColors()
 
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
-            .background(taskPriority.backgroundColor)
+            .background(priorityColors.container)
             .padding(horizontal = 8.dp, vertical = 2.dp)
     ) {
         Text(
             text = PriorityFormatter.formatPriority(priority),
             style = MaterialTheme.typography.labelSmall,
-            color = taskPriority.color
+            color = priorityColors.text
         )
     }
 }

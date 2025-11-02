@@ -5,6 +5,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.danioliveira.taskmanager.core.ui.theme.LocalTaskItExtendedColors
+import com.danioliveira.taskmanager.core.ui.theme.extendedDarkColors
+import com.danioliveira.taskmanager.core.ui.theme.extendedLightColors
 import com.danioliveira.taskmanager.core.ui.theme.backgroundDark
 import com.danioliveira.taskmanager.core.ui.theme.backgroundLight
 import com.danioliveira.taskmanager.core.ui.theme.errorContainerDark
@@ -158,11 +162,15 @@ fun TaskItTheme(
     // Dynamic color is available on Android 12+
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) darkScheme else lightScheme,
-        typography = AppTypography,
-        shapes = TaskItShapes,
-        content = content
-    )
+    val extendedColors = if (darkTheme) extendedDarkColors() else extendedLightColors()
+    
+    CompositionLocalProvider(LocalTaskItExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) darkScheme else lightScheme,
+            typography = AppTypography,
+            shapes = TaskItShapes,
+            content = content
+        )
+    }
 }
 

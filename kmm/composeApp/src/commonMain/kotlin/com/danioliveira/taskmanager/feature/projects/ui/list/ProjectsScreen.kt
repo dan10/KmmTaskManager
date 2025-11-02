@@ -15,13 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -30,7 +27,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -40,14 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -57,20 +51,15 @@ import com.danioliveira.taskmanager.core.domain.model.Project
 import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.ProjectItemSkeleton
 import com.danioliveira.taskmanager.core.ui.components.TaskItEmptyState
-import com.danioliveira.taskmanager.core.ui.components.TaskItSmallLoadingIndicator
-import com.danioliveira.taskmanager.core.ui.components.TrackItInputField
+import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
 import com.danioliveira.taskmanager.ui.project.create.CreateEditProjectBottomSheet
 import com.danioliveira.taskmanager.ui.projects.ProjectsAction
-import com.danioliveira.taskmanager.ui.projects.ProjectsState
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
-import kmmtaskmanager.composeapp.generated.resources.content_description_search
 import kmmtaskmanager.composeapp.generated.resources.ic_folder
 import kmmtaskmanager.composeapp.generated.resources.projects_add
-import kmmtaskmanager.composeapp.generated.resources.projects_all
 import kmmtaskmanager.composeapp.generated.resources.projects_empty_subtitle
 import kmmtaskmanager.composeapp.generated.resources.projects_empty_title
-import kmmtaskmanager.composeapp.generated.resources.projects_search_placeholder
 import kmmtaskmanager.composeapp.generated.resources.projects_title
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.jetbrains.compose.resources.painterResource
@@ -244,6 +233,7 @@ private fun ProjectsList(
 
 @Composable
 fun ProjectCard(project: Project, onClick: () -> Unit) {
+    val extendedColors = TaskItThemeExt.colors
     val progressPercentage = if (project.total > 0) {
         ((project.completed.toFloat() / project.total) * 100).toInt()
     } else {
@@ -257,7 +247,7 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = extendedColors.surfaceCard
         )
     ) {
         Column(
@@ -270,7 +260,7 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
                 text = project.name,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A)
+                color = extendedColors.textPrimary
             )
             
             // Project description (if available)
@@ -279,7 +269,7 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
                 Text(
                     text = project.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF6B7280)
+                    color = extendedColors.textSecondary
                 )
             }
             
@@ -294,13 +284,13 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
                 Text(
                     text = "${project.completed} of ${project.total} tasks",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF6B7280)
+                    color = extendedColors.textSecondary
                 )
                 Text(
                     text = "$progressPercentage%",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1A1A1A)
+                    color = extendedColors.textPrimary
                 )
             }
             
@@ -313,7 +303,7 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
                     .fillMaxWidth()
                     .height(8.dp),
                 color = MaterialTheme.colorScheme.primary,
-                trackColor = Color(0xFFE5E7EB),
+                trackColor = extendedColors.trackNeutral,
                 strokeCap = StrokeCap.Round,
             )
         }

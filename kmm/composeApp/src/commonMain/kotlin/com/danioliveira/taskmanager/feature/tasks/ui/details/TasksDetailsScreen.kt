@@ -46,6 +46,7 @@ import com.danioliveira.taskmanager.core.domain.model.toTaskPriority
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorState
 import com.danioliveira.taskmanager.core.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
+import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
 import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementKey
 import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementType
 import com.danioliveira.taskmanager.util.DateFormatter
@@ -246,9 +247,11 @@ private fun TaskHeaderCard(
 ) {
     val priorityColor = priority.toTaskPriority().color
     
+    val extendedColors = TaskItThemeExt.colors
+    
     with(sts) {
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = extendedColors.surfaceCard),
             shape = RoundedCornerShape(12.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             modifier = Modifier.sharedBounds(
@@ -280,7 +283,7 @@ private fun TaskHeaderCard(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color(0xFF1A1A1A),
+                        color = extendedColors.textPrimary,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.sharedElement(
                             rememberSharedContentState(key = "task_title_$taskId"),
@@ -301,7 +304,7 @@ private fun TaskHeaderCard(
                             imageVector = Icons.Default.Edit,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = Color(0xFF6B7280)
+                            tint = extendedColors.textSecondary
                         )
 
                         Text(
@@ -309,7 +312,7 @@ private fun TaskHeaderCard(
                                 priority.name.lowercase().replaceFirstChar { it.titlecase() }
                             } ${stringResource(Res.string.task_priority_suffix)}",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF6B7280)
+                            color = extendedColors.textSecondary
                         )
                     }
                 }
@@ -325,9 +328,11 @@ private fun DescriptionCard(
     taskId: Uuid,
     description: String
 ) {
+    val extendedColors = TaskItThemeExt.colors
+    
     with(sts) {
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = extendedColors.surfaceCard),
             shape = RoundedCornerShape(12.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
@@ -340,14 +345,14 @@ private fun DescriptionCard(
                 Text(
                     text = stringResource(Res.string.task_description_section),
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFF1A1A1A),
+                    color = extendedColors.textPrimary,
                     fontWeight = FontWeight.Bold
                 )
 
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF6B7280),
+                    color = extendedColors.textSecondary,
                     lineHeight = 22.sp,
                     modifier = Modifier.sharedElement(
                         rememberSharedContentState(key = "task_description_$taskId"),
@@ -365,8 +370,10 @@ private fun TaskInformationCard(
     status: TaskStatus,
     priority: Priority
 ) {
+    val extendedColors = TaskItThemeExt.colors
+    
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = extendedColors.surfaceCard),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -379,7 +386,7 @@ private fun TaskInformationCard(
             Text(
                 text = stringResource(Res.string.task_information_section),
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF1A1A1A),
+                color = extendedColors.textPrimary,
                 fontWeight = FontWeight.Bold
             )
 
@@ -411,10 +418,23 @@ private fun StatusBadge(
     taskId: Uuid,
     status: TaskStatus
 ) {
+    val extendedColors = TaskItThemeExt.colors
+    
     with(sts) {
         val statusText = TaskStatusFormatter.formatTaskStatus(status)
+        val backgroundColor = when (status) {
+            TaskStatus.TODO -> extendedColors.statusTodoContainer
+            TaskStatus.IN_PROGRESS -> extendedColors.statusInProgressContainer
+            TaskStatus.DONE -> extendedColors.statusDoneContainer
+        }
+        val textColor = when (status) {
+            TaskStatus.TODO -> extendedColors.statusTodoText
+            TaskStatus.IN_PROGRESS -> extendedColors.statusInProgressText
+            TaskStatus.DONE -> extendedColors.statusDoneText
+        }
+        
         Surface(
-            color = Color(0xFFE8F5E9),
+            color = backgroundColor,
             shape = RoundedCornerShape(4.dp),
             modifier = Modifier.sharedElement(
                 rememberSharedContentState(key = "task_status_$taskId"),
@@ -424,7 +444,7 @@ private fun StatusBadge(
             Text(
                 text = statusText,
                 style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF2E7D32),
+                color = textColor,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
@@ -438,6 +458,8 @@ private fun TaskInfoRow(
     label: String,
     value: String
 ) {
+    val extendedColors = TaskItThemeExt.colors
+    
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -447,20 +469,20 @@ private fun TaskInfoRow(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(20.dp),
-            tint = Color(0xFF9CA3AF)
+            tint = extendedColors.iconNeutral
         )
 
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF6B7280),
+            color = extendedColors.textSecondary,
             modifier = Modifier.width(80.dp)
         )
 
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF1A1A1A),
+            color = extendedColors.textPrimary,
             fontWeight = FontWeight.Medium
         )
     }
@@ -468,8 +490,10 @@ private fun TaskInfoRow(
 
 @Composable
 private fun DatesCard(createdAt: LocalDateTime?) {
+    val extendedColors = TaskItThemeExt.colors
+    
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = extendedColors.surfaceCard),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -482,7 +506,7 @@ private fun DatesCard(createdAt: LocalDateTime?) {
             Text(
                 text = stringResource(Res.string.task_dates_section),
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF1A1A1A),
+                color = extendedColors.textPrimary,
                 fontWeight = FontWeight.Bold
             )
 
@@ -507,6 +531,8 @@ private fun DateInfoRow(
     label: String,
     value: String
 ) {
+    val extendedColors = TaskItThemeExt.colors
+    
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -516,20 +542,20 @@ private fun DateInfoRow(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(20.dp),
-            tint = Color(0xFF7C3AED)
+            tint = extendedColors.iconPurple
         )
 
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF6B7280),
+            color = extendedColors.textSecondary,
             modifier = Modifier.width(100.dp)
         )
 
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF1A1A1A),
+            color = extendedColors.textPrimary,
             fontWeight = FontWeight.Medium
         )
     }

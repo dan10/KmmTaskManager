@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.TaskItem
+import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
 
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
@@ -43,6 +44,8 @@ fun TaskItemWithSwipe(
         swipeToDismissState.reset()
     }
 
+    val extendedColors = TaskItThemeExt.colors
+    
     SwipeToDismissBox(
         modifier = modifier,
         state = swipeToDismissState,
@@ -50,12 +53,12 @@ fun TaskItemWithSwipe(
             val color by animateColorAsState(
                 when (swipeToDismissState.targetValue) {
                     SwipeToDismissBoxValue.Settled -> Color.Transparent
-                    SwipeToDismissBoxValue.StartToEnd -> Color(0xFF2E7D32)
-                    SwipeToDismissBoxValue.EndToStart -> Color(0xFFFFEBEE)
+                    SwipeToDismissBoxValue.StartToEnd -> extendedColors.swipeCompleteBackground
+                    SwipeToDismissBoxValue.EndToStart -> extendedColors.swipeDeleteBackground
                 }
             )
 
-            BoxSwipe(color, swipeToDismissState)
+            BoxSwipe(color, swipeToDismissState, extendedColors)
         },
         onDismiss = { direction ->
             when (direction) {
@@ -81,7 +84,8 @@ fun TaskItemWithSwipe(
 @Composable
 private fun BoxSwipe(
     color: Color,
-    swipeToDismissState: SwipeToDismissBoxState
+    swipeToDismissState: SwipeToDismissBoxState,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
 ) {
     Box(Modifier.fillMaxSize().background(color)) {
         when (swipeToDismissState.targetValue) {
@@ -104,7 +108,7 @@ private fun BoxSwipe(
                     .padding(16.dp),
                 tint = when (swipeToDismissState.targetValue) {
                     SwipeToDismissBoxValue.StartToEnd -> Color.White
-                    SwipeToDismissBoxValue.EndToStart -> Color(0xFFD32F2F)
+                    SwipeToDismissBoxValue.EndToStart -> extendedColors.swipeDeleteForeground
                     else -> Color.White
                 }
             )

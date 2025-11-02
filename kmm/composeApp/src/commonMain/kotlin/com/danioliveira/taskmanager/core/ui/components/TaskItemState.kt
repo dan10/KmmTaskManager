@@ -7,15 +7,17 @@ import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.domain.model.TaskPriority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.domain.model.toTaskPriority
+import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
-data class TaskItemState(val task: Task) {
-
+data class TaskItemState(
+    val task: Task,
+    val colors: TaskItemColors
+) {
     val priority = task.priority.toTaskPriority()
     val isOverdue = task.isOverdue()
-    val colors = createTaskItemColors(task, priority, isOverdue)
 
     @OptIn(ExperimentalTime::class)
     private fun Task.isOverdue(): Boolean {
@@ -24,75 +26,116 @@ data class TaskItemState(val task: Task) {
             status != TaskStatus.DONE && dueDate < now
         } ?: false
     }
-    
-    private fun createTaskItemColors(
-        task: Task,
-        priority: TaskPriority,
-        isOverdue: Boolean
-    ): TaskItemColors {
-        return TaskItemColors(
-            indicator = getIndicatorColor(priority, isOverdue),
-            container = getContainerColor(task, isOverdue),
-            title = getTitleColor(task),
-            description = getDescriptionColor(task),
-            statusText = getStatusTextColor(task.status),
-            statusBackground = getStatusBackgroundColor(task.status)
-        )
-    }
-
-    private fun getIndicatorColor(priority: TaskPriority, isOverdue: Boolean): Color {
-        return when {
-            isOverdue -> Color(0xFFEF4444)
-            else -> priority.color
-        }
-    }
-
-    private fun getContainerColor(task: Task, isOverdue: Boolean): Color {
-        return when {
-            isOverdue -> Color(0xFFFFF5F5)
-            task.status == TaskStatus.DONE -> Color(0xFFF9FAFB)
-            else -> Color.White
-        }
-    }
-
-    private fun getTitleColor(task: Task): Color {
-        return if (task.status == TaskStatus.DONE) {
-            Color(0xFF9CA3AF)
-        } else {
-            Color(0xFF1A1A1A)
-        }
-    }
-
-    private fun getDescriptionColor(task: Task): Color {
-        return if (task.status == TaskStatus.DONE) {
-            Color(0xFFD1D5DB)
-        } else {
-            Color(0xFF6B7280)
-        }
-    }
-
-    private fun getStatusTextColor(status: TaskStatus): Color {
-        return when (status) {
-            TaskStatus.TODO -> Color(0xFF6B7280)
-            TaskStatus.IN_PROGRESS -> Color(0xFF3B82F6)
-            TaskStatus.DONE -> Color(0xFF10B981)
-        }
-    }
-
-    private fun getStatusBackgroundColor(status: TaskStatus): Color {
-        return when (status) {
-            TaskStatus.TODO -> Color(0xFFF3F4F6)
-            TaskStatus.IN_PROGRESS -> Color(0xFFDCEEFE)
-            TaskStatus.DONE -> Color(0xFFD1FAE5)
-        }
-    }
 }
 
 // Remember and compute task item state
 @Composable
 fun rememberTaskItemState(task: Task): TaskItemState {
-    return remember(task) {
-        TaskItemState(task = task)
+    val extendedColors = TaskItThemeExt.colors
+    val priority = task.priority.toTaskPriority()
+    val isOverdue = task.isOverdue()
+    
+    return remember(task, extendedColors) {
+        TaskItemState(
+            task = task,
+            colors = createTaskItemColors(
+                task = task,
+                priority = priority,
+                isOverdue = isOverdue,
+                extendedColors = extendedColors
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalTime::class)
+private fun Task.isOverdue(): Boolean {
+    return dueDate?.let { dueDate ->
+        val now = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        status != TaskStatus.DONE && dueDate < now
+    } ?: false
+}
+
+private fun createTaskItemColors(
+    task: Task,
+    priority: TaskPriority,
+    isOverdue: Boolean,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
+): TaskItemColors {
+    return TaskItemColors(
+        indicator = getIndicatorColor(priority, isOverdue, extendedColors),
+        container = getContainerColor(task, isOverdue, extendedColors),
+        title = getTitleColor(task, extendedColors),
+        description = getDescriptionColor(task, extendedColors),
+        statusText = getStatusTextColor(task.status, extendedColors),
+        statusBackground = getStatusBackgroundColor(task.status, extendedColors)
+    )
+}
+
+private fun getIndicatorColor(
+    priority: TaskPriority,
+    isOverdue: Boolean,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
+): Color {
+    return when {
+        isOverdue -> extendedColors.taskIndicatorOverdue
+        else -> priority.color
+    }
+}
+
+private fun getContainerColor(
+    task: Task,
+    isOverdue: Boolean,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
+): Color {
+    return when {
+        isOverdue -> extendedColors.taskContainerOverdue
+        task.status == TaskStatus.DONE -> extendedColors.taskContainerDone
+        else -> extendedColors.taskContainerDefault
+    }
+}
+
+private fun getTitleColor(
+    task: Task,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
+): Color {
+    return if (task.status == TaskStatus.DONE) {
+        extendedColors.taskTitleDone
+    } else {
+        extendedColors.taskTitleDefault
+    }
+}
+
+private fun getDescriptionColor(
+    task: Task,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
+): Color {
+    return if (task.status == TaskStatus.DONE) {
+        extendedColors.taskDescriptionDone
+    } else {
+        extendedColors.taskDescriptionDefault
+    }
+}
+
+private fun getStatusTextColor(
+    status: TaskStatus,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
+): Color {
+    return when (status) {
+        TaskStatus.TODO -> extendedColors.statusTodoText
+        TaskStatus.IN_PROGRESS -> extendedColors.statusInProgressText
+        TaskStatus.DONE -> extendedColors.statusDoneText
+    }
+}
+
+private fun getStatusBackgroundColor(
+    status: TaskStatus,
+    extendedColors: com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
+): Color {
+    return when (status) {
+        TaskStatus.TODO -> extendedColors.statusTodoContainer
+        TaskStatus.IN_PROGRESS -> extendedColors.statusInProgressContainer
+        TaskStatus.DONE -> extendedColors.statusDoneContainer
     }
 }
 

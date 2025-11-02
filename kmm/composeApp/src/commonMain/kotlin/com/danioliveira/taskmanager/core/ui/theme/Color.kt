@@ -2,18 +2,6 @@ package com.danioliveira.taskmanager.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-object TaskDetailColors {
-    val CardBorder = Color(0xFFF6C958)
-    val CardBackground = Color(0xFFFFFBF3)
-    val MetaSurface = Color(0xFFF2F0FF)
-    val MetaIconBackground = Color(0xFFE7E5FF)
-    val MetaIconColor = Color(0xFF6750A4)
-    val PillSecondary = Color(0xFFF1F2F7)
-    val PillSecondaryContent = Color(0xFF3C3F52)
-    val PillPrimary = Color(0xFFFFE9A6)
-    val PillPrimaryContent = Color(0xFF7A4E00)
-}
-
 val primaryLight = Color(0xFF575992)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFE1E0FF)
@@ -86,8 +74,121 @@ val surfaceContainerDark = Color(0xFF1F1F25)
 val surfaceContainerHighDark = Color(0xFF2A292F)
 val surfaceContainerHighestDark = Color(0xFF35343A)
 
+// Extended color tokens - Task item colors
+val taskContainerDefaultLight = Color(0xFFFFFFFF)
+val taskContainerDoneLight = Color(0xFFF9FAFB)
+val taskContainerOverdueLight = Color(0xFFFFF5F5)
+val taskIndicatorOverdueLight = Color(0xFFEF4444)
+val taskTitleDefaultLight = Color(0xFF1A1A1A)
+val taskTitleDoneLight = Color(0xFF9CA3AF)
+val taskDescriptionDefaultLight = Color(0xFF6B7280)
+val taskDescriptionDoneLight = Color(0xFFD1D5DB)
 
+val taskContainerDefaultDark = Color(0xFF1F1F25)
+val taskContainerDoneDark = Color(0xFF1B1B21)
+val taskContainerOverdueDark = Color(0xFF2A1F1F)
+val taskIndicatorOverdueDark = Color(0xFFD65C5C)
+val taskTitleDefaultDark = Color(0xFFE4E1E9)
+val taskTitleDoneDark = Color(0xFF8B8990)
+val taskDescriptionDefaultDark = Color(0xFFA5A3AB)
+val taskDescriptionDoneDark = Color(0xFF6B6870)
 
+// Extended color tokens - Status badge colors
+val statusTodoTextLight = Color(0xFF6B7280)
+val statusTodoContainerLight = Color(0xFFF3F4F6)
+val statusInProgressTextLight = Color(0xFF3B82F6)
+val statusInProgressContainerLight = Color(0xFFDCEEFE)
+val statusDoneTextLight = Color(0xFF10B981)
+val statusDoneContainerLight = Color(0xFFD1FAE5)
 
+val statusTodoTextDark = Color(0xFF9CA3AF)
+val statusTodoContainerDark = Color(0xFF2A292F)
+val statusInProgressTextDark = Color(0xFF6BA3F5)
+val statusInProgressContainerDark = Color(0xFF1F2A3F)
+val statusDoneTextDark = Color(0xFF4FD1A7)
+val statusDoneContainerDark = Color(0xFF1F2F2A)
+
+// Extended color tokens - Chip colors
+val chipDueDateTextLight = Color(0xFF4B5563)
+val chipDueDateContainerLight = Color(0xFFF3F4F6)
+val chipDueDateOverdueTextLight = Color(0xFFDC2626)
+val chipDueDateOverdueContainerLight = Color(0xFFFEE2E2)
+val chipProjectTextLight = Color(0xFF7C3AED)
+val chipProjectContainerLight = Color(0xFFEDE9FE)
+
+val chipDueDateTextDark = Color(0xFFA5A3AB)
+val chipDueDateContainerDark = Color(0xFF2A292F)
+val chipDueDateOverdueTextDark = Color(0xFFE65C5C)
+val chipDueDateOverdueContainerDark = Color(0xFF3F2A2A)
+val chipProjectTextDark = Color(0xFF9D7AFF)
+val chipProjectContainerDark = Color(0xFF2F2540)
+
+// Extended color tokens - Checkbox colors
+val checkboxUncheckedLight = Color(0xFFD1D5DB)
+val checkboxCheckmarkLight = Color(0xFFFFFFFF)
+
+val checkboxUncheckedDark = Color(0xFF6B6870)
+val checkboxCheckmarkDark = Color(0xFFFFFFFF)
+
+// Extended color tokens - Priority colors
+val priorityNoneTextLight = Color(0xFF6B7280)
+val priorityNoneContainerLight = Color(0xFFF3F4F6)
+val priorityHighTextLight = Color(0xFFDC2626)
+val priorityHighContainerLight = Color(0xFFFFE4E4)
+val priorityMediumTextLight = Color(0xFFEAB308)
+val priorityMediumContainerLight = Color(0xFFFEF9C3)
+val priorityLowTextLight = Color(0xFF22C55E)
+val priorityLowContainerLight = Color(0xFFDCFCE7)
+
+val priorityNoneTextDark = Color(0xFF9CA3AF)
+val priorityNoneContainerDark = Color(0xFF2A292F)
+val priorityHighTextDark = Color(0xFFE65C5C)
+val priorityHighContainerDark = Color(0xFF3F2A2A)
+val priorityMediumTextDark = Color(0xFFD4B020)
+val priorityMediumContainerDark = Color(0xFF3F3A1F)
+val priorityLowTextDark = Color(0xFF4FD1A7)
+val priorityLowContainerDark = Color(0xFF1F2F2A)
+
+// Extended color tokens - Neutral text colors
+val textPrimaryLight = Color(0xFF1A1A1A)
+val textSecondaryLight = Color(0xFF6B7280)
+val iconNeutralLight = Color(0xFF9CA3AF)
+val iconPurpleLight = Color(0xFF7C3AED)
+
+val textPrimaryDark = Color(0xFFE4E1E9)
+val textSecondaryDark = Color(0xFFA5A3AB)
+val iconNeutralDark = Color(0xFF8B8990)
+val iconPurpleDark = Color(0xFF9D7AFF)
+
+// Extended color tokens - Surface colors
+val surfaceCardLight = Color(0xFFFFFFFF)
+val trackNeutralLight = Color(0xFFE5E7EB)
+
+val surfaceCardDark = Color(0xFF1F1F25)
+val trackNeutralDark = Color(0xFF35343A)
+
+// Extended color tokens - Accent colors
+val accentSuccessTextLight = Color(0xFF2E7D32)
+val accentSuccessContainerLight = Color(0xFFE8F5E9)
+val accentWarningTextLight = Color(0xFFEAB308)
+val accentWarningContainerLight = Color(0xFFFEF9C3)
+val accentDangerTextLight = Color(0xFFD32F2F)
+val accentDangerContainerLight = Color(0xFFFFEBEE)
+
+val accentSuccessTextDark = Color(0xFF4FD1A7)
+val accentSuccessContainerDark = Color(0xFF1F2F2A)
+val accentWarningTextDark = Color(0xFFD4B020)
+val accentWarningContainerDark = Color(0xFF3F3A1F)
+val accentDangerTextDark = Color(0xFFE65C5C)
+val accentDangerContainerDark = Color(0xFF3F2A2A)
+
+// Extended color tokens - Swipe action colors
+val swipeCompleteBackgroundLight = Color(0xFF2E7D32)
+val swipeDeleteBackgroundLight = Color(0xFFFFEBEE)
+val swipeDeleteForegroundLight = Color(0xFFD32F2F)
+
+val swipeCompleteBackgroundDark = Color(0xFF1F3F25)
+val swipeDeleteBackgroundDark = Color(0xFF3F2A2A)
+val swipeDeleteForegroundDark = Color(0xFFE65C5C)
 
 

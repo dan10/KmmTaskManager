@@ -41,6 +41,7 @@ import com.danioliveira.taskmanager.core.domain.model.TaskPriority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementKey
 import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementType
+import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
 import com.danioliveira.taskmanager.utils.PriorityFormatter
@@ -269,6 +270,7 @@ private fun TaskMetaInfo(
 
 @Composable
 private fun TaskDueDateChip(dueDate: LocalDateTime, isOverdue: Boolean) {
+    val extendedColors = TaskItThemeExt.colors
     val dueDateLabel = DateFormatter.formatDate(dueDate)
     val chipLabel = if (isOverdue) {
         stringResource(Res.string.task_chip_due_date_overdue, dueDateLabel)
@@ -278,29 +280,31 @@ private fun TaskDueDateChip(dueDate: LocalDateTime, isOverdue: Boolean) {
 
     TaskInfoChip(
         label = chipLabel,
-        containerColor = if (isOverdue) Color(0xFFFEE2E2) else Color(0xFFF3F4F6),
-        contentColor = if (isOverdue) Color(0xFFDC2626) else Color(0xFF4B5563)
+        containerColor = if (isOverdue) extendedColors.chipDueDateOverdueContainer else extendedColors.chipDueDateContainer,
+        contentColor = if (isOverdue) extendedColors.chipDueDateOverdueText else extendedColors.chipDueDateText
     )
 }
 
 @Composable
 private fun TaskPriorityChip(priority: Priority, taskPriority: TaskPriority) {
+    val priorityColors = taskPriority.getColors()
     TaskInfoChip(
         label = stringResource(
             Res.string.task_chip_priority,
             PriorityFormatter.formatPriority(priority)
         ),
-        containerColor = taskPriority.backgroundColor,
-        contentColor = taskPriority.color
+        containerColor = priorityColors.container,
+        contentColor = priorityColors.text
     )
 }
 
 @Composable
 private fun TaskProjectChip(projectName: String) {
+    val extendedColors = TaskItThemeExt.colors
     TaskInfoChip(
         label = stringResource(Res.string.task_chip_project, projectName),
-        containerColor = Color(0xFFEDE9FE),
-        contentColor = Color(0xFF7C3AED)
+        containerColor = extendedColors.chipProjectContainer,
+        contentColor = extendedColors.chipProjectText
     )
 }
 
@@ -309,13 +313,14 @@ private fun TaskItemCheckbox(
     state: TaskItemState,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val extendedColors = TaskItThemeExt.colors
     Checkbox(
         checked = state.task.status == TaskStatus.DONE,
         onCheckedChange = onCheckedChange,
         colors = CheckboxDefaults.colors(
             checkedColor = state.colors.indicator,
-            uncheckedColor = Color(0xFFD1D5DB),
-            checkmarkColor = Color.White
+            uncheckedColor = extendedColors.checkboxUnchecked,
+            checkmarkColor = extendedColors.checkboxCheckmark
         ),
         modifier = Modifier.padding(end = 8.dp, top = 12.dp)
     )
