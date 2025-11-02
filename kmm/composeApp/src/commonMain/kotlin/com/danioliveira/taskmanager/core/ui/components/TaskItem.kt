@@ -13,11 +13,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,12 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.Task
+import com.danioliveira.taskmanager.core.domain.model.TaskPriority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
-import com.danioliveira.taskmanager.core.domain.model.toTaskPriority
 import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementKey
 import com.danioliveira.taskmanager.feature.tasks.ui.TaskSharedElementType
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import com.danioliveira.taskmanager.util.DateFormatter
+import com.danioliveira.taskmanager.util.HapticFeedback
 import com.danioliveira.taskmanager.util.HapticFeedbackType
 import com.danioliveira.taskmanager.util.rememberHapticFeedback
 import com.danioliveira.taskmanager.utils.PriorityFormatter
@@ -55,16 +54,12 @@ import kmmtaskmanager.composeapp.generated.resources.task_chip_due_date_overdue
 import kmmtaskmanager.composeapp.generated.resources.task_chip_priority
 import kmmtaskmanager.composeapp.generated.resources.task_chip_project
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.time.ExperimentalTime
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
-@OptIn(ExperimentalTime::class, ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun TaskItem(
     task: Task,
@@ -73,49 +68,7 @@ fun TaskItem(
     modifier: Modifier = Modifier,
     showProjectName: Boolean = true
 ) {
-    val priority = task.priority.toTaskPriority()
-    val haptic = rememberHapticFeedback()
-
-    // Check if task is overdue
-    val isOverdue = task.dueDate?.let { dueDate ->
-        val now = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        task.status != TaskStatus.DONE && dueDate < now
-    } ?: false
-
-    val indicatorColor = when {
-        isOverdue -> Color(0xFFEF4444)
-        else -> priority.color
-    }
-
-    val containerColor = when {
-        isOverdue -> Color(0xFFFFF5F5)
-        task.status == TaskStatus.DONE -> Color(0xFFF9FAFB)
-        else -> Color.White
-    }
-
-    val titleColor = if (task.status == TaskStatus.DONE) {
-        Color(0xFF9CA3AF)
-    } else {
-        Color(0xFF1A1A1A)
-    }
-
-    val descriptionColor = if (task.status == TaskStatus.DONE) {
-        Color(0xFFD1D5DB)
-    } else {
-        Color(0xFF6B7280)
-    }
-
-    val statusColor = when (task.status) {
-        TaskStatus.TODO -> Color(0xFF6B7280)
-        TaskStatus.IN_PROGRESS -> Color(0xFF3B82F6)
-        TaskStatus.DONE -> Color(0xFF10B981)
-    }
-
-    val statusBackgroundColor = when (task.status) {
-        TaskStatus.TODO -> Color(0xFFF3F4F6)
-        TaskStatus.IN_PROGRESS -> Color(0xFFDCEEFE)
-        TaskStatus.DONE -> Color(0xFFD1FAE5)
-    }
+    val state = rememberTaskItemState(task)
 
     with(sts) {
         Card(
@@ -132,158 +85,254 @@ fun TaskItem(
                     ), avs
                 ),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = containerColor)
+            colors = CardDefaults.cardColors(containerColor = state.colors.container)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.Top
-            ) {
-                // Left indicator bar
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .fillMaxHeight()
-                        .background(indicatorColor)
-                        .sharedElement(
-                            rememberSharedContentState(key = "task_indicator_${task.id}"),
-                            animatedVisibilityScope = avs
-                        )
-                )
-
-                // Main content
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Title and Status Row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            text = task.title,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            ),
-                            color = titleColor,
-                            textDecoration = if (task.status == TaskStatus.DONE) TextDecoration.LineThrough else null,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .weight(1f)
-                                .sharedElement(
-                                    rememberSharedContentState(key = "task_title_${task.id}"),
-                                    animatedVisibilityScope = avs
-                                )
-                        )
-
-                        Surface(
-                            color = statusBackgroundColor,
-                            shape = RoundedCornerShape(6.dp),
-                            modifier = Modifier.sharedElement(
-                                rememberSharedContentState(key = "task_status_${task.id}"),
-                                animatedVisibilityScope = avs
-                            )
-                        ) {
-                            Text(
-                                text = TaskStatusFormatter.formatTaskStatus(task.status),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = statusColor,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    // Description
-                    if (task.description.isNotBlank()) {
-                        Text(
-                            text = task.description,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                lineHeight = 20.sp
-                            ),
-                            color = descriptionColor,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.sharedElement(
-                                rememberSharedContentState(key = "task_description_${task.id}"),
-                                animatedVisibilityScope = avs
-                            )
-                        )
-                    }
-
-                    // Meta information
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Due Date
-                        task.dueDate?.let { dueDate ->
-                            val dueDateLabel = DateFormatter.formatDate(dueDate)
-                            val chipLabel = if (isOverdue) {
-                                stringResource(Res.string.task_chip_due_date_overdue, dueDateLabel)
-                            } else {
-                                stringResource(Res.string.task_chip_due_date, dueDateLabel)
-                            }
-                            TaskInfoChip(
-                                label = chipLabel,
-                                containerColor = if (isOverdue) Color(0xFFFEE2E2) else Color(0xFFF3F4F6),
-                                contentColor = if (isOverdue) Color(0xFFDC2626) else Color(0xFF4B5563)
-                            )
-                        }
-
-                        // Priority
-                        TaskInfoChip(
-                            label = stringResource(
-                                Res.string.task_chip_priority,
-                                PriorityFormatter.formatPriority(task.priority)
-                            ),
-                            containerColor = priority.backgroundColor,
-                            contentColor = priority.color
-                        )
-
-                        // Project
-                        val projectName = task.projectName
-                        if (showProjectName && !projectName.isNullOrBlank()) {
-                            TaskInfoChip(
-                                label = stringResource(Res.string.task_chip_project, projectName),
-                                containerColor = Color(0xFFEDE9FE),
-                                contentColor = Color(0xFF7C3AED)
-                            )
-                        }
-                    }
-                }
-
-                // Checkbox
-                Checkbox(
-                    checked = task.status == TaskStatus.DONE,
-                    onCheckedChange = { isChecked ->
-                        if (isChecked) {
-                            haptic.performHapticFeedback(HapticFeedbackType.Success)
-                        } else {
-                            haptic.performHapticFeedback(HapticFeedbackType.Click)
-                        }
-                        onCheckedChange(isChecked)
-                    },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = indicatorColor,
-                        uncheckedColor = Color(0xFFD1D5DB),
-                        checkmarkColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .padding(end = 8.dp, top = 12.dp)
-                )
-            }
+            TaskItemContent(
+                state = state,
+                showProjectName = showProjectName,
+                onCheckedChange = onCheckedChange
+            )
         }
     }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun TaskItemContent(
+    state: TaskItemState,
+    showProjectName: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    val haptic = rememberHapticFeedback()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.Top
+    ) {
+        TaskIndicatorBar(taskId = state.task.id, color = state.colors.indicator)
+
+        TaskMainContent(
+            state = state,
+            showProjectName = showProjectName,
+            modifier = Modifier.weight(1f)
+        )
+
+        TaskItemCheckbox(
+            state = state,
+            haptic = haptic,
+            onCheckedChange = onCheckedChange
+        )
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun TaskIndicatorBar(taskId: Uuid, color: Color) {
+    with(sts) {
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(color)
+                .sharedElement(
+                    rememberSharedContentState(key = "task_indicator_$taskId"),
+                    animatedVisibilityScope = avs
+                )
+        )
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TaskMainContent(
+    state: TaskItemState,
+    showProjectName: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .padding(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        TaskTitleAndStatus(state)
+
+        if (state.task.description.isNotBlank()) {
+            TaskDescription(state)
+        }
+
+        TaskMetaInfo(state, showProjectName)
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun TaskTitleAndStatus(state: TaskItemState) {
+    with(sts) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = state.task.title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                ),
+                color = state.colors.title,
+                textDecoration = if (state.task.status == TaskStatus.DONE) {
+                    TextDecoration.LineThrough
+                } else null,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .weight(1f)
+                    .sharedElement(
+                        rememberSharedContentState(key = "task_title_${state.task.id}"),
+                        animatedVisibilityScope = avs
+                    )
+            )
+
+            TaskStatusBadge(state)
+        }
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun TaskStatusBadge(state: TaskItemState) {
+    with(sts) {
+        Surface(
+            color = state.colors.statusBackground,
+            shape = RoundedCornerShape(6.dp),
+            modifier = Modifier.sharedElement(
+                rememberSharedContentState(key = "task_status_${state.task.id}"),
+                animatedVisibilityScope = avs
+            )
+        ) {
+            Text(
+                text = TaskStatusFormatter.formatTaskStatus(state.task.status),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = state.colors.statusText,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun TaskDescription(state: TaskItemState) {
+    with(sts) {
+        Text(
+            text = state.task.description,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                lineHeight = 20.sp
+            ),
+            color = state.colors.description,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.sharedElement(
+                rememberSharedContentState(key = "task_description_${state.task.id}"),
+                animatedVisibilityScope = avs
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TaskMetaInfo(
+    state: TaskItemState,
+    showProjectName: Boolean
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        state.task.dueDate?.let { dueDate ->
+            TaskDueDateChip(dueDate, state.isOverdue)
+        }
+
+        TaskPriorityChip(state.task.priority, state.priority)
+
+        state.task.projectName?.takeIf { showProjectName && it.isNotBlank() }?.let {
+            TaskProjectChip(it)
+        }
+    }
+}
+
+@Composable
+private fun TaskDueDateChip(dueDate: LocalDateTime, isOverdue: Boolean) {
+    val dueDateLabel = DateFormatter.formatDate(dueDate)
+    val chipLabel = if (isOverdue) {
+        stringResource(Res.string.task_chip_due_date_overdue, dueDateLabel)
+    } else {
+        stringResource(Res.string.task_chip_due_date, dueDateLabel)
+    }
+
+    TaskInfoChip(
+        label = chipLabel,
+        containerColor = if (isOverdue) Color(0xFFFEE2E2) else Color(0xFFF3F4F6),
+        contentColor = if (isOverdue) Color(0xFFDC2626) else Color(0xFF4B5563)
+    )
+}
+
+@Composable
+private fun TaskPriorityChip(priority: Priority, taskPriority: TaskPriority) {
+    TaskInfoChip(
+        label = stringResource(
+            Res.string.task_chip_priority,
+            PriorityFormatter.formatPriority(priority)
+        ),
+        containerColor = taskPriority.backgroundColor,
+        contentColor = taskPriority.color
+    )
+}
+
+@Composable
+private fun TaskProjectChip(projectName: String) {
+    TaskInfoChip(
+        label = stringResource(Res.string.task_chip_project, projectName),
+        containerColor = Color(0xFFEDE9FE),
+        contentColor = Color(0xFF7C3AED)
+    )
+}
+
+@Composable
+private fun TaskItemCheckbox(
+    state: TaskItemState,
+    haptic: HapticFeedback,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Checkbox(
+        checked = state.task.status == TaskStatus.DONE,
+        onCheckedChange = { isChecked ->
+            if (isChecked) {
+                haptic.performHapticFeedback(HapticFeedbackType.Success)
+            } else {
+                haptic.performHapticFeedback(HapticFeedbackType.Click)
+            }
+            onCheckedChange(isChecked)
+        },
+        colors = CheckboxDefaults.colors(
+            checkedColor = state.colors.indicator,
+            uncheckedColor = Color(0xFFD1D5DB),
+            checkmarkColor = Color.White
+        ),
+        modifier = Modifier.padding(end = 8.dp, top = 12.dp)
+    )
 }
 
 @Composable
