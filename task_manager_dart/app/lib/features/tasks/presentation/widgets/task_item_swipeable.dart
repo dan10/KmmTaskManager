@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task_manager_shared/models.dart';
 
+import '../../../../core/theme/theme.dart';
 import 'task_item_widget.dart';
 
 /// Swipeable wrapper for TaskItemWidget
@@ -108,15 +109,22 @@ class _TaskItemSwipeableState extends State<TaskItemSwipeable> {
   }
 
   Widget _buildSwipeBackground({required bool isLeftToRight}) {
-    return Container(
-      color: isLeftToRight ? const Color(0xFF2E7D32) : const Color(0xFFFFEBEE),
-      alignment: isLeftToRight ? Alignment.centerLeft : Alignment.centerRight,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Icon(
-        isLeftToRight ? Icons.done : Icons.delete,
-        color: isLeftToRight ? Colors.white : const Color(0xFFD32F2F),
-        size: 32,
-      ),
+    return Builder(
+      builder: (context) {
+        final ext = context.extColors;
+        return Container(
+          color: isLeftToRight 
+              ? ext.swipeCompleteBackground 
+              : ext.swipeDeleteBackground,
+          alignment: isLeftToRight ? Alignment.centerLeft : Alignment.centerRight,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Icon(
+            isLeftToRight ? Icons.done : Icons.delete,
+            color: isLeftToRight ? Colors.white : ext.swipeDeleteForeground,
+            size: 32,
+          ),
+        );
+      },
     );
   }
 }

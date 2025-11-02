@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../state/project_detail_state.dart';
 import '../viewmodels/project_tasks_viewmodel.dart';
@@ -73,10 +74,11 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     final viewModel = context.watch<ProjectTasksViewModel>();
     final vmState = viewModel.state;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: _buildAppBar(vmState),
-      body: vmState.isLoading
+    return Builder(
+      builder: (context) => Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        appBar: _buildAppBar(vmState),
+        body: vmState.isLoading
           ? const Center(child: CircularProgressIndicator())
           : vmState.errorMessage != null
               ? _buildError(vmState.errorMessage!)
@@ -104,7 +106,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         ),
                       ],
                     ),
-      floatingActionButton: _buildFAB(),
+        floatingActionButton: _buildFAB(),
+      ),
     );
   }
 
@@ -229,10 +232,11 @@ class _ProjectHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+    return Builder(
+      builder: (context) => Container(
+        width: double.infinity,
+        color: context.extColors.surfaceCard,
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       child: Column(
         children: [
           // Statistics row
@@ -262,7 +266,7 @@ class _ProjectHeader extends StatelessWidget {
                 child: _StatisticItem(
                   label: 'Total',
                   value: '${project.total}',
-                  color: const Color(0xFF1A1A1A),
+                  color: context.extColors.textPrimary,
                 ),
               ),
             ],
@@ -276,13 +280,14 @@ class _ProjectHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: project.total > 0 ? project.completed / project.total : 0,
               minHeight: 6,
-              backgroundColor: const Color(0xFFE5E7EB),
+              backgroundColor: context.extColors.trackNeutral,
               valueColor: AlwaysStoppedAnimation<Color>(
                 Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -307,7 +312,7 @@ class _StatisticItem extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF6B7280),
+                color: context.extColors.textSecondary,
               ),
           textAlign: TextAlign.center,
         ),

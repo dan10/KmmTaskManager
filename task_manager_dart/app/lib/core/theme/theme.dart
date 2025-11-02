@@ -8,6 +8,7 @@ class TaskItTheme {
 
   static ThemeData _buildTheme(ColorScheme colorScheme) {
     final textTheme = _buildTextTheme(colorScheme);
+    final isDark = colorScheme.brightness == Brightness.dark;
 
     return ThemeData(
       useMaterial3: true,
@@ -16,6 +17,9 @@ class TaskItTheme {
       textTheme: textTheme,
       scaffoldBackgroundColor: colorScheme.surface,
       canvasColor: colorScheme.surface,
+      extensions: <ThemeExtension<dynamic>>[
+        isDark ? darkExtendedColors : lightExtendedColors,
+      ],
       // Enable predictive back animations for Android 13+
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -48,4 +52,11 @@ class TaskItTheme {
       titleSmall: displayTextTheme.titleSmall?.copyWith(color: colorScheme.onSurface),
     );
   }
+}
+
+/// Extension on BuildContext for easy access to extended colors.
+extension AppThemeX on BuildContext {
+  /// Gets the extended colors from the current theme.
+  AppExtendedColors get extColors =>
+      Theme.of(this).extension<AppExtendedColors>()!;
 }

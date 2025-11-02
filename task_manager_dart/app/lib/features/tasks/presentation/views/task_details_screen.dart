@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../state/task_details_state.dart';
 import '../viewmodels/task_details_viewmodel.dart';
@@ -108,17 +109,19 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
           // The ViewModel disposal is handled by Provider automatically
         }
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
-        appBar: _TaskDetailsAppBar(
+      child: Builder(
+        builder: (context) => Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          appBar: _TaskDetailsAppBar(
           isDeleting: state.isDeleting,
           onNavigateBack: viewModel.handleNavigateBack,
           onEdit: viewModel.handleEditTask,
           onDelete: _showDeleteConfirmationDialog,
         ),
-        body: _TaskDetailsBody(
-          state: state,
-          onRefresh: () => _viewModel.refresh(),
+          body: _TaskDetailsBody(
+            state: state,
+            onRefresh: () => _viewModel.refresh(),
+          ),
         ),
       ),
     );
@@ -293,39 +296,41 @@ class _TaskHeaderCard extends StatelessWidget {
         type: MaterialType.transparency,
         child: SizedBox(
           width: double.infinity,
-          child: Card(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 1,
-            child: ClipRect(
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                _TaskIndicator(),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _TaskTitle(title: task.title),
-                          const SizedBox(height: 8),
-                          _TaskHeaderMetadata(
-                            status: task.status,
-                            priority: task.priority,
+          child: Builder(
+            builder: (context) => Card(
+              color: context.extColors.surfaceCard,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 1,
+              child: ClipRect(
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _TaskIndicator(),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: SingleChildScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _TaskTitle(title: task.title),
+                                const SizedBox(height: 8),
+                                _TaskHeaderMetadata(
+                                  status: task.status,
+                                  priority: task.priority,
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ),
-                  ],
                 ),
               ),
             ),
@@ -343,9 +348,9 @@ class _TaskIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 4,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFDB022),
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: context.extColors.priorityMediumText,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           bottomLeft: Radius.circular(12),
         ),
@@ -365,10 +370,10 @@ class _TaskTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF1A1A1A),
+        color: context.extColors.textPrimary,
       ),
     );
   }
@@ -392,16 +397,16 @@ class _TaskHeaderMetadata extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         _TaskStatusBadge(status: status),
-        const Icon(
+        Icon(
           Icons.edit,
           size: 16,
-          color: Color(0xFF6B7280),
+          color: context.extColors.textSecondary,
         ),
         Text(
           l10n.taskPriorityText(_priorityLabel(priority, l10n)),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: Color(0xFF6B7280),
+            color: context.extColors.textSecondary,
           ),
         ),
       ],
@@ -417,18 +422,29 @@ class _TaskStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final ext = context.extColors;
+    final backgroundColor = switch (status) {
+      TaskStatus.todo => ext.statusTodoContainer,
+      TaskStatus.inProgress => ext.statusInProgressContainer,
+      TaskStatus.done => ext.statusDoneContainer,
+    };
+    final textColor = switch (status) {
+      TaskStatus.todo => ext.statusTodoText,
+      TaskStatus.inProgress => ext.statusInProgressText,
+      TaskStatus.done => ext.statusDoneText,
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E9),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         _statusLabel(status, l10n),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF2E7D32),
+          color: textColor,
         ),
       ),
     );
@@ -443,37 +459,42 @@ class _TaskDescriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.taskDescriptionLabel,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A1A),
-              ),
+    return Builder(
+      builder: (context) {
+        final ext = context.extColors;
+        return Card(
+          color: ext.surfaceCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.taskDescriptionLabel,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: ext.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  task.description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: ext.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              task.description,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -486,25 +507,28 @@ class _TaskInformationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.taskInformationLabel,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
+    return Builder(
+      builder: (context) {
+        final ext = context.extColors;
+        return Card(
+          color: ext.surfaceCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.taskInformationLabel,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: ext.textPrimary,
+                  ),
+                ),
             const SizedBox(height: 16),
             _TaskInfoRow(
               icon: Icons.calendar_today_outlined,
@@ -525,9 +549,11 @@ class _TaskInformationCard extends StatelessWidget {
               label: l10n.taskPriorityLabel,
               value: _priorityLabel(task.priority, l10n),
             ),
-          ],
-        ),
-      ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -540,25 +566,28 @@ class _TaskDatesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.taskDatesLabel,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
+    return Builder(
+      builder: (context) {
+        final ext = context.extColors;
+        return Card(
+          color: ext.surfaceCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.taskDatesLabel,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: ext.textPrimary,
+                  ),
+                ),
             const SizedBox(height: 16),
             _TaskDateRow(
               icon: Icons.add,
@@ -577,9 +606,11 @@ class _TaskDatesCard extends StatelessWidget {
                       ? DateFormat('MMM d, y').format(task.createdAt!)
                       : l10n.commonNA,
             ),
-          ],
-        ),
-      ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -603,26 +634,26 @@ class _TaskInfoRow extends StatelessWidget {
         Icon(
           icon,
           size: 20,
-          color: const Color(0xFF9CA3AF),
+          color: context.extColors.iconNeutral,
         ),
         const SizedBox(width: 12),
         SizedBox(
           width: 80,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF6B7280),
+              color: context.extColors.textSecondary,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF1A1A1A),
+              color: context.extColors.textPrimary,
             ),
           ),
         ),
@@ -649,26 +680,26 @@ class _TaskDateRow extends StatelessWidget {
         Icon(
           icon,
           size: 20,
-          color: const Color(0xFF7C3AED),
+          color: context.extColors.iconPurple,
         ),
         const SizedBox(width: 12),
         SizedBox(
           width: 100,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF6B7280),
+              color: context.extColors.textSecondary,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF1A1A1A),
+              color: context.extColors.textPrimary,
             ),
           ),
         ),

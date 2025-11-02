@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../viewmodels/task_edit_viewmodel.dart';
 
@@ -149,14 +150,15 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
 
     return Hero(
       tag: 'task_card_${widget.taskId}',
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
-        appBar: _TaskEditAppBar(
-          isDeleting: state.isDeleting,
-          onNavigateBack: viewModel.handleNavigateBack,
-          onDelete: _showDeleteConfirmationDialog,
-        ),
-        body: state.isLoading
+      child: Builder(
+        builder: (context) => Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          appBar: _TaskEditAppBar(
+            isDeleting: state.isDeleting,
+            onNavigateBack: viewModel.handleNavigateBack,
+            onDelete: _showDeleteConfirmationDialog,
+          ),
+          body: state.isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -190,6 +192,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                   ],
                 ),
               ),
+        ),
       ),
     );
   }
@@ -307,7 +310,7 @@ class _TaskEditForm extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.extColors.surfaceCard,
           ),
           onChanged: onTitleChanged,
           textCapitalization: TextCapitalization.sentences,
@@ -324,7 +327,7 @@ class _TaskEditForm extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.extColors.surfaceCard,
             alignLabelWithHint: true,
           ),
           onChanged: onDescriptionChanged,
@@ -342,7 +345,7 @@ class _TaskEditForm extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.extColors.surfaceCard,
           ),
           items: Priority.values.map((priority) {
             return DropdownMenuItem(
@@ -352,7 +355,7 @@ class _TaskEditForm extends StatelessWidget {
                   Icon(
                     Icons.flag,
                     size: 20,
-                    color: _getPriorityColor(priority),
+                    color: _getPriorityColor(context, priority),
                   ),
                   const SizedBox(width: 8),
                   Text(_priorityLabel(priority, l10n)),
@@ -375,7 +378,7 @@ class _TaskEditForm extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.extColors.surfaceCard,
           ),
           items: TaskStatus.values.map((status) {
             return DropdownMenuItem(
@@ -385,7 +388,7 @@ class _TaskEditForm extends StatelessWidget {
                   Icon(
                     _getStatusIcon(status),
                     size: 20,
-                    color: _getStatusColor(status),
+                    color: _getStatusColor(context, status),
                   ),
                   const SizedBox(width: 8),
                   Text(_statusLabel(status, l10n)),
@@ -440,20 +443,22 @@ class _TaskEditForm extends StatelessWidget {
     );
   }
 
-  Color _getPriorityColor(Priority priority) {
+  Color _getPriorityColor(BuildContext context, Priority priority) {
+    final ext = context.extColors;
     return switch (priority) {
-      Priority.none => const Color(0xFF9CA3AF),
-      Priority.high => const Color(0xFFEF4444),
-      Priority.medium => const Color(0xFFF59E0B),
-      Priority.low => const Color(0xFF10B981),
+      Priority.none => ext.priorityNoneText,
+      Priority.high => ext.priorityHighText,
+      Priority.medium => ext.priorityMediumText,
+      Priority.low => ext.priorityLowText,
     };
   }
 
-  Color _getStatusColor(TaskStatus status) {
+  Color _getStatusColor(BuildContext context, TaskStatus status) {
+    final ext = context.extColors;
     return switch (status) {
-      TaskStatus.todo => const Color(0xFF6B7280),
-      TaskStatus.inProgress => const Color(0xFF3B82F6),
-      TaskStatus.done => const Color(0xFF10B981),
+      TaskStatus.todo => ext.statusTodoText,
+      TaskStatus.inProgress => ext.statusInProgressText,
+      TaskStatus.done => ext.statusDoneText,
     };
   }
 

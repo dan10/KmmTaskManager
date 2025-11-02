@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/theme/theme.dart';
 
 /// Task item widget
 /// Simplified version of KMM's TaskItem (without swipe and shared transitions)
@@ -22,20 +23,41 @@ class TaskItemWidget extends StatelessWidget {
     this.showProjectName = true,
   });
 
-  Color _getPriorityColor() {
+  Color _getPriorityColor(BuildContext context) {
+    final ext = context.extColors;
     return switch (task.priority) {
-      Priority.none => const Color(0xFF9CA3AF),
-      Priority.high => const Color(0xFFEF4444),
-      Priority.medium => const Color(0xFFF59E0B),
-      Priority.low => const Color(0xFF10B981),
+      Priority.none => ext.priorityNoneText,
+      Priority.high => ext.priorityHighText,
+      Priority.medium => ext.priorityMediumText,
+      Priority.low => ext.priorityLowText,
     };
   }
 
-  Color _getStatusColor() {
+  Color _getStatusColor(BuildContext context) {
+    final ext = context.extColors;
     return switch (task.status) {
-      TaskStatus.todo => const Color(0xFF6B7280),
-      TaskStatus.inProgress => const Color(0xFF3B82F6),
-      TaskStatus.done => const Color(0xFF10B981),
+      TaskStatus.todo => ext.statusTodoText,
+      TaskStatus.inProgress => ext.statusInProgressText,
+      TaskStatus.done => ext.statusDoneText,
+    };
+  }
+
+  Color _getStatusBackgroundColor(BuildContext context) {
+    final ext = context.extColors;
+    return switch (task.status) {
+      TaskStatus.todo => ext.statusTodoContainer,
+      TaskStatus.inProgress => ext.statusInProgressContainer,
+      TaskStatus.done => ext.statusDoneContainer,
+    };
+  }
+
+  Color _getPriorityBackgroundColor(BuildContext context) {
+    final ext = context.extColors;
+    return switch (task.priority) {
+      Priority.none => ext.priorityNoneContainer,
+      Priority.high => ext.priorityHighContainer,
+      Priority.medium => ext.priorityMediumContainer,
+      Priority.low => ext.priorityLowContainer,
     };
   }
 
@@ -69,24 +91,25 @@ class TaskItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final ext = context.extColors;
     final isOverdue = _isOverdue();
-    final priorityColor = _getPriorityColor();
-    final statusColor = _getStatusColor();
-    final indicatorColor = isOverdue ? const Color(0xFFEF4444) : priorityColor;
+    final priorityColor = _getPriorityColor(context);
+    final statusColor = _getStatusColor(context);
+    final indicatorColor = isOverdue ? ext.taskIndicatorOverdue : priorityColor;
 
     final containerColor = switch (task.status) {
-      TaskStatus.done => theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-      _ when isOverdue => const Color(0xFFFFF1F2),
-      _ => theme.colorScheme.surface,
+      TaskStatus.done => ext.taskContainerDone,
+      _ when isOverdue => ext.taskContainerOverdue,
+      _ => ext.taskContainerDefault,
     };
 
     final titleColor = task.status == TaskStatus.done
-        ? theme.colorScheme.onSurface.withValues(alpha: 0.65)
-        : theme.colorScheme.onSurface;
+        ? ext.taskTitleDone
+        : ext.taskTitleDefault;
 
     final descriptionColor = task.status == TaskStatus.done
-        ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6)
-        : theme.colorScheme.onSurfaceVariant;
+        ? ext.taskDescriptionDone
+        : ext.taskDescriptionDefault;
 
     final statusLabel = _formatStatus(context);
     final priorityLabel = _formatPriority(context);
@@ -127,6 +150,7 @@ class TaskItemWidget extends StatelessWidget {
                                 task: task,
                                 titleColor: titleColor,
                                 statusColor: statusColor,
+                                statusBackgroundColor: _getStatusBackgroundColor(context),
                                 statusLabel: statusLabel,
                                 titleStyle: textTheme.titleMedium,
                                 statusTextStyle: textTheme.labelSmall,
@@ -145,6 +169,7 @@ class TaskItemWidget extends StatelessWidget {
                                 task: task,
                                 theme: theme,
                                 priorityColor: priorityColor,
+                                priorityBackgroundColor: _getPriorityBackgroundColor(context),
                                 priorityLabel: priorityLabel,
                                 isOverdue: isOverdue,
                                 showProjectName: showProjectName,
@@ -199,6 +224,7 @@ class _TaskHeaderRow extends StatelessWidget {
   final TaskDto task;
   final Color titleColor;
   final Color statusColor;
+  final Color statusBackgroundColor;
   final String statusLabel;
   final TextStyle? titleStyle;
   final TextStyle? statusTextStyle;
@@ -207,6 +233,7 @@ class _TaskHeaderRow extends StatelessWidget {
     required this.task,
     required this.titleColor,
     required this.statusColor,
+    required this.statusBackgroundColor,
     required this.statusLabel,
     required this.titleStyle,
     required this.statusTextStyle,
@@ -235,6 +262,7 @@ class _TaskHeaderRow extends StatelessWidget {
         _TaskStatusBadge(
           label: statusLabel,
           statusColor: statusColor,
+          statusBackgroundColor: statusBackgroundColor,
           textStyle: statusTextStyle,
         ),
       ],
@@ -245,11 +273,13 @@ class _TaskHeaderRow extends StatelessWidget {
 class _TaskStatusBadge extends StatelessWidget {
   final String label;
   final Color statusColor;
+  final Color statusBackgroundColor;
   final TextStyle? textStyle;
 
   const _TaskStatusBadge({
     required this.label,
     required this.statusColor,
+    required this.statusBackgroundColor,
     required this.textStyle,
   });
 
@@ -262,7 +292,7 @@ class _TaskStatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: statusColor.withValues(alpha: 0.12),
+        color: statusBackgroundColor,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(label, style: resolvedStyle),
@@ -296,6 +326,7 @@ class _TaskMetadataChips extends StatelessWidget {
   final TaskDto task;
   final ThemeData theme;
   final Color priorityColor;
+  final Color priorityBackgroundColor;
   final String priorityLabel;
   final bool isOverdue;
   final bool showProjectName;
@@ -304,6 +335,7 @@ class _TaskMetadataChips extends StatelessWidget {
     required this.task,
     required this.theme,
     required this.priorityColor,
+    required this.priorityBackgroundColor,
     required this.priorityLabel,
     required this.isOverdue,
     required this.showProjectName,
@@ -320,12 +352,15 @@ class _TaskMetadataChips extends StatelessWidget {
             icon: Icons.folder_outlined,
             label: task.projectName!,
             theme: theme,
+            color: context.extColors.chipProjectText,
+            backgroundColor: context.extColors.chipProjectContainer,
           ),
         _InfoChip(
           icon: Icons.flag_outlined,
           label: priorityLabel,
           theme: theme,
           color: priorityColor,
+          backgroundColor: priorityBackgroundColor,
         ),
         if (task.dueDate != null)
           _InfoChip(
@@ -333,7 +368,10 @@ class _TaskMetadataChips extends StatelessWidget {
                 isOverdue ? Icons.warning_outlined : Icons.calendar_today_outlined,
             label: DateFormat('MMM d, y').format(task.dueDate!),
             theme: theme,
-            color: isOverdue ? const Color(0xFFEF4444) : null,
+            color: isOverdue ? context.extColors.chipDueDateOverdueText : null,
+            backgroundColor: isOverdue 
+                ? context.extColors.chipDueDateOverdueContainer 
+                : context.extColors.chipDueDateContainer,
           ),
       ],
     );
@@ -345,22 +383,26 @@ class _InfoChip extends StatelessWidget {
   final String label;
   final ThemeData theme;
   final Color? color;
+  final Color? backgroundColor;
 
   const _InfoChip({
     required this.icon,
     required this.label,
     required this.theme,
     this.color,
+    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final chipColor = color ?? theme.colorScheme.onSurfaceVariant;
+    final ext = context.extColors;
+    final chipColor = color ?? ext.chipDueDateText;
+    final chipBackground = backgroundColor ?? ext.chipDueDateContainer;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: chipColor.withValues(alpha: 0.1),
+        color: chipBackground,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
