@@ -50,6 +50,27 @@ class TaskApiService(
     }
 
     /**
+     * Fetches tasks assigned to the current user due on a specific date.
+     *
+     * @param date The date in YYYY-MM-DD format
+     * @param page The page number (0-based)
+     * @param size The page size
+     * @return PaginatedResponse containing the tasks due on the specified date
+     */
+    suspend fun getAssignedTasksDueOn(
+        date: String,
+        page: Int,
+        size: Int
+    ): PaginatedResponse<TaskResponse> {
+        val resource = Tasks.Assigned.DueOn(
+            date = date,
+            page = page,
+            size = size
+        )
+        return client.get(resource).body()
+    }
+
+    /**
      * Fetches a specific task by ID.
      *
      * @param taskId The ID of the task

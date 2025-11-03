@@ -13,6 +13,9 @@ import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepositor
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
 import com.danioliveira.taskmanager.utils.toUuid
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.plus
 import org.jetbrains.exposed.v1.core.Slf4jSqlDebugLogger
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import kotlin.uuid.ExperimentalUuidApi
@@ -50,6 +53,24 @@ internal class TaskService(
         addLogger(Slf4jSqlDebugLogger)
         with(this) {
             repository.findAllByAssigneeId(assigneeId, page, size, query)
+        }
+    }
+
+    suspend fun findAssignedDueOn(
+        assigneeId: Uuid,
+        date: String,
+        page: Int = 0,
+        size: Int = 10
+    ): PaginatedResponse<TaskResponse> = dbQuery {
+        // Parse date string (YYYY-MM-DD) to LocalDate
+        val localDate = kotlinx.datetime.LocalDate.parse(date)
+        // Create start of day and end of day (next day at 00:00)
+        val start = LocalDateTime(localDate.year, localDate.monthNumber, localDate.dayOfMonth, 0, 0, 0)
+        val nextDay = localDate.plus(DatePeriod(days = 1))
+        val end = LocalDateTime(nextDay.year, nextDay.monthNumber, nextDay.dayOfMonth, 0, 0, 0)
+        
+        with(this) {
+            repository.findAllByAssigneeAndDueDateRange(assigneeId, start, end, page, size)
         }
     }
 

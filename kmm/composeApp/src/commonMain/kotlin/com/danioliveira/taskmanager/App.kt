@@ -254,7 +254,7 @@ fun TaskItNavHost(
                         onGlobalSearch = onGlobalSearch
                     )
 
-                    // Calendar Section - placeholder for future implementation
+                    // Calendar Section
                     composableWithCompositionLocal<Screen.Calendar>(
                         enterTransition = {
                             slideInHorizontally(
@@ -272,7 +272,13 @@ fun TaskItNavHost(
                         val sharedTransitionScope = LocalSharedTransitionScope.current
                             ?: throw IllegalStateException("No sharedTransitionScope found")
                         with(sharedTransitionScope) {
-                            CalendarScreen(onGlobalSearch = onGlobalSearch)
+                            // move to section and remove global search
+                            CalendarScreen(
+                                onGlobalSearch = onGlobalSearch,
+                                onTaskClick = { taskId ->
+                                    navController.navigate(TaskDetailRoute(taskId))
+                                }
+                            )
                         }
                     }
 

@@ -35,6 +35,15 @@ internal interface TaskRepository {
     ): PaginatedResponse<TaskResponse>
 
     context(transaction: R2dbcTransaction)
+    suspend fun findAllByAssigneeAndDueDateRange(
+        assigneeId: Uuid,
+        start: LocalDateTime,
+        end: LocalDateTime,
+        page: Int = 0,
+        size: Int = 10
+    ): PaginatedResponse<TaskResponse>
+
+    context(transaction: R2dbcTransaction)
     suspend fun findById(id: String): TaskResponse?
 
     /**

@@ -95,6 +95,13 @@ fun Route.taskRoutes() {
             call.respond(tasks)
         }
 
+        // Get tasks assigned to current user due on a specific date: GET /v1/tasks/assigned/due-on
+        get<Tasks.Assigned.DueOn> { res ->
+            val userId = userPrincipal()
+            val tasks = taskService.findAssignedDueOn(userId, res.date, res.page, res.size)
+            call.respond(tasks)
+        }
+
         // Get task statistics: GET /v1/tasks/stats
         get<Tasks.Stats> {
             val userId = userPrincipal()

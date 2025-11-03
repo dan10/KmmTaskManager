@@ -29,13 +29,30 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItem
 import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
 
 
+/**
+ * Task item with swipe-to-dismiss functionality.
+ * Supports swipe right for complete/uncomplete and swipe left for delete.
+ *
+ * @param task The task to display
+ * @param onClick Callback invoked when the task is clicked
+ * @param onAction Callback for task actions (for backward compatibility with TasksScreen)
+ * @param modifier Modifier to be applied to the component
+ * @param showProjectName Whether to show the project name
+ * @param onCheckedChange Optional callback for checkbox state changes
+ * @param onSwipeComplete Optional callback for swipe-to-complete action
+ * @param onSwipeDelete Optional callback for swipe-to-delete action
+ */
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
 fun TaskItemWithSwipe(
     task: Task,
-    onClick: (Task) -> Unit,
-    onAction: (TasksAction) -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    showProjectName: Boolean = true,
+    onAction: ((TasksAction) -> Unit)? = null,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+    onSwipeComplete: (() -> Unit)? = null,
+    onSwipeDelete: (() -> Unit)? = null
 ) {
     val swipeToDismissState = rememberSwipeToDismissBoxState()
 
@@ -60,24 +77,49 @@ fun TaskItemWithSwipe(
 
             BoxSwipe(color, swipeToDismissState, extendedColors)
         },
-        onDismiss = { direction ->
+        onDismiss = { direction: SwipeToDismissBoxValue ->
             when (direction) {
                 SwipeToDismissBoxValue.StartToEnd -> {
-                    val newStatus = if (task.status == TaskStatus.DONE) TaskStatus.TODO else TaskStatus.DONE
-                    onAction(TasksAction.ConfirmTaskCompletion(task.id, newStatus))
+                    handleSwipeComplete(task, onSwipeComplete, onAction)
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
-                    onAction(TasksAction.ConfirmTaskDeletion(task.id))
+                    handleSwipeDelete(task, onSwipeDelete, onAction)
                 }
-                else -> Unit
+                else -> {}
             }
         }
     ) {
         TaskItem(
             task = task,
-            onClick = { onClick(task) },
-            onCheckedChange = {}
+            onClick = onClick,
+            onCheckedChange = onCheckedChange ?: {},
+            showProjectName = showProjectName
         )
+    }
+}
+
+private fun handleSwipeComplete(
+    task: Task,
+    onSwipeComplete: (() -> Unit)?,
+    onAction: ((TasksAction) -> Unit)?
+) {
+    if (onSwipeComplete != null) {
+        onSwipeComplete()
+    } else if (onAction != null) {
+        val newStatus = if (task.status == TaskStatus.DONE) TaskStatus.TODO else TaskStatus.DONE
+        onAction(TasksAction.ConfirmTaskCompletion(task.id, newStatus))
+    }
+}
+
+private fun handleSwipeDelete(
+    task: Task,
+    onSwipeDelete: (() -> Unit)?,
+    onAction: ((TasksAction) -> Unit)?
+) {
+    if (onSwipeDelete != null) {
+        onSwipeDelete()
+    } else if (onAction != null) {
+        onAction(TasksAction.ConfirmTaskDeletion(task.id))
     }
 }
 

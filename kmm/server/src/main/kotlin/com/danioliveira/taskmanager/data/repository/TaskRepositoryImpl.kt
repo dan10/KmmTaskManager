@@ -23,10 +23,13 @@ import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.greaterEq
 import org.jetbrains.exposed.v1.core.intLiteral
 import org.jetbrains.exposed.v1.core.leftJoin
+import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.core.sum
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
@@ -138,6 +141,26 @@ internal class TaskRepositoryImpl : TaskRepository {
         ) {
             condition
         }
+    }
+
+    context(transaction: R2dbcTransaction)
+    override suspend fun findAllByAssigneeAndDueDateRange(
+        assigneeId: Uuid,
+        start: LocalDateTime,
+        end: LocalDateTime,
+        page: Int,
+        size: Int
+    ): PaginatedResponse<TaskResponse> = with(transaction) {
+        val condition = (TasksTable.assigneeId eq assigneeId.toJavaUuid()) and
+            (TasksTable.status neq TaskStatus.DONE) and
+            (TasksTable.dueDate greaterEq start) and
+            (TasksTable.dueDate less end)
+
+        return queryWithPaginationAndCustomOrder(
+            limit = size,
+            offset = page * size,
+            predicate = { condition }
+        )
     }
 
     context(transaction: R2dbcTransaction)
@@ -255,6 +278,54 @@ internal class TaskRepositoryImpl : TaskRepository {
             .orderBy(TasksTable.dueDate, SortOrder.DESC)
             .apply { if (limit != null) limit(limit) }
             .apply { if (offset != null) offset(offset.toLong()) }
+            .map { row -> row.toResponse() }
+            .toList()
+
+        return PaginatedResponse(
+            items = items,
+            total = totalCount,
+            currentPage = if (limit != null && limit > 0) (offset ?: 0) / limit else 0,
+            pageSize = items.size,
+            totalPages = if (limit != null && limit > 0) ceil(totalCount.toDouble() / limit).toInt() else 1
+        )
+    }
+
+    private suspend fun queryWithPaginationAndCustomOrder(
+        limit: Int? = null,
+        offset: Int? = null,
+        predicate: () -> Op<Boolean>,
+    ): PaginatedResponse<TaskResponse> {
+        // Collect total count first
+        val totalCount = TasksTable
+            .select(TasksTable.id.count())
+            .where(predicate)
+            .map { it[TasksTable.id.count()] }
+            .toList()
+            .firstOrNull()?.toInt() ?: 0
+
+        // Priority ordering: HIGH=4, MEDIUM=3, LOW=2, NONE=1 (descending for higher priority first)
+        val priorityOrder = Case()
+            .When(TasksTable.priority eq Priority.HIGH, intLiteral(4))
+            .When(TasksTable.priority eq Priority.MEDIUM, intLiteral(3))
+            .When(TasksTable.priority eq Priority.LOW, intLiteral(2))
+            .Else(intLiteral(1))
+
+        // Get paginated tasks with project info, ordered by dueDate ASC NULLS LAST, priority DESC, title ASC
+        var query = TasksTable
+            .leftJoin(ProjectsTable,
+                onColumn = { TasksTable.projectId },
+                otherColumn = { ProjectsTable.id }
+            )
+            .select(TasksTable.fields + ProjectsTable.name + ProjectsTable.id)
+            .where(predicate)
+            .orderBy(TasksTable.dueDate, SortOrder.ASC)
+            .orderBy(priorityOrder, SortOrder.DESC)
+            .orderBy(TasksTable.title, SortOrder.ASC)
+        
+        if (limit != null) query = query.limit(limit)
+        if (offset != null) query = query.offset(offset.toLong())
+        
+        val items = query
             .map { row -> row.toResponse() }
             .toList()
 

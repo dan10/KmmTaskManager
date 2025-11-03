@@ -47,6 +47,20 @@ interface TaskRepository {
     ): Result<PaginatedResponse<TaskResponse>>
 
     /**
+     * Gets tasks assigned to the current user due on a specific date.
+     *
+     * @param date The date in YYYY-MM-DD format
+     * @param page The page number (0-based)
+     * @param size The page size
+     * @return Result containing paginated tasks due on the specified date
+     */
+    suspend fun getAssignedTasksDueOn(
+        date: String,
+        page: Int,
+        size: Int
+    ): Result<PaginatedResponse<TaskResponse>>
+
+    /**
      * Gets paginated tasks for a specific project.
      *
      * @param projectId The ID of the project

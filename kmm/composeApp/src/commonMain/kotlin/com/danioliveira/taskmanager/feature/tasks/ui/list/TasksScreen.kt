@@ -186,9 +186,9 @@ private fun TaskList(
             val task = pagingItems[index]
             if (task != null) {
                 TaskItemWithSwipe(
-                    modifier = Modifier.animateItem(),
                     task = task,
-                    onClick = { onAction(TasksAction.OpenTaskDetails(it.id)) },
+                    onClick = { onAction(TasksAction.OpenTaskDetails(task.id)) },
+                    modifier = Modifier.animateItem(),
                     onAction = onAction
                 )
             } else {

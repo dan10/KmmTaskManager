@@ -71,6 +71,23 @@ class TaskRepositoryImpl(
         }
     }
 
+    override suspend fun getAssignedTasksDueOn(
+        date: String,
+        page: Int,
+        size: Int
+    ): Result<PaginatedResponse<TaskResponse>> {
+        return try {
+            val response = apiService.getAssignedTasksDueOn(date, page, size)
+            Result.success(response)
+        } catch (e: ClientRequestException) {
+            Result.failure(Exception("Failed to fetch tasks: ${e.message}"))
+        } catch (e: ServerResponseException) {
+            Result.failure(Exception("Server error: ${e.message}"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Unknown error: ${e.message}"))
+        }
+    }
+
     override suspend fun getTask(taskId: Uuid): Result<TaskResponse> {
         return try {
             val response = apiService.getTask(taskId.toString())

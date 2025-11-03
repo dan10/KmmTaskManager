@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -53,10 +52,8 @@ import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorState
 import com.danioliveira.taskmanager.core.ui.components.TaskItInfoCard
 import com.danioliveira.taskmanager.core.ui.components.TaskItLoadingState
-import com.danioliveira.taskmanager.core.ui.components.TaskItSmallLoadingIndicator
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
-import com.danioliveira.taskmanager.core.ui.components.TaskItem
-import com.danioliveira.taskmanager.core.ui.components.TaskItemSkeleton
+import com.danioliveira.taskmanager.core.ui.components.TaskListPaging
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -227,74 +224,38 @@ private fun ProjectDetailsContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Text(
-            text = stringResource(Res.string.project_tasks_title),
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        ProjectTasksList(
+        TaskListPaging(
             pagingItems = pagingItems,
-            navigateToTaskDetail = navigateToTaskDetail,
-            onTaskStatusChange = onTaskStatusChange
+            showProjectName = false,
+            enableSwipe = true,
+            onTaskClick = { task ->
+                navigateToTaskDetail(task.id)
+            },
+            onTaskCheckedChange = { taskId, checked ->
+                val newStatus = if (checked) TaskStatus.DONE.name else TaskStatus.TODO.name
+                onTaskStatusChange(taskId, newStatus)
+            },
+            onTaskSwipeComplete = { task ->
+                val newStatus = if (task.status == TaskStatus.DONE) TaskStatus.TODO.name else TaskStatus.DONE.name
+                onTaskStatusChange(task.id.toString(), newStatus)
+            },
+            onTaskSwipeDelete = { task ->
+                // TODO: Add delete action to ProjectDetailsAction
+            },
+            header = {
+                item {
+                    Text(
+                        text = stringResource(Res.string.project_tasks_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+            },
+            emptyContent = { EmptyProjectTasks() }
         )
     }
 }
 
-
-context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
-@Composable
-private fun ProjectTasksList(
-    pagingItems: LazyPagingItems<Task>,
-    navigateToTaskDetail: (Uuid) -> Unit,
-    onTaskStatusChange: (String, String) -> Unit
-) {
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey { it.id },
-            contentType = pagingItems.itemContentType { "task" }
-        ) { index ->
-            val task = pagingItems[index]
-            if (task != null) {
-                // Real task item
-                TaskItem(
-                    task = task,
-                    onClick = { navigateToTaskDetail(task.id) },
-                    onCheckedChange = { isChecked ->
-                        val newStatus =
-                            if (isChecked) TaskStatus.DONE.name else TaskStatus.TODO.name
-                        onTaskStatusChange(task.id.toString(), newStatus)
-                    },
-                    showProjectName = false
-                )
-            } else {
-                // Placeholder (null item) - show shimmer skeleton
-                TaskItemSkeleton()
-            }
-        }
-
-        if (pagingItems.loadState.append == LoadState.Loading) {
-            item {
-                TaskItSmallLoadingIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                )
-            }
-        }
-
-        if (pagingItems.loadState.append.endOfPaginationReached && pagingItems.itemCount == 0) {
-            item {
-                EmptyProjectTasks()
-            }
-        }
-    }
-}
 
 @Composable
 private fun EmptyProjectTasks() {
