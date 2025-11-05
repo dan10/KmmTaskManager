@@ -7,6 +7,7 @@ import 'core/data/local/secure_storage.dart';
 import 'core/di/providers.dart';
 import 'core/l10n/app_l10n.dart';
 import 'core/routing/app_router.dart';
+import 'core/auth/auth_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
       child: Builder(
         builder: (context) {
           final secureStorage = Provider.of<SecureStorage>(context, listen: false);
+          final authState = Provider.of<AuthState>(context, listen: false);
           
           return MaterialApp.router(
             localizationsDelegates: const [
@@ -42,7 +44,7 @@ class MyApp extends StatelessWidget {
             theme: TaskItTheme.light(),
             darkTheme: TaskItTheme.dark(),
             supportedLocales: AppLocalizations.supportedLocales,
-            routerConfig: createAppRouter(secureStorage),
+            routerConfig: createAppRouter(secureStorage, authState),
           );
         },
       ),

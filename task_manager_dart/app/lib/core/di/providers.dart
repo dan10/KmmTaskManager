@@ -3,6 +3,7 @@ import 'package:provider/single_child_widget.dart';
 import '../data/local/secure_storage.dart';
 import '../constants/api_constants.dart';
 import '../network/api_client.dart';
+import '../auth/auth_state.dart';
 
 // Feature providers
 import '../../features/auth/di/providers.dart' as auth_di;
@@ -17,9 +18,15 @@ class DependencyProviders {
           create: (_) => SecureStorage(),
         ),
 
+        // Auth state notifier used to refresh router on auth changes
+        ChangeNotifierProxyProvider<SecureStorage, AuthState>(
+          create: (context) => AuthState(Provider.of<SecureStorage>(context, listen: false)),
+          update: (context, secureStorage, previous) => previous ?? AuthState(secureStorage),
+        ),
+
         // Singleton ApiClient - shared by all authenticated services
-        ProxyProvider<SecureStorage, ApiClient>(
-          update: (context, secureStorage, _) {
+        ProxyProvider2<SecureStorage, AuthState, ApiClient>(
+          update: (context, secureStorage, authState, _) {
             // Parse the base URL to extract host, port, and scheme
             final uri = Uri.parse(ApiConstants.baseUrl);
             
@@ -30,9 +37,8 @@ class DependencyProviders {
               scheme: uri.scheme,
               authTokenProvider: () => secureStorage.getToken(),
               unauthorizedHandler: () async {
-                // Clear token on 401 - this will trigger auth state change
-                // and the router will automatically redirect to login
-                await secureStorage.deleteToken();
+                // Clear token and notify auth state on 401 - router will redirect
+                await authState.logout();
               },
               enableLogging: true,
             );

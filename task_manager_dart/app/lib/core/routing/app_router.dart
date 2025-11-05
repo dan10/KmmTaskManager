@@ -6,6 +6,7 @@ import '../../features/calendar/presentation/views/calendar_screen.dart';
 import '../../features/projects/routing/project_routes.dart';
 import '../../features/tasks/routing/task_routes.dart';
 import '../data/local/secure_storage.dart';
+import '../auth/auth_state.dart';
 
 // It's good practice to have your route paths as constants
 class AppRoutes {
@@ -32,10 +33,12 @@ class AppRoutes {
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Create GoRouter with SecureStorage for auth redirect
-GoRouter createAppRouter(SecureStorage secureStorage) {
+GoRouter createAppRouter(SecureStorage secureStorage, AuthState authState) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.login,
+    // Refresh routing whenever auth state changes (e.g., token cleared on 401)
+    refreshListenable: authState,
     redirect: (context, state) => _authRedirect(secureStorage, state),
     routes: [
     // Auth routes
