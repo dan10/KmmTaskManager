@@ -21,6 +21,7 @@ class TaskRoutes {
     baseRouter.get(ApiRoutes.tasksStats, _getTaskProgress);
     baseRouter.get(ApiRoutes.tasksCreatedByMe, _getTasksCreatedByMe);
     baseRouter.get(ApiRoutes.tasksByProject, _getTasksByProject);
+    baseRouter.get('/assigned/due-on', _getAssignedDueOnTasks);
     baseRouter.get(ApiRoutes.taskById, _getTaskById);
     baseRouter.post('/', _createTask);
     baseRouter.put(ApiRoutes.taskById, _updateTask);
@@ -185,6 +186,61 @@ class TaskRoutes {
     return okJsonResponse(tasks.map((t) => t.toJson()).toList());
   }
 
+  Future<Response> _getAssignedDueOnTasks(Request request) async {
+    final userId = request.context['userId'] as String;
+    final params = request.url.queryParameters;
+
+    // Required date parameter (YYYY-MM-DD)
+    final dateStr = params['date'];
+    if (dateStr == null || dateStr.isEmpty) {
+      throw ValidationException(message: 'Query parameter "date" is required (format: YYYY-MM-DD).');
+    }
+
+    // Optional timezone offset in minutes
+    final tzOffsetStr = params['tzOffsetMinutes'] ?? '0';
+    int tzOffsetMinutes;
+    try {
+      tzOffsetMinutes = int.parse(tzOffsetStr);
+    } catch (e) {
+      throw ValidationException(message: 'Query parameter "tzOffsetMinutes" must be a valid integer.');
+    }
+
+    // Parse page and size
+    final pageStr = params['page'] ?? '0';
+    int page;
+    try {
+      page = int.parse(pageStr);
+      if (page < 0) throw ValidationException(message: 'Query parameter "page" must be non-negative.');
+    } catch (e) {
+      throw ValidationException(message: 'Query parameter "page" must be a valid integer.');
+    }
+
+    final sizeStr = params['size'] ?? '10';
+    int size;
+    try {
+      size = int.parse(sizeStr);
+      if (size <= 0) throw ValidationException(message: 'Query parameter "size" must be positive.');
+      if (size > 100) size = 100; // Cap size
+    } catch (e) {
+      throw ValidationException(message: 'Query parameter "size" must be a valid integer.');
+    }
+
+    // Convert local date to UTC range
+    // Local date at 00:00:00 minus offset = UTC start
+    final localStart = DateTime.parse('$dateStr 00:00:00');
+    final startUtc = localStart.subtract(Duration(minutes: tzOffsetMinutes));
+    final endUtc = startUtc.add(const Duration(days: 1));
+
+    final tasks = await _service.getTasksAssignedDueOn(
+      userId,
+      startUtc,
+      endUtc,
+      page: page,
+      size: size,
+    );
+    return okJsonResponse(tasks.map((t) => t.toJson()).toList());
+  }
+
   Future<Response> _getTaskById(Request request) async {
     final id = request.params['id'];
     if (id == null || id.isEmpty) {
@@ -262,7 +318,7 @@ class TaskRoutes {
       status: updateRequest.status ?? existingTask.status,
       priority: updateRequest.priority ?? existingTask.priority,
       dueDate: updateRequest.dueDate ?? existingTask.dueDate,
-      projectId: updateRequest.projectId ?? existingTask.projectId,
+      projectId: existingTask.projectId, // Project cannot be changed via update
       assigneeId: updateRequest.assigneeId ?? existingTask.assigneeId,
       creatorId: userId,
     );

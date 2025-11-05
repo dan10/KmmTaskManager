@@ -322,4 +322,46 @@ class TaskRepository {
       completedTasks: completedTasks,
     );
   }
+
+  Future<List<shared_models.TaskDto>> getTasksAssignedDueOn({
+    required String assigneeId,
+    required DateTime startUtc,
+    required DateTime endUtc,
+    int page = 0,
+    int size = 10,
+  }) async {
+    // Priority ordering: HIGH=4, MEDIUM=3, LOW=2, NONE=1
+    final sql = '''
+      SELECT t.*, p.name as project_name 
+      FROM tasks t 
+      LEFT JOIN projects p ON t.project_id = p.id
+      WHERE t.assignee_id = @assigneeId 
+        AND t.status != 'DONE'
+        AND t.due_date >= @startUtc 
+        AND t.due_date < @endUtc
+      ORDER BY 
+        t.due_date ASC NULLS LAST,
+        CASE t.priority
+          WHEN 'HIGH' THEN 4
+          WHEN 'MEDIUM' THEN 3
+          WHEN 'LOW' THEN 2
+          ELSE 1
+        END DESC,
+        t.title ASC
+      LIMIT @limit OFFSET @offset
+    ''';
+
+    final result = await _db.execute(
+      Sql.named(sql),
+      parameters: {
+        'assigneeId': assigneeId,
+        'startUtc': startUtc.toIso8601String(),
+        'endUtc': endUtc.toIso8601String(),
+        'limit': size,
+        'offset': page * size,
+      },
+    );
+
+    return result.map((row) => _mapTaskFromRow(row.toColumnMap())).toList();
+  }
 }

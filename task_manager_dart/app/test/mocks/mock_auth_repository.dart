@@ -1,5 +1,6 @@
 import 'package:task_manager_shared/models.dart';
 import 'package:task_manager_app/features/auth/data/repositories/auth_repository.dart';
+import 'package:task_manager_app/core/utils/result.dart';
 
 /// Manual mock implementation of AuthRepository for testing
 class MockAuthRepository implements AuthRepository {
@@ -15,36 +16,35 @@ class MockAuthRepository implements AuthRepository {
   bool shouldThrowException = false;
 
   @override
-  Future<LoginResponseDto> login(String email, String password) async {
+  Future<Result<void>> login({required String email, required String password}) async {
     if (shouldThrowException && mockException != null) {
-      throw mockException!;
+      return Result.error(mockException!);
     }
 
     if (mockLoginResponse != null) {
       _storedToken = mockLoginResponse!.token;
       _currentUser = mockLoginResponse!.user;
       _isLoggedIn = true;
-      return mockLoginResponse!;
+      return Result.ok(null);
     }
 
-    throw Exception('No mock response set');
+    return Result.error(Exception('No mock response set'));
   }
 
   @override
-  Future<LoginResponseDto> register(String name, String email,
-      String password) async {
+  Future<Result<void>> register({required String name, required String email, required String password}) async {
     if (shouldThrowException && mockException != null) {
-      throw mockException!;
+      return Result.error(mockException!);
     }
 
     if (mockLoginResponse != null) {
       _storedToken = mockLoginResponse!.token;
       _currentUser = mockLoginResponse!.user;
       _isLoggedIn = true;
-      return mockLoginResponse!;
+      return Result.ok(null);
     }
 
-    throw Exception('No mock response set');
+    return Result.error(Exception('No mock response set'));
   }
 
   @override

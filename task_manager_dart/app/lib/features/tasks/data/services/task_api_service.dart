@@ -13,6 +13,13 @@ abstract class TaskApiService {
   });
   
   Future<Result<TaskProgress>> getTaskProgress();
+  
+  Future<Result<PaginatedResponse<TaskDto>>> getAssignedTasksDueOn({
+    required DateTime localDate,
+    int page = 0,
+    int size = 20,
+  });
+  
   Future<Result<TaskDto>> getTask(String id);
   Future<Result<TaskDto>> createTask(TaskCreateRequestDto request);
   Future<Result<TaskDto>> updateTask(String id, TaskUpdateRequestDto request);
@@ -54,6 +61,34 @@ class TaskApiServiceImpl implements TaskApiService {
     return _client.get<TaskProgress>(
       ApiRoutes.tasksStats,
       fromJson: (json) => TaskProgress.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  Future<Result<PaginatedResponse<TaskDto>>> getAssignedTasksDueOn({
+    required DateTime localDate,
+    int page = 0,
+    int size = 20,
+  }) async {
+    final dateString = '${localDate.year.toString().padLeft(4, '0')}-'
+        '${localDate.month.toString().padLeft(2, '0')}-'
+        '${localDate.day.toString().padLeft(2, '0')}';
+    
+    final tzOffsetMinutes = localDate.timeZoneOffset.inMinutes;
+    
+    final queryParams = <String, String>{
+      'date': dateString,
+      'tzOffsetMinutes': tzOffsetMinutes.toString(),
+      'page': page.toString(),
+      'size': size.toString(),
+    };
+
+    return _client.get<PaginatedResponse<TaskDto>>(
+      ApiRoutes.tasksAssignedDueOn,
+      queryParameters: queryParams,
+      fromJson: (json) => PaginatedResponse<TaskDto>.fromJson(
+        json,
+        (item) => TaskDto.fromJson(item as Map<String, dynamic>),
+      ),
     );
   }
 

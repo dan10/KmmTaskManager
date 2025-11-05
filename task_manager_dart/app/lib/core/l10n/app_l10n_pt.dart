@@ -343,6 +343,29 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get projectNameRequired => 'Nome do projeto é obrigatório';
+
+  @override
+  String get calendarTitle => 'Calendar';
+
+  @override
+  String calendarTasksFor(String date) {
+    return 'Tasks for $date';
+  }
+
+  @override
+  String calendarTaskCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks',
+      one: '1 task',
+      zero: 'No tasks',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarNoTasksForDate => 'No tasks scheduled for this date';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

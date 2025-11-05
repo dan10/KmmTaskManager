@@ -472,5 +472,35 @@
   "projectNameRequired": "Project name is required",
   "@projectNameRequired": {
     "description": "Error message when project name is empty"
+  },
+  
+  "@@context": "Calendar feature strings",
+  "calendarTitle": "Calendar",
+  "@calendarTitle": {
+    "description": "Title for calendar screen"
+  },
+  "calendarTasksFor": "Tasks for {date}",
+  "@calendarTasksFor": {
+    "description": "Header showing tasks for selected date",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "January 15, 2024"
+      }
+    }
+  },
+  "calendarTaskCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
+  "@calendarTaskCount": {
+    "description": "Shows the number of tasks",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "calendarNoTasksForDate": "No tasks scheduled for this date",
+  "@calendarNoTasksForDate": {
+    "description": "Message when no tasks are found for selected date"
   }
 }

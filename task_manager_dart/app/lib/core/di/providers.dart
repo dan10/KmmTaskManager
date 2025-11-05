@@ -6,6 +6,7 @@ import '../network/api_client.dart';
 
 // Feature providers
 import '../../features/auth/di/providers.dart' as auth_di;
+import '../../features/calendar/di/providers.dart' as calendar_di;
 import '../../features/projects/di/providers.dart' as projects_di;
 import '../../features/tasks/di/providers.dart' as tasks_di;
 
@@ -42,5 +43,6 @@ class DependencyProviders {
         ...auth_di.providers,
         ...tasks_di.providers,
         ...projects_di.providers,
+        ...calendar_di.providers,
       ];
 } 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/routing/auth_routes.dart';
+import '../../features/calendar/presentation/views/calendar_screen.dart';
 import '../../features/projects/routing/project_routes.dart';
 import '../../features/tasks/routing/task_routes.dart';
 import '../data/local/secure_storage.dart';
@@ -65,8 +66,8 @@ GoRouter createAppRouter(SecureStorage secureStorage) {
           routes: [
             GoRoute(
               path: AppRoutes.calendar,
-              builder: (context, state) =>
-                  const Center(child: Text('Calendar')),
+              // TODO: create section
+              builder: (context, state) => const CalendarScreen(),
             ),
           ],
         ),

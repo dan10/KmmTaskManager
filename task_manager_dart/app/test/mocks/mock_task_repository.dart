@@ -1,6 +1,7 @@
 import 'package:task_manager_shared/models.dart';
 
 import 'package:task_manager_app/features/tasks/data/repositories/task_repository.dart';
+import 'package:task_manager_app/core/utils/result.dart';
 
 class MockTaskRepository implements TaskRepository {
   bool _shouldThrowError = false;
@@ -103,7 +104,7 @@ class MockTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<PaginatedResponse<TaskDto>> getTasks({
+  Future<Result<PaginatedResponse<TaskDto>>> getTasks({
     int page = 0,
     int size = 20,
     String? query,
@@ -118,29 +119,30 @@ class MockTaskRepository implements TaskRepository {
     await _simulateDelay();
 
     if (_shouldThrowError) {
-      throw Exception('Failed to load tasks: Mock error');
+      return Result.error(Exception('Failed to load tasks: Mock error'));
     }
 
-    return _getTasksResponse ?? PaginatedResponse<TaskDto>(
+    final response = _getTasksResponse ?? PaginatedResponse<TaskDto>(
       items: [],
       total: 0,
       page: page,
       size: size,
       totalPages: 0,
     );
+    return Result.ok(response);
   }
 
   @override
-  Future<TaskDto> getTask(String id) async {
+  Future<Result<TaskDto>> getTask(String id) async {
     lastGetTaskId = id;
 
     await _simulateDelay();
 
     if (_shouldThrowError) {
-      throw Exception('Failed to load task: Mock error');
+      return Result.error(Exception('Failed to load task: Mock error'));
     }
 
-    return _getTaskResponse ?? TaskDto(
+    final task = _getTaskResponse ?? TaskDto(
       id: id,
       title: 'Mock Task',
       description: 'Mock Description',
@@ -148,19 +150,20 @@ class MockTaskRepository implements TaskRepository {
       priority: Priority.medium,
       creatorId: 'mock-user',
     );
+    return Result.ok(task);
   }
 
   @override
-  Future<TaskDto> createTask(TaskCreateRequestDto request) async {
+  Future<Result<TaskDto>> createTask(TaskCreateRequestDto request) async {
     lastCreateRequest = request;
 
     await _simulateDelay();
 
     if (_shouldThrowError) {
-      throw Exception('Failed to create task: Mock error');
+      return Result.error(Exception('Failed to create task: Mock error'));
     }
 
-    return _createTaskResponse ?? TaskDto(
+    final task = _createTaskResponse ?? TaskDto(
       id: 'mock-id',
       title: request.title,
       description: request.description,
@@ -171,59 +174,62 @@ class MockTaskRepository implements TaskRepository {
       assigneeId: request.assigneeId,
       creatorId: 'mock-user',
     );
+    return Result.ok(task);
   }
 
   @override
-  Future<TaskDto> updateTask(String id, TaskUpdateRequestDto request) async {
+  Future<Result<TaskDto>> updateTask(String id, TaskUpdateRequestDto request) async {
     lastUpdateTaskId = id;
     lastUpdateRequest = request;
 
     await _simulateDelay();
 
     if (_shouldThrowError) {
-      throw Exception('Failed to update task: Mock error');
+      return Result.error(Exception('Failed to update task: Mock error'));
     }
 
-    return _updateTaskResponse ?? TaskDto(
+    final task = _updateTaskResponse ?? TaskDto(
       id: id,
       title: request.title ?? 'Mock Task',
       description: request.description ?? 'Mock Description',
       status: request.status ?? TaskStatus.todo,
       priority: request.priority ?? Priority.medium,
       dueDate: request.dueDate,
-      projectId: request.projectId,
       assigneeId: request.assigneeId,
       creatorId: 'mock-user',
     );
+    return Result.ok(task);
   }
 
   @override
-  Future<void> deleteTask(String id) async {
+  Future<Result<void>> deleteTask(String id) async {
     lastDeleteTaskId = id;
 
     await _simulateDelay();
 
     if (_shouldThrowError) {
-      throw Exception('Failed to delete task: Mock error');
+      return Result.error(Exception('Failed to delete task: Mock error'));
     }
 
     if (!_deleteTaskSuccess) {
-      throw Exception('Delete failed');
+      return Result.error(Exception('Delete failed'));
     }
+    
+    return Result.ok(null);
   }
 
   @override
-  Future<TaskDto> changeTaskStatus(String id, TaskStatus status) async {
+  Future<Result<TaskDto>> changeTaskStatus(String id, TaskStatus status) async {
     lastStatusChangeTaskId = id;
     lastStatusChangeStatus = status;
 
     await _simulateDelay();
 
     if (_shouldThrowError) {
-      throw Exception('Failed to change task status: Mock error');
+      return Result.error(Exception('Failed to change task status: Mock error'));
     }
 
-    return _changeTaskStatusResponse ?? TaskDto(
+    final task = _changeTaskStatusResponse ?? TaskDto(
       id: id,
       title: 'Mock Task',
       description: 'Mock Description',
@@ -231,20 +237,21 @@ class MockTaskRepository implements TaskRepository {
       priority: Priority.medium,
       creatorId: 'mock-user',
     );
+    return Result.ok(task);
   }
 
   @override
-  Future<TaskDto> assignTask(String id, String assigneeId) async {
+  Future<Result<TaskDto>> assignTask(String id, String assigneeId) async {
     lastAssignTaskId = id;
     lastAssigneeId = assigneeId;
 
     await _simulateDelay();
 
     if (_shouldThrowError) {
-      throw Exception('Failed to assign task: Mock error');
+      return Result.error(Exception('Failed to assign task: Mock error'));
     }
 
-    return _assignTaskResponse ?? TaskDto(
+    final task = _assignTaskResponse ?? TaskDto(
       id: id,
       title: 'Mock Task',
       description: 'Mock Description',
@@ -253,5 +260,20 @@ class MockTaskRepository implements TaskRepository {
       assigneeId: assigneeId,
       creatorId: 'mock-user',
     );
+    return Result.ok(task);
+  }
+
+  @override
+  Future<Result<TaskProgress>> getTaskProgress() async {
+    await _simulateDelay();
+
+    if (_shouldThrowError) {
+      return Result.error(Exception('Failed to get task progress: Mock error'));
+    }
+
+    return Result.ok(const TaskProgress(
+      totalTasks: 0,
+      completedTasks: 0,
+    ));
   }
 } 

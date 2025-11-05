@@ -40,6 +40,7 @@ class ApiRoutes {
   // Task query routes
   static const String tasksOwned = '$tasks/owned';
   static const String tasksAssigned = '$tasks/assigned';
+  static const String tasksAssignedDueOn = '$tasksAssigned/due-on';
   static const String tasksStats = '$tasks/stats';
 }
 

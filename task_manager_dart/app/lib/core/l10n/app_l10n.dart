@@ -730,6 +730,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Project name is required'**
   String get projectNameRequired;
+
+  /// Title for calendar screen
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTitle;
+
+  /// Header showing tasks for selected date
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks for {date}'**
+  String calendarTasksFor(String date);
+
+  /// Shows the number of tasks
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}'**
+  String calendarTaskCount(int count);
+
+  /// Message when no tasks are found for selected date
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks scheduled for this date'**
+  String get calendarNoTasksForDate;
 }
 
 class _AppLocalizationsDelegate
