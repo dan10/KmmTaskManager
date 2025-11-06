@@ -9,6 +9,3 @@ abstract class CalendarRepository {
     int size = 20,
   });
 }
-
-
-

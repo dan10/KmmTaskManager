@@ -13,6 +13,3 @@ class ApiRoutes {
   static const String taskAssign = '/<id>/assign';
   static const String taskStatus = '/<id>/status';
 }
-
-
-

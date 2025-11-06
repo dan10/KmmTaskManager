@@ -70,6 +70,7 @@ class CalendarViewModel extends ChangeNotifier {
           hasMorePages: !isLastPage,
           totalTasks: response.total,
         );
+        notifyListeners();
 
         return response.items;
       } else {

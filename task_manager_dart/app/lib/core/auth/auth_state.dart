@@ -44,5 +44,3 @@ class AuthState extends ChangeNotifier {
     await clearToken();
   }
 }
-
-

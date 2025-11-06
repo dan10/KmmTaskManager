@@ -62,6 +62,3 @@ class CalendarState extends Equatable {
         totalTasks,
       ];
 }
-
-
-

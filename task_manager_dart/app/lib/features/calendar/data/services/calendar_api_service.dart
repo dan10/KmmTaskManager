@@ -46,6 +46,3 @@ class CalendarApiServiceImpl implements CalendarApiService {
     );
   }
 }
-
-
-
