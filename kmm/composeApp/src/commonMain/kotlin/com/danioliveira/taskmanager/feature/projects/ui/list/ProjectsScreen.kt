@@ -73,7 +73,8 @@ context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 fun ProjectsScreen(
     viewModel: ProjectsViewModel = koinViewModel(),
     navigateToProjectDetail: (String) -> Unit,
-    onGlobalSearch: (String) -> Unit = {}
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     var showCreateProjectBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -101,7 +102,8 @@ fun ProjectsScreen(
         ProjectsScreen(
             pagingItems = viewModel.projectFlow.collectAsLazyPagingItems(),
             onAction = onAction,
-            onGlobalSearch = onGlobalSearch
+            userInitials = userInitials,
+            onProfileClick = onProfileClick
         )
         
         // Project Create BottomSheet
@@ -124,11 +126,15 @@ fun ProjectsScreen(
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
-private fun ProjectsTopBar(onGlobalSearch: (String) -> Unit) {
+private fun ProjectsTopBar(
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
+) {
     with(sts) {
         PrincipalTaskItTopAppBar(
             title = stringResource(Res.string.projects_title),
-            onSearch = onGlobalSearch,
+            userInitials = userInitials,
+            onProfileClick = onProfileClick,
             modifier = Modifier.sharedBounds(
                 sts.rememberSharedContentState(key = "main_top_bar"),
                 avs
@@ -142,11 +148,15 @@ context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 private fun ProjectsScreen(
     pagingItems: LazyPagingItems<Project>,
     onAction: (ProjectsAction) -> Unit,
-    onGlobalSearch: (String) -> Unit = {}
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
-            ProjectsTopBar(onGlobalSearch = onGlobalSearch)
+            ProjectsTopBar(
+                userInitials = userInitials,
+                onProfileClick = onProfileClick
+            )
         },
         floatingActionButton = {
             ProjectsFloatingActionButton(onAction)

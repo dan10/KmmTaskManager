@@ -9,14 +9,18 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -51,6 +56,7 @@ import kmmtaskmanager.composeapp.generated.resources.app_name
 import kmmtaskmanager.composeapp.generated.resources.content_description_close
 import kmmtaskmanager.composeapp.generated.resources.content_description_close_search
 import kmmtaskmanager.composeapp.generated.resources.content_description_navigate_back
+import kmmtaskmanager.composeapp.generated.resources.content_description_open_profile
 import kmmtaskmanager.composeapp.generated.resources.content_description_search
 import kmmtaskmanager.composeapp.generated.resources.global_search_placeholder
 import org.jetbrains.compose.resources.stringResource
@@ -240,10 +246,24 @@ private fun SearchActionIcon(
 fun PrincipalTaskItTopAppBar(
     title: String,
     onSearch: (String) -> Unit = {},
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var showSearch by remember { mutableStateOf(false) }
     val textFieldState = rememberTextFieldState()
+
+    // Trigger search on text changes
+    LaunchedEffect(textFieldState.text) {
+        onSearch(textFieldState.text.toString())
+    }
+
+    // Clear search when closing
+    LaunchedEffect(showSearch) {
+        if (!showSearch) {
+            textFieldState.clearText()
+        }
+    }
 
     Column(modifier) {
         TopAppBar(
@@ -255,6 +275,14 @@ fun PrincipalTaskItTopAppBar(
                 )
             },
             actions = {
+                if (!showSearch && userInitials != null && onProfileClick != null) {
+                    IconButton(onClick = onProfileClick) {
+                        AvatarInitials(
+                            initials = userInitials,
+                            contentDescription = stringResource(Res.string.content_description_open_profile)
+                        )
+                    }
+                }
                 IconButton(onClick = { showSearch = !showSearch }) {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -280,20 +308,16 @@ fun PrincipalTaskItTopAppBar(
                     )
                 },
                 trailingIcon = {
-                    IconButton(onClick = { showSearch = false }) {
+                    IconButton(onClick = { 
+                        textFieldState.clearText()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = stringResource(Res.string.content_description_close)
                         )
                     }
                 },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                onKeyboardAction = object : KeyboardActionHandler {
-                    override fun onKeyboardAction(performDefaultAction: () -> Unit) {
-                        onSearch(textFieldState.text.toString())
-                        performDefaultAction()
-                    }
-                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
             )
         }
     }
@@ -311,6 +335,30 @@ private fun PrincipalTaskItTopAppBarPreview() {
     }
 }
 
+
+@Composable
+private fun AvatarInitials(
+    initials: String,
+    contentDescription: String?,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.size(40.dp),
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primaryContainer
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initials,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
 
 @Preview
 @Composable

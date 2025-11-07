@@ -122,6 +122,11 @@
 
     <!-- ProfileScreen strings -->
     <string name="profile_coming_soon">Profile Screen - Coming Soon</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_joined_label">Member since</string>
+    <string name="profile_logout">Logout</string>
+    <string name="content_description_open_profile">Open profile</string>
 
     <!-- TaskScreen strings -->
     <string name="create_task">Create Task</string>

@@ -59,6 +59,7 @@ import com.danioliveira.taskmanager.feature.auth.navigation.LoginRoute
 import com.danioliveira.taskmanager.feature.auth.navigation.RegisterRoute
 import com.danioliveira.taskmanager.feature.auth.navigation.authSection
 import com.danioliveira.taskmanager.feature.calendar.ui.CalendarScreen
+import com.danioliveira.taskmanager.feature.profile.ui.ProfileScreen
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectDetailRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.projectsSection
@@ -100,9 +101,6 @@ fun TaskItApp(
                 navController = appState.navController,
                 appState = appState,
                 onAppReady = onAppReady,
-                onGlobalSearch = { query ->
-                    appState.onGlobalSearchQueryChanged(query)
-                },
                 modifier = Modifier
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding)
@@ -170,8 +168,7 @@ fun TaskItNavHost(
     navController: NavHostController,
     appState: TasksItAppState,
     modifier: Modifier = Modifier,
-    onAppReady: () -> Unit = {},
-    onGlobalSearch: (String) -> Unit = {},
+    onAppReady: () -> Unit = {}
 ) {
     val authManager = koinInject<AuthManager>()
     var startDestination by remember { mutableStateOf<Screen?>(null) }
@@ -227,7 +224,8 @@ fun TaskItNavHost(
                         onEditTask = { taskId ->
                             navController.navigate(EditTaskRoute(taskId.toString()))
                         },
-                        onGlobalSearch = onGlobalSearch
+                        userInitials = appState.userInitials,
+                        onProfileClick = { appState.navigateToProfile() }
                     )
 
                     // Projects Section - includes ProjectsRoute, ProjectDetailRoute, and TaskDetailRoute
@@ -251,7 +249,8 @@ fun TaskItNavHost(
                                 }
                             )
                         },
-                        onGlobalSearch = onGlobalSearch
+                        userInitials = appState.userInitials,
+                        onProfileClick = { appState.navigateToProfile() }
                     )
 
                     // Calendar Section
@@ -272,12 +271,12 @@ fun TaskItNavHost(
                         val sharedTransitionScope = LocalSharedTransitionScope.current
                             ?: throw IllegalStateException("No sharedTransitionScope found")
                         with(sharedTransitionScope) {
-                            // move to section and remove global search
                             CalendarScreen(
-                                onGlobalSearch = onGlobalSearch,
                                 onTaskClick = { taskId ->
                                     navController.navigate(TaskDetailRoute(taskId))
-                                }
+                                },
+                                userInitials = appState.userInitials,
+                                onProfileClick = { appState.navigateToProfile() }
                             )
                         }
                     }
@@ -296,7 +295,11 @@ fun TaskItNavHost(
                             ) + fadeOut(animationSpec = tween(300))
                         }
                     ) {
-                        Text("Profile Screen - Coming Soon")
+                        ProfileScreen(
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
                     }
                 }
             }

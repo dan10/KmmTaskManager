@@ -52,12 +52,6 @@ class TasksItAppState(
     private val previousDestination = mutableStateOf<NavDestination?>(null)
     private var previousAuthState by mutableStateOf<Boolean?>(null)
 
-    private val _globalSearchQuery = MutableStateFlow("")
-    val globalSearchQuery = _globalSearchQuery.asStateFlow()
-
-    var isSearchVisible by mutableStateOf(false)
-        private set
-
     var userInitials by mutableStateOf<String?>(null)
         private set
 
@@ -93,16 +87,6 @@ class TasksItAppState(
             userInitials = user?.displayName?.takeIf { it.isNotBlank() }
                 ?.let { computeInitials(it) }
                 ?: user?.email?.let { computeInitials(it) }
-        }
-
-        coroutineScope.launch {
-            navController.currentBackStackEntryFlow.collectLatest { currentEntry ->
-                val destination = currentEntry.destination
-                if (!shouldShowToolbar(destination)) {
-                    isSearchVisible = false
-                    _globalSearchQuery.value = ""
-                }
-            }
         }
     }
 
@@ -141,8 +125,7 @@ class TasksItAppState(
         return currentDestination.hierarchy.any {
             it.hasRoute(TasksRoute::class) ||
             it.hasRoute(ProjectsRoute::class) ||
-            it.hasRoute(Screen.Calendar::class) ||
-            it.hasRoute(Screen.Profile::class)
+            it.hasRoute(Screen.Calendar::class)
         }
     }
 
@@ -212,17 +195,6 @@ class TasksItAppState(
         navController.navigate(Screen.Profile) {
             launchSingleTop = true
         }
-    }
-
-    fun toggleSearchVisibility() {
-        isSearchVisible = !isSearchVisible
-        if (!isSearchVisible) {
-            _globalSearchQuery.value = ""
-        }
-    }
-
-    fun onGlobalSearchQueryChanged(query: String) {
-        _globalSearchQuery.value = query
     }
 
     fun shouldShowToolbar(destination: NavDestination): Boolean {

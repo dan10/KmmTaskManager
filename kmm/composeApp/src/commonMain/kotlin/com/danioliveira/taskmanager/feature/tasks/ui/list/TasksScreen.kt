@@ -70,18 +70,13 @@ import kotlin.uuid.Uuid
 context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
 fun TasksScreen(
-    viewModel: TasksViewModel = koinViewModel(),
     navigateToTaskDetail: (Uuid) -> Unit,
-    globalSearchQuery: String = "",
-    onGlobalSearch: (String) -> Unit = {}
+    viewModel: TasksViewModel = koinViewModel(),
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // Sync global search query with local search field
-    LaunchedEffect(globalSearchQuery) {
-        viewModel.updateSearchQuery(globalSearchQuery)
-    }
 
     // Refresh when returning from other screens
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -100,7 +95,9 @@ fun TasksScreen(
         state = viewModel.state,
         onAction = viewModel::handleActions,
         snackbarHostState = snackbarHostState,
-        onGlobalSearch = onGlobalSearch
+        onSearch = { query -> viewModel.updateSearchQuery(query) },
+        userInitials = userInitials,
+        onProfileClick = onProfileClick
     )
 
     if (showCreateTaskBottomSheet) {
@@ -117,11 +114,17 @@ fun TasksScreen(
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
-private fun TasksTopBar(onGlobalSearch: (String) -> Unit) {
+private fun TasksTopBar(
+    onSearch: (String) -> Unit,
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
+) {
     with(sts) {
         PrincipalTaskItTopAppBar(
             title = stringResource(Res.string.tasks_title),
-            onSearch = onGlobalSearch,
+            onSearch = onSearch,
+            userInitials = userInitials,
+            onProfileClick = onProfileClick,
             modifier = Modifier.sharedBounds(
                 sts.rememberSharedContentState(key = "main_top_bar"),
                 avs
@@ -137,11 +140,17 @@ fun TasksContent(
     state: TasksState,
     onAction: (TasksAction) -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onGlobalSearch: (String) -> Unit = {}
+    onSearch: (String) -> Unit = {},
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
-            TasksTopBar(onGlobalSearch = onGlobalSearch)
+            TasksTopBar(
+                onSearch = onSearch,
+                userInitials = userInitials,
+                onProfileClick = onProfileClick
+            )
         },
         floatingActionButton = { AddTaskButton(onAction) },
         snackbarHost = { SnackbarHost(snackbarHostState) }

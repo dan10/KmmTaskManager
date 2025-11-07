@@ -48,8 +48,9 @@ import kotlin.time.ExperimentalTime
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
 fun CalendarScreen(
-    onGlobalSearch: (String) -> Unit = {},
-    onTaskClick: (String) -> Unit = {}
+    onTaskClick: (String) -> Unit = {},
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     val viewModel = koinViewModel<CalendarViewModel>()
     val state = viewModel.state
@@ -64,7 +65,10 @@ fun CalendarScreen(
 
     Scaffold(
         topBar = {
-            CalendarTopBar(onGlobalSearch = onGlobalSearch)
+            CalendarTopBar(
+                userInitials = userInitials,
+                onProfileClick = onProfileClick
+            )
         }
     ) { paddingValues ->
         CalendarContent(
@@ -79,11 +83,15 @@ fun CalendarScreen(
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
 @Composable
-private fun CalendarTopBar(onGlobalSearch: (String) -> Unit) {
+private fun CalendarTopBar(
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
+) {
     with(sts) {
         PrincipalTaskItTopAppBar(
             title = "Calendar",
-            onSearch = onGlobalSearch,
+            userInitials = userInitials,
+            onProfileClick = onProfileClick,
             modifier = Modifier.sharedBounds(
                 sts.rememberSharedContentState(key = "main_top_bar"),
                 avs

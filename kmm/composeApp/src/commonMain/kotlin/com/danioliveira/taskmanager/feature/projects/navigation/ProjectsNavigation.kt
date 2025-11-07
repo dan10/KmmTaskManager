@@ -27,7 +27,8 @@ fun NavGraphBuilder.projectsSection(
     onBackClick: () -> Unit,
     onTaskClick: (Uuid) -> Unit,
     taskDetailsDestination: NavGraphBuilder.() -> Unit,
-    onGlobalSearch: (String) -> Unit = {}
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     navigation<ProjectsBaseRoute>(startDestination = ProjectsRoute) {
         composableWithCompositionLocal<ProjectsRoute> {
@@ -36,7 +37,8 @@ fun NavGraphBuilder.projectsSection(
             with(sharedTransitionScope) {
                 ProjectsScreen(
                     navigateToProjectDetail = onProjectClick,
-                    onGlobalSearch = onGlobalSearch
+                    userInitials = userInitials,
+                    onProfileClick = onProfileClick
                 )
             }
         }

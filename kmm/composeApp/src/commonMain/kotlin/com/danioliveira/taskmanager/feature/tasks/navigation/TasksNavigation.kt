@@ -44,7 +44,8 @@ fun NavGraphBuilder.tasksSection(
     onTaskClick: (Uuid) -> Unit,
     onBackClick: () -> Unit,
     onEditTask: (Uuid) -> Unit,
-    onGlobalSearch: (String) -> Unit = {}
+    userInitials: String? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     navigation<TasksBaseRoute>(startDestination = TasksRoute) {
         composableWithCompositionLocal<TasksRoute>(
@@ -74,7 +75,8 @@ fun NavGraphBuilder.tasksSection(
             with(sharedTransitionScope) {
                 TasksScreen(
                     navigateToTaskDetail = onTaskClick,
-                    onGlobalSearch = onGlobalSearch
+                    userInitials = userInitials,
+                    onProfileClick = onProfileClick
                 )
             }
         }
