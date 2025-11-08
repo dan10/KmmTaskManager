@@ -52,7 +52,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.danioliveira.taskmanager.core.domain.manager.AuthManager
 import com.danioliveira.taskmanager.core.ui.TasksItAppState
-import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.rememberTasksItAppState
 import com.danioliveira.taskmanager.feature.auth.navigation.AuthBaseRoute
 import com.danioliveira.taskmanager.feature.auth.navigation.LoginRoute
@@ -61,17 +60,15 @@ import com.danioliveira.taskmanager.feature.auth.navigation.authSection
 import com.danioliveira.taskmanager.feature.calendar.ui.CalendarScreen
 import com.danioliveira.taskmanager.feature.profile.ui.ProfileScreen
 import com.danioliveira.taskmanager.feature.projects.navigation.ProjectDetailRoute
-import com.danioliveira.taskmanager.feature.projects.navigation.ProjectsRoute
 import com.danioliveira.taskmanager.feature.projects.navigation.projectsSection
 import com.danioliveira.taskmanager.feature.tasks.navigation.EditTaskRoute
 import com.danioliveira.taskmanager.feature.tasks.navigation.TaskDetailRoute
 import com.danioliveira.taskmanager.feature.tasks.navigation.TasksBaseRoute
-import com.danioliveira.taskmanager.feature.tasks.navigation.TasksRoute
 import com.danioliveira.taskmanager.feature.tasks.navigation.taskDetailsScreen
 import com.danioliveira.taskmanager.feature.tasks.navigation.tasksSection
-import com.danioliveira.taskmanager.navigation.composableWithCompositionLocal
 import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
+import com.danioliveira.taskmanager.navigation.composableWithCompositionLocal
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource

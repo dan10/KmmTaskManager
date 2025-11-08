@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/routing/auth_routes.dart';
 import '../../features/calendar/presentation/views/calendar_screen.dart';
+import '../../features/profile/profile_screen.dart';
 import '../../features/projects/routing/project_routes.dart';
 import '../../features/tasks/routing/task_routes.dart';
 import '../data/local/secure_storage.dart';
@@ -28,6 +29,9 @@ class AppRoutes {
 
   // Calendar
   static const String calendar = '/calendar';
+  
+  // Profile
+  static const String profile = '/profile';
 }
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -88,6 +92,12 @@ GoRouter createAppRouter(SecureStorage secureStorage, AuthState authState) {
     // Full-screen routes (no bottom bar) - Project details with nested task routes
     ...projectDetailRoutes(
       taskDetailsRoutes: taskDetailsRoutes,
+    ),
+    
+    // Profile screen (full-screen, no bottom bar)
+    GoRoute(
+      path: AppRoutes.profile,
+      builder: (context, state) => const ProfileScreen(),
     ),
     ],
     errorBuilder: (context, state) =>

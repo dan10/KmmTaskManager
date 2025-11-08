@@ -28,6 +28,8 @@ class TaskItTopAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback? onNavigateBack;
   final TaskItSearchState? searchState;
   final List<Widget> actions;
+  final String? userInitials;
+  final VoidCallback? onProfileClick;
 
   const TaskItTopAppBar({
     super.key,
@@ -36,6 +38,8 @@ class TaskItTopAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onNavigateBack,
     this.searchState,
     this.actions = const [],
+    this.userInitials,
+    this.onProfileClick,
   });
 
   @override
@@ -107,7 +111,7 @@ class _TaskItTopAppBarState extends State<TaskItTopAppBar> {
           children: [
             SizedBox(
               height: kToolbarHeight,
-              child: AppBar(
+              child:               AppBar(
                 backgroundColor: Colors.transparent,
                 foregroundColor: theme.colorScheme.onSurface,
                 elevation: 0,
@@ -126,6 +130,16 @@ class _TaskItTopAppBarState extends State<TaskItTopAppBar> {
                 ),
                 actions: [
                   ...widget.actions,
+                  if (!isSearchActive && widget.userInitials != null && widget.onProfileClick != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: IconButton(
+                        onPressed: widget.onProfileClick,
+                        icon: _AvatarInitials(
+                          initials: widget.userInitials!,
+                        ),
+                      ),
+                    ),
                   if (searchState != null)
                     IconButton(
                       icon: const Icon(Icons.search),
@@ -212,6 +226,36 @@ class _TaskItTopAppBarState extends State<TaskItTopAppBar> {
                     : const SizedBox.shrink(),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Avatar widget displaying user initials
+class _AvatarInitials extends StatelessWidget {
+  const _AvatarInitials({required this.initials});
+
+  final String initials;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: theme.colorScheme.primaryContainer,
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onPrimaryContainer,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

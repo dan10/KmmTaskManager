@@ -361,4 +361,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarNoTasksForDate => 'No tasks scheduled for this date';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileDisplayName => 'Display Name';
+
+  @override
+  String get profileEmail => 'Email';
+
+  @override
+  String get profileLogout => 'Logout';
+
+  @override
+  String get profileLogoutConfirmTitle => 'Logout';
+
+  @override
+  String get profileLogoutConfirmMessage => 'Are you sure you want to logout?';
+
+  @override
+  String get profileErrorLoading => 'Unable to load user information';
+
+  @override
+  String get cancel => 'Cancel';
 }

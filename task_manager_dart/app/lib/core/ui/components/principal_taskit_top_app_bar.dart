@@ -49,6 +49,8 @@ class _PrincipalTaskItTopAppBarState extends State<PrincipalTaskItTopAppBar> {
   }
 
   void _onQueryChanged() {
+    // Trigger search on every text change
+    widget.onSearch?.call(_controller.text.trim());
     setState(() {});
   }
 
@@ -68,8 +70,10 @@ class _PrincipalTaskItTopAppBarState extends State<PrincipalTaskItTopAppBar> {
         }
       });
     } else {
+      // Clear search when closing
+      _controller.clear();
+      widget.onSearch?.call('');
       _focusNode.unfocus();
-      widget.onSearch?.call(_controller.text.trim());
     }
   }
 
@@ -84,7 +88,7 @@ class _PrincipalTaskItTopAppBarState extends State<PrincipalTaskItTopAppBar> {
   }
 
   void _submitSearch(String value) {
-    widget.onSearch?.call(value.trim());
+    // Search is already triggered on text change, just unfocus
     _focusNode.unfocus();
   }
 

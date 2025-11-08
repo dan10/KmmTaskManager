@@ -5,6 +5,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
+import '../../../../core/data/local/secure_storage.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/ui/components/shimmer.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
@@ -28,6 +29,7 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   late TasksViewModel _viewModel;
   bool _isSearchActive = false;
+  String? _userInitials;
 
   @override
   void initState() {
@@ -37,6 +39,29 @@ class _TaskListScreenState extends State<TaskListScreen> {
     // Add listeners for commands
     _viewModel.updateTaskStatus.addListener(_onUpdateStatusResult);
     _viewModel.deleteTask.addListener(_onDeleteResult);
+    
+    // Load user initials
+    _loadUserInitials();
+  }
+  
+  Future<void> _loadUserInitials() async {
+    final secureStorage = context.read<SecureStorage>();
+    final user = await secureStorage.getUser();
+    
+    if (user != null && mounted) {
+      setState(() {
+        _userInitials = _computeInitials(user.displayName);
+      });
+    }
+  }
+  
+  String _computeInitials(String displayName) {
+    if (displayName.isEmpty) return '';
+    final parts = displayName.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return displayName[0].toUpperCase();
   }
 
   @override
@@ -184,6 +209,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
         placeholder: l10n.taskSearchPlaceholder,
         enableClearOnClose: true,
       ),
+      userInitials: _userInitials,
+      onProfileClick: () => context.push(AppRoutes.profile),
     );
   }
 

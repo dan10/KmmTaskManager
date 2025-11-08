@@ -502,5 +502,39 @@
   "calendarNoTasksForDate": "No tasks scheduled for this date",
   "@calendarNoTasksForDate": {
     "description": "Message when no tasks are found for selected date"
+  },
+  
+  "@@context": "Profile feature strings",
+  "profileTitle": "Profile",
+  "@profileTitle": {
+    "description": "Title for profile screen"
+  },
+  "profileDisplayName": "Display Name",
+  "@profileDisplayName": {
+    "description": "Label for display name field"
+  },
+  "profileEmail": "Email",
+  "@profileEmail": {
+    "description": "Label for email field"
+  },
+  "profileLogout": "Logout",
+  "@profileLogout": {
+    "description": "Logout button text"
+  },
+  "profileLogoutConfirmTitle": "Logout",
+  "@profileLogoutConfirmTitle": {
+    "description": "Title for logout confirmation dialog"
+  },
+  "profileLogoutConfirmMessage": "Are you sure you want to logout?",
+  "@profileLogoutConfirmMessage": {
+    "description": "Message for logout confirmation dialog"
+  },
+  "profileErrorLoading": "Unable to load user information",
+  "@profileErrorLoading": {
+    "description": "Error message when user info fails to load"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
   }
 }

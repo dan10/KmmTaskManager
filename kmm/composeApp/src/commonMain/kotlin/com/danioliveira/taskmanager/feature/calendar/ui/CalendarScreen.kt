@@ -30,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.danioliveira.taskmanager.core.domain.model.Task
 import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.TaskList
 import kmmtaskmanager.composeapp.generated.resources.Res

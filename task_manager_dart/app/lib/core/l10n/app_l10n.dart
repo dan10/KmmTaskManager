@@ -754,6 +754,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No tasks scheduled for this date'**
   String get calendarNoTasksForDate;
+
+  /// Title for profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// Label for display name field
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name'**
+  String get profileDisplayName;
+
+  /// Label for email field
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get profileEmail;
+
+  /// Logout button text
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get profileLogout;
+
+  /// Title for logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get profileLogoutConfirmTitle;
+
+  /// Message for logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get profileLogoutConfirmMessage;
+
+  /// Error message when user info fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load user information'**
+  String get profileErrorLoading;
+
+  /// Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
 }
 
 class _AppLocalizationsDelegate
