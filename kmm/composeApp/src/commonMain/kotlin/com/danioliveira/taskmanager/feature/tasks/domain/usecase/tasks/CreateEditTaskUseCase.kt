@@ -2,7 +2,9 @@ package com.danioliveira.taskmanager.feature.tasks.domain.usecase.tasks
 
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
+import com.danioliveira.taskmanager.api.response.PriorityResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
+import com.danioliveira.taskmanager.api.response.TaskStatusResponse
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.feature.tasks.domain.repository.TaskRepository
@@ -38,7 +40,7 @@ class CreateEditTaskUseCase(private val taskRepository: TaskRepository) {
         val request = TaskCreateRequest(
             title = title,
             description = description,
-            priority = priority,
+            priority = PriorityResponse.valueOf(priority.name),
             dueDate = dueDate,
             projectId = projectId,
             assigneeId = assigneeId
@@ -69,8 +71,8 @@ class CreateEditTaskUseCase(private val taskRepository: TaskRepository) {
         val request = TaskUpdateRequest(
             title = title,
             description = description,
-            status = status,
-            priority = priority,
+            status = TaskStatusResponse.valueOf(status.name),
+            priority = PriorityResponse.valueOf(priority.name),
             dueDate = dueDate
         )
 

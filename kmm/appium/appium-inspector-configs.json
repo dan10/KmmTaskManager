@@ -1,0 +1,156 @@
+{
+  "configurations": [
+    {
+      "name": "KMM Android Profile",
+      "description": "KMM Compose app on Android emulator with profile build",
+      "capabilities": {
+        "platformName": "Android",
+        "appium:automationName": "UiAutomator2",
+        "appium:deviceName": "emulator-5554",
+        "appium:app": "/Users/danieloliveira/Projects/KmmTaskManager/kmm/composeApp/build/outputs/apk/profile/composeApp-profile.apk",
+        "appium:appPackage": "com.danioliveira.taskmanager",
+        "appium:appActivity": "com.danioliveira.taskmanager.MainActivity",
+        "appium:noReset": false,
+        "appium:fullReset": false,
+        "appium:newCommandTimeout": 300,
+        "appium:eventTimings": true,
+        "appium:printPageSourceOnFindFailure": true
+      },
+      "notes": [
+        "Make sure to build the profile APK first: ./gradlew :composeApp:assembleProfile",
+        "Start Android emulator before connecting",
+        "Elements use resource-id attribute (e.g., resource-id='txt_email')",
+        "Use XPath locators: //*[@resource-id='txt_email']"
+      ]
+    },
+    {
+      "name": "Flutter Android Profile",
+      "description": "Flutter app on Android emulator with profile build",
+      "capabilities": {
+        "platformName": "Android",
+        "appium:automationName": "UiAutomator2",
+        "appium:deviceName": "emulator-5554",
+        "appium:app": "/Users/danieloliveira/Projects/KmmTaskManager/task_manager_dart/app/build/app/outputs/flutter-apk/app-profile.apk",
+        "appium:appPackage": "com.example.task_manager_app",
+        "appium:appActivity": ".MainActivity",
+        "appium:noReset": false,
+        "appium:fullReset": false,
+        "appium:newCommandTimeout": 300,
+        "appium:eventTimings": true,
+        "appium:printPageSourceOnFindFailure": true
+      },
+      "notes": [
+        "Make sure to build the profile APK first: flutter build apk --profile",
+        "Start Android emulator before connecting",
+        "Elements use resource-id from Semantics identifier",
+        "Use XPath locators: //*[@resource-id='txt_email']"
+      ]
+    },
+    {
+      "name": "KMM iOS Profile",
+      "description": "KMM Compose app on iOS simulator with profile build",
+      "capabilities": {
+        "platformName": "iOS",
+        "appium:automationName": "XCUITest",
+        "appium:deviceName": "iPhone 15 Pro",
+        "appium:platformVersion": "17.0",
+        "appium:app": "/Users/danieloliveira/Projects/KmmTaskManager/kmm/iosApp/build/Release-iphonesimulator/iosApp.app",
+        "appium:bundleId": "com.danioliveira.taskmanager",
+        "appium:udid": "auto",
+        "appium:noReset": false,
+        "appium:fullReset": false,
+        "appium:newCommandTimeout": 300,
+        "appium:eventTimings": true,
+        "appium:printPageSourceOnFindFailure": true
+      },
+      "notes": [
+        "Build using Xcode with Release/Profile scheme",
+        "iOS simulator starts automatically",
+        "Elements use accessibilityIdentifier (exposed as 'name' in XPath)",
+        "Use XPath locators: //*[@name='txt_email']"
+      ]
+    },
+    {
+      "name": "Flutter iOS Profile",
+      "description": "Flutter app on iOS simulator with profile build",
+      "capabilities": {
+        "platformName": "iOS",
+        "appium:automationName": "XCUITest",
+        "appium:deviceName": "iPhone 15 Pro",
+        "appium:platformVersion": "17.0",
+        "appium:app": "/Users/danieloliveira/Projects/KmmTaskManager/task_manager_dart/app/build/ios/iphonesimulator/Runner.app",
+        "appium:bundleId": "com.example.taskManagerApp",
+        "appium:udid": "auto",
+        "appium:noReset": false,
+        "appium:fullReset": false,
+        "appium:newCommandTimeout": 300,
+        "appium:eventTimings": true,
+        "appium:printPageSourceOnFindFailure": true
+      },
+      "notes": [
+        "Make sure to build the profile app first: flutter build ios --profile",
+        "iOS simulator starts automatically",
+        "Elements use accessibilityIdentifier from Semantics",
+        "Use XPath locators: //*[@name='txt_email']"
+      ]
+    }
+  ],
+  "common_locators": {
+    "android": {
+      "description": "XPath locators for Android (resource-id attribute)",
+      "examples": [
+        "//*[@resource-id='txt_email']",
+        "//*[@resource-id='txt_password']",
+        "//*[@resource-id='btn_login']",
+        "//*[@resource-id='link_register']",
+        "//*[@resource-id='nav_tasks']",
+        "//*[@resource-id='nav_projects']",
+        "//*[@resource-id='nav_calendar']",
+        "//*[@resource-id='list_tasks']",
+        "//*[@resource-id='btn_add_task']",
+        "//android.widget.EditText[@resource-id='txt_email']",
+        "//android.widget.Button[@resource-id='btn_login']"
+      ]
+    },
+    "ios": {
+      "description": "XPath locators for iOS (name/accessibilityIdentifier attribute)",
+      "examples": [
+        "//*[@name='txt_email']",
+        "//*[@name='txt_password']",
+        "//*[@name='btn_login']",
+        "//*[@name='link_register']",
+        "//*[@name='nav_tasks']",
+        "//*[@name='nav_projects']",
+        "//*[@name='nav_calendar']",
+        "//*[@name='list_tasks']",
+        "//*[@name='btn_add_task']",
+        "//XCUIElementTypeTextField[@name='txt_email']",
+        "//XCUIElementTypeButton[@name='btn_login']"
+      ]
+    }
+  },
+  "setup_instructions": {
+    "android": [
+      "1. Set ANDROID_HOME environment variable:",
+      "   export ANDROID_HOME=/Users/danieloliveira/Library/Android/sdk",
+      "2. Start Appium server:",
+      "   appium",
+      "3. Start Android emulator:",
+      "   emulator -avd <your_avd_name>",
+      "4. Build profile APK:",
+      "   KMM: ./gradlew :composeApp:assembleProfile",
+      "   Flutter: flutter build apk --profile",
+      "5. Open Appium Inspector and paste the capabilities JSON"
+    ],
+    "ios": [
+      "1. Start Appium server:",
+      "   appium",
+      "2. Build profile app using Xcode or:",
+      "   Flutter: flutter build ios --profile",
+      "3. iOS simulator will start automatically",
+      "4. Open Appium Inspector and paste the capabilities JSON"
+    ]
+  }
+}
+
+

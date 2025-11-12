@@ -6,6 +6,7 @@ import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/testing/test_ids.dart';
 import '../../../../core/ui/components/shimmer.dart';
 import '../../../tasks/presentation/widgets/task_item_swipeable.dart';
 import '../../../tasks/presentation/widgets/task_list_indicators.dart';
@@ -100,18 +101,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
           onRefresh: () => _handleRefresh(viewModel),
           child: PagingListener<int, TaskDto>(
             controller: viewModel.pagingController,
-            builder: (context, pagingState, fetchNextPage) => CustomScrollView(
-              slivers: [
-                // Calendar header with task count
-                SliverToBoxAdapter(
-                  child: CalendarHeader(
-                    selectedDate: vmState.selectedDate,
-                    taskCount: vmState.totalTasks,
+            builder: (context, pagingState, fetchNextPage) => Semantics(
+              identifier: TestIds.listCalendarTasks,
+              child: CustomScrollView(
+                slivers: [
+                  // Calendar header with task count
+                  SliverToBoxAdapter(
+                    child: CalendarHeader(
+                      selectedDate: vmState.selectedDate,
+                      taskCount: vmState.totalTasks,
+                    ),
                   ),
-                ),
 
-                // Paginated task list with swipeable items
-                PagedSliverList<int, TaskDto>(
+                  // Paginated task list with swipeable items
+                  PagedSliverList<int, TaskDto>(
                   state: pagingState,
                   fetchNextPage: fetchNextPage,
                   builderDelegate: PagedChildBuilderDelegate<TaskDto>(
@@ -149,6 +152,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                 ),
               ],
+              ),
             ),
           ),
         ),

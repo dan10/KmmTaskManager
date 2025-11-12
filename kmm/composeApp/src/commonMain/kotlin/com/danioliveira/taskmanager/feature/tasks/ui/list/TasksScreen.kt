@@ -34,8 +34,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.danioliveira.taskmanager.testing.TestTags
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.PagingData
@@ -63,6 +65,7 @@ import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -74,6 +77,8 @@ fun TasksScreen(
     userInitials: String? = null,
     onProfileClick: (() -> Unit)? = null
 ) {
+    TraceLifecycle("TasksScreen")
+    
     var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -176,7 +181,9 @@ private fun TaskList(
     onAction: (TasksAction) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(TestTags.LIST_TASKS),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -278,10 +285,12 @@ fun AddTaskButton(
                 onAction(TasksAction.OpenCreateTask)
             },
             containerColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.sharedElement(
-                sts.rememberSharedContentState(key = "add_fab"),
-                avs
-            )
+            modifier = Modifier
+                .testTag(TestTags.BTN_ADD_TASK)
+                .sharedElement(
+                    sts.rememberSharedContentState(key = "add_fab"),
+                    avs
+                )
         ) {
             Icon(
                 imageVector = Icons.Default.Add,

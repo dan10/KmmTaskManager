@@ -5,7 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/applocalization.dart';
+import '../../../core/perf/perf_trace.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/testing/test_ids.dart';
 import '../../../core/ui/components/task_it_input_field.dart';
 import '../../../core/ui/components/task_it_password_field.dart';
 import '../../../core/ui/components/task_it_primary_action_button.dart';
@@ -68,7 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalization.of(context);
 
-    return Scaffold(
+    return TracedWidget(
+      name: 'LoginScreen',
+      child: Scaffold(
       resizeToAvoidBottomInset: false, // Keep screen fixed when keyboard appears
       backgroundColor: theme.colorScheme.primaryContainer,
       body: Center(
@@ -112,14 +116,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ValueListenableBuilder<bool>(
                       valueListenable: widget.viewModel.emailHasError,
                       builder: (context, hasError, _) {
-                        return TaskItInputField(
-                          controller: _email,
-                          label: l10n.email,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          enabled: !widget.viewModel.login.running,
-                          isError: hasError,
-                          errorMessage: l10n.emailError,
+                        return Semantics(
+                          identifier: TestIds.txtEmail,
+                          child: TaskItInputField(
+                            controller: _email,
+                            label: l10n.email,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            enabled: !widget.viewModel.login.running,
+                            isError: hasError,
+                            errorMessage: l10n.emailError,
+                          ),
                         );
                       },
                     ),
@@ -129,14 +136,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ValueListenableBuilder<bool>(
                       valueListenable: widget.viewModel.passwordHasError,
                       builder: (context, hasError, _) {
-                        return TaskItPasswordField(
-                          controller: _password,
-                          label: l10n.password,
-                          textInputAction: TextInputAction.done,
-                          enabled: !widget.viewModel.login.running,
-                          onSubmitted: (_) => _handleLogin(),
-                          isError: hasError,
-                          errorMessage: l10n.passwordError,
+                        return Semantics(
+                          identifier: TestIds.txtPassword,
+                          child: TaskItPasswordField(
+                            controller: _password,
+                            label: l10n.password,
+                            textInputAction: TextInputAction.done,
+                            enabled: !widget.viewModel.login.running,
+                            onSubmitted: (_) => _handleLogin(),
+                            isError: hasError,
+                            errorMessage: l10n.passwordError,
+                          ),
                         );
                       },
                     ),
@@ -149,13 +159,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         return ListenableBuilder(
                           listenable: widget.viewModel.login,
                           builder: (context, _) {
-                            return SizedBox(
-                              width: double.infinity,
-                              child: TaskItPrimaryActionButton(
-                                text: l10n.login,
-                                onPressed: _handleLogin,
-                                enabled: isValid && !widget.viewModel.login.running,
-                                isLoading: widget.viewModel.login.running,
+                            return Semantics(
+                              identifier: TestIds.btnLogin,
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: TaskItPrimaryActionButton(
+                                  text: l10n.login,
+                                  onPressed: _handleLogin,
+                                  enabled: isValid && !widget.viewModel.login.running,
+                                  isLoading: widget.viewModel.login.running,
+                                ),
                               ),
                             );
                           },
@@ -176,6 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -229,12 +243,15 @@ class _LoginAccountLink extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        TextButton(
-          onPressed: onLinkClick,
-          child: Text(
-            l10n.signUp,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.primary,
+        Semantics(
+          identifier: TestIds.linkRegister,
+          child: TextButton(
+            onPressed: onLinkClick,
+            child: Text(
+              l10n.signUp,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
             ),
           ),
         ),

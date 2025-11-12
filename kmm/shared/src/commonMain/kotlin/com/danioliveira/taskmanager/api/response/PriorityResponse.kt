@@ -1,9 +1,9 @@
-package com.danioliveira.taskmanager.core.domain.model
+package com.danioliveira.taskmanager.api.response
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Priority {
+enum class PriorityResponse {
     NONE,
     LOW,
     MEDIUM,

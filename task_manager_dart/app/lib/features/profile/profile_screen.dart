@@ -6,6 +6,7 @@ import 'package:task_manager_shared/models.dart';
 import '../../core/auth/auth_state.dart';
 import '../../core/data/local/secure_storage.dart';
 import '../../core/l10n/app_l10n.dart';
+import '../../core/testing/test_ids.dart';
 
 /// Profile screen displaying user information and logout functionality
 class ProfileScreen extends StatefulWidget {
@@ -144,14 +145,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 24),
                       
                       // Logout Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: _handleLogout,
-                          icon: const Icon(Icons.logout),
-                          label: Text(l10n.profileLogout),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                      Semantics(
+                        identifier: TestIds.btnLogout,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _handleLogout,
+                            icon: const Icon(Icons.logout),
+                            label: Text(l10n.profileLogout),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
                           ),
                         ),
                       ),

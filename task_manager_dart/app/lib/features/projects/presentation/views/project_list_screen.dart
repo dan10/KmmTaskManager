@@ -7,6 +7,7 @@ import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/data/local/secure_storage.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/testing/test_ids.dart';
 import '../../../../core/ui/components/shimmer.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../viewmodels/projects_viewmodel.dart';
@@ -116,14 +117,19 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                 child: PagingListener<int, Project>(
                   controller: viewModel.pagingController,
                   builder: (context, pagingState, fetchNextPage) => 
-                    PagedListView<int, Project>(
-                      state: pagingState,
-                      fetchNextPage: fetchNextPage,
-                      padding: const EdgeInsets.all(16),
-                      builderDelegate: PagedChildBuilderDelegate<Project>(
-                        itemBuilder: (context, project, index) => ProjectCard(
-                          project: project,
-                          onTap: () => _navigateToProjectDetail(context, project.id),
+                    Semantics(
+                      identifier: TestIds.listProjects,
+                      child: PagedListView<int, Project>(
+                        state: pagingState,
+                        fetchNextPage: fetchNextPage,
+                        padding: const EdgeInsets.all(16),
+                        builderDelegate: PagedChildBuilderDelegate<Project>(
+                        itemBuilder: (context, project, index) => Semantics(
+                          identifier: TestIds.projectCard(project.id),
+                          child: ProjectCard(
+                            project: project,
+                            onTap: () => _navigateToProjectDetail(context, project.id),
+                          ),
                         ),
                         firstPageErrorIndicatorBuilder: (context) => 
                           FirstPageErrorIndicator(
@@ -181,10 +187,13 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   }
 
   Widget _buildFAB() {
-    return FloatingActionButton(
-      heroTag: 'add_project_fab',
-      onPressed: () => _showCreateProjectBottomSheet(context),
-      child: const Icon(Icons.add),
+    return Semantics(
+      identifier: TestIds.btnAddProject,
+      child: FloatingActionButton(
+        heroTag: 'add_project_fab',
+        onPressed: () => _showCreateProjectBottomSheet(context),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.api.request
 
-import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.api.response.PriorityResponse
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -13,6 +13,6 @@ data class TaskCreateRequest(
     val description: String? = null,
     val projectId: String? = null,
     val assigneeId: String? = null,
-    val priority: Priority,
+    val priority: PriorityResponse,
     val dueDate: LocalDateTime? = null
 )

@@ -26,9 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.danioliveira.taskmanager.testing.TestTags
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.ui.components.PrincipalTaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.TaskList
@@ -134,6 +136,7 @@ private fun CalendarContent(
             else -> TaskList(
                 tasks = state.tasks,
                 enableSwipe = true,
+                modifier = Modifier.testTag(TestTags.LIST_CALENDAR_TASKS),
                 onTaskClick = { task ->
                     onAction(CalendarAction.TaskClicked(task.id.toString()))
                 },

@@ -42,12 +42,13 @@ import org.jetbrains.compose.resources.stringResource
  *
  * @param state Text field state managing the input value
  * @param label Label text displayed above the field
- * @param modifier Modifier to be applied to the field
+ * @param modifier Modifier to be applied to the container
  * @param isError Whether the field is in error state
  * @param errorMessage Error message to display when [isError] is true
  * @param enabled Whether the field accepts user input
  * @param lineLimits Line limits for the text field
  * @param trailingIcon Optional trailing icon composable
+ * @param textFieldModifier Modifier to be applied to the text field itself (useful for testTag)
  */
 @Composable
 fun TaskItInputField(
@@ -58,11 +59,12 @@ fun TaskItInputField(
     errorMessage: String = "",
     enabled: Boolean = true,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
-    trailingIcon: @Composable (() -> Unit)? = null
+    trailingIcon: @Composable (() -> Unit)? = null,
+    textFieldModifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().then(textFieldModifier),
             state = state,
             lineLimits = lineLimits,
             label = { Text(text = label) },
@@ -90,10 +92,11 @@ fun TaskItInputField(
  *
  * @param state Text field state managing the password value
  * @param label Label text displayed above the field
- * @param modifier Modifier to be applied to the field
+ * @param modifier Modifier to be applied to the container
  * @param isError Whether the field is in error state
  * @param errorMessage Error message to display when [isError] is true
  * @param enabled Whether the field accepts user input
+ * @param textFieldModifier Modifier to be applied to the text field itself (useful for testTag)
  */
 @Composable
 fun TaskItPasswordField(
@@ -102,13 +105,14 @@ fun TaskItPasswordField(
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String = "",
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    textFieldModifier: Modifier = Modifier
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().then(textFieldModifier),
             value = state.text.toString(),
             onValueChange = { value -> state.setText(value) },
             label = { Text(text = label) },

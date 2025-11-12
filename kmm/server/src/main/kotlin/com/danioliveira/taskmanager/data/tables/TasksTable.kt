@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.data.tables
 
-import com.danioliveira.taskmanager.core.domain.model.Priority
-import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.api.response.PriorityResponse
+import com.danioliveira.taskmanager.api.response.TaskStatusResponse
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.datetime.CurrentTimestamp
 import org.jetbrains.exposed.v1.datetime.datetime
@@ -13,8 +13,8 @@ object TasksTable : UUIDTable("tasks") {
     val projectId = optReference("project_id", ProjectsTable)
     val assigneeId = optReference("assignee_id", UsersTable)
     val creatorId = reference("creator_id", UsersTable)
-    val status = enumeration("status", TaskStatus::class).default(TaskStatus.TODO)
-    val priority = enumeration("priority", Priority::class)
+    val status = enumeration("status", TaskStatusResponse::class).default(TaskStatusResponse.TODO)
+    val priority = enumeration("priority", PriorityResponse::class)
     val dueDate = datetime("due_date").nullable()
 
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)

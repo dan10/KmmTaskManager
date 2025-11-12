@@ -1,10 +1,10 @@
 package com.danioliveira.taskmanager.domain.repository
 
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
+import com.danioliveira.taskmanager.api.response.PriorityResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
-import com.danioliveira.taskmanager.core.domain.model.Priority
-import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.api.response.TaskStatusResponse
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import kotlin.uuid.ExperimentalUuidApi
@@ -56,8 +56,8 @@ internal interface TaskRepository {
         projectId: Uuid?,
         assigneeId: Uuid?,
         creatorId: Uuid,
-        status: TaskStatus,
-        priority: Priority,
+        status: TaskStatusResponse,
+        priority: PriorityResponse,
         dueDate: LocalDateTime?
     ): TaskResponse
 
@@ -66,8 +66,8 @@ internal interface TaskRepository {
         id: String,
         title: String,
         description: String?,
-        status: TaskStatus,
-        priority: Priority,
+        status: TaskStatusResponse,
+        priority: PriorityResponse,
         dueDate: LocalDateTime?,
         assigneeId: Uuid?
     ): TaskResponse?

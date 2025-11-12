@@ -20,8 +20,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.danioliveira.taskmanager.testing.TestTags
 import com.danioliveira.taskmanager.core.ui.components.TaskItInputField
 import com.danioliveira.taskmanager.core.ui.components.TaskItPasswordField
 import com.danioliveira.taskmanager.core.ui.components.TaskItPrimaryActionButton
@@ -40,6 +42,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
 
 @Composable
 fun LoginScreen(
@@ -47,6 +50,7 @@ fun LoginScreen(
     navigateToRegister: () -> Unit = {},
     navigateToHome: () -> Unit = {}
 ) {
+    TraceLifecycle("LoginScreen")
 
     val isFormValid by viewModel.isFormValid.collectAsState()
     val emailHasError by viewModel.emailHasError.collectAsState()
@@ -118,7 +122,8 @@ fun LoginScreen(
                     lineLimits = TextFieldLineLimits.SingleLine,
                     enabled = !state.isLoading,
                     isError = emailHasError,
-                    errorMessage = stringResource(Res.string.title_email_error)
+                    errorMessage = stringResource(Res.string.title_email_error),
+                    textFieldModifier = Modifier.testTag(TestTags.TXT_EMAIL)
                 )
 
                 TaskItPasswordField(
@@ -127,11 +132,14 @@ fun LoginScreen(
                     label = stringResource(Res.string.title_password),
                     isError = passwordHasError,
                     errorMessage = stringResource(Res.string.title_password_error),
-                    enabled = !state.isLoading
+                    enabled = !state.isLoading,
+                    textFieldModifier = Modifier.testTag(TestTags.TXT_PASSWORD)
                 )
 
                 TaskItPrimaryActionButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(TestTags.BTN_LOGIN),
                     text = stringResource(Res.string.title_login_button),
                     onClick = { onAction(LoginAction.Login) },
                     enabled = isFormValid,
@@ -162,7 +170,10 @@ fun LoginAccountLink(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        TextButton(onClick = onLinkClick) {
+        TextButton(
+            modifier = Modifier.testTag(TestTags.LINK_REGISTER),
+            onClick = onLinkClick
+        ) {
             Text(
                 stringResource(Res.string.button_sign_up),
                 color = MaterialTheme.colorScheme.primary,

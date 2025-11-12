@@ -1,7 +1,7 @@
 package com.danioliveira.taskmanager.api.request
 
-import com.danioliveira.taskmanager.core.domain.model.Priority
-import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.api.response.PriorityResponse
+import com.danioliveira.taskmanager.api.response.TaskStatusResponse
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -12,8 +12,8 @@ import kotlinx.serialization.Serializable
 data class TaskUpdateRequest(
     val title: String? = null,
     val description: String? = null,
-    val status: TaskStatus? = null,
-    val priority: Priority? = null,
+    val status: TaskStatusResponse? = null,
+    val priority: PriorityResponse? = null,
     val dueDate: LocalDateTime? = null,
     val assigneeId: String? = null
 )

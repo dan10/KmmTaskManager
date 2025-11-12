@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    id("io.github.ttypic.swiftklib") version "0.6.4"
 }
 
 kotlin {
@@ -18,10 +19,16 @@ kotlin {
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
+        iosTarget.compilations {
+            val main by getting {
+                cinterops {
+                    create("Tracer")
+                }
+            }
+        }
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
@@ -126,4 +133,12 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+swiftklib {
+    create("Tracer") {
+        path = file("native/Tracer")
+        packageName("com.danioliveira.taskmanager.perf.native")
+        minIos.set(15)
+    }
 }

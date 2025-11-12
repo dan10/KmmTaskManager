@@ -48,9 +48,9 @@ class EditTaskViewModel(
                             isLoading = false,
                             title = TextFieldState(task.title),
                             description = TextFieldState(task.description),
-                            priority = task.priority,
+                            priority = Priority.valueOf(task.priority.name),
                             dueDate = task.dueDate,
-                            status = task.status,
+                            status = TaskStatus.valueOf(task.status.name),
                             projectId = task.projectId,
                             projectName = task.projectName,
                             errorMessage = null

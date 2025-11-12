@@ -1,10 +1,10 @@
 package com.danioliveira.taskmanager.data.repository
 
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
+import com.danioliveira.taskmanager.api.response.PriorityResponse
 import com.danioliveira.taskmanager.api.response.TaskProgressResponse
 import com.danioliveira.taskmanager.api.response.TaskResponse
-import com.danioliveira.taskmanager.core.domain.model.Priority
-import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.api.response.TaskStatusResponse
 import com.danioliveira.taskmanager.data.tables.ProjectsTable
 import com.danioliveira.taskmanager.data.tables.TasksTable
 import com.danioliveira.taskmanager.domain.repository.TaskRepository
@@ -54,8 +54,8 @@ internal class TaskRepositoryImpl : TaskRepository {
         id: String,
         title: String,
         description: String?,
-        status: TaskStatus,
-        priority: Priority,
+        status: TaskStatusResponse,
+        priority: PriorityResponse,
         dueDate: LocalDateTime?,
         assigneeId: Uuid?
     ): TaskResponse? = with(transaction) {
@@ -200,8 +200,8 @@ internal class TaskRepositoryImpl : TaskRepository {
         projectId: Uuid?,
         assigneeId: Uuid?,
         creatorId: Uuid,
-        status: TaskStatus,
-        priority: Priority,
+        status: TaskStatusResponse,
+        priority: PriorityResponse,
         dueDate: LocalDateTime?
     ): TaskResponse = with(transaction) {
         val id = Uuid.randomV7().toJavaUuid()

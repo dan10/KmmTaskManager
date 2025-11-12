@@ -26,11 +26,13 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.domain.manager.AuthManager
 import com.danioliveira.taskmanager.core.ui.components.TaskItPrimaryActionButton
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.domain.User
+import com.danioliveira.taskmanager.testing.TestTags
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.nav_profile
 import kmmtaskmanager.composeapp.generated.resources.profile_email_label
@@ -39,11 +41,14 @@ import kmmtaskmanager.composeapp.generated.resources.profile_logout
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import perf.TraceLifecycle
 
 @Composable
 fun ProfileScreen(
     onBack: () -> Unit
 ) {
+    TraceLifecycle("ProfileScreen")
+    
     val authManager = koinInject<AuthManager>()
     val coroutineScope = rememberCoroutineScope()
     
@@ -102,7 +107,9 @@ private fun ProfileContent(
             TaskItPrimaryActionButton(
                 text = stringResource(Res.string.profile_logout),
                 onClick = onLogout,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(TestTags.BTN_LOGOUT)
             )
         } else {
             Text(

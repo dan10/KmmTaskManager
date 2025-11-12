@@ -1,7 +1,9 @@
 package com.danioliveira.taskmanager.feature.tasks.data.mapper
 
 import com.danioliveira.taskmanager.api.response.TaskResponse
+import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.Task
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -16,8 +18,8 @@ fun TaskResponse.toTask(): Task {
         title = title,
         description = description,
         projectName = projectName,
-        status = status,
-        priority = priority,
+        status = TaskStatus.valueOf(status.name),
+        priority = Priority.valueOf(priority.name),
         dueDate = dueDate,
         createdAt = createdAt,
     )

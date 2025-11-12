@@ -1,9 +1,9 @@
-package com.danioliveira.taskmanager.core.domain.model
+package com.danioliveira.taskmanager.api.response
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class TaskStatus {
+enum class TaskStatusResponse {
     TODO,
     IN_PROGRESS,
     DONE

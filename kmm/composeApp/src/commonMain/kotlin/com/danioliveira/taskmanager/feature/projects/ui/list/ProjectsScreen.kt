@@ -36,8 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import com.danioliveira.taskmanager.testing.TestTags
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -67,6 +69,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
 
 context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
 @Composable
@@ -76,6 +79,8 @@ fun ProjectsScreen(
     userInitials: String? = null,
     onProfileClick: (() -> Unit)? = null
 ) {
+    TraceLifecycle("ProjectsScreen")
+    
     var showCreateProjectBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
@@ -176,6 +181,7 @@ private fun ProjectsFloatingActionButton(onAction: (ProjectsAction) -> Unit) {
     with(sts) {
         FloatingActionButton(
             modifier = Modifier
+                .testTag(TestTags.BTN_ADD_PROJECT)
                 .sharedElement(
                     sts.rememberSharedContentState(key = "add_fab"),
                 avs
@@ -200,7 +206,9 @@ private fun ProjectsList(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .testTag(TestTags.LIST_PROJECTS),
         contentPadding = PaddingValues(16.dp),
     ) {
         items(
@@ -250,6 +258,7 @@ fun ProjectCard(project: Project, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag(TestTags.projectCard(project.id))
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp),

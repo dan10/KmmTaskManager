@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -77,6 +78,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun TaskItApp(
+    modifier: Modifier= Modifier,
     onAppReady: () -> Unit = {}
 ) {
     TaskItTheme {
@@ -89,7 +91,7 @@ fun TaskItApp(
         )
 
         Scaffold(
-            modifier = Modifier,
+            modifier = modifier,
             bottomBar = {
                 TaskItBottomBar(appState = appState)
             }
@@ -130,7 +132,14 @@ fun TaskItBottomBar(
     ) {
         NavigationBar(modifier = Modifier.navigationBarsPadding()) {
             topLevelRoutes.forEach { topLevelRoute ->
+                val testTag = when (topLevelRoute.route) {
+                    is Screen.Tasks -> com.danioliveira.taskmanager.testing.TestTags.NAV_TASKS
+                    is Screen.Projects -> com.danioliveira.taskmanager.testing.TestTags.NAV_PROJECTS
+                    is Screen.Calendar -> com.danioliveira.taskmanager.testing.TestTags.NAV_CALENDAR
+                    else -> null
+                }
                 NavigationBarItem(
+                    modifier = testTag?.let { Modifier.testTag(it) } ?: Modifier,
                     icon = {
                         when (val icon = topLevelRoute.icon) {
                             is NavIcon.ImageVectorIcon -> Icon(
