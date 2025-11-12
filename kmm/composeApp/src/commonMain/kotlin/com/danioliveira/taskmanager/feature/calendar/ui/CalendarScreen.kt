@@ -44,6 +44,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
 import kotlin.time.ExperimentalTime
 
 context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
@@ -53,6 +54,8 @@ fun CalendarScreen(
     userInitials: String? = null,
     onProfileClick: (() -> Unit)? = null
 ) {
+    TraceLifecycle("CalendarScreen")
+    
     val viewModel = koinViewModel<CalendarViewModel>()
     val state = viewModel.state
 

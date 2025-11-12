@@ -35,6 +35,7 @@ import kmmtaskmanager.composeapp.generated.resources.edit_task
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import perf.TraceLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -45,6 +46,8 @@ fun EditTaskScreen(
     onBack: () -> Unit,
     viewModel: EditTaskViewModel = koinViewModel(key = "edit-task-$taskId") { parametersOf(taskId) }
 ) {
+    TraceLifecycle("EditTaskScreen")
+    
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle effects

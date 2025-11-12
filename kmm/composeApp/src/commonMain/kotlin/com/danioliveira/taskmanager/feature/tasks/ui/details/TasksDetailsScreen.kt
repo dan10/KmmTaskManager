@@ -75,6 +75,7 @@ import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
 import kotlin.uuid.Uuid
 
 context(_: SharedTransitionScope, _: AnimatedVisibilityScope)
@@ -85,6 +86,8 @@ fun TaskDetailsScreen(
     onBack: () -> Unit,
     onEditTask: (Uuid) -> Unit
 ) {
+    TraceLifecycle("TaskDetailsScreen")
+    
     viewModel.onBack = onBack
     viewModel.onEditTask = onEditTask
 

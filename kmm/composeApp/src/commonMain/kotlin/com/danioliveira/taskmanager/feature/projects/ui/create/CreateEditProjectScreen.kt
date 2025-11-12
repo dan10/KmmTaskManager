@@ -37,6 +37,7 @@ import kmmtaskmanager.composeapp.generated.resources.project_name_label
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
 
 /**
  * BottomSheet version of project creation/editing screen
@@ -47,6 +48,8 @@ fun CreateEditProjectBottomSheet(
     onDismiss: () -> Unit = {},
     viewModel: CreateEditProjectViewModel = koinViewModel(key = "bottomsheet_${projectId}")
 ) {
+    TraceLifecycle("CreateEditProjectBottomSheet")
+    
     // Initialize the ViewModel with the projectId
     LaunchedEffect(projectId) {
         viewModel.initialize(projectId)

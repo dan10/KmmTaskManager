@@ -71,6 +71,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -81,6 +82,8 @@ fun ProjectDetailsScreen(
     navigateToTaskDetail: (Uuid) -> Unit,
     viewModel: ProjectDetailsViewModel = koinViewModel()
 ) {
+    TraceLifecycle("ProjectDetailsScreen")
+    
     var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
     var projectIdForTask by remember { mutableStateOf<String?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
