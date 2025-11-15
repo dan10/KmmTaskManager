@@ -31,11 +31,28 @@ dependencies {
     testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
     testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.15.2")
     
+    // Gson for JSON (used by new perf framework)
+    testImplementation("com.google.code.gson:gson:2.10.1")
+    
+    // Coroutines (used by new perf framework)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    
+    // AndroidX TraceProcessor (Perfetto query client)
+    testImplementation("androidx.benchmark:benchmark-traceprocessor:1.4.1")
+    
+    // AndroidX Benchmark TraceProcessor (Perfetto SQL queries)
+    // NOTE: These are AAR dependencies and require Android instrumentation test context
+    // For now, we're using stub implementations that will be replaced when we integrate
+    // the actual TraceProcessor HTTP server in Phase 3
+    // testImplementation("androidx.benchmark:benchmark-common:1.3.3")
+    // testImplementation("androidx.benchmark:benchmark-macro:1.3.3")
+    
     // Logging
     testImplementation("org.slf4j:slf4j-simple:2.0.9")
     
     // Kotlin test
     testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
 tasks.test {

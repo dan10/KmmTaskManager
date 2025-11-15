@@ -42,6 +42,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.splashscreen)
+            implementation(libs.androidx.tracing)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
         }

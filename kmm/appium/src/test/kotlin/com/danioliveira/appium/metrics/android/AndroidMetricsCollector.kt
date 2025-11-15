@@ -1,5 +1,6 @@
 package com.danioliveira.appium.metrics.android
 
+import com.danioliveira.appium.utils.AdbShell
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -7,9 +8,14 @@ class AndroidMetricsCollector(private val packageName: String) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private var perfettoProcess: Process? = null
     
+    // Systrace collector for screen-level tracing
+    val systraceCollector: SystraceCollector by lazy {
+        SystraceCollector()
+    }
+    
     fun resetGfxInfo() {
         try {
-            execAdbCommand("shell", "dumpsys", "gfxinfo", packageName, "reset")
+            AdbShell.exec("shell", "dumpsys", "gfxinfo", packageName, "reset")
             logger.debug("Reset gfxinfo for $packageName")
         } catch (e: Exception) {
             logger.warn("Failed to reset gfxinfo: ${e.message}")
@@ -18,7 +24,7 @@ class AndroidMetricsCollector(private val packageName: String) {
     
     fun collectGfxInfo(): GfxInfoMetrics {
         return try {
-            val output = execAdbCommand("shell", "dumpsys", "gfxinfo", packageName)
+            val output = AdbShell.exec("shell", "dumpsys", "gfxinfo", packageName)
             parseGfxInfo(output)
         } catch (e: Exception) {
             logger.error("Failed to collect gfxinfo: ${e.message}")
@@ -28,7 +34,7 @@ class AndroidMetricsCollector(private val packageName: String) {
     
     fun collectMemInfo(): MemInfoMetrics {
         return try {
-            val output = execAdbCommand("shell", "dumpsys", "meminfo", packageName)
+            val output = AdbShell.exec("shell", "dumpsys", "meminfo", packageName)
             parseMemInfo(output)
         } catch (e: Exception) {
             logger.error("Failed to collect meminfo: ${e.message}")
@@ -45,7 +51,7 @@ class AndroidMetricsCollector(private val packageName: String) {
             }
             
             logger.debug("Collecting CPU for PID: $pid")
-            val output = execAdbCommand("shell", "top", "-n", "1", "-p", pid.toString())
+            val output = AdbShell.exec("shell", "top", "-n", "1", "-p", pid.toString())
             
             if (output.isEmpty() || output.length < 50) {
                 logger.warn("top command returned empty or very short output for PID $pid")
@@ -65,11 +71,11 @@ class AndroidMetricsCollector(private val packageName: String) {
             val startTime = System.currentTimeMillis()
             
             // Force stop the app
-            execAdbCommand("shell", "am", "force-stop", packageName)
+            AdbShell.exec("shell", "am", "force-stop", packageName)
             Thread.sleep(1000)
             
             // Start the app and measure
-            execAdbCommand("shell", "am", "start", "-W", "-n", 
+            AdbShell.exec("shell", "am", "start", "-W", "-n", 
                 "$packageName/.MainActivity")
             
             val endTime = System.currentTimeMillis()
@@ -84,7 +90,7 @@ class AndroidMetricsCollector(private val packageName: String) {
     
     private fun getPid(): Int? {
         return try {
-            val output = execAdbCommand("shell", "pidof", packageName)
+            val output = AdbShell.exec("shell", "pidof", packageName)
             val pid = output.trim().toIntOrNull()
             if (pid != null) {
                 logger.debug("Found PID $pid for $packageName")
@@ -252,48 +258,187 @@ class AndroidMetricsCollector(private val packageName: String) {
         return CpuMetrics.empty()
     }
     
-    private fun execAdbCommand(vararg args: String): String {
-        val adbPath = findAdbPath()
-        val command = listOf(adbPath) + args
-        val process = ProcessBuilder(command)
-            .redirectErrorStream(true)
-            .start()
-        
-        val output = process.inputStream.bufferedReader().readText()
-        process.waitFor()
-        return output
+    
+    // ==================== Flashlight-inspired ADB methods ====================
+    
+    private var cachedRefreshRate: Int? = null
+    
+    /**
+     * Detect device refresh rate using dumpsys display.
+     * Based on Flashlight's detectDeviceRefreshRate method.
+     */
+    fun detectDeviceRefreshRate(): Int {
+        return try {
+            val output = AdbShell.exec("shell", "dumpsys", "display")
+            
+            // Try renderFrameRate first
+            val renderMatch = Regex("""renderFrameRate\s+(\d+\.?\d*)""").find(output)
+            if (renderMatch != null) {
+                return renderMatch.groupValues[1].toFloat().toInt()
+            }
+            
+            // Fallback: extract all fps values, take highest
+            val fpsMatches = Regex("""fps=(\d+\.?\d*)""").findAll(output)
+            val rates = fpsMatches.map { it.groupValues[1].toFloat() }.sortedDescending().toList()
+            rates.firstOrNull()?.toInt() ?: 60
+        } catch (e: Exception) {
+            logger.warn("Failed to detect refresh rate: ${e.message}, defaulting to 60Hz")
+            60
+        }
     }
     
-    private fun findAdbPath(): String {
-        // Try common locations for ADB
-        val possiblePaths = listOf(
-            "adb", // Already in PATH
-            "/usr/local/bin/adb",
-            System.getenv("ANDROID_HOME")?.let { "$it/platform-tools/adb" },
-            System.getProperty("user.home")?.let { "$it/Library/Android/sdk/platform-tools/adb" },
-            System.getProperty("user.home")?.let { "$it/Android/Sdk/platform-tools/adb" },
-            "/opt/android-sdk/platform-tools/adb"
-        ).filterNotNull()
-        
-        for (path in possiblePaths) {
-            try {
-                val process = ProcessBuilder(path, "version")
-                    .redirectErrorStream(true)
-                    .start()
-                val exitCode = process.waitFor()
-                if (exitCode == 0) {
-                    logger.info("Found ADB at: $path")
-                    return path
-                }
-            } catch (e: Exception) {
-                // Try next path
-                continue
-            }
+    /**
+     * Get cached device refresh rate (detects once, then caches).
+     */
+    fun getDeviceRefreshRate(): Int {
+        if (cachedRefreshRate == null) {
+            cachedRefreshRate = detectDeviceRefreshRate()
+            logger.info("Detected device refresh rate: ${cachedRefreshRate}Hz")
         }
-        
-        logger.error("⚠️  ADB not found! Please ensure Android SDK is installed and ANDROID_HOME is set.")
-        logger.error("   Metrics will return zeros. Install: https://developer.android.com/studio/command-line/adb")
-        throw IllegalStateException("ADB not found in PATH or common locations. Set ANDROID_HOME environment variable.")
+        return cachedRefreshRate!!
+    }
+    
+    /**
+     * Collect FPS using Flashlight's gfxinfo algorithm.
+     * Accounts for idle time and device refresh rate.
+     * 
+     * @param timeIntervalMs Time interval for measurement (default: 500ms)
+     * @return FPS value
+     */
+    fun collectFlashlightFps(timeIntervalMs: Long = 500): Double {
+        return try {
+            val refreshRate = getDeviceRefreshRate()
+            val targetFrameTime = 1000.0 / refreshRate
+            
+            val output = AdbShell.exec("shell", "dumpsys", "gfxinfo", packageName)
+            
+            // Parse frame times from gfxinfo
+            val frameTimes = mutableListOf<Double>()
+            val lines = output.lines()
+            var inFrameData = false
+            
+            for (line in lines) {
+                if (line.contains("Frame timings")) {
+                    inFrameData = true
+                    continue
+                }
+                if (inFrameData && line.trim().isEmpty()) {
+                    break
+                }
+                if (inFrameData) {
+                    val parts = line.trim().split("\\s+".toRegex())
+                    if (parts.size >= 3) {
+                        try {
+                            val frameTime = parts[2].toDoubleOrNull()
+                            if (frameTime != null && frameTime > 0) {
+                                frameTimes.add(frameTime)
+                            }
+                        } catch (e: Exception) {
+                            // Skip invalid lines
+                        }
+                    }
+                }
+            }
+            
+            if (frameTimes.isEmpty()) {
+                return 60.0 // Default
+            }
+            
+            // Calculate render time and idle time
+            val renderTime = frameTimes.sumOf { maxOf(it, targetFrameTime) }
+            val idleTime = maxOf(timeIntervalMs - renderTime, 0.0)
+            val idleFrameCount = (idleTime * refreshRate) / 1000.0
+            
+            // Calculate FPS
+            ((frameTimes.size + idleFrameCount) / (renderTime + idleTime)) * 1000.0
+        } catch (e: Exception) {
+            logger.warn("Failed to collect Flashlight FPS: ${e.message}")
+            60.0
+        }
+    }
+    
+    /**
+     * Collect CPU info using dumpsys cpuinfo as an alternative to top.
+     * More reliable for some devices.
+     */
+    fun collectCpuInfoFromDumpsys(): CpuMetrics {
+        return try {
+            val output = AdbShell.exec("shell", "dumpsys", "cpuinfo")
+            val pattern = Regex("""(\d+(?:\.\d+)?)%\s+\d+/${Regex.escape(packageName)}""")
+            val match = pattern.find(output)
+            
+            if (match != null) {
+                val cpuPercent = match.groupValues[1].toDoubleOrNull() ?: 0.0
+                CpuMetrics(cpuPercent)
+            } else {
+                logger.debug("Could not find CPU usage for $packageName in dumpsys cpuinfo")
+                CpuMetrics.empty()
+            }
+        } catch (e: Exception) {
+            logger.warn("Failed to collect CPU from dumpsys: ${e.message}")
+            CpuMetrics.empty()
+        }
+    }
+    
+    /**
+     * Collect enhanced gfxinfo with histogram data.
+     * Based on Flashlight's enhanced gfxinfo parsing.
+     */
+    fun collectEnhancedGfxInfo(): EnhancedGfxInfoMetrics {
+        return try {
+            val output = AdbShell.exec("shell", "dumpsys", "gfxinfo", packageName, "framestats")
+            
+            val frameTimes = mutableListOf<Double>()
+            val histogram = mutableMapOf<String, Int>()
+            
+            // Parse frame times
+            val lines = output.lines()
+            var inFrameData = false
+            
+            for (line in lines) {
+                if (line.contains("---PROFILEDATA---")) {
+                    inFrameData = true
+                    continue
+                }
+                if (inFrameData && line.trim().isEmpty()) {
+                    break
+                }
+                if (inFrameData && line.startsWith("0,")) {
+                    val parts = line.split(",")
+                    if (parts.size >= 13) {
+                        try {
+                            val frameTime = (parts[13].toLong() - parts[1].toLong()) / 1_000_000.0
+                            if (frameTime > 0) {
+                                frameTimes.add(frameTime)
+                            }
+                        } catch (e: Exception) {
+                            // Skip invalid lines
+                        }
+                    }
+                }
+            }
+            
+            // Build histogram
+            for (frameTime in frameTimes) {
+                val bucket = when {
+                    frameTime < 8 -> "<8ms"
+                    frameTime < 16 -> "8-16ms"
+                    frameTime < 32 -> "16-32ms"
+                    frameTime < 64 -> "32-64ms"
+                    else -> ">64ms"
+                }
+                histogram[bucket] = histogram.getOrDefault(bucket, 0) + 1
+            }
+            
+            EnhancedGfxInfoMetrics(
+                frameTimes = frameTimes,
+                histogram = histogram,
+                totalFrames = frameTimes.size
+            )
+        } catch (e: Exception) {
+            logger.warn("Failed to collect enhanced gfxinfo: ${e.message}")
+            EnhancedGfxInfoMetrics(emptyList(), emptyMap(), 0)
+        }
     }
 }
 
@@ -307,6 +452,9 @@ data class GfxInfoMetrics(
 ) {
     val jankPercentage: Double
         get() = if (totalFrames > 0) (jankyFrames.toDouble() / totalFrames) * 100.0 else 0.0
+    
+    val fps: Double
+        get() = if (avgFrameTimeMs > 0) 1000.0 / avgFrameTimeMs else 60.0
     
     companion object {
         fun empty() = GfxInfoMetrics(0, 0, 0.0, 0.0, 0.0, 0.0)
@@ -328,6 +476,32 @@ data class CpuMetrics(
 ) {
     companion object {
         fun empty() = CpuMetrics(0.0)
+    }
+}
+
+/**
+ * Enhanced gfxinfo metrics with histogram data.
+ * Based on Flashlight's enhanced gfxinfo parsing.
+ */
+data class EnhancedGfxInfoMetrics(
+    val frameTimes: List<Double>,
+    val histogram: Map<String, Int>,
+    val totalFrames: Int
+) {
+    val avgFrameTime: Double
+        get() = if (frameTimes.isNotEmpty()) frameTimes.average() else 0.0
+    
+    val p50FrameTime: Double
+        get() = if (frameTimes.isNotEmpty()) frameTimes.sorted()[frameTimes.size / 2] else 0.0
+    
+    val p90FrameTime: Double
+        get() = if (frameTimes.isNotEmpty()) frameTimes.sorted()[(frameTimes.size * 0.9).toInt()] else 0.0
+    
+    val p99FrameTime: Double
+        get() = if (frameTimes.isNotEmpty()) frameTimes.sorted()[(frameTimes.size * 0.99).toInt()] else 0.0
+    
+    companion object {
+        fun empty() = EnhancedGfxInfoMetrics(emptyList(), emptyMap(), 0)
     }
 }
 

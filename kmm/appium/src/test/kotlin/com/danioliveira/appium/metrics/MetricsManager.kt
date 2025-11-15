@@ -16,7 +16,7 @@ class MetricsManager(
     private val instrumentsProfileName: String = "Activity Monitor"  // iOS Instruments profile to use
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val androidCollector = if (platform == Platform.ANDROID) {
+    val androidCollector = if (platform == Platform.ANDROID) {
         try {
             AndroidMetricsCollector(packageOrBundleId).also {
                 logger.info("✅ Android metrics collector initialized for: $packageOrBundleId")
@@ -44,6 +44,7 @@ class MetricsManager(
     private val pageMetricsMap = ConcurrentHashMap<String, MutableList<ActionMetrics>>()
     
     private var appLaunchTimeMs: Long = 0
+    private var traceMetrics: com.danioliveira.appium.metrics.android.TraceMetrics? = null
     
     fun measureAppLaunchTime(): Long {
         appLaunchTimeMs = when (platform) {
@@ -55,32 +56,62 @@ class MetricsManager(
     }
     
     /**
-     * Start performance recording (iOS only, uses instruments)
-     * Call this at the beginning of your test suite
+     * Start performance recording
+     * - iOS: Uses Instruments
+     * - Android: Starts systrace capture with app-level tracing
+     * 
+     * Capture will continue until stopPerformanceRecording() is called.
      */
     fun startPerformanceRecording() {
-        if (platform == Platform.IOS) {
-            iosCollector?.startPerformanceRecording()
+        when (platform) {
+            Platform.IOS -> iosCollector?.startPerformanceRecording()
+            Platform.ANDROID -> {
+                // Start systrace with app-level tracing enabled
+                val started = androidCollector?.systraceCollector?.startCapture(
+                    packageName = packageOrBundleId
+                )
+                if (started == true) {
+                    logger.info("✅ Systrace capture started (will run until stopped)")
+                } else {
+                    logger.warn("⚠️  Failed to start systrace capture")
+                }
+            }
         }
     }
     
     /**
-     * Stop performance recording (iOS only)
-     * Call this at the end of your test suite
-     * Returns performance snapshot with recording duration
+     * Stop performance recording
+     * - iOS: Stops Instruments and parses trace
+     * - Android: Stops systrace and parses trace
+     * 
+     * @param testName Name for the trace file
+     * @return Summary message
      */
-    fun stopPerformanceRecording(): String? {
-        if (platform == Platform.IOS) {
-            val snapshot = iosCollector?.stopPerformanceRecording()
-            
-            // Update all collected metrics with parsed values from trace
-            iosCollector?.let { collector ->
-                updateMetricsWithParsedValues(collector)
+    fun stopPerformanceRecording(testName: String = "test"): String? {
+        return when (platform) {
+            Platform.IOS -> {
+                val snapshot = iosCollector?.stopPerformanceRecording()
+                
+                // Update all collected metrics with parsed values from trace
+                iosCollector?.let { collector ->
+                    updateMetricsWithParsedValues(collector)
+                }
+                
+                snapshot?.message
             }
-            
-            return snapshot?.message
+            Platform.ANDROID -> {
+                val traceFile = androidCollector?.systraceCollector?.stopCapture(testName)
+                if (traceFile != null) {
+                    traceMetrics = androidCollector?.systraceCollector?.parseTrace(traceFile)
+                    logger.info("✅ Systrace captured: ${traceFile.name}")
+                    logger.info("   Found ${traceMetrics?.screenCount ?: 0} screen traces")
+                    "Systrace saved to: ${traceFile.absolutePath}"
+                } else {
+                    logger.warn("⚠️  Failed to capture systrace")
+                    null
+                }
+            }
         }
-        return null
     }
     
     /**
@@ -120,8 +151,29 @@ class MetricsManager(
         
         val startTime = System.currentTimeMillis()
         
-        // Reset frame stats for Android
-        androidCollector?.resetGfxInfo()
+        // Collect BEFORE metrics
+        val beforeMetrics = when (platform) {
+            Platform.ANDROID -> {
+                androidCollector?.let {
+                    // Reset frame stats before measuring
+                    it.resetGfxInfo()
+                    MetricsSnapshot(
+                        memoryMb = it.collectMemInfo().rssMb,
+                        cpuPercent = it.collectCpuInfo().cpuPercentage
+                    )
+                } ?: MetricsSnapshot(0, 0.0)
+            }
+            Platform.IOS -> {
+                iosCollector?.let {
+                    MetricsSnapshot(
+                        memoryMb = it.collectMemoryInfo().avgMemoryMb,
+                        cpuPercent = it.collectCpuInfo().avgCpuPercent
+                    )
+                } ?: MetricsSnapshot(0, 0.0)
+            }
+        }
+        
+        logger.debug("Before metrics: memory=${beforeMetrics.memoryMb}MB, cpu=${beforeMetrics.cpuPercent}%")
         
         // Execute the action
         block()
@@ -131,16 +183,39 @@ class MetricsManager(
         
         val durationMs = System.currentTimeMillis() - startTime
         
-        // Collect metrics after action
-        val metrics = collectMetrics(pageName, actionName, durationMs)
+        // Collect AFTER metrics
+        val afterMetrics = collectMetrics(pageName, actionName, durationMs)
+        
+        // Calculate DELTA (change during action)
+        val deltaMemoryMb = afterMetrics.memoryMb - beforeMetrics.memoryMb
+        val deltaCpuPercent = afterMetrics.cpuPercent - beforeMetrics.cpuPercent
+        
+        // Update metrics with delta information
+        val metricsWithDelta = afterMetrics.copy(
+            memoryMb = afterMetrics.memoryMb,  // Keep absolute value
+            cpuPercent = afterMetrics.cpuPercent,  // Keep absolute value
+            deltaMemoryMb = deltaMemoryMb,  // Store delta
+            deltaCpuPercent = deltaCpuPercent  // Store delta
+        )
         
         // Store metrics
-        actionMetrics.add(metrics)
-        pageMetricsMap.getOrPut(pageName) { mutableListOf() }.add(metrics)
+        actionMetrics.add(metricsWithDelta)
+        pageMetricsMap.getOrPut(pageName) { mutableListOf() }.add(metricsWithDelta)
         
-        logger.info("Metrics collected for $pageName.$actionName: " +
-            "duration=${durationMs}ms, memory=${metrics.memoryMb}MB, cpu=${metrics.cpuPercent}%")
+        logger.info("Metrics collected for $pageName.$actionName:")
+        logger.info("  Duration: ${durationMs}ms")
+        logger.info("  Memory: ${afterMetrics.memoryMb}MB (Δ ${if (deltaMemoryMb >= 0) "+" else ""}${deltaMemoryMb}MB)")
+        logger.info("  CPU: ${String.format("%.1f", afterMetrics.cpuPercent)}% (Δ ${if (deltaCpuPercent >= 0) "+" else ""}${String.format("%.1f", deltaCpuPercent)}%)")
+        logger.info("  FPS: ${String.format("%.1f", afterMetrics.fps)}")
     }
+    
+    /**
+     * Snapshot of metrics at a point in time.
+     */
+    private data class MetricsSnapshot(
+        val memoryMb: Int,
+        val cpuPercent: Double
+    )
     
     private fun collectMetrics(
         pageName: String, 
@@ -277,10 +352,26 @@ class MetricsManager(
         )
     }
     
+    /**
+     * Get systrace metrics (Android only).
+     * Returns screen-level trace data from systrace capture.
+     */
+    fun getTraceMetrics(): com.danioliveira.appium.metrics.android.TraceMetrics? {
+        return traceMetrics
+    }
+    
+    /**
+     * Get all action-level metrics with delta values.
+     */
+    fun getActionMetrics(): List<ActionMetrics> {
+        return actionMetrics.toList()
+    }
+    
     fun reset() {
         actionMetrics.clear()
         pageMetricsMap.clear()
         appLaunchTimeMs = 0
+        traceMetrics = null
         logger.info("Metrics manager reset")
     }
 }
@@ -294,7 +385,10 @@ data class ActionMetrics(
     val avgFrameTimeMs: Double,
     val jankPercentage: Double,
     val fps: Double,
-    val platform: String
+    val platform: String,
+    // Delta values (change during action)
+    val deltaMemoryMb: Int = 0,
+    val deltaCpuPercent: Double = 0.0
 )
 
 data class PageMetricsSummary(
