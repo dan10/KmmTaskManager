@@ -24,10 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.ui.components.TaskItPrimaryActionButton
 import com.danioliveira.taskmanager.core.ui.components.TaskItInputField
 import com.danioliveira.taskmanager.core.ui.components.TaskItPasswordField
+import com.danioliveira.taskmanager.testing.TestTags
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.app_name
@@ -156,6 +158,7 @@ private fun RegisterForm(
         isError = nameHasError(),
         lineLimits = TextFieldLineLimits.SingleLine,
         errorMessage = stringResource(Res.string.title_name_error),
+        textFieldModifier = Modifier.testTag(TestTags.TXT_NAME)
     )
 
     TaskItInputField(
@@ -165,6 +168,7 @@ private fun RegisterForm(
         isError = emailHasError(),
         lineLimits = TextFieldLineLimits.SingleLine,
         errorMessage = stringResource(Res.string.title_email_error),
+        textFieldModifier = Modifier.testTag(TestTags.TXT_EMAIL)
     )
 
     TaskItPasswordField(
@@ -173,6 +177,7 @@ private fun RegisterForm(
         enabled = !isLoading,
         isError = passwordHasError(),
         errorMessage = stringResource(Res.string.title_password_error),
+        textFieldModifier = Modifier.testTag(TestTags.TXT_PASSWORD)
     )
 
     TaskItPasswordField(
@@ -181,12 +186,15 @@ private fun RegisterForm(
         enabled = !isLoading,
         isError = confirmPasswordHasError(),
         errorMessage = stringResource(Res.string.title_confirm_password_error),
+        textFieldModifier = Modifier.testTag(TestTags.TXT_CONFIRM_PASSWORD)
     )
 
     TaskItPrimaryActionButton(
         text = stringResource(Res.string.title_register_button),
         onClick = onRegisterClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(TestTags.BTN_REGISTER),
         enabled = buttonEnabled(),
         isLoading = isLoading
     )

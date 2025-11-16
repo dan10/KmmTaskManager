@@ -61,12 +61,18 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
             frames.map { it.durationMs }.average()
         } else 0.0
         
-        // Calculate memory statistics (min/max/avg)
-        val memoryMbValues = memory.map { it.rssMb }
-        val minMemoryMb = memoryMbValues.minOrNull() ?: 0
-        val maxMemoryMb = memoryMbValues.maxOrNull() ?: 0
+        // Calculate memory statistics (min/max/avg/p50/p90)
+        val memoryMbValues = memory.map { it.rssMb.toDouble() }
+        val minMemoryMb = memoryMbValues.minOrNull()?.toInt() ?: 0
+        val maxMemoryMb = memoryMbValues.maxOrNull()?.toInt() ?: 0
         val avgMemoryMb = if (memoryMbValues.isNotEmpty()) {
             memoryMbValues.average().toInt()
+        } else 0
+        val p50MemoryMb = if (memoryMbValues.isNotEmpty()) {
+            calculatePercentile(memoryMbValues, 0.50).toInt()
+        } else 0
+        val p90MemoryMb = if (memoryMbValues.isNotEmpty()) {
+            calculatePercentile(memoryMbValues, 0.90).toInt()
         } else 0
         
         // Calculate CPU statistics by bucketing into time windows
@@ -92,7 +98,7 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
             logger.info("  Frame source: ${determineFrameSource(frames)}")
         }
         logger.info("  Avg frame time: ${String.format("%.2f", avgFrameTimeMs)}ms")
-        logger.info("  Memory: min=${minMemoryMb}MB, max=${maxMemoryMb}MB, avg=${avgMemoryMb}MB")
+        logger.info("  Memory: min=${minMemoryMb}MB, max=${maxMemoryMb}MB, avg=${avgMemoryMb}MB, p50=${p50MemoryMb}MB, p90=${p90MemoryMb}MB (${memoryMbValues.size} samples)")
         logger.info("  CPU: min=${String.format("%.1f", minCpuPercent)}%, max=${String.format("%.1f", maxCpuPercent)}%, avg=${String.format("%.1f", avgCpuPercent)}%")
         logger.info("  FPS: min=${String.format("%.1f", minFps)}, max=${String.format("%.1f", maxFps)}, avg=${String.format("%.1f", avgFps)}")
         logger.info("  Trace sections: ${sections.size}")
@@ -176,10 +182,12 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
         val cpuAvg = if (cpuPercentages.isNotEmpty()) cpuPercentages.average() else 0.0
         
         // Calculate Memory stats
-        val memoryMbValues = screenMemory.map { it.rssMb }
-        val memoryMin = memoryMbValues.minOrNull() ?: 0
-        val memoryMax = memoryMbValues.maxOrNull() ?: 0
+        val memoryMbValues = screenMemory.map { it.rssMb.toDouble() }
+        val memoryMin = memoryMbValues.minOrNull()?.toInt() ?: 0
+        val memoryMax = memoryMbValues.maxOrNull()?.toInt() ?: 0
         val memoryAvg = if (memoryMbValues.isNotEmpty()) memoryMbValues.average().toInt() else 0
+        val memoryP50 = if (memoryMbValues.isNotEmpty()) calculatePercentile(memoryMbValues, 0.50).toInt() else 0
+        val memoryP90 = if (memoryMbValues.isNotEmpty()) calculatePercentile(memoryMbValues, 0.90).toInt() else 0
         
         // Calculate FPS stats
         val fpsValues = if (screenFrames.isNotEmpty()) {
@@ -195,7 +203,7 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
         logger.info("Screen '${section.name}' metrics:")
         logger.info("  Duration: ${section.durationMs}ms")
         logger.info("  CPU: min=${String.format("%.1f", cpuMin)}%, max=${String.format("%.1f", cpuMax)}%, avg=${String.format("%.1f", cpuAvg)}% (${screenCpu.size} samples)")
-        logger.info("  Memory: min=${memoryMin}MB, max=${memoryMax}MB, avg=${memoryAvg}MB (${screenMemory.size} samples)")
+        logger.info("  Memory: min=${memoryMin}MB, max=${memoryMax}MB, avg=${memoryAvg}MB, p50=${memoryP50}MB, p90=${memoryP90}MB (${screenMemory.size} samples)")
         logger.info("  FPS: min=${String.format("%.1f", fpsMin)}, max=${String.format("%.1f", fpsMax)}, avg=${String.format("%.1f", fpsAvg)} (${screenFrames.size} frames, $jankCount janky)")
         
         return com.danioliveira.appium.metrics.android.ScreenMetrics(
@@ -210,6 +218,8 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
             memoryMin = memoryMin,
             memoryMax = memoryMax,
             memoryAvg = memoryAvg,
+            memoryP50 = memoryP50,
+            memoryP90 = memoryP90,
             memorySamples = screenMemory.size,
             fpsMin = fpsMin,
             fpsMax = fpsMax,
@@ -217,6 +227,19 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
             frameCount = screenFrames.size,
             jankCount = jankCount
         )
+    }
+    
+    /**
+     * Calculate percentile from a list of values.
+     * @param values List of numeric values
+     * @param percentile Percentile to calculate (0.0 to 1.0, e.g., 0.50 for p50, 0.90 for p90)
+     * @return The percentile value
+     */
+    private fun calculatePercentile(values: List<Double>, percentile: Double): Double {
+        if (values.isEmpty()) return 0.0
+        val sorted = values.sorted()
+        val index = (percentile * (sorted.size - 1)).toInt()
+        return sorted[index]
     }
     
     /**

@@ -143,6 +143,56 @@ object JsonExporter {
             "upper" to stats.confidenceInterval95.second
         )
     )
+    
+    /**
+     * Export aggregated result with histograms to JSON.
+     */
+    fun exportAggregatedResultWithHistograms(result: AggregatedResultWithHistograms, outputFile: File) {
+        val data = mapOf(
+            "totalRuns" to result.totalRuns,
+            "successfulRuns" to result.successfulRuns,
+            "combinedStatistics" to mapOf(
+                "cpu" to formatMetricStats(result.cpuStats),
+                "memory" to formatMetricStats(result.memoryStats),
+                "fps" to formatMetricStats(result.fpsStats),
+                "duration" to formatMetricStats(result.durationStats)
+            ),
+            "histograms" to mapOf(
+                "cpu" to formatHistogram(result.cpuHistogram),
+                "memory" to formatHistogram(result.memoryHistogram),
+                "fps" to formatHistogram(result.fpsHistogram),
+                "duration" to formatHistogram(result.durationHistogram)
+            ),
+            "individualRuns" to result.individualRunSummaries.map { run ->
+                mapOf(
+                    "runNumber" to run.runNumber,
+                    "durationMs" to run.durationMs,
+                    "cpuAvg" to run.cpuAvg,
+                    "memoryAvg" to run.memoryAvg,
+                    "fpsAvg" to run.fpsAvg
+                )
+            }
+        )
+        
+        val json = gson.toJson(data)
+        outputFile.writeText(json)
+    }
+    
+    private fun formatHistogram(histogram: Histogram): Map<String, Any> {
+        return mapOf(
+            "binWidth" to histogram.binWidth,
+            "unit" to histogram.unit,
+            "totalSamples" to histogram.totalSamples,
+            "bins" to histogram.bins.map { bin ->
+                mapOf(
+                    "rangeStart" to bin.rangeStart,
+                    "rangeEnd" to bin.rangeEnd,
+                    "count" to bin.count,
+                    "percentage" to bin.percentage
+                )
+            }
+        )
+    }
 }
 
 

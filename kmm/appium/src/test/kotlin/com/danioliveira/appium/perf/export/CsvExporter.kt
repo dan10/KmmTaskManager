@@ -138,7 +138,7 @@ object CsvExporter {
         val csv = buildString {
             appendLine("Screen,Duration (ms),Start (ms),End (ms)," +
                 "CPU Min (%),CPU Max (%),CPU Avg (%),CPU Samples," +
-                "Memory Min (MB),Memory Max (MB),Memory Avg (MB),Memory Samples," +
+                "Memory Min (MB),Memory Max (MB),Memory Avg (MB),Memory P50 (MB),Memory P90 (MB),Memory Samples," +
                 "FPS Min,FPS Max,FPS Avg,Frame Count,Jank Count,Jank %")
             
             screenMetrics.forEach { screen ->
@@ -153,6 +153,8 @@ object CsvExporter {
                 append("${screen.memoryMin},")
                 append("${screen.memoryMax},")
                 append("${screen.memoryAvg},")
+                append("${screen.memoryP50},")
+                append("${screen.memoryP90},")
                 append("${screen.memorySamples},")
                 append("${fmt(screen.fpsMin)},")
                 append("${fmt(screen.fpsMax)},")
@@ -186,6 +188,25 @@ object CsvExporter {
     
     private fun fmt(value: Double): String {
         return String.format(Locale.US, "%.2f", value)
+    }
+    
+    /**
+     * Export run summaries to CSV.
+     */
+    fun exportRunSummaries(summaries: List<RunSummary>, outputFile: File) {
+        val csv = buildString {
+            appendLine("Run,Duration (ms),CPU Avg (%),Memory Avg (MB),FPS Avg")
+            
+            summaries.forEach { run ->
+                append("${run.runNumber},")
+                append("${run.durationMs},")
+                append("${fmt(run.cpuAvg)},")
+                append("${fmt(run.memoryAvg)},")
+                appendLine("${fmt(run.fpsAvg)}")
+            }
+        }
+        
+        outputFile.writeText(csv)
     }
 }
 

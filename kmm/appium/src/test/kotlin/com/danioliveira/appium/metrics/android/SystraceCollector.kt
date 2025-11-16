@@ -737,6 +737,8 @@ data class ScreenMetrics(
     val memoryMin: Int = 0,
     val memoryMax: Int = 0,
     val memoryAvg: Int = 0,
+    val memoryP50: Int = 0,
+    val memoryP90: Int = 0,
     val memorySamples: Int = 0,
     val fpsMin: Double = 0.0,
     val fpsMax: Double = 0.0,

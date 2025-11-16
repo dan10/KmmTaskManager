@@ -219,11 +219,11 @@ object MarkdownExporter {
                 
                 appendLine("### Metrics")
                 appendLine()
-                appendLine("| Metric | Min | Max | Avg | Samples |")
-                appendLine("|--------|-----|-----|-----|---------|")
-                appendLine("| CPU (%) | ${fmt(screen.cpuMin)} | ${fmt(screen.cpuMax)} | ${fmt(screen.cpuAvg)} | ${screen.cpuSamples} |")
-                appendLine("| Memory (MB) | ${screen.memoryMin} | ${screen.memoryMax} | ${screen.memoryAvg} | ${screen.memorySamples} |")
-                appendLine("| FPS | ${fmt(screen.fpsMin)} | ${fmt(screen.fpsMax)} | ${fmt(screen.fpsAvg)} | ${screen.frameCount} frames |")
+                appendLine("| Metric | Min | Max | Avg | P50 | P90 | Samples |")
+                appendLine("|--------|-----|-----|-----|-----|-----|---------|")
+                appendLine("| CPU (%) | ${fmt(screen.cpuMin)} | ${fmt(screen.cpuMax)} | ${fmt(screen.cpuAvg)} | - | - | ${screen.cpuSamples} |")
+                appendLine("| Memory (MB) | ${screen.memoryMin} | ${screen.memoryMax} | ${screen.memoryAvg} | ${screen.memoryP50} | ${screen.memoryP90} | ${screen.memorySamples} |")
+                appendLine("| FPS | ${fmt(screen.fpsMin)} | ${fmt(screen.fpsMax)} | ${fmt(screen.fpsAvg)} | - | - | ${screen.frameCount} frames |")
                 appendLine()
                 
                 if (screen.frameCount > 0) {
@@ -253,6 +253,74 @@ object MarkdownExporter {
     
     private fun fmt(value: Double): String {
         return String.format(Locale.US, "%.2f", value)
+    }
+    
+    /**
+     * Export aggregated result with histograms to Markdown.
+     */
+    fun exportAggregatedResultWithHistograms(result: AggregatedResultWithHistograms, outputFile: File) {
+        val md = buildString {
+            appendLine("# Aggregated Performance Results")
+            appendLine()
+            appendLine("**Total Runs:** ${result.totalRuns}")
+            appendLine("**Successful Runs:** ${result.successfulRuns}")
+            appendLine()
+            
+            appendLine("## Combined Statistics")
+            appendLine()
+            appendLine("Statistics computed from all merged samples across all runs.")
+            appendLine()
+            
+            appendLine("| Metric | Min | Max | Avg | P50 | P90 | Samples |")
+            appendLine("|--------|-----|-----|-----|-----|-----|---------|")
+            appendLine("| CPU (%) | ${fmt(result.cpuStats.min)} | ${fmt(result.cpuStats.max)} | ${fmt(result.cpuStats.avg)} | ${fmt(result.cpuStats.p50)} | ${fmt(result.cpuStats.p90)} | ${result.cpuStats.samples} |")
+            appendLine("| Memory (MB) | ${fmt(result.memoryStats.min)} | ${fmt(result.memoryStats.max)} | ${fmt(result.memoryStats.avg)} | ${fmt(result.memoryStats.p50)} | ${fmt(result.memoryStats.p90)} | ${result.memoryStats.samples} |")
+            appendLine("| FPS | ${fmt(result.fpsStats.min)} | ${fmt(result.fpsStats.max)} | ${fmt(result.fpsStats.avg)} | ${fmt(result.fpsStats.p50)} | ${fmt(result.fpsStats.p90)} | ${result.fpsStats.samples} |")
+            appendLine("| Duration (ms) | ${fmt(result.durationStats.min)} | ${fmt(result.durationStats.max)} | ${fmt(result.durationStats.avg)} | ${fmt(result.durationStats.p50)} | ${fmt(result.durationStats.p90)} | ${result.durationStats.samples} |")
+            appendLine()
+            
+            appendLine("## Histograms")
+            appendLine()
+            
+            appendLine("### CPU Distribution")
+            appendLine()
+            appendLine("```")
+            appendLine(result.cpuHistogram.toAscii())
+            appendLine("```")
+            appendLine()
+            
+            appendLine("### Memory Distribution")
+            appendLine()
+            appendLine("```")
+            appendLine(result.memoryHistogram.toAscii())
+            appendLine("```")
+            appendLine()
+            
+            appendLine("### FPS Distribution")
+            appendLine()
+            appendLine("```")
+            appendLine(result.fpsHistogram.toAscii())
+            appendLine("```")
+            appendLine()
+            
+            appendLine("### Duration Distribution")
+            appendLine()
+            appendLine("```")
+            appendLine(result.durationHistogram.toAscii())
+            appendLine("```")
+            appendLine()
+            
+            appendLine("## Individual Run Summaries")
+            appendLine()
+            appendLine("| Run | Duration (ms) | CPU Avg (%) | Memory Avg (MB) | FPS Avg |")
+            appendLine("|-----|---------------|-------------|-----------------|---------|")
+            result.individualRunSummaries.forEach { run ->
+                appendLine("| ${run.runNumber} | ${run.durationMs} | ${fmt(run.cpuAvg)} | ${fmt(run.memoryAvg)} | ${fmt(run.fpsAvg)} |")
+            }
+            appendLine()
+        }
+        
+        outputFile.writeText(md)
     }
 }
 

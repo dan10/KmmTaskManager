@@ -10,8 +10,10 @@ object TestTags {
     const val BTN_LOGIN = "btn_login"
     const val BTN_REGISTER = "btn_register"
     const val BTN_LOGOUT = "btn_logout"
+    const val TXT_NAME = "txt_name"
     const val TXT_EMAIL = "txt_email"
     const val TXT_PASSWORD = "txt_password"
+    const val TXT_CONFIRM_PASSWORD = "txt_confirm_password"
     const val LINK_REGISTER = "link_register"
     
     // Navigation
