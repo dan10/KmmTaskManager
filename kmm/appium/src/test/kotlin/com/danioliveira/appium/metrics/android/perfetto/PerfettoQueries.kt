@@ -63,20 +63,20 @@ object PerfettoQueries {
     
     /**
      * Query frame timing using frame_timeline (Android 12+).
-     * 
+     *
      * Returns: vsync_id, dur_ns, jank_type
-     * 
+     *
      * Based on AndroidX FrameTimingQuery.kt
      */
     fun frameTimingQuery(packageName: String, startNs: Long? = null, endNs: Long? = null): String {
         val timeFilter = buildTimeFilter(startNs, endNs)
-        
+
         return """
             SELECT
                 actual_frame_timeline_slice.name,
                 actual_frame_timeline_slice.ts,
                 actual_frame_timeline_slice.dur as dur_ns,
-                actual_frame_timeline_slice.vsync as vsync_id,
+                COALESCE(actual_frame_timeline_slice.surface_frame_token, actual_frame_timeline_slice.display_frame_token, 0) as vsync_id,
                 expected_frame_timeline_slice.dur as expected_dur_ns,
                 CASE
                     WHEN actual_frame_timeline_slice.dur > expected_frame_timeline_slice.dur * 1.5
@@ -84,7 +84,10 @@ object PerfettoQueries {
                     ELSE 'normal'
                 END as jank_type
             FROM actual_frame_timeline_slice
-            JOIN expected_frame_timeline_slice USING(vsync)
+            JOIN expected_frame_timeline_slice ON (
+                actual_frame_timeline_slice.surface_frame_token = expected_frame_timeline_slice.surface_frame_token
+                AND actual_frame_timeline_slice.display_frame_token = expected_frame_timeline_slice.display_frame_token
+            )
             JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
             JOIN process USING(upid)
             WHERE process.name LIKE '%$packageName%'
@@ -94,52 +97,66 @@ object PerfettoQueries {
     }
     
     /**
-     * Query frame timing using actual_frame_timeline_event (Android 12+).
-     * This is the primary method for Android 12+ devices.
-     * 
+     * Query frame timing using actual_frame_timeline_slice (Android 12+).
+     *
+     * NOTE:
+     * - Some devices/traces don't expose the `actual_frame_timeline_event` table, but
+     *   they do expose `actual_frame_timeline_slice` and `expected_frame_timeline_slice`.
+     * - We treat this as the primary method for Android 12+ devices when available.
+     * - The tables are joined on surface_frame_token and display_frame_token
+     *
      * Returns: ts, dur_ns, vsync_id, expected_dur_ns, jank_type
      */
     fun frameTimingEventQuery(packageName: String, startNs: Long? = null, endNs: Long? = null): String {
         val timeFilter = buildTimeFilter(startNs, endNs)
-        
+
         return """
             SELECT
-                ts,
-                dur as dur_ns,
-                0 as vsync_id,
-                16666666 as expected_dur_ns,
+                actual_frame_timeline_slice.ts,
+                actual_frame_timeline_slice.dur as dur_ns,
+                COALESCE(actual_frame_timeline_slice.surface_frame_token, actual_frame_timeline_slice.display_frame_token, 0) as vsync_id,
+                expected_frame_timeline_slice.dur as expected_dur_ns,
                 CASE
-                    WHEN dur > 16666666 * 1.5
+                    WHEN actual_frame_timeline_slice.dur > expected_frame_timeline_slice.dur * 1.5
                         THEN 'jank'
                     ELSE 'normal'
                 END as jank_type
-            FROM actual_frame_timeline_event
-            WHERE upid = (
-                SELECT upid FROM process WHERE name LIKE '%$packageName%' LIMIT 1
+            FROM actual_frame_timeline_slice
+            JOIN expected_frame_timeline_slice ON (
+                actual_frame_timeline_slice.surface_frame_token = expected_frame_timeline_slice.surface_frame_token
+                AND actual_frame_timeline_slice.display_frame_token = expected_frame_timeline_slice.display_frame_token
             )
-            $timeFilter
-            ORDER BY ts
+            JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
+            JOIN process USING(upid)
+            WHERE process.name LIKE '%$packageName%'
+                $timeFilter
+            ORDER BY actual_frame_timeline_slice.ts
         """.trimIndent()
     }
     
     /**
-     * Query FPS aggregated per second using actual_frame_timeline_event (Android 12+).
+     * Query FPS aggregated per second using actual_frame_timeline_slice (Android 12+).
      * This provides a time-series view of FPS over the trace duration.
-     * 
+     *
      * Returns: second (timestamp in seconds), fps (frame count per second)
      */
     fun fpsPerSecondQuery(packageName: String, startNs: Long? = null, endNs: Long? = null): String {
-        val timeFilter = buildTimeFilter(startNs, endNs)
-        
+        val timeFilter = when {
+            startNs != null && endNs != null -> "AND actual_frame_timeline_slice.ts BETWEEN $startNs AND $endNs"
+            startNs != null -> "AND actual_frame_timeline_slice.ts >= $startNs"
+            endNs != null -> "AND actual_frame_timeline_slice.ts <= $endNs"
+            else -> ""
+        }
+
         return """
             SELECT
-                (ts + dur) / 1000000000 AS second,
+                (actual_frame_timeline_slice.ts + actual_frame_timeline_slice.dur) / 1000000000 AS second,
                 COUNT(*) AS fps
-            FROM actual_frame_timeline_event
-            WHERE upid = (
-                SELECT upid FROM process WHERE name LIKE '%$packageName%' LIMIT 1
-            )
-            $timeFilter
+            FROM actual_frame_timeline_slice
+            JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
+            JOIN process USING(upid)
+            WHERE process.name LIKE '%$packageName%'
+                $timeFilter
             GROUP BY second
             ORDER BY second
         """.trimIndent()

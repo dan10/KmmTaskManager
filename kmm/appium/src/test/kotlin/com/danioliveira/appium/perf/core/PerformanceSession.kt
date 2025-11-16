@@ -307,8 +307,9 @@ class PerformanceSession(
                         min = cpuPercent,
                         max = cpuPercent,
                         avg = cpuPercent,
-                        p50 = cpuPercent,
                         p90 = cpuPercent,
+                        p95 = cpuPercent,
+                        p99 = cpuPercent,
                         stddev = 0.0,
                         samples = cpu.size
                     ),
@@ -317,8 +318,9 @@ class PerformanceSession(
                         min = fps,
                         max = fps,
                         avg = fps,
-                        p50 = fps,
                         p90 = fps,
+                        p95 = fps,
+                        p99 = fps,
                         stddev = 0.0,
                         samples = frames.size
                     )
@@ -373,8 +375,9 @@ class PerformanceSession(
                 min = adbStats.cpu.min.toDouble(),
                 max = adbStats.cpu.max.toDouble(),
                 avg = adbStats.cpu.avg,
-                p50 = adbStats.cpu.avg,  // Approximate
                 p90 = adbStats.cpu.max.toDouble(),  // Approximate
+                p95 = adbStats.cpu.max.toDouble(),  // Approximate
+                p99 = adbStats.cpu.max.toDouble(),  // Approximate
                 stddev = 0.0,  // Not available from ADB stats
                 samples = adbStats.cpu.samples
             ),
@@ -382,8 +385,9 @@ class PerformanceSession(
                 min = adbStats.memory.min.toDouble(),
                 max = adbStats.memory.max.toDouble(),
                 avg = adbStats.memory.avg,
-                p50 = adbStats.memory.avg,  // Approximate
                 p90 = adbStats.memory.max.toDouble(),  // Approximate
+                p95 = adbStats.memory.max.toDouble(),  // Approximate
+                p99 = adbStats.memory.max.toDouble(),  // Approximate
                 stddev = 0.0,  // Not available from ADB stats
                 samples = adbStats.memory.samples
             ),
@@ -391,8 +395,9 @@ class PerformanceSession(
                 min = adbStats.fps.min.toDouble(),
                 max = adbStats.fps.max.toDouble(),
                 avg = adbStats.fps.avg,
-                p50 = adbStats.fps.avg,  // Approximate
                 p90 = adbStats.fps.max.toDouble(),  // Approximate
+                p95 = adbStats.fps.max.toDouble(),  // Approximate
+                p99 = adbStats.fps.max.toDouble(),  // Approximate
                 stddev = 0.0,  // Not available from ADB stats
                 samples = adbStats.fps.samples
             )

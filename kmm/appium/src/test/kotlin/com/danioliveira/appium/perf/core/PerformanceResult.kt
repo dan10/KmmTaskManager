@@ -2,6 +2,7 @@ package com.danioliveira.appium.perf.core
 
 import com.danioliveira.appium.metrics.android.perfetto.JankStats
 import com.danioliveira.appium.metrics.android.perfetto.StartupBreakdown
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
 import java.io.File
 
 /**
@@ -182,47 +183,59 @@ data class PerformanceMetrics(
 }
 
 /**
- * Statistical metrics (min, max, avg, p50, p90, stddev).
+ * Statistical metrics (min, max, avg, p90, p95, p99, stddev).
+ *
+ * NOTE:
+ * - P50 is effectively the median and very close to avg for these workloads,
+ *   so we omit it and focus on tail latency: p90, p95, p99.
  */
 data class MetricStats(
     val min: Double,
     val max: Double,
     val avg: Double,
-    val p50: Double,
     val p90: Double,
+    val p95: Double,
+    val p99: Double,
     val stddev: Double,
     val samples: Int
 ) {
     companion object {
-        fun empty() = MetricStats(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0)
+        fun empty() = MetricStats(
+            min = 0.0,
+            max = 0.0,
+            avg = 0.0,
+            p90 = 0.0,
+            p95 = 0.0,
+            p99 = 0.0,
+            stddev = 0.0,
+            samples = 0
+        )
         
         fun from(values: List<Double>): MetricStats {
             if (values.isEmpty()) return empty()
-            
-            val sorted = values.sorted()
-            val min = sorted.first()
-            val max = sorted.last()
-            val avg = values.average()
-            val p50 = percentile(sorted, 50.0)
-            val p90 = percentile(sorted, 90.0)
-            val stddev = standardDeviation(values, avg)
-            
-            return MetricStats(min, max, avg, p50, p90, stddev, values.size)
-        }
-        
-        private fun percentile(sorted: List<Double>, p: Double): Double {
-            if (sorted.isEmpty()) return 0.0
-            val index = (p / 100.0) * (sorted.size - 1)
-            val lower = index.toInt()
-            val upper = (lower + 1).coerceAtMost(sorted.size - 1)
-            val weight = index - lower
-            return sorted[lower] * (1 - weight) + sorted[upper] * weight
-        }
-        
-        private fun standardDeviation(values: List<Double>, mean: Double): Double {
-            if (values.size < 2) return 0.0
-            val variance = values.map { (it - mean) * (it - mean) }.average()
-            return kotlin.math.sqrt(variance)
+
+            // Use Apache Commons Math for robust descriptive stats & percentiles
+            val stats = DescriptiveStatistics()
+            values.forEach { stats.addValue(it) }
+
+            val min = stats.min
+            val max = stats.max
+            val avg = stats.mean
+            val p90 = stats.getPercentile(90.0)
+            val p95 = stats.getPercentile(95.0)
+            val p99 = stats.getPercentile(99.0)
+            val stddev = stats.standardDeviation
+
+            return MetricStats(
+                min = min,
+                max = max,
+                avg = avg,
+                p90 = p90,
+                p95 = p95,
+                p99 = p99,
+                stddev = stddev,
+                samples = stats.n.toInt()
+            )
         }
     }
 }

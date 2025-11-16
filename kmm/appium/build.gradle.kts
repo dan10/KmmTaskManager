@@ -47,6 +47,9 @@ dependencies {
     // testImplementation("androidx.benchmark:benchmark-common:1.3.3")
     // testImplementation("androidx.benchmark:benchmark-macro:1.3.3")
     
+    // Apache Commons Math for statistics (p90/p95/p99 percentiles, stddev, etc.)
+    testImplementation("org.apache.commons:commons-math3:3.6.1")
+    
     // Logging
     testImplementation("org.slf4j:slf4j-simple:2.0.9")
     

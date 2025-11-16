@@ -127,8 +127,9 @@ object JsonExporter {
         "min" to stats.min,
         "max" to stats.max,
         "avg" to stats.avg,
-        "p50" to stats.p50,
         "p90" to stats.p90,
+        "p95" to stats.p95,
+        "p99" to stats.p99,
         "stddev" to stats.stddev,
         "samples" to stats.samples
     )

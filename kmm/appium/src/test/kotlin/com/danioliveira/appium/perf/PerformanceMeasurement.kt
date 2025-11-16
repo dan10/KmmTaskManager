@@ -485,29 +485,20 @@ private fun buildPerformanceMetrics(sessionData: SessionData): PerformanceMetric
         }
         
         // Extract memory statistics from ADB (Perfetto memory is less reliable for RSS)
-        val memoryStats = sessionData.adbStats?.memory?.let {
-            MetricStats(
-                min = it.min.toDouble(),
-                max = it.max.toDouble(),
-                avg = it.avg,
-                p50 = it.avg,
-                p90 = it.max.toDouble(),
-                stddev = 0.0,
-                samples = it.samples
-            )
+        val memoryStats = sessionData.adbStats?.memory?.let { memStats ->
+            val memValues = List(memStats.samples) { memStats.avg } // Approximate distribution
+            if (memValues.isNotEmpty()) {
+                MetricStats.from(memValues)
+            } else {
+                MetricStats.empty()
+            }
         } ?: MetricStats.empty()
         
         // Use FPS from Perfetto trace
-        val fpsStats = if (traceMetrics.fps > 0) {
-            MetricStats(
-                min = traceMetrics.fps,
-                max = traceMetrics.fps,
-                avg = traceMetrics.fps,
-                p50 = traceMetrics.fps,
-                p90 = traceMetrics.fps,
-                stddev = 0.0,
-                samples = traceMetrics.frameCount
-            )
+        val fpsStats = if (traceMetrics.fps > 0 && traceMetrics.frameCount > 0) {
+            // Approximate FPS distribution by repeating the average FPS per frame
+            val fpsValues = List(traceMetrics.frameCount) { traceMetrics.fps }
+            MetricStats.from(fpsValues)
         } else {
             MetricStats.empty()
         }
@@ -523,38 +514,17 @@ private fun buildPerformanceMetrics(sessionData: SessionData): PerformanceMetric
     logger.info("Using ADB polling metrics (no Perfetto data available)")
     
     return PerformanceMetrics(
-        cpu = sessionData.adbStats?.cpu?.let {
-            MetricStats(
-                min = it.min.toDouble(),
-                max = it.max.toDouble(),
-                avg = it.avg,
-                p50 = it.avg,
-                p90 = it.max.toDouble(),
-                stddev = 0.0,
-                samples = it.samples
-            )
+        cpu = sessionData.adbStats?.cpu?.let { cpuStats ->
+            val cpuValues = List(cpuStats.samples) { cpuStats.avg } // Approximate distribution
+            if (cpuValues.isNotEmpty()) MetricStats.from(cpuValues) else MetricStats.empty()
         } ?: MetricStats.empty(),
-        memory = sessionData.adbStats?.memory?.let {
-            MetricStats(
-                min = it.min.toDouble(),
-                max = it.max.toDouble(),
-                avg = it.avg,
-                p50 = it.avg,
-                p90 = it.max.toDouble(),
-                stddev = 0.0,
-                samples = it.samples
-            )
+        memory = sessionData.adbStats?.memory?.let { memStats ->
+            val memValues = List(memStats.samples) { memStats.avg } // Approximate distribution
+            if (memValues.isNotEmpty()) MetricStats.from(memValues) else MetricStats.empty()
         } ?: MetricStats.empty(),
-        fps = sessionData.adbStats?.fps?.let {
-            MetricStats(
-                min = it.min.toDouble(),
-                max = it.max.toDouble(),
-                avg = it.avg,
-                p50 = it.avg,
-                p90 = it.max.toDouble(),
-                stddev = 0.0,
-                samples = it.samples
-            )
+        fps = sessionData.adbStats?.fps?.let { fpsStats ->
+            val fpsValues = List(fpsStats.samples) { fpsStats.avg } // Approximate distribution
+            if (fpsValues.isNotEmpty()) MetricStats.from(fpsValues) else MetricStats.empty()
         } ?: MetricStats.empty()
     )
 }

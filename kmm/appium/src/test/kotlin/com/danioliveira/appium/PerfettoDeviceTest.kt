@@ -189,38 +189,35 @@ class PerfettoDeviceTest {
         val traceMetrics = perfettoCollector!!.parseTrace(traceFile)
         
         // Build result manually since we're not using measurePerformance()
+        // Use MetricStats.from(...) so all statistics (min/max/avg/p90/p95/p99/stddev) come from the
+        // same Apache Commons Math pipeline used elsewhere.
+        val cpuSamples = traceMetrics.cpuUtilization.map { it.cpuPercent }
+        val cpuStats = if (cpuSamples.isNotEmpty()) {
+            MetricStats.from(cpuSamples)
+        } else {
+            MetricStats.empty()
+        }
+
+        // We currently don't expose a full memory time series from PerfettoCollector here,
+        // so keep memory metrics empty for now.
+        val memoryStats = MetricStats.empty()
+
+        // FPS: we have an average fps and frameCount – approximate distribution by treating
+        // every frame as having the same fps value.
+        val fpsValues = if (traceMetrics.frameCount > 0) {
+            List(traceMetrics.frameCount) { traceMetrics.fps }
+        } else {
+            emptyList()
+        }
+        val fpsStats = if (fpsValues.isNotEmpty()) MetricStats.from(fpsValues) else MetricStats.empty()
+
         val result = PerformanceResult(
             testName = "performance_test",
             durationMs = testDuration,
             metrics = PerformanceMetrics(
-                cpu = MetricStats(
-                    min = traceMetrics.cpuUtilization.minOfOrNull { it.cpuPercent } ?: 0.0,
-                    max = traceMetrics.cpuUtilization.maxOfOrNull { it.cpuPercent } ?: 0.0,
-                    avg = if (traceMetrics.cpuUtilization.isNotEmpty()) 
-                        traceMetrics.cpuUtilization.map { it.cpuPercent }.average() else 0.0,
-                    p50 = 0.0,
-                    p90 = 0.0,
-                    stddev = 0.0,
-                    samples = traceMetrics.cpuUtilization.size
-                ),
-                memory = MetricStats(
-                    min = 0.0,
-                    max = 0.0,
-                    avg = 0.0,
-                    p50 = 0.0,
-                    p90 = 0.0,
-                    stddev = 0.0,
-                    samples = 0
-                ),
-                fps = MetricStats(
-                    min = traceMetrics.fps,
-                    max = traceMetrics.fps,
-                    avg = traceMetrics.fps,
-                    p50 = traceMetrics.fps,
-                    p90 = traceMetrics.fps,
-                    stddev = 0.0,
-                    samples = traceMetrics.frameCount
-                )
+                cpu = cpuStats,
+                memory = memoryStats,
+                fps = fpsStats
             ),
             traceFile = traceFile,
             screenMetrics = traceMetrics.screenMetrics,

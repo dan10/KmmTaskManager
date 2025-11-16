@@ -52,8 +52,8 @@ object MarkdownExporter {
             
             appendLine("## Performance Metrics")
             appendLine()
-            appendLine("| Metric | Min | Max | Avg | P50 | P90 | StdDev | Samples |")
-            appendLine("|--------|-----|-----|-----|-----|-----|--------|---------|")
+            appendLine("| Metric | Min | Max | Avg | P90 | P95 | P99 | StdDev | Samples |")
+            appendLine("|--------|-----|-----|-----|-----|-----|-----|--------|---------|")
             appendLine(formatMetricRow("CPU (%)", result.metrics.cpu))
             appendLine(formatMetricRow("Memory (MB)", result.metrics.memory))
             appendLine(formatMetricRow("FPS", result.metrics.fps))
@@ -190,7 +190,7 @@ object MarkdownExporter {
     
     private fun formatMetricRow(name: String, stats: MetricStats): String {
         return "| $name | ${fmt(stats.min)} | ${fmt(stats.max)} | ${fmt(stats.avg)} | " +
-            "${fmt(stats.p50)} | ${fmt(stats.p90)} | ${fmt(stats.stddev)} | ${stats.samples} |"
+            "${fmt(stats.p90)} | ${fmt(stats.p95)} | ${fmt(stats.p99)} | ${fmt(stats.stddev)} | ${stats.samples} |"
     }
     
     private fun formatAggregatedRow(name: String, stats: AggregatedStats): String {
@@ -271,12 +271,12 @@ object MarkdownExporter {
             appendLine("Statistics computed from all merged samples across all runs.")
             appendLine()
             
-            appendLine("| Metric | Min | Max | Avg | P50 | P90 | Samples |")
-            appendLine("|--------|-----|-----|-----|-----|-----|---------|")
-            appendLine("| CPU (%) | ${fmt(result.cpuStats.min)} | ${fmt(result.cpuStats.max)} | ${fmt(result.cpuStats.avg)} | ${fmt(result.cpuStats.p50)} | ${fmt(result.cpuStats.p90)} | ${result.cpuStats.samples} |")
-            appendLine("| Memory (MB) | ${fmt(result.memoryStats.min)} | ${fmt(result.memoryStats.max)} | ${fmt(result.memoryStats.avg)} | ${fmt(result.memoryStats.p50)} | ${fmt(result.memoryStats.p90)} | ${result.memoryStats.samples} |")
-            appendLine("| FPS | ${fmt(result.fpsStats.min)} | ${fmt(result.fpsStats.max)} | ${fmt(result.fpsStats.avg)} | ${fmt(result.fpsStats.p50)} | ${fmt(result.fpsStats.p90)} | ${result.fpsStats.samples} |")
-            appendLine("| Duration (ms) | ${fmt(result.durationStats.min)} | ${fmt(result.durationStats.max)} | ${fmt(result.durationStats.avg)} | ${fmt(result.durationStats.p50)} | ${fmt(result.durationStats.p90)} | ${result.durationStats.samples} |")
+            appendLine("| Metric | Min | Max | Avg | P90 | P95 | P99 | Samples |")
+            appendLine("|--------|-----|-----|-----|-----|-----|-----|---------|")
+            appendLine("| CPU (%) | ${fmt(result.cpuStats.min)} | ${fmt(result.cpuStats.max)} | ${fmt(result.cpuStats.avg)} | ${fmt(result.cpuStats.p90)} | ${fmt(result.cpuStats.p95)} | ${fmt(result.cpuStats.p99)} | ${result.cpuStats.samples} |")
+            appendLine("| Memory (MB) | ${fmt(result.memoryStats.min)} | ${fmt(result.memoryStats.max)} | ${fmt(result.memoryStats.avg)} | ${fmt(result.memoryStats.p90)} | ${fmt(result.memoryStats.p95)} | ${fmt(result.memoryStats.p99)} | ${result.memoryStats.samples} |")
+            appendLine("| FPS | ${fmt(result.fpsStats.min)} | ${fmt(result.fpsStats.max)} | ${fmt(result.fpsStats.avg)} | ${fmt(result.fpsStats.p90)} | ${fmt(result.fpsStats.p95)} | ${fmt(result.fpsStats.p99)} | ${result.fpsStats.samples} |")
+            appendLine("| Duration (ms) | ${fmt(result.durationStats.min)} | ${fmt(result.durationStats.max)} | ${fmt(result.durationStats.avg)} | ${fmt(result.durationStats.p90)} | ${fmt(result.durationStats.p95)} | ${fmt(result.durationStats.p99)} | ${result.durationStats.samples} |")
             appendLine()
             
             appendLine("## Histograms")

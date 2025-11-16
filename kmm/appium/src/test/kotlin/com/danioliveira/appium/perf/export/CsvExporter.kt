@@ -14,7 +14,7 @@ object CsvExporter {
      */
     fun exportPerformanceResult(result: PerformanceResult, outputFile: File) {
         val csv = buildString {
-            appendLine("Metric,Min,Max,Avg,P50,P90,StdDev,Samples")
+            appendLine("Metric,Min,Max,Avg,P90,P95,P99,StdDev,Samples")
             appendLine(formatMetricRow("CPU (%)", result.metrics.cpu))
             appendLine(formatMetricRow("Memory (MB)", result.metrics.memory))
             appendLine(formatMetricRow("FPS", result.metrics.fps))
@@ -118,8 +118,9 @@ object CsvExporter {
             "${fmt(stats.min)}," +
             "${fmt(stats.max)}," +
             "${fmt(stats.avg)}," +
-            "${fmt(stats.p50)}," +
             "${fmt(stats.p90)}," +
+            "${fmt(stats.p95)}," +
+            "${fmt(stats.p99)}," +
             "${fmt(stats.stddev)}," +
             "${stats.samples}"
     }

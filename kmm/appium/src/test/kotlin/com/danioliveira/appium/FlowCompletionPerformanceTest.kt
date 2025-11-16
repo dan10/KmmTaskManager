@@ -377,26 +377,30 @@ class FlowCompletionPerformanceTest {
         logger.info("  CPU:      min=${String.format("%.1f", aggregated.cpuStats.min)}%, " +
             "max=${String.format("%.1f", aggregated.cpuStats.max)}%, " +
             "avg=${String.format("%.1f", aggregated.cpuStats.avg)}%, " +
-            "p50=${String.format("%.1f", aggregated.cpuStats.p50)}%, " +
-            "p90=${String.format("%.1f", aggregated.cpuStats.p90)}% " +
+            "p90=${String.format("%.1f", aggregated.cpuStats.p90)}%, " +
+            "p95=${String.format("%.1f", aggregated.cpuStats.p95)}%, " +
+            "p99=${String.format("%.1f", aggregated.cpuStats.p99)}% " +
             "(${aggregated.cpuStats.samples} samples)")
         logger.info("  Memory:   min=${String.format("%.1f", aggregated.memoryStats.min)}MB, " +
             "max=${String.format("%.1f", aggregated.memoryStats.max)}MB, " +
             "avg=${String.format("%.1f", aggregated.memoryStats.avg)}MB, " +
-            "p50=${String.format("%.1f", aggregated.memoryStats.p50)}MB, " +
-            "p90=${String.format("%.1f", aggregated.memoryStats.p90)}MB " +
+            "p90=${String.format("%.1f", aggregated.memoryStats.p90)}MB, " +
+            "p95=${String.format("%.1f", aggregated.memoryStats.p95)}MB, " +
+            "p99=${String.format("%.1f", aggregated.memoryStats.p99)}MB " +
             "(${aggregated.memoryStats.samples} samples)")
         logger.info("  FPS:      min=${String.format("%.1f", aggregated.fpsStats.min)}, " +
             "max=${String.format("%.1f", aggregated.fpsStats.max)}, " +
             "avg=${String.format("%.1f", aggregated.fpsStats.avg)}, " +
-            "p50=${String.format("%.1f", aggregated.fpsStats.p50)}, " +
-            "p90=${String.format("%.1f", aggregated.fpsStats.p90)} " +
+            "p90=${String.format("%.1f", aggregated.fpsStats.p90)}, " +
+            "p95=${String.format("%.1f", aggregated.fpsStats.p95)}, " +
+            "p99=${String.format("%.1f", aggregated.fpsStats.p99)} " +
             "(${aggregated.fpsStats.samples} samples)")
         logger.info("  Duration: min=${String.format("%.0f", aggregated.durationStats.min)}ms, " +
             "max=${String.format("%.0f", aggregated.durationStats.max)}ms, " +
             "avg=${String.format("%.0f", aggregated.durationStats.avg)}ms, " +
-            "p50=${String.format("%.0f", aggregated.durationStats.p50)}ms, " +
-            "p90=${String.format("%.0f", aggregated.durationStats.p90)}ms " +
+            "p90=${String.format("%.0f", aggregated.durationStats.p90)}ms, " +
+            "p95=${String.format("%.0f", aggregated.durationStats.p95)}ms, " +
+            "p99=${String.format("%.0f", aggregated.durationStats.p99)}ms " +
             "(${aggregated.durationStats.samples} samples)")
         logger.info("")
         logger.info("Histograms:")
