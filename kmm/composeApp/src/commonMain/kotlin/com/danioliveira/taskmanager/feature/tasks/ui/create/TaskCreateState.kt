@@ -1,6 +1,7 @@
 package com.danioliveira.taskmanager.feature.tasks.ui.create
 
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.runtime.Stable
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import kotlinx.datetime.LocalDateTime
@@ -8,6 +9,7 @@ import kotlinx.datetime.LocalDateTime
 /**
  * State for the Task Creation screen.
  */
+@Stable
 data class TaskCreateState(
     val titleFieldState: TextFieldState = TextFieldState(),
     val descriptionFieldState: TextFieldState = TextFieldState(),

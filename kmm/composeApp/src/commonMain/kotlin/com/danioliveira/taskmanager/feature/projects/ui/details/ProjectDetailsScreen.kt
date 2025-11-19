@@ -55,6 +55,7 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItLoadingState
 import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
 import com.danioliveira.taskmanager.core.ui.components.TaskListPaging
 import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
+import com.danioliveira.taskmanager.testing.enableTestTagsAsResourceId
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
@@ -118,7 +119,8 @@ fun ProjectDetailsScreen(
                 showCreateTaskBottomSheet = false
                 projectIdForTask = null
             },
-            sheetState = sheetState
+            sheetState = sheetState,
+            modifier = Modifier.enableTestTagsAsResourceId()
         ) {
             TaskCreateBottomSheet(
                 projectId = projectIdForTask,

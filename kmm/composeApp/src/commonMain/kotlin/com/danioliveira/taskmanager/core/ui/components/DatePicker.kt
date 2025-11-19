@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.danioliveira.taskmanager.testing.enableTestTagsAsResourceId
 import com.danioliveira.taskmanager.util.DateFormatter
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.date_picker_cancel
@@ -118,6 +119,7 @@ private fun Material3DatePickerModal(
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
+        modifier = Modifier.enableTestTagsAsResourceId(),
         confirmButton = {
             TextButton(
                 onClick = {

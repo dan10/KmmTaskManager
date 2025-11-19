@@ -71,6 +71,7 @@ import com.danioliveira.taskmanager.navigation.NavIcon
 import com.danioliveira.taskmanager.navigation.Screen
 import com.danioliveira.taskmanager.navigation.composableWithCompositionLocal
 import com.danioliveira.taskmanager.navigation.topLevelRoutes
+import com.danioliveira.taskmanager.testing.TestTags
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -133,9 +134,9 @@ fun TaskItBottomBar(
         NavigationBar(modifier = Modifier.navigationBarsPadding()) {
             topLevelRoutes.forEach { topLevelRoute ->
                 val testTag = when (topLevelRoute.route) {
-                    is Screen.Tasks -> com.danioliveira.taskmanager.testing.TestTags.NAV_TASKS
-                    is Screen.Projects -> com.danioliveira.taskmanager.testing.TestTags.NAV_PROJECTS
-                    is Screen.Calendar -> com.danioliveira.taskmanager.testing.TestTags.NAV_CALENDAR
+                    is Screen.Tasks -> TestTags.NAV_TASKS
+                    is Screen.Projects -> TestTags.NAV_PROJECTS
+                    is Screen.Calendar -> TestTags.NAV_CALENDAR
                     else -> null
                 }
                 NavigationBarItem(

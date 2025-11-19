@@ -26,11 +26,15 @@ object TestTags {
     const val LIST_TASKS = "list_tasks"
     const val TXT_SEARCH = "txt_search"
     const val CARD_TASK = "card_task_"
+    const val TXT_TASK_TITLE = "txt_task_title"
+    const val TXT_TASK_DESCRIPTION = "txt_task_description"
     
     // Projects
     const val BTN_ADD_PROJECT = "btn_add_project"
     const val LIST_PROJECTS = "list_projects"
     const val CARD_PROJECT = "card_project_"
+    const val TXT_PROJECT_NAME = "txt_project_name"
+    const val TXT_PROJECT_DESCRIPTION = "txt_project_description"
     
     // Calendar
     const val LIST_CALENDAR_TASKS = "list_calendar_tasks"

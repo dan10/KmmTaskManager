@@ -56,6 +56,7 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItEmptyState
 import com.danioliveira.taskmanager.core.ui.theme.TaskItExtendedColors
 import com.danioliveira.taskmanager.core.ui.theme.TaskItThemeExt
 import com.danioliveira.taskmanager.feature.projects.ui.create.CreateEditProjectBottomSheet
+import com.danioliveira.taskmanager.testing.enableTestTagsAsResourceId
 import com.danioliveira.taskmanager.ui.projects.ProjectsAction
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
@@ -117,7 +118,8 @@ fun ProjectsScreen(
                 onDismissRequest = {
                     showCreateProjectBottomSheet = false
                 },
-                sheetState = sheetState
+                sheetState = sheetState,
+                modifier = Modifier.enableTestTagsAsResourceId()
             ) {
                 CreateEditProjectBottomSheet(
                     projectId = null,

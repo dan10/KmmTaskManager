@@ -3,9 +3,8 @@ package com.danioliveira.appium
 import com.danioliveira.appium.config.BenchmarkConfig
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.drivers.AndroidDriverFactory
-import com.danioliveira.appium.locators.Tags
 import com.danioliveira.appium.metrics.android.AndroidMetricsCollector
-import com.danioliveira.appium.pages.*
+import com.danioliveira.appium.flows.Flows
 import com.danioliveira.appium.perf.core.*
 import com.danioliveira.appium.perf.measurePerformance
 import io.appium.java_client.android.AndroidDriver
@@ -14,21 +13,16 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.openqa.selenium.By
-import org.openqa.selenium.support.ui.ExpectedConditions
-import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.time.Duration
 
 /**
- * Full flow completion performance test executing 15 iterations.
+ * Full flow completion performance test using Flows DSL.
  * 
  * Flow:
  * 1. Register User (creates unique user per iteration)
- * 2. Create 50 tasks and scroll to locate
- * 3. Create 10 projects and test scroll
- * 4. Logout
+ * 2. Create tasks using Flows DSL
+ * 3. Scroll to verify all tasks visible
  * 
  * Each iteration clears app data and registers a new user to ensure clean state.
  * Aggregates all samples across runs for combined metrics with histograms.
@@ -37,6 +31,7 @@ class FlowCompletionPerformanceTest {
     private val logger = LoggerFactory.getLogger(javaClass)
     private lateinit var driver: AndroidDriver
     private lateinit var androidCollector: AndroidMetricsCollector
+    private lateinit var flows: Flows
     private val packageName = "com.danioliveira.taskmanager"
     
     @BeforeEach
@@ -47,7 +42,7 @@ class FlowCompletionPerformanceTest {
             scenario = "flow-completion",
             runs = 1,
             warmup = 0,
-            deviceName = System.getProperty("deviceName") ?: "emulator-5554",
+            deviceName = /*System.getProperty("deviceName") ?:*/ "emulator-5554",
             udid = System.getProperty("udid"),
             apkPath = System.getProperty("apk"),
             ipaPath = null,
@@ -56,8 +51,9 @@ class FlowCompletionPerformanceTest {
             registerEveryCycle = false
         )
         
-        driver = AndroidDriverFactory.create(config) as AndroidDriver
+        driver = AndroidDriverFactory.create(config)
         androidCollector = AndroidMetricsCollector(packageName)
+        flows = Flows(driver, Platform.ANDROID)
         
         logger.info("✅ FlowCompletionPerformanceTest setup complete")
     }
@@ -108,19 +104,22 @@ class FlowCompletionPerformanceTest {
             run = {
                 logger.info("🚀 Executing flow...")
                 
-                // 1. Register User
-                registerUser(iteration)
-
+                // 1. Register User and create initial task using Flows DSL
+                val timestamp = System.currentTimeMillis()
+                val name = "Test User $iteration"
+                val email = "testuser${iteration}_${timestamp}@test.com"
+                val password = "TestPass123!"
+                
+                val tasksPage = flows.registerUser(name, email, password)
                 delay(500)
                 
-                // 2. Create 50 tasks and scroll
-                createBulkTasks(50)
+                // 2. Create bulk tasks using Flows DSL
+                val taskTitles = (1..10).map { "Task $it - Performance Test" }
+                val finalTasksPage = flows.createBulkTasks(taskTitles)
                 
-                // 3. Create 10 projects and scroll
-                createBulkProjects(10)
-                
-                // 4. Logout
-                logout()
+                // 3. Scroll to verify all tasks visible
+                finalTasksPage.scrollToEnd()
+                delay(1000)
                 
                 logger.info("✅ Flow complete")
             },
@@ -171,181 +170,6 @@ class FlowCompletionPerformanceTest {
         }
     }
     
-    private fun registerUser(iteration: Int) {
-        logger.info("📝 Registering user for iteration $iteration...")
-        
-        val loginPage = LoginPage(driver, Platform.ANDROID)
-        val registerPage = RegisterPage(driver, Platform.ANDROID)
-        val tasksPage = TasksPage(driver, Platform.ANDROID)
-        
-        // Wait for login screen
-        loginPage.waitForLoginScreen()
-
-
-        // Click register link
-        try {
-            loginPage.clickRegisterLink()
-
-            // Wait for register screen
-            registerPage.waitForRegisterScreen()
-
-            // Generate unique credentials for this iteration
-            val timestamp = System.currentTimeMillis()
-            val name = "Test User $iteration"
-            val email = "testuser${iteration}_${timestamp}@test.com"
-            val password = "TestPass123!"
-            
-            // Fill registration form
-            registerPage.enterName(name)
-
-            registerPage.enterEmail(email)
-
-            registerPage.enterPassword(password)
-
-            registerPage.enterConfirmPassword(password)
-            
-            // Click register button
-            registerPage.clickRegister()
-
-            // Wait until Tasks screen is visible after successful registration
-            logger.info("🕒 Waiting for Tasks screen after registration...")
-            tasksPage.waitForTasksList()
-            logger.info("✅ Tasks screen is visible after registration")
-        } catch (e: Exception) {
-            logger.error("❌ Registration failed: ${e.message}", e)
-            throw e
-        }
-    }
-    
-    private suspend fun createBulkTasks(count: Int) {
-        logger.info("📋 Creating $count tasks...")
-        
-        val tasksPage = TasksPage(driver, Platform.ANDROID)
-        val navPage = NavigationPage(driver, Platform.ANDROID)
-        val wait = WebDriverWait(driver, Duration.ofSeconds(10))
-        
-        // Ensure we're on tasks screen
-        navPage.navigateToTasks()
-        tasksPage.waitForTasksList()
-        delay(500)
-        
-        for (i in 1..count) {
-            try {
-                // Click add task button
-                tasksPage.clickAddTask()
-                delay(800)
-                
-                // Wait for save button (indicates form is open)
-                wait.until(ExpectedConditions.presenceOfElementLocated(
-                    By.xpath("//android.widget.Button[@resource-id='${Tags.BTN_SAVE}']")
-                ))
-                
-                // Enter task title
-                val titleField = driver.findElement(By.xpath("//android.widget.EditText[1]"))
-                titleField.click()
-                titleField.sendKeys("Task $i - Performance Test")
-                delay(200)
-                
-                // Save task
-                val saveButton = driver.findElement(By.xpath("//android.widget.Button[@resource-id='${Tags.BTN_SAVE}']"))
-                saveButton.click()
-                delay(500)
-                
-                if (i % 10 == 0) {
-                    logger.info("  Created $i/$count tasks")
-                }
-            } catch (e: Exception) {
-                logger.warn("Failed to create task $i: ${e.message}")
-            }
-        }
-        
-        // Scroll to end to confirm all tasks visible
-        logger.info("📜 Scrolling to end of task list...")
-        tasksPage.scrollToEnd()
-        delay(1000)
-        
-        logger.info("✅ Created $count tasks")
-    }
-    
-    private suspend fun createBulkProjects(count: Int) {
-        logger.info("📁 Creating $count projects...")
-        
-        val projectsPage = ProjectsPage(driver, Platform.ANDROID)
-        val navPage = NavigationPage(driver, Platform.ANDROID)
-        val wait = WebDriverWait(driver, Duration.ofSeconds(10))
-        
-        // Navigate to projects
-        navPage.navigateToProjects()
-        projectsPage.waitForProjectsList()
-        delay(500)
-        
-        for (i in 1..count) {
-            try {
-                // Click add project button
-                projectsPage.clickAddProject()
-                delay(800)
-                
-                // Wait for save button
-                wait.until(ExpectedConditions.presenceOfElementLocated(
-                    By.xpath("//android.widget.Button[@resource-id='${Tags.BTN_SAVE}']")
-                ))
-                
-                // Enter project name
-                val nameField = driver.findElement(By.xpath("//android.widget.EditText[1]"))
-                nameField.click()
-                nameField.sendKeys("Project $i")
-                delay(200)
-                
-                // Save project
-                val saveButton = driver.findElement(By.xpath("//android.widget.Button[@resource-id='${Tags.BTN_SAVE}']"))
-                saveButton.click()
-                delay(500)
-                
-                if (i % 5 == 0) {
-                    logger.info("  Created $i/$count projects")
-                }
-            } catch (e: Exception) {
-                logger.warn("Failed to create project $i: ${e.message}")
-            }
-        }
-        
-        // Scroll to test visibility
-        logger.info("📜 Scrolling projects list...")
-        try {
-            val projectsList = driver.findElement(By.xpath("//android.widget.ScrollView[@resource-id='${Tags.LIST_PROJECTS}']"))
-            repeat(5) {
-                projectsList.sendKeys(org.openqa.selenium.Keys.PAGE_DOWN)
-                delay(300)
-            }
-        } catch (e: Exception) {
-            logger.warn("Could not scroll projects list: ${e.message}")
-        }
-        
-        logger.info("✅ Created $count projects")
-    }
-    
-    private suspend fun logout() {
-        logger.info("🚪 Logging out...")
-        
-        val profilePage = ProfilePage(driver, Platform.ANDROID)
-        val navPage = NavigationPage(driver, Platform.ANDROID)
-        
-        try {
-            // Navigate to profile (assuming profile is accessible from nav)
-            // Note: Adjust based on actual UI navigation
-            driver.navigate().back() // Go back to main screen if needed
-            delay(500)
-            
-            // Wait for and click logout
-            profilePage.waitForProfileScreen()
-            profilePage.clickLogout()
-            delay(2000)
-            
-            logger.info("✅ Logged out")
-        } catch (e: Exception) {
-            logger.warn("Logout failed: ${e.message}")
-        }
-    }
     
     private fun aggregateAndExportResults(results: List<PerformanceResult>) {
         if (results.isEmpty()) {

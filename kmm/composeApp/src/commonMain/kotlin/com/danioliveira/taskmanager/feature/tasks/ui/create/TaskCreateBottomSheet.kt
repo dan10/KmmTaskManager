@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.danioliveira.taskmanager.core.domain.model.Priority
 import com.danioliveira.taskmanager.core.domain.model.TaskStatus
@@ -33,6 +34,8 @@ import com.danioliveira.taskmanager.core.ui.components.TaskItCreateEditButtons
 import com.danioliveira.taskmanager.core.ui.components.TaskItErrorMessage
 import com.danioliveira.taskmanager.core.ui.components.TaskItInputField
 import com.danioliveira.taskmanager.core.ui.components.TaskItPriorityDropdown
+import com.danioliveira.taskmanager.testing.TestTags
+import com.danioliveira.taskmanager.testing.enableTestTagsAsResourceId
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.create_task
@@ -65,7 +68,8 @@ fun TaskCreateBottomSheet(
 
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        onDismissRequest = { onDismiss(false) }
+        onDismissRequest = { onDismiss(false) },
+        modifier = Modifier.enableTestTagsAsResourceId()
     ) {
         Box {
             TaskCreateContent(
@@ -179,7 +183,9 @@ private fun TaskCreateTitleField(state: TaskCreateState) {
         isError = state.titleError != null,
         errorMessage = state.titleError ?: "",
         enabled = !state.isSaving,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth(),
+        textFieldModifier = Modifier.testTag(TestTags.TXT_TASK_TITLE)
     )
 }
 
@@ -192,7 +198,9 @@ private fun TaskCreateDescriptionField(state: TaskCreateState) {
         isError = state.descriptionError != null,
         errorMessage = state.descriptionError ?: "",
         enabled = !state.isSaving,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth(),
+        textFieldModifier = Modifier.testTag(TestTags.TXT_TASK_DESCRIPTION)
     )
 }
 
