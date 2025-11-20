@@ -136,19 +136,7 @@ class TaskCreatePage(
     // Instance-based methods (fallback when test tags don't work)
     // ============================================================================
     
-    /**
-     * Wait for the task creation form to be visible using className detection.
-     * Waits for the first EditText to appear as an indicator.
-     */
-    fun waitForCreateFormByInstance() {
-        trackAction("waitForCreateForm_instance") {
-            try {
-                findEditTextByInstance(0)
-            } catch (e: Exception) {
-                throw Exception("Task create form not visible - first EditText not found", e)
-            }
-        }
-    }
+
     
     /**
      * Wait for the task creation form using instance-based finding.

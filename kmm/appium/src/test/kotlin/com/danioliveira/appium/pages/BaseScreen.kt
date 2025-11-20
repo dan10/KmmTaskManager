@@ -44,9 +44,29 @@ open class BaseScreen(
             return screen
         }
     }
-
     
-
+    /**
+     * Navigate to a new screen/page object.
+     * Instantiates the target screen and optionally verifies it's loaded.
+     * 
+     * @param verifyScreen If true, calls verify() on the new screen to ensure it's loaded
+     * @return The new screen instance
+     */
+    inline fun <reified T : BaseScreen> on(verifyScreen: Boolean = true): T {
+        val screen = T::class.java
+            .getDeclaredConstructor(
+                WebDriver::class.java,
+                Platform::class.java,
+                MetricsManager::class.java
+            )
+            .newInstance(driver, platform, metricsManager)
+        
+        if (verifyScreen) {
+            screen.verify()
+        }
+        
+        return screen
+    }
     
     /**
      * Verify that the current screen is loaded and ready.

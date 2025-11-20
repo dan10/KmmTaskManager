@@ -133,6 +133,9 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
             logger.info("  FPS range: min=$minFpsPerSecond, max=$maxFpsPerSecond, avg=${String.format("%.1f", avgFpsPerSecond)}")
         }
         
+        // Calculate trace bounds
+        val traceBounds = calculateTraceBounds()
+        
         // Convert to existing TraceMetrics format
         return TraceMetrics(
             traceFile = traceFile,
@@ -144,13 +147,14 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
                     durationMs = section.durationMs.toLong()
                 )
             },
-            totalDurationMs = calculateTotalDuration(),
+            totalDurationMs = traceBounds?.durationMs?.toLong() ?: 0L,
             cpuUtilization = cpuUtilizationList,
             startupTimeMs = startup?.durationMs?.toLong(),
             fps = avgFps,
             frameCount = totalFrames,
             screenMetrics = screenMetricsList,
-            fpsPerSecond = fpsPerSecondList
+            fpsPerSecond = fpsPerSecondList,
+            traceStartTs = traceBounds?.startNs?.let { it / 1_000_000 }
         )
     }
     
@@ -710,18 +714,22 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
     }
     
     /**
-     * Calculate total trace duration.
+     * Calculate trace bounds (start, end, duration).
      */
-    private fun calculateTotalDuration(): Long {
+    private fun calculateTraceBounds(): TraceBounds? {
         return try {
             val sql = PerfettoQueries.traceBoundsQuery()
             val results = executeQuery(sql) { row ->
-                (row["duration_ms"] as? Number)?.toLong() ?: 0
+                TraceBounds(
+                    startNs = (row["start_ns"] as? Number)?.toLong() ?: 0,
+                    endNs = (row["end_ns"] as? Number)?.toLong() ?: 0,
+                    durationMs = (row["duration_ms"] as? Number)?.toDouble() ?: 0.0
+                )
             }
-            results.firstOrNull() ?: 0
+            results.firstOrNull()
         } catch (e: Exception) {
-            logger.warn("Failed to calculate trace duration: ${e.message}")
-            0
+            logger.warn("Failed to calculate trace bounds: ${e.message}")
+            null
         }
     }
     

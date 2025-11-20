@@ -12,6 +12,11 @@ class AndroidMetricsCollector(private val packageName: String) {
     val systraceCollector: SystraceCollector by lazy {
         SystraceCollector()
     }
+
+    // Perfetto collector for detailed tracing
+    val perfettoCollector: PerfettoCollector by lazy {
+        PerfettoCollector()
+    }
     
     fun resetGfxInfo() {
         try {
@@ -361,19 +366,38 @@ class AndroidMetricsCollector(private val packageName: String) {
      * Collect CPU info using dumpsys cpuinfo as an alternative to top.
      * More reliable for some devices.
      */
+    /**
+     * Collect CPU info using dumpsys cpuinfo as an alternative to top.
+     * More reliable for some devices.
+     */
     fun collectCpuInfoFromDumpsys(): CpuMetrics {
         return try {
             val output = AdbShell.exec("shell", "dumpsys", "cpuinfo")
+            
+            // Strategy 1: Look for exact package match
+            // Format: "0.1% 1234/com.package.name: 0.1% user + 0% kernel"
+            // Regex: Start of line or space, digits% space PID/package
             val pattern = Regex("""(\d+(?:\.\d+)?)%\s+\d+/${Regex.escape(packageName)}""")
             val match = pattern.find(output)
             
             if (match != null) {
                 val cpuPercent = match.groupValues[1].toDoubleOrNull() ?: 0.0
-                CpuMetrics(cpuPercent)
-            } else {
-                logger.debug("Could not find CPU usage for $packageName in dumpsys cpuinfo")
-                CpuMetrics.empty()
+                return CpuMetrics(cpuPercent)
             }
+            
+            // Strategy 2: Look for package name only (sometimes PID is missing or format differs)
+            // Format: "  0.1% com.package.name"
+            val loosePattern = Regex("""(\d+(?:\.\d+)?)%\s+.*${Regex.escape(packageName)}""")
+            val looseMatch = loosePattern.find(output)
+            
+            if (looseMatch != null) {
+                val cpuPercent = looseMatch.groupValues[1].toDoubleOrNull() ?: 0.0
+                return CpuMetrics(cpuPercent)
+            }
+            
+            logger.debug("Could not find CPU usage for $packageName in dumpsys cpuinfo")
+            CpuMetrics.empty()
+            
         } catch (e: Exception) {
             logger.warn("Failed to collect CPU from dumpsys: ${e.message}")
             CpuMetrics.empty()

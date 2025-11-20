@@ -8,13 +8,27 @@ import org.openqa.selenium.WebDriver
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 
-class MetricsManager(
+interface MetricsManager {
+    fun measureAppLaunchTime(): Long
+    fun startPerformanceRecording()
+    fun stopPerformanceRecording(testName: String = "test"): String?
+    fun trackAction(pageName: String, actionName: String, block: () -> Unit)
+    fun getActionMetrics(): List<ActionMetrics>
+    fun analyzeTraceSegments(): Map<String, TraceSegmentMetrics>
+    fun reset()
+    fun getPageSummary(pageName: String): PageMetricsSummary?
+    fun getTotalSummary(): TotalMetricsSummary
+    fun getTraceMetrics(): com.danioliveira.appium.metrics.android.TraceMetrics?
+    fun getAppLaunchTime(): Long
+}
+
+class LegacyMetricsManager(
     private val platform: Platform,
     private val packageOrBundleId: String,
     private val udid: String? = null,
     private val driver: WebDriver? = null,
     private val instrumentsProfileName: String = "Activity Monitor"  // iOS Instruments profile to use
-) {
+) : MetricsManager {
     private val logger = LoggerFactory.getLogger(javaClass)
     val androidCollector = if (platform == Platform.ANDROID) {
         try {
@@ -46,12 +60,20 @@ class MetricsManager(
     private var appLaunchTimeMs: Long = 0
     private var traceMetrics: com.danioliveira.appium.metrics.android.TraceMetrics? = null
     
-    fun measureAppLaunchTime(): Long {
+    // Trace timing for correlation with action timestamps
+    private var traceStartTimeMs: Long = 0  // When trace recording started (host time)
+    private var traceStartTimeDeviceMs: Long = 0  // Device time when trace started (for alignment)
+    
+    override fun measureAppLaunchTime(): Long {
         appLaunchTimeMs = when (platform) {
             Platform.ANDROID -> androidCollector?.measureLaunchTime() ?: 0L
             Platform.IOS -> iosCollector?.measureLaunchTime() ?: 0L
         }
         logger.info("App launch time measured: ${appLaunchTimeMs}ms")
+        return appLaunchTimeMs
+    }
+
+    override fun getAppLaunchTime(): Long {
         return appLaunchTimeMs
     }
     
@@ -61,17 +83,26 @@ class MetricsManager(
      * - Android: Starts systrace capture with app-level tracing
      * 
      * Capture will continue until stopPerformanceRecording() is called.
+     * Records the start time for trace-to-action correlation.
      */
-    fun startPerformanceRecording() {
+    override fun startPerformanceRecording() {
+        traceStartTimeMs = System.currentTimeMillis()
+        
         when (platform) {
-            Platform.IOS -> iosCollector?.startPerformanceRecording()
+            Platform.IOS -> {
+                iosCollector?.startPerformanceRecording()
+                // For iOS, we'll use the trace file's timestamp when parsing
+                logger.info("✅ Instruments recording started at host time: $traceStartTimeMs")
+            }
             Platform.ANDROID -> {
                 // Start systrace with app-level tracing enabled
                 val started = androidCollector?.systraceCollector?.startCapture(
                     packageName = packageOrBundleId
                 )
                 if (started == true) {
-                    logger.info("✅ Systrace capture started (will run until stopped)")
+                    // For now, use host time (device time alignment can be added later if needed)
+                    traceStartTimeDeviceMs = traceStartTimeMs
+                    logger.info("✅ Systrace capture started at host time: $traceStartTimeMs")
                 } else {
                     logger.warn("⚠️  Failed to start systrace capture")
                 }
@@ -87,7 +118,7 @@ class MetricsManager(
      * @param testName Name for the trace file
      * @return Summary message
      */
-    fun stopPerformanceRecording(testName: String = "test"): String? {
+    override fun stopPerformanceRecording(testName: String): String? {
         return when (platform) {
             Platform.IOS -> {
                 val snapshot = iosCollector?.stopPerformanceRecording()
@@ -146,10 +177,11 @@ class MetricsManager(
         logger.info("✅ All metrics updated with real trace values")
     }
     
-    fun trackAction(pageName: String, actionName: String, block: () -> Unit) {
+    override fun trackAction(pageName: String, actionName: String, block: () -> Unit) {
         logger.debug("Starting metrics collection for $pageName.$actionName")
         
-        val startTime = System.currentTimeMillis()
+        val startTimeMs = System.currentTimeMillis()
+        val startTimeRelativeToTrace = startTimeMs - traceStartTimeMs
         
         // Collect BEFORE metrics
         val beforeMetrics = when (platform) {
@@ -181,7 +213,9 @@ class MetricsManager(
         // Small delay to let metrics settle
         Thread.sleep(100)
         
-        val durationMs = System.currentTimeMillis() - startTime
+        val endTimeMs = System.currentTimeMillis()
+        val endTimeRelativeToTrace = endTimeMs - traceStartTimeMs
+        val durationMs = endTimeMs - startTimeMs
         
         // Collect AFTER metrics
         val afterMetrics = collectMetrics(pageName, actionName, durationMs)
@@ -190,12 +224,16 @@ class MetricsManager(
         val deltaMemoryMb = afterMetrics.memoryMb - beforeMetrics.memoryMb
         val deltaCpuPercent = afterMetrics.cpuPercent - beforeMetrics.cpuPercent
         
-        // Update metrics with delta information
+        // Update metrics with delta information and timestamps
         val metricsWithDelta = afterMetrics.copy(
             memoryMb = afterMetrics.memoryMb,  // Keep absolute value
             cpuPercent = afterMetrics.cpuPercent,  // Keep absolute value
             deltaMemoryMb = deltaMemoryMb,  // Store delta
-            deltaCpuPercent = deltaCpuPercent  // Store delta
+            deltaCpuPercent = deltaCpuPercent,  // Store delta
+            startTimeMs = startTimeMs,  // Absolute host time
+            endTimeMs = endTimeMs,  // Absolute host time
+            startTimeRelativeToTraceMs = startTimeRelativeToTrace,  // Relative to trace start
+            endTimeRelativeToTraceMs = endTimeRelativeToTrace  // Relative to trace start
         )
         
         // Store metrics
@@ -204,6 +242,7 @@ class MetricsManager(
         
         logger.info("Metrics collected for $pageName.$actionName:")
         logger.info("  Duration: ${durationMs}ms")
+        logger.info("  Time window: ${startTimeRelativeToTrace}ms - ${endTimeRelativeToTrace}ms (relative to trace)")
         logger.info("  Memory: ${afterMetrics.memoryMb}MB (Δ ${if (deltaMemoryMb >= 0) "+" else ""}${deltaMemoryMb}MB)")
         logger.info("  CPU: ${String.format("%.1f", afterMetrics.cpuPercent)}% (Δ ${if (deltaCpuPercent >= 0) "+" else ""}${String.format("%.1f", deltaCpuPercent)}%)")
         logger.info("  FPS: ${String.format("%.1f", afterMetrics.fps)}")
@@ -295,7 +334,7 @@ class MetricsManager(
     }
     
     
-    fun getPageSummary(pageName: String): PageMetricsSummary? {
+    override fun getPageSummary(pageName: String): PageMetricsSummary? {
         val metrics = pageMetricsMap[pageName] ?: return null
         if (metrics.isEmpty()) return null
         
@@ -319,7 +358,7 @@ class MetricsManager(
         return pageMetricsMap.keys.mapNotNull { getPageSummary(it) }
     }
     
-    fun getTotalSummary(): TotalMetricsSummary {
+    override fun getTotalSummary(): TotalMetricsSummary {
         val allMetrics = actionMetrics
         
         return TotalMetricsSummary(
@@ -356,25 +395,146 @@ class MetricsManager(
      * Get systrace metrics (Android only).
      * Returns screen-level trace data from systrace capture.
      */
-    fun getTraceMetrics(): com.danioliveira.appium.metrics.android.TraceMetrics? {
+    override fun getTraceMetrics(): com.danioliveira.appium.metrics.android.TraceMetrics? {
         return traceMetrics
     }
     
     /**
      * Get all action-level metrics with delta values.
      */
-    fun getActionMetrics(): List<ActionMetrics> {
+    override fun getActionMetrics(): List<ActionMetrics> {
         return actionMetrics.toList()
     }
     
-    fun reset() {
+    /**
+     * Get trace start time for correlation with action timestamps.
+     */
+    fun getTraceStartTimeMs(): Long = traceStartTimeMs
+    
+    /**
+     * Get device trace start time (if available).
+     */
+    fun getTraceStartTimeDeviceMs(): Long = traceStartTimeDeviceMs
+    
+    /**
+     * Analyze trace segments for each action using timestamps.
+     * This method queries the parsed trace data for metrics within each action's time window.
+     * 
+     * @return Map of action key (pageName.actionName) to trace-derived metrics
+     */
+    override fun analyzeTraceSegments(): Map<String, TraceSegmentMetrics> {
+        val results = mutableMapOf<String, TraceSegmentMetrics>()
+        
+        if (traceMetrics == null) {
+            logger.warn("⚠️  No trace metrics available for segment analysis")
+            return results
+        }
+        
+        // Group actions by pageName.actionName
+        val actionGroups = actionMetrics.groupBy { "${it.pageName}.${it.actionName}" }
+        
+        actionGroups.forEach { (actionKey, metricsList) ->
+            // For each action, analyze all occurrences
+            val segmentMetrics = metricsList.mapNotNull { metrics ->
+                analyzeSingleTraceSegment(metrics)
+            }
+            
+            if (segmentMetrics.isNotEmpty()) {
+                // Aggregate metrics across all occurrences of this action
+                val aggregated = aggregateTraceSegments(segmentMetrics)
+                results[actionKey] = aggregated
+            }
+        }
+        
+        logger.info("✅ Analyzed ${results.size} action segments from trace")
+        return results
+    }
+    
+    /**
+     * Analyze a single action's trace segment.
+     */
+    private fun analyzeSingleTraceSegment(metrics: ActionMetrics): TraceSegmentMetrics? {
+        // Convert relative time to trace time (if we have device time alignment)
+        // For now, use relative time directly - trace parsers should handle this
+        val traceStart = metrics.startTimeRelativeToTraceMs
+        val traceEnd = metrics.endTimeRelativeToTraceMs
+        
+        // Query trace metrics for this time window
+        // This will be implemented in the trace collector
+        return when (platform) {
+            Platform.ANDROID -> {
+                traceMetrics?.let { queryAndroidTraceSegment(it, traceStart, traceEnd) }
+            }
+            Platform.IOS -> {
+                // iOS trace analysis would go here
+                null
+            }
+        }
+    }
+    
+    /**
+     * Query Android trace metrics for a specific time window.
+     */
+    private fun queryAndroidTraceSegment(
+        trace: com.danioliveira.appium.metrics.android.TraceMetrics,
+        startMs: Long,
+        endMs: Long
+    ): TraceSegmentMetrics? {
+        // Use TraceMetrics queryTraceSegment method directly
+        return trace.queryTraceSegment(startMs, endMs)
+    }
+    
+    /**
+     * Aggregate multiple trace segments for the same action.
+     */
+    private fun aggregateTraceSegments(segments: List<TraceSegmentMetrics>): TraceSegmentMetrics {
+        return TraceSegmentMetrics(
+            avgCpuPercent = segments.map { it.avgCpuPercent }.average(),
+            peakCpuPercent = segments.maxOf { it.peakCpuPercent },
+            avgMemoryMb = segments.map { it.avgMemoryMb }.average().toInt(),
+            peakMemoryMb = segments.maxOf { it.peakMemoryMb },
+            avgFps = segments.map { it.avgFps }.average(),
+            minFps = segments.minOf { it.minFps },
+            jankCount = segments.sumOf { it.jankCount }
+        )
+    }
+    
+    override fun reset() {
         actionMetrics.clear()
         pageMetricsMap.clear()
         appLaunchTimeMs = 0
         traceMetrics = null
+        traceStartTimeMs = 0
+        traceStartTimeDeviceMs = 0
         logger.info("Metrics manager reset")
     }
 }
+
+/**
+ * Metrics extracted from trace file for a specific time segment.
+ */
+data class TraceSegmentMetrics(
+    val avgCpuPercent: Double,
+    val peakCpuPercent: Double,
+    val avgMemoryMb: Int,
+    val peakMemoryMb: Int,
+    val avgFps: Double,
+    val minFps: Double,
+    val jankCount: Int,
+    // Percentiles
+    val p50Cpu: Double = 0.0,
+    val p90Cpu: Double = 0.0,
+    val p95Cpu: Double = 0.0,
+    val p99Cpu: Double = 0.0,
+    val p50Memory: Double = 0.0,
+    val p90Memory: Double = 0.0,
+    val p95Memory: Double = 0.0,
+    val p99Memory: Double = 0.0,
+    val p50Fps: Double = 0.0,
+    val p90Fps: Double = 0.0,
+    val p95Fps: Double = 0.0,
+    val p99Fps: Double = 0.0
+)
 
 data class ActionMetrics(
     val pageName: String,
@@ -388,7 +548,25 @@ data class ActionMetrics(
     val platform: String,
     // Delta values (change during action)
     val deltaMemoryMb: Int = 0,
-    val deltaCpuPercent: Double = 0.0
+    val deltaCpuPercent: Double = 0.0,
+    // Timestamps for trace correlation
+    val startTimeMs: Long = 0,  // Absolute host time when action started
+    val endTimeMs: Long = 0,  // Absolute host time when action ended
+    val startTimeRelativeToTraceMs: Long = 0,  // Time relative to trace start (for querying trace segments)
+    val endTimeRelativeToTraceMs: Long = 0,  // Time relative to trace start
+    // Percentiles (populated from trace analysis or continuous sampling)
+    val p50Cpu: Double = 0.0,
+    val p90Cpu: Double = 0.0,
+    val p95Cpu: Double = 0.0,
+    val p99Cpu: Double = 0.0,
+    val p50Memory: Double = 0.0,
+    val p90Memory: Double = 0.0,
+    val p95Memory: Double = 0.0,
+    val p99Memory: Double = 0.0,
+    val p50Fps: Double = 0.0,
+    val p90Fps: Double = 0.0,
+    val p95Fps: Double = 0.0,
+    val p99Fps: Double = 0.0
 )
 
 data class PageMetricsSummary(

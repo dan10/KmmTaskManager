@@ -127,17 +127,21 @@ class SystraceCollector(
                 .redirectErrorStream(true)
                 .start()
             
-            // Read trace data
-            val traceData = process.inputStream.bufferedReader().readText()
+            // Stream trace data directly to file to avoid OOM with large traces
+            outputFile.outputStream().use { fileOut ->
+                process.inputStream.copyTo(fileOut)
+            }
+            
             val exitCode = process.waitFor()
             
             if (exitCode != 0) {
-                logger.error("Failed to stop systrace")
+                logger.error("Failed to stop systrace. Exit code: $exitCode")
+                // We might have captured some error output in the file, log it
+                if (outputFile.exists() && outputFile.length() < 1024) {
+                    logger.error("Output: ${outputFile.readText()}")
+                }
                 return null
             }
-            
-            // Save to file
-            outputFile.writeText(traceData)
             
             val durationMs = System.currentTimeMillis() - captureStartTime
             val fileSizeMb = outputFile.length() / (1024.0 * 1024.0)
@@ -224,6 +228,17 @@ class SystraceCollector(
             logger.error("Failed to parse trace file: ${e.message}", e)
             return TraceMetrics.empty()
         }
+    }
+    
+
+    
+    /**
+     * Extract frame times from Choreographer events within a time window.
+     */
+    private fun extractFrameTimesInWindow(traceFile: File, startMs: Long, endMs: Long): List<Double> {
+        // This is a simplified version - actual implementation would parse trace events
+        // For now, return empty list - can be enhanced later
+        return emptyList()
     }
     
     /**
@@ -702,111 +717,5 @@ class SystraceCollector(
     }
 }
 
-/**
- * Represents a single screen trace from the app.
- */
-data class ScreenTrace(
-    val name: String,
-    val startTimeMs: Long,
-    val endTimeMs: Long,
-    val durationMs: Long
-)
 
-/**
- * CPU utilization data point from trace.
- */
-data class CpuUtilization(
-    val timestampMs: Long,
-    val cpuPercent: Double,
-    val core: Int? = null  // Specific CPU core, or null for overall
-)
-
-/**
- * Per-screen performance metrics.
- * Contains CPU, Memory, and FPS data for a specific screen.
- */
-data class ScreenMetrics(
-    val screenName: String,
-    val durationMs: Long,
-    val startMs: Long,
-    val endMs: Long,
-    val cpuMin: Double = 0.0,
-    val cpuMax: Double = 0.0,
-    val cpuAvg: Double = 0.0,
-    val cpuSamples: Int = 0,
-    val memoryMin: Int = 0,
-    val memoryMax: Int = 0,
-    val memoryAvg: Int = 0,
-    val memoryP50: Int = 0,
-    val memoryP90: Int = 0,
-    val memorySamples: Int = 0,
-    val fpsMin: Double = 0.0,
-    val fpsMax: Double = 0.0,
-    val fpsAvg: Double = 0.0,
-    val frameCount: Int = 0,
-    val jankCount: Int = 0
-) {
-    val jankPercentage: Double
-        get() = if (frameCount > 0) (jankCount.toDouble() / frameCount) * 100.0 else 0.0
-}
-
-/**
- * Per-second FPS data point for time-series analysis.
- */
-data class FpsPerSecond(
-    val second: Long,  // Timestamp in seconds from trace start
-    val fps: Int       // Frame count in that second
-)
-
-/**
- * Complete trace metrics from a systrace capture.
- * Includes screen traces and CPU utilization data.
- */
-data class TraceMetrics(
-    val traceFile: File?,
-    val screens: List<ScreenTrace>,
-    val totalDurationMs: Long,
-    val cpuUtilization: List<CpuUtilization> = emptyList(),
-    val startupTimeMs: Long? = null,  // From Android App Startups section
-    val fps: Double = 0.0,  // From Choreographer#doFrame events (atrace)
-    val frameCount: Int = 0,  // Number of frames rendered
-    val screenMetrics: List<ScreenMetrics> = emptyList(),  // Per-screen metrics
-    val fpsPerSecond: List<FpsPerSecond> = emptyList()  // Per-second FPS time series
-) {
-    val screenCount: Int get() = screens.size
-    
-    val avgScreenDurationMs: Double
-        get() = if (screens.isNotEmpty()) {
-            screens.map { it.durationMs }.average()
-        } else 0.0
-    
-    val avgCpuPercent: Double
-        get() = if (cpuUtilization.isNotEmpty()) {
-            cpuUtilization.map { it.cpuPercent }.average()
-        } else 0.0
-    
-    val peakCpuPercent: Double
-        get() = cpuUtilization.maxOfOrNull { it.cpuPercent } ?: 0.0
-    
-    fun getScreenByName(name: String): ScreenTrace? {
-        return screens.firstOrNull { it.name == name }
-    }
-    
-    fun getScreenMetricsByName(name: String): ScreenMetrics? {
-        return screenMetrics.firstOrNull { it.screenName == name }
-    }
-    
-    fun getScreenDurations(): Map<String, List<Long>> {
-        return screens.groupBy { it.name }
-            .mapValues { (_, traces) -> traces.map { it.durationMs } }
-    }
-    
-    fun getCpuUtilizationInRange(startMs: Long, endMs: Long): List<CpuUtilization> {
-        return cpuUtilization.filter { it.timestampMs in startMs..endMs }
-    }
-    
-    companion object {
-        fun empty() = TraceMetrics(null, emptyList(), 0L, emptyList(), null)
-    }
-}
 

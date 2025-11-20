@@ -3,9 +3,9 @@ package com.danioliveira.appium
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.drivers.AndroidDriverFactory
 import com.danioliveira.appium.drivers.IOSDriverFactory
+import com.danioliveira.appium.metrics.LegacyMetricsManager
 import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.pages.LoginPage
-import com.danioliveira.appium.pages.TasksPage
 import com.danioliveira.appium.reporting.MetricsReporter
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -71,7 +71,7 @@ class PerformanceMetricsTest {
                 val packageName = System.getProperty("packageName") 
                     ?: "com.danioliveira.taskmanager"
                 logger.info("Using Android package: $packageName")
-                MetricsManager(platform, packageName, driver = driver)
+                LegacyMetricsManager(platform, packageName, driver = driver)
             }
             Platform.IOS -> {
                 // Read from system properties (passed via -D flags)
@@ -93,7 +93,7 @@ class PerformanceMetricsTest {
                 logger.info("Using iOS bundle ID: $bundleId, UDID: $udid")
                 logger.info("Using Instruments profile: '$instrumentsProfile'")
                 
-                MetricsManager(
+                LegacyMetricsManager(
                     platform = platform,
                     packageOrBundleId = bundleId,
                     udid = udid,

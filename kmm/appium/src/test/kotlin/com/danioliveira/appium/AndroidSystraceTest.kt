@@ -2,6 +2,7 @@ package com.danioliveira.appium
 
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.drivers.AndroidDriverFactory
+import com.danioliveira.appium.metrics.LegacyMetricsManager
 import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.pages.LoginPage
 import com.danioliveira.appium.pages.TasksPage
@@ -75,7 +76,7 @@ class AndroidSystraceTest {
         driver = AndroidDriverFactory.create(config)
         
         // Initialize metrics manager
-        metricsManager = MetricsManager(platform, packageName, driver = driver)
+        metricsManager = LegacyMetricsManager(platform, packageName, driver = driver)
         
         // Check systrace availability
         val apiLevel = metricsManager.let {

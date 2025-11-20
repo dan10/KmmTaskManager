@@ -2,6 +2,7 @@ package com.danioliveira.appium
 
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.drivers.AndroidDriverFactory
+import com.danioliveira.appium.metrics.LegacyMetricsManager
 import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.metrics.android.PerformanceStatisticsCollector
 import com.danioliveira.appium.pages.LoginPage
@@ -56,11 +57,11 @@ class LoginSystraceTest {
         )
         
         driver = AndroidDriverFactory.create(config)
-        metricsManager = MetricsManager(platform, packageName, driver = driver)
+        metricsManager = LegacyMetricsManager(platform, packageName, driver = driver)
         
         // Initialize statistics collector with Flashlight FPS
         statsCollector = PerformanceStatisticsCollector(
-            androidCollector = metricsManager.androidCollector 
+            androidCollector = (metricsManager as? LegacyMetricsManager)?.androidCollector 
                 ?: throw IllegalStateException("Android collector not available"),
             packageName = packageName
         )

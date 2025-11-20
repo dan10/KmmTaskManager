@@ -61,6 +61,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     systemProperties(System.getProperties().mapKeys { it.key.toString() })
+    maxHeapSize = "4g"
 }
 
 // Task to run iOS performance test with external Instruments recording

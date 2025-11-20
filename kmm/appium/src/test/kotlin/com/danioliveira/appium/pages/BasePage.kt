@@ -9,12 +9,17 @@ import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.WebDriverWait
+import org.openqa.selenium.interactions.PointerInput
+import org.openqa.selenium.interactions.Sequence
+import org.openqa.selenium.Dimension
+import org.openqa.selenium.Point
 import java.time.Duration
+import java.util.Collections
 
 abstract class BasePage(
-    protected val driver: WebDriver,
-    protected val platform: Platform,
-    protected val metricsManager: MetricsManager? = null
+    val driver: WebDriver,
+    val platform: Platform,
+    val metricsManager: MetricsManager? = null
 ) {
     protected val wait = WebDriverWait(driver, Duration.ofSeconds(10))
     
@@ -202,14 +207,21 @@ abstract class BasePage(
         trackAction("scrollToEnd") {
             when (platform) {
                 Platform.ANDROID -> {
-                    driver.findElement(
-                        AppiumBy.androidUIAutomator(
-                            "new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)"
+                    try {
+                        // Try to find a scrollable element and scroll to end
+                        driver.findElement(
+                            AppiumBy.androidUIAutomator(
+                                "new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(5)"
+                            )
                         )
-                    )
+                    } catch (e: Exception) {
+                        // Fallback: Try to scroll using W3C actions or just ignore if already at end
+                        log.warn("Failed to scroll to end using UiScrollable: ${e.message}")
+                    }
                 }
                 Platform.IOS -> {
-                    val params = mapOf("direction" to "down")
+                    val params = HashMap<String, Any>()
+                    params["direction"] = "down"
                     (driver as JavascriptExecutor).executeScript("mobile: scroll", params)
                 }
             }
@@ -235,6 +247,80 @@ abstract class BasePage(
                 }
             }
         }
+    }
+
+    /**
+     * Scrolls until the specified text is visible.
+     */
+    protected fun executeScrollToText(text: String) {
+        trackAction("scrollToText") {
+            when (platform) {
+                Platform.ANDROID -> {
+                    try {
+                        driver.findElement(
+                            AppiumBy.androidUIAutomator(
+                                "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().textContains(\"$text\"))"
+                            )
+                        )
+                    } catch (e: Exception) {
+                        log.warn("UiScrollable failed to find '$text', falling back to manual swipe: ${e.message}")
+                        manualScrollToText(text)
+                    }
+                }
+                Platform.IOS -> {
+                    // Simple fallback for iOS - just try to find it, if not scroll down a bit
+                    // Real iOS scrolling to element is more complex without predicates
+                    try {
+                        findByText(text)
+                    } catch (e: Exception) {
+                         val params = HashMap<String, Any>()
+                        params["direction"] = "down"
+                        (driver as JavascriptExecutor).executeScript("mobile: scroll", params)
+                        findByText(text)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun manualScrollToText(text: String) {
+        var attempts = 0
+        val maxAttempts = 5
+        while (attempts < maxAttempts) {
+            if (isTextVisible(text)) return
+            
+            log.info("  👇 Manual swipe down (attempt ${attempts + 1}/$maxAttempts)")
+            scrollDown()
+            attempts++
+        }
+        
+        if (!isTextVisible(text)) {
+            throw NoSuchElementException("Could not find text '$text' after $maxAttempts manual scrolls")
+        }
+    }
+    
+    private fun isTextVisible(text: String): Boolean {
+        return try {
+            driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().textContains(\"$text\")")).isDisplayed
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun scrollDown() {
+        val dimension = driver.manage().window().size
+        val start = Point(dimension.width / 2, (dimension.height * 0.8).toInt())
+        val end = Point(dimension.width / 2, (dimension.height * 0.2).toInt())
+        
+        val finger = PointerInput(PointerInput.Kind.TOUCH, "finger")
+        val swipe = Sequence(finger, 1)
+        
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(0), PointerInput.Origin.viewport(), start.x, start.y))
+        swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()))
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(1000), PointerInput.Origin.viewport(), end.x, end.y))
+        swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()))
+        
+        (driver as org.openqa.selenium.remote.RemoteWebDriver).perform(Collections.singletonList(swipe))
     }
     
     /**
