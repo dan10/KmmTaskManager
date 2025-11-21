@@ -6,9 +6,12 @@ class TestIds {
   static const String btnLogin = 'btn_login';
   static const String btnRegister = 'btn_register';
   static const String btnLogout = 'btn_logout';
+  static const String linkRegister = 'link_register';
+  static const String linkLogin = 'link_login';
   static const String txtEmail = 'txt_email';
   static const String txtPassword = 'txt_password';
-  static const String linkRegister = 'link_register';
+  static const String txtName = 'txt_name';
+  static const String txtConfirmPassword = 'txt_confirm_password';
   
   // Navigation
   static const String navTasks = 'nav_tasks';
@@ -20,11 +23,17 @@ class TestIds {
   static const String listTasks = 'list_tasks';
   static const String txtSearch = 'txt_search';
   static const String cardTask = 'card_task_';
+  static const String txtTaskTitle = 'txt_task_title';
+  static const String txtTaskDescription = 'txt_task_description';
+  static const String btnCreateTask = 'btn_create_task';
   
   // Projects
   static const String btnAddProject = 'btn_add_project';
   static const String listProjects = 'list_projects';
   static const String cardProject = 'card_project_';
+  static const String txtProjectName = 'txt_project_name';
+  static const String txtProjectDescription = 'txt_project_description';
+  static const String btnCreateProject = 'btn_create_project';
   
   // Calendar
   static const String listCalendarTasks = 'list_calendar_tasks';
@@ -39,6 +48,7 @@ class TestIds {
   
   /// Generate a task card identifier with task ID
   static String taskCard(String id) => '$cardTask$id';
+  static String taskItem(String id) => taskCard(id);
   
   /// Generate a project card identifier with project ID
   static String projectCard(String id) => '$cardProject$id';

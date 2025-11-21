@@ -1,5 +1,6 @@
 package com.danioliveira.appium.pages
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.locators.Tags
 import com.danioliveira.appium.metrics.MetricsManager
@@ -12,8 +13,9 @@ import org.openqa.selenium.WebDriver
 class ProjectCreatePage(
     driver: WebDriver,
     platform: Platform,
+    app: App = App.KMM,
     metricsManager: MetricsManager? = null
-) : BasePage(driver, platform, metricsManager) {
+) : BasePage(driver, platform, app, metricsManager) {
 
     /**
      * Wait for the project creation form to be visible.

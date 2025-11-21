@@ -1,16 +1,21 @@
 package com.danioliveira.appium.pages.abstract
 
+import com.danioliveira.appium.config.App
+import com.danioliveira.appium.config.Platform
+import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.pages.BaseScreen
+import org.openqa.selenium.WebDriver
 
 /**
  * Abstract base class for Task Creation page across all frameworks.
  * Defines the contract for task creation actions that all implementations must follow.
  */
 abstract class AbstractTaskCreatePage(
-    driver: org.openqa.selenium.WebDriver,
-    platform: com.danioliveira.appium.config.Platform,
-    metricsManager: com.danioliveira.appium.metrics.MetricsManager? = null
-) : BaseScreen(driver, platform, metricsManager) {
+    driver: WebDriver,
+    platform: Platform,
+    app: App = App.KMM,
+    metricsManager: MetricsManager? = null
+) : BaseScreen(driver, platform, app, metricsManager) {
     
     /**
      * Wait for the task creation form to be visible.
@@ -52,7 +57,7 @@ abstract class AbstractTaskCreatePage(
      * @param description Optional task description
      * @return TasksPage instance after task is created
      */
-    fun createTask(title: String, description: String? = null): AbstractTasksPage {
+    open fun createTask(title: String, description: String? = null): AbstractTasksPage {
         return waitForCreateForm()
             .enterTitle(title)
             .let { page ->
@@ -72,7 +77,7 @@ abstract class AbstractTaskCreatePage(
      * @param title The task title
      * @return TasksPage instance after task is created
      */
-    fun quickCreate(title: String): AbstractTasksPage {
+    open fun quickCreate(title: String): AbstractTasksPage {
         return enterTitle(title)
             .clickSave()
     }
@@ -86,5 +91,4 @@ abstract class AbstractTaskCreatePage(
      */
     abstract fun quickCreateByInstance(title: String): AbstractTasksPage
 }
-
 

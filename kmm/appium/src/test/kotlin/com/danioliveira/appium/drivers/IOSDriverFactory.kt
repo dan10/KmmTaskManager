@@ -4,6 +4,7 @@ import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.BenchmarkConfig
 import io.appium.java_client.ios.IOSDriver
 import io.appium.java_client.ios.options.XCUITestOptions
+import io.appium.java_client.flutter.ios.FlutterIOSDriver
 import java.net.URL
 import java.time.Duration
 
@@ -32,7 +33,10 @@ object IOSDriverFactory {
         config.deviceName?.let { options.setDeviceName(it) }
         config.ipaPath?.let { options.setApp(it) }
         
-        return IOSDriver(URL(APPIUM_URL), options)
+        return when (config.app) {
+            App.FLUTTER -> FlutterIOSDriver(URL(APPIUM_URL), options)
+            App.KMM -> IOSDriver(URL(APPIUM_URL), options)
+        }
     }
     
     private fun getBundleId(app: App): String = when (app) {

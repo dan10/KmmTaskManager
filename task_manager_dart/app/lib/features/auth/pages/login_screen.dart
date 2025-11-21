@@ -161,6 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           builder: (context, _) {
                             return Semantics(
                               identifier: TestIds.btnLogin,
+                              button: true,
                               child: SizedBox(
                                 width: double.infinity,
                                 child: TaskItPrimaryActionButton(
@@ -245,6 +246,7 @@ class _LoginAccountLink extends StatelessWidget {
         ),
         Semantics(
           identifier: TestIds.linkRegister,
+          button: true,
           child: TextButton(
             onPressed: onLinkClick,
             child: Text(

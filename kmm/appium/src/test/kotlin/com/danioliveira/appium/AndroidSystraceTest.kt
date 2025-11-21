@@ -1,5 +1,6 @@
 package com.danioliveira.appium
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.drivers.AndroidDriverFactory
 import com.danioliveira.appium.metrics.LegacyMetricsManager
@@ -119,7 +120,7 @@ class AndroidSystraceTest {
         logger.info("App launched in ${launchTime}ms")
         
         // Create page objects
-        val loginPage = LoginPage(driver, Platform.ANDROID, metricsManager)
+        val loginPage = LoginPage(driver, Platform.ANDROID, metricsManager = metricsManager)
         
         // Execute login flow with metrics tracking
         loginPage.waitForLoginScreen()
@@ -196,7 +197,7 @@ class AndroidSystraceTest {
         metricsManager.measureAppLaunchTime()
         
         // Login flow
-        val loginPage = LoginPage(driver, Platform.ANDROID, metricsManager)
+        val loginPage = LoginPage(driver, Platform.ANDROID, App.KMM, metricsManager)
         loginPage.waitForLoginScreen()
         loginPage.enterEmail("test@example.com")
         loginPage.enterPassword("password123")

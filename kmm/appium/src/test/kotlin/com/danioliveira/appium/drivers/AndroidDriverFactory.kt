@@ -5,6 +5,9 @@ import com.danioliveira.appium.config.BenchmarkConfig
 import io.appium.java_client.Setting
 import io.appium.java_client.android.AndroidDriver
 import io.appium.java_client.android.options.UiAutomator2Options
+import io.appium.java_client.flutter.android.FlutterAndroidDriver
+import io.appium.java_client.flutter.ios.FlutterIOSDriver
+import java.net.URI
 import java.net.URL
 import java.time.Duration
 
@@ -25,11 +28,21 @@ object AndroidDriverFactory {
             .setSystemPort(8200)  // Set a fixed system port for UiAutomator2 server
             .setUiautomator2ServerLaunchTimeout(Duration.ofSeconds(60))  // Increase server launch timeout
             .setUiautomator2ServerInstallTimeout(Duration.ofSeconds(60))  // Increase server install timeout
-        
+
+
         //config.apkPath?.let { options.setApp(it) }
         
-        return AndroidDriver(URL(APPIUM_URL), options).also {
-            it.setSetting(Setting.ALLOW_INVISIBLE_ELEMENTS, true)
+        return when (config.app) {
+            App.FLUTTER -> {
+                FlutterAndroidDriver(URI(APPIUM_URL).toURL(), options).also {
+                    it.setSetting(Setting.ALLOW_INVISIBLE_ELEMENTS, true)
+                }
+            }
+            App.KMM -> {
+                AndroidDriver(URL(APPIUM_URL), options).also {
+                    it.setSetting(Setting.ALLOW_INVISIBLE_ELEMENTS, true)
+                }
+            }
         }
     }
     

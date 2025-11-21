@@ -1,8 +1,10 @@
 package com.danioliveira.appium.pages
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.locators.Tags
 import com.danioliveira.appium.metrics.MetricsManager
+import com.danioliveira.appium.pages.abstract.AbstractTasksPage
 import org.openqa.selenium.WebDriver
 
 /**
@@ -15,58 +17,43 @@ import org.openqa.selenium.WebDriver
  * ```
  */
 class TasksPage(
-    driver: WebDriver, 
+    driver: WebDriver,
     platform: Platform,
+    app: App = App.KMM,
     metricsManager: MetricsManager? = null
-) : BaseScreen(driver, platform, metricsManager) {
+) : AbstractTasksPage(driver, platform, app, metricsManager) {
     
     override fun verify(): TasksPage {
         waitForElement(Tags.LIST_TASKS)
         return this
     }
     
-    /**
-     * Click the add task button to open task creation.
-     * @return TaskCreatePage instance
-     */
-    fun clickAddTask(): TaskCreatePage {
+    override fun clickAddTask(): TaskCreatePage {
         clickById(Tags.BTN_ADD_TASK)
-        return on<TaskCreatePage>(verifyScreen = false) // Bottom sheet may not be immediately ready
+        return on<TaskCreatePage>(verifyScreen = false)
     }
     
-    /**
-     * Open task creation bottom sheet.
-     * Alias for clickAddTask() with more descriptive name.
-     * @return TaskCreatePage instance
-     */
-    fun openCreateTask(): TaskCreatePage {
+    override fun openCreateTask(): TaskCreatePage {
         return clickAddTask()
     }
     
-    /**
-     * Wait for tasks list to be visible.
-     * @return This TasksPage instance for fluent chaining
-     */
-    fun waitForTasksList(): TasksPage {
+    override fun waitForTasksList(): TasksPage {
         verify()
         return this
     }
     
-    /**
-     * Scroll to the end of the tasks list.
-     * @return This TasksPage instance for fluent chaining
-     */
-    fun scrollToEnd(): TasksPage {
+    override fun scrollToEnd(): TasksPage {
         executeScrollToEnd()
         return this
     }
     
-    /**
-     * Scroll to the top of the tasks list.
-     * @return This TasksPage instance for fluent chaining
-     */
-    fun scrollToTop(): TasksPage {
+    override fun scrollToTop(): TasksPage {
         executeScrollToBeginning()
+        return this
+    }
+    
+    override fun scrollToTask(taskTitle: String): TasksPage {
+        executeScrollToText(taskTitle)
         return this
     }
 }

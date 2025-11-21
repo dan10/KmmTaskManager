@@ -10,4 +10,9 @@
 -keep class androidx.core.view.accessibility.** { *; }
 -dontwarn androidx.core.view.accessibility.**
 
+# Flutter plugins referenced via reflection
+-keep class io.flutter.plugins.GeneratedPluginRegistrant { *; }
+-keep class com.it_nomads.fluttersecurestorage.** { *; }
+-keep class io.flutter.plugins.pathprovider.** { *; }
+-keep class io.flutter.plugins.sharedpreferences.** { *; }
 

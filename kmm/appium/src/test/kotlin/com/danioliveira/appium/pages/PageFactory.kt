@@ -7,15 +7,13 @@ import com.danioliveira.appium.pages.abstract.AbstractLoginPage
 import com.danioliveira.appium.pages.abstract.AbstractRegisterPage
 import com.danioliveira.appium.pages.abstract.AbstractTaskCreatePage
 import com.danioliveira.appium.pages.abstract.AbstractTasksPage
-import com.danioliveira.appium.pages.cmp.*
-import com.danioliveira.appium.pages.flutter.*
 import org.openqa.selenium.WebDriver
 
 /**
- * Factory for creating page objects based on framework type (CMP/Flutter).
- * 
- * This factory ensures the correct page implementation is used for each framework,
- * allowing the same test code to work across different UI frameworks.
+ * Factory for creating page objects with framework-aware locators.
+ *
+ * Each page receives the selected [App] so it can adapt locator strategies
+ * through the unified `BasePage`/`BaseScreen` infrastructure.
  */
 object PageFactory {
     
@@ -33,12 +31,7 @@ object PageFactory {
         platform: Platform,
         app: App,
         metricsManager: MetricsManager? = null
-    ): AbstractLoginPage {
-        return when (app) {
-            App.KMM -> CmpLoginPage(driver, platform, metricsManager)
-            App.FLUTTER -> FlutterLoginPage(driver, platform, metricsManager)
-        }
-    }
+    ): AbstractLoginPage = LoginPage(driver, platform, app, metricsManager)
     
     /**
      * Create a RegisterPage instance based on the app type.
@@ -48,12 +41,7 @@ object PageFactory {
         platform: Platform,
         app: App,
         metricsManager: MetricsManager? = null
-    ): AbstractRegisterPage {
-        return when (app) {
-            App.KMM -> CmpRegisterPage(driver, platform, metricsManager)
-            App.FLUTTER -> FlutterRegisterPage(driver, platform, metricsManager)
-        }
-    }
+    ): AbstractRegisterPage = RegisterPage(driver, platform, app, metricsManager)
     
     /**
      * Create a TasksPage instance based on the app type.
@@ -63,12 +51,7 @@ object PageFactory {
         platform: Platform,
         app: App,
         metricsManager: MetricsManager? = null
-    ): AbstractTasksPage {
-        return when (app) {
-            App.KMM -> CmpTasksPage(driver, platform, metricsManager)
-            App.FLUTTER -> FlutterTasksPage(driver, platform, metricsManager)
-        }
-    }
+    ): AbstractTasksPage = TasksPage(driver, platform, app, metricsManager)
     
     /**
      * Create a TaskCreatePage instance based on the app type.
@@ -78,12 +61,7 @@ object PageFactory {
         platform: Platform,
         app: App,
         metricsManager: MetricsManager? = null
-    ): AbstractTaskCreatePage {
-        return when (app) {
-            App.KMM -> CmpTaskCreatePage(driver, platform, metricsManager)
-            App.FLUTTER -> FlutterTaskCreatePage(driver, platform, metricsManager)
-        }
-    }
+    ): AbstractTaskCreatePage = TaskCreatePage(driver, platform, app, metricsManager)
 }
 
 

@@ -1,18 +1,21 @@
 package com.danioliveira.appium.pages.abstract
 
+import com.danioliveira.appium.config.App
+import com.danioliveira.appium.config.Platform
+import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.pages.BaseScreen
-import com.danioliveira.appium.pages.RegisterPage
-import com.danioliveira.appium.pages.TasksPage
+import org.openqa.selenium.WebDriver
 
 /**
  * Abstract base class for Login page across all frameworks.
  * Defines the contract for login actions that all implementations must follow.
  */
 abstract class AbstractLoginPage(
-    driver: org.openqa.selenium.WebDriver,
-    platform: com.danioliveira.appium.config.Platform,
-    metricsManager: com.danioliveira.appium.metrics.MetricsManager? = null
-) : BaseScreen(driver, platform, metricsManager) {
+    driver: WebDriver,
+    platform: Platform,
+    app: App = App.KMM,
+    metricsManager: MetricsManager? = null
+) : BaseScreen(driver, platform, app, metricsManager) {
     
     /**
      * Enter email address.
@@ -48,11 +51,10 @@ abstract class AbstractLoginPage(
      * @param password The password
      * @return TasksPage instance after successful login
      */
-    fun login(email: String, password: String): AbstractTasksPage {
+    open fun login(email: String, password: String): AbstractTasksPage {
         return enterEmail(email)
             .enterPassword(password)
             .clickLogin()
     }
 }
-
 

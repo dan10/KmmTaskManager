@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/applocalization.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/testing/test_ids.dart';
 import '../../../core/ui/components/task_it_input_field.dart';
 import '../../../core/ui/components/task_it_password_field.dart';
 import '../../../core/ui/components/task_it_primary_action_button.dart';
@@ -123,14 +124,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ValueListenableBuilder<bool>(
                       valueListenable: widget.viewModel.nameHasError,
                       builder: (context, hasError, _) {
-                        return TaskItInputField(
-                          controller: _name,
-                          label: l10n.name,
-                          keyboardType: TextInputType.name,
-                          textInputAction: TextInputAction.next,
-                          enabled: !widget.viewModel.register.running,
-                          isError: hasError,
-                          errorMessage: l10n.nameError,
+                        return Semantics(
+                          identifier: TestIds.txtName,
+                          child: TaskItInputField(
+                            controller: _name,
+                            label: l10n.name,
+                            keyboardType: TextInputType.name,
+                            textInputAction: TextInputAction.next,
+                            enabled: !widget.viewModel.register.running,
+                            isError: hasError,
+                            errorMessage: l10n.nameError,
+                          ),
                         );
                       },
                     ),
@@ -140,14 +144,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ValueListenableBuilder<bool>(
                       valueListenable: widget.viewModel.emailHasError,
                       builder: (context, hasError, _) {
-                        return TaskItInputField(
-                          controller: _email,
-                          label: l10n.email,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          enabled: !widget.viewModel.register.running,
-                          isError: hasError,
-                          errorMessage: l10n.emailError,
+                        return Semantics(
+                          identifier: TestIds.txtEmail,
+                          child: TaskItInputField(
+                            controller: _email,
+                            label: l10n.email,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            enabled: !widget.viewModel.register.running,
+                            isError: hasError,
+                            errorMessage: l10n.emailError,
+                          ),
                         );
                       },
                     ),
@@ -157,13 +164,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ValueListenableBuilder<bool>(
                       valueListenable: widget.viewModel.passwordHasError,
                       builder: (context, hasError, _) {
-                        return TaskItPasswordField(
-                          controller: _password,
-                          label: l10n.password,
-                          textInputAction: TextInputAction.next,
-                          enabled: !widget.viewModel.register.running,
-                          isError: hasError,
-                          errorMessage: l10n.passwordError,
+                        return Semantics(
+                          identifier: TestIds.txtPassword,
+                          child: TaskItPasswordField(
+                            controller: _password,
+                            label: l10n.password,
+                            textInputAction: TextInputAction.next,
+                            enabled: !widget.viewModel.register.running,
+                            isError: hasError,
+                            errorMessage: l10n.passwordError,
+                          ),
                         );
                       },
                     ),
@@ -173,14 +183,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ValueListenableBuilder<bool>(
                       valueListenable: widget.viewModel.confirmPasswordHasError,
                       builder: (context, hasError, _) {
-                        return TaskItPasswordField(
-                          controller: _confirmPassword,
-                          label: l10n.confirmPassword,
-                          textInputAction: TextInputAction.done,
-                          enabled: !widget.viewModel.register.running,
-                          onSubmitted: (_) => _handleRegister(),
-                          isError: hasError,
-                          errorMessage: l10n.confirmPasswordError,
+                        return Semantics(
+                          identifier: TestIds.txtConfirmPassword,
+                          child: TaskItPasswordField(
+                            controller: _confirmPassword,
+                            label: l10n.confirmPassword,
+                            textInputAction: TextInputAction.done,
+                            enabled: !widget.viewModel.register.running,
+                            onSubmitted: (_) => _handleRegister(),
+                            isError: hasError,
+                            errorMessage: l10n.confirmPasswordError,
+                          ),
                         );
                       },
                     ),
@@ -193,13 +206,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         return ListenableBuilder(
                           listenable: widget.viewModel.register,
                           builder: (context, _) {
-                            return SizedBox(
-                              width: double.infinity,
-                              child: TaskItPrimaryActionButton(
-                                text: l10n.register,
-                                onPressed: _handleRegister,
-                                enabled: isValid && !widget.viewModel.register.running,
-                                isLoading: widget.viewModel.register.running,
+                            return Semantics(
+                              identifier: TestIds.btnRegister,
+                              button: true,
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: TaskItPrimaryActionButton(
+                                  text: l10n.register,
+                                  onPressed: _handleRegister,
+                                  enabled: isValid && !widget.viewModel.register.running,
+                                  isLoading: widget.viewModel.register.running,
+                                ),
                               ),
                             );
                           },
@@ -275,12 +292,16 @@ class _RegisterAccountLink extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        TextButton(
-          onPressed: onLinkClick,
-          child: Text(
-            l10n.signIn,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.primary,
+        Semantics(
+          identifier: TestIds.linkLogin,
+          button: true,
+          child: TextButton(
+            onPressed: onLinkClick,
+            child: Text(
+              l10n.signIn,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
             ),
           ),
         ),

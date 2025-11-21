@@ -1,16 +1,21 @@
 package com.danioliveira.appium.pages.abstract
 
+import com.danioliveira.appium.config.App
+import com.danioliveira.appium.config.Platform
+import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.pages.BaseScreen
+import org.openqa.selenium.WebDriver
 
 /**
  * Abstract base class for Register page across all frameworks.
  * Defines the contract for registration actions that all implementations must follow.
  */
 abstract class AbstractRegisterPage(
-    driver: org.openqa.selenium.WebDriver,
-    platform: com.danioliveira.appium.config.Platform,
-    metricsManager: com.danioliveira.appium.metrics.MetricsManager? = null
-) : BaseScreen(driver, platform, metricsManager) {
+    driver: WebDriver,
+    platform: Platform,
+    app: App = App.KMM,
+    metricsManager: MetricsManager? = null
+) : BaseScreen(driver, platform, app, metricsManager) {
     
     /**
      * Enter name.
@@ -56,7 +61,7 @@ abstract class AbstractRegisterPage(
      * @param confirmPassword The password confirmation (defaults to password)
      * @return TasksPage instance after successful registration
      */
-    fun register(
+    open fun register(
         name: String,
         email: String,
         password: String,
@@ -69,5 +74,4 @@ abstract class AbstractRegisterPage(
             .clickRegister()
     }
 }
-
 

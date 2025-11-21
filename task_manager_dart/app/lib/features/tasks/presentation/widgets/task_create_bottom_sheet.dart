@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/testing/test_ids.dart';
 import '../../data/repositories/task_repository.dart';
 import '../viewmodels/task_create_viewmodel.dart';
 
@@ -193,15 +194,19 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                       ValueListenableBuilder<String?>(
                         valueListenable: _viewModel.titleError,
                         builder: (context, error, _) {
-                          return TextField(
-                            controller: _titleController,
-                            decoration: InputDecoration(
-                              labelText: l10n.taskTitleRequired,
-                              hintText: l10n.taskTitleHint,
-                              border: const OutlineInputBorder(),
-                              errorText: error,
+                          return Semantics(
+                            identifier: TestIds.txtTaskTitle,
+                            child: TextField(
+                              key: const Key(TestIds.txtTaskTitle),
+                              controller: _titleController,
+                              decoration: InputDecoration(
+                                labelText: l10n.taskTitleRequired,
+                                hintText: l10n.taskTitleHint,
+                                border: const OutlineInputBorder(),
+                                errorText: error,
+                              ),
+                              textInputAction: TextInputAction.next,
                             ),
-                            textInputAction: TextInputAction.next,
                           );
                         },
                       ),
@@ -212,16 +217,20 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                       ValueListenableBuilder<String?>(
                         valueListenable: _viewModel.descriptionError,
                         builder: (context, error, _) {
-                          return TextField(
-                            controller: _descriptionController,
-                            decoration: InputDecoration(
-                              labelText: l10n.taskDescriptionLabel,
-                              hintText: l10n.taskDescriptionHint,
-                              border: const OutlineInputBorder(),
-                              errorText: error,
+                          return Semantics(
+                            identifier: TestIds.txtTaskDescription,
+                            child: TextField(
+                              key: const Key(TestIds.txtTaskDescription),
+                              controller: _descriptionController,
+                              decoration: InputDecoration(
+                                labelText: l10n.taskDescriptionLabel,
+                                hintText: l10n.taskDescriptionHint,
+                                border: const OutlineInputBorder(),
+                                errorText: error,
+                              ),
+                              maxLines: 4,
+                              textInputAction: TextInputAction.next,
                             ),
-                            maxLines: 4,
-                            textInputAction: TextInputAction.next,
                           );
                         },
                       ),
@@ -301,20 +310,25 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                                   listenable: _viewModel.createTask,
                                   builder: (context, _) {
                                     final isRunning = _viewModel.createTask.running;
-                                    return FilledButton(
-                                      onPressed: isValid && !isRunning ? _handleCreate : null,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
-                                        child: isRunning
-                                            ? const SizedBox(
-                                                height: 20,
-                                                width: 20,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                                ),
-                                              )
-                                            : Text(l10n.taskCreateTitle),
+                                    return Semantics(
+                                      identifier: TestIds.btnCreateTask,
+                                      button: true,
+                                      child: FilledButton(
+                                        key: const Key(TestIds.btnCreateTask),
+                                        onPressed: isValid && !isRunning ? _handleCreate : null,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          child: isRunning
+                                              ? const SizedBox(
+                                                  height: 20,
+                                                  width: 20,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                  ),
+                                                )
+                                              : Text(l10n.taskCreateTitle),
+                                        ),
                                       ),
                                     );
                                   },

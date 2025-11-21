@@ -26,6 +26,7 @@ object Tags {
     const val CARD_TASK = "card_task_"
     const val TXT_TASK_TITLE = "txt_task_title"
     const val TXT_TASK_DESCRIPTION = "txt_task_description"
+    const val BTN_CREATE_TASK = "btn_create_task"
     
     // Projects
     const val BTN_ADD_PROJECT = "btn_add_project"

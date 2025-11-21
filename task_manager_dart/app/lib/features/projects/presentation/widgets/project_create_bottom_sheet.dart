@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/testing/test_ids.dart';
 import '../../data/repositories/project_repository.dart';
 import '../../view_models/project_create_edit_viewmodel.dart';
 
@@ -175,37 +176,45 @@ class _ProjectCreateBottomSheetState extends State<ProjectCreateBottomSheet> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Project name field
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            labelText: l10n.projectNameLabel,
-                            hintText: l10n.projectNameHint,
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.folder),
+                        Semantics(
+                          identifier: TestIds.txtProjectName,
+                          child: TextFormField(
+                            key: const Key(TestIds.txtProjectName),
+                            controller: _nameController,
+                            decoration: InputDecoration(
+                              labelText: l10n.projectNameLabel,
+                              hintText: l10n.projectNameHint,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.folder),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.projectNameRequired;
+                              }
+                              return null;
+                            },
+                            textCapitalization: TextCapitalization.words,
+                            autofocus: true,
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return l10n.projectNameRequired;
-                            }
-                            return null;
-                          },
-                          textCapitalization: TextCapitalization.words,
-                          autofocus: true,
                         ),
                         
                         const SizedBox(height: 16),
                         
                         // Description field
-                        TextFormField(
-                          controller: _descriptionController,
-                          decoration: InputDecoration(
-                            labelText: l10n.projectDescriptionLabel,
-                            hintText: l10n.projectDescriptionHint,
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.description),
+                        Semantics(
+                          identifier: TestIds.txtProjectDescription,
+                          child: TextFormField(
+                            key: const Key(TestIds.txtProjectDescription),
+                            controller: _descriptionController,
+                            decoration: InputDecoration(
+                              labelText: l10n.projectDescriptionLabel,
+                              hintText: l10n.projectDescriptionHint,
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.description),
+                            ),
+                            maxLines: 3,
+                            textCapitalization: TextCapitalization.sentences,
                           ),
-                          maxLines: 3,
-                          textCapitalization: TextCapitalization.sentences,
                         ),
                       ],
                     ),
@@ -244,27 +253,32 @@ class _ProjectCreateBottomSheetState extends State<ProjectCreateBottomSheet> {
                     // Create button
                     Expanded(
                       flex: 2,
-                      child: ElevatedButton(
-                        onPressed: (_isValid && !_viewModel.create.running)
-                            ? _handleCreate
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: theme.colorScheme.primary,
-                          foregroundColor: theme.colorScheme.onPrimary,
-                        ),
-                        child: _viewModel.create.running
-                            ? SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    theme.colorScheme.onPrimary,
+                      child: Semantics(
+                        identifier: TestIds.btnCreateProject,
+                        button: true,
+                        child: ElevatedButton(
+                          key: const Key(TestIds.btnCreateProject),
+                          onPressed: (_isValid && !_viewModel.create.running)
+                              ? _handleCreate
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
+                          ),
+                          child: _viewModel.create.running
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      theme.colorScheme.onPrimary,
+                                    ),
                                   ),
-                                ),
-                              )
-                            : Text(l10n.projectCreateTitle),
+                                )
+                              : Text(l10n.projectCreateTitle),
+                        ),
                       ),
                     ),
                   ],

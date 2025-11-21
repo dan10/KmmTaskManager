@@ -1,5 +1,6 @@
 package com.danioliveira.appium
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.drivers.AndroidDriverFactory
 import com.danioliveira.appium.drivers.IOSDriverFactory
@@ -132,7 +133,7 @@ class PerformanceMetricsTest {
         }
         
         // Create page objects with metrics manager
-        val loginPage = LoginPage(driver, platform, metricsManager)
+        val loginPage = LoginPage(driver, platform, App.KMM, metricsManager)
         
         // All actions are automatically tracked
         loginPage.waitForLoginScreen()
@@ -177,7 +178,7 @@ class PerformanceMetricsTest {
         metricsManager.measureAppLaunchTime()
         
         // Login flow
-        val loginPage = LoginPage(driver, platform, metricsManager)
+        val loginPage = LoginPage(driver, platform, App.KMM, metricsManager)
         loginPage.waitForLoginScreen()
         loginPage.enterEmail("test@example.com")
         loginPage.enterPassword("password123")

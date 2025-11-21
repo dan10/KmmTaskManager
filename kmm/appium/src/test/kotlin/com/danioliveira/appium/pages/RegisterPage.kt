@@ -1,8 +1,10 @@
 package com.danioliveira.appium.pages
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.locators.Tags
 import com.danioliveira.appium.metrics.MetricsManager
+import com.danioliveira.appium.pages.abstract.AbstractRegisterPage
 import org.openqa.selenium.WebDriver
 
 /**
@@ -15,80 +17,51 @@ import org.openqa.selenium.WebDriver
  * ```
  */
 class RegisterPage(
-    driver: WebDriver, 
+    driver: WebDriver,
     platform: Platform,
+    app: App = App.KMM,
     metricsManager: MetricsManager? = null
-) : BaseScreen(driver, platform, metricsManager) {
+) : AbstractRegisterPage(driver, platform, app, metricsManager) {
     
     override fun verify(): RegisterPage {
         waitForElement(Tags.BTN_REGISTER)
         return this
     }
     
-    /**
-     * Enter name.
-     * @param name The name to enter
-     * @return This RegisterPage instance for fluent chaining
-     */
-    fun enterName(name: String): RegisterPage {
+    override fun enterName(name: String): RegisterPage {
+        clickById(Tags.TXT_NAME)
         sendKeysById(Tags.TXT_NAME, name)
         return this
     }
     
-    /**
-     * Enter email address.
-     * @param email The email to enter
-     * @return This RegisterPage instance for fluent chaining
-     */
-    fun enterEmail(email: String): RegisterPage {
+    override fun enterEmail(email: String): RegisterPage {
+        clickById(Tags.TXT_EMAIL)
         sendKeysById(Tags.TXT_EMAIL, email)
         return this
     }
     
-    /**
-     * Enter password.
-     * @param password The password to enter
-     * @return This RegisterPage instance for fluent chaining
-     */
-    fun enterPassword(password: String): RegisterPage {
+    override fun enterPassword(password: String): RegisterPage {
+        clickById(Tags.TXT_PASSWORD)
         sendKeysById(Tags.TXT_PASSWORD, password)
         return this
     }
     
-    /**
-     * Enter confirm password.
-     * @param confirmPassword The password confirmation
-     * @return This RegisterPage instance for fluent chaining
-     */
-    fun enterConfirmPassword(confirmPassword: String): RegisterPage {
+    override fun enterConfirmPassword(confirmPassword: String): RegisterPage {
+        clickById(Tags.TXT_CONFIRM_PASSWORD)
         sendKeysById(Tags.TXT_CONFIRM_PASSWORD, confirmPassword)
         return this
     }
     
-    /**
-     * Click the register button.
-     * @return TasksPage instance after successful registration
-     */
-    fun clickRegister(): TasksPage {
+    override fun clickRegister(): TasksPage {
         clickById(Tags.BTN_REGISTER)
-        return on<TasksPage>(driver, platform, metricsManager)
+        return on<TasksPage>()
     }
     
-    /**
-     * Complete registration flow with all required fields.
-     * Fluent method that chains all fields and registration.
-     * 
-     * @param name The user's name
-     * @param email The email address
-     * @param password The password
-     * @param confirmPassword The password confirmation (defaults to password)
-     * @return TasksPage instance after successful registration
-     */
-    fun register(
+    override fun register(
         name: String,
         email: String,
         password: String,
-        confirmPassword: String = password
+        confirmPassword: String
     ): TasksPage {
         return enterName(name)
             .enterEmail(email)

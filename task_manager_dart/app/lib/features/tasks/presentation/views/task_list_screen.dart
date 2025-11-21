@@ -7,6 +7,7 @@ import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/data/local/secure_storage.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/testing/test_ids.dart';
 import '../../../../core/ui/components/shimmer.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../viewmodels/tasks_viewmodel.dart';
@@ -133,11 +134,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 child: PagingListener<int, TaskDto>(
                   controller: viewModel.pagingController,
                   builder: (context, pagingState, fetchNextPage) => 
-                    CustomScrollView(
-                      slivers: [
-                        // Progress summary loaded independently
-                        ProgressSummarySliver(
-                          completedTasks: vmState.completedTasks,
+                    Semantics(
+                      identifier: TestIds.listTasks,
+                      child: CustomScrollView(
+                        slivers: [
+                          // Progress summary loaded independently
+                          ProgressSummarySliver(
+                            completedTasks: vmState.completedTasks,
                           totalTasks: vmState.totalTasks,
                           isLoading: vmState.isLoading,
                         ),
@@ -147,15 +150,19 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           state: pagingState,
                           fetchNextPage: fetchNextPage,
                           builderDelegate: PagedChildBuilderDelegate<TaskDto>(
-                            itemBuilder: (context, task, index) => TaskItemSwipeable(
-                              task: task,
-                              onTap: () => _navigateToTaskDetails(context, task.id),
-                              onStatusChanged: (status) {
-                                _viewModel.updateTaskStatus.execute((task.id, status));
-                              },
-                              onDelete: () {
-                                _viewModel.deleteTask.execute(task.id);
-                              },
+                            itemBuilder: (context, task, index) => Semantics(
+                              identifier: TestIds.taskItem(task.id),
+                              child: TaskItemSwipeable(
+                                key: Key(TestIds.taskItem(task.id)),
+                                task: task,
+                                onTap: () => _navigateToTaskDetails(context, task.id),
+                                onStatusChanged: (status) {
+                                  _viewModel.updateTaskStatus.execute((task.id, status));
+                                },
+                                onDelete: () {
+                                  _viewModel.deleteTask.execute(task.id);
+                                },
+                              ),
                             ),
                             firstPageErrorIndicatorBuilder: (context) => 
                               FirstPageErrorIndicator(
@@ -178,6 +185,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         ),
                       ],
                     ),
+                  ),
                 ),
               ),
             ),
@@ -215,17 +223,22 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Widget _buildFAB() {
-    return FloatingActionButton(
-      heroTag: 'add_task_fab',
-      onPressed: () => showTaskCreateBottomSheet(
-        context: context,
-        onDismiss: (shouldRefresh) {
-          if (shouldRefresh) {
-            _viewModel.refresh();
-          }
-        },
+    return Semantics(
+      identifier: TestIds.btnAddTask,
+      button: true,
+      child: FloatingActionButton(
+        key: const Key(TestIds.btnAddTask),
+        heroTag: 'add_task_fab',
+        onPressed: () => showTaskCreateBottomSheet(
+          context: context,
+          onDismiss: (shouldRefresh) {
+            if (shouldRefresh) {
+              _viewModel.refresh();
+            }
+          },
+        ),
+        child: const Icon(Icons.add),
       ),
-      child: const Icon(Icons.add),
     );
   }
 

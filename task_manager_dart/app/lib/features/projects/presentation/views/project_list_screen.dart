@@ -116,40 +116,43 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                 onRefresh: () => _handleRefresh(viewModel),
                 child: PagingListener<int, Project>(
                   controller: viewModel.pagingController,
-                  builder: (context, pagingState, fetchNextPage) => 
-                    Semantics(
+                  builder: (context, pagingState, fetchNextPage) {
+                    return Semantics(
                       identifier: TestIds.listProjects,
                       child: PagedListView<int, Project>(
                         state: pagingState,
                         fetchNextPage: fetchNextPage,
                         padding: const EdgeInsets.all(16),
                         builderDelegate: PagedChildBuilderDelegate<Project>(
-                        itemBuilder: (context, project, index) => Semantics(
-                          identifier: TestIds.projectCard(project.id),
-                          child: ProjectCard(
-                            project: project,
-                            onTap: () => _navigateToProjectDetail(context, project.id),
+                          itemBuilder: (context, project, index) => Semantics(
+                            identifier: TestIds.projectCard(project.id),
+                            child: ProjectCard(
+                              key: Key(TestIds.projectCard(project.id)),
+                              project: project,
+                              onTap: () => _navigateToProjectDetail(context, project.id),
+                            ),
                           ),
+                          firstPageErrorIndicatorBuilder: (context) =>
+                              FirstPageErrorIndicator(
+                                errorMessage: vmState.errorMessage,
+                                onRetry: () => viewModel.pagingController.refresh(),
+                              ),
+                          newPageErrorIndicatorBuilder: (context) =>
+                              NewPageErrorIndicator(
+                                onRetry: () => viewModel.pagingController.refresh(),
+                              ),
+                          firstPageProgressIndicatorBuilder: (context) =>
+                              const FirstPageProgressIndicator(),
+                          newPageProgressIndicatorBuilder: (context) =>
+                              const NewPageProgressIndicator(),
+                          noItemsFoundIndicatorBuilder: (context) =>
+                              const NoItemsFoundIndicator(),
+                          noMoreItemsIndicatorBuilder: (context) =>
+                              const NoMoreItemsIndicator(),
                         ),
-                        firstPageErrorIndicatorBuilder: (context) => 
-                          FirstPageErrorIndicator(
-                            errorMessage: vmState.errorMessage,
-                            onRetry: () => viewModel.pagingController.refresh(),
-                          ),
-                        newPageErrorIndicatorBuilder: (context) => 
-                          NewPageErrorIndicator(
-                            onRetry: () => viewModel.pagingController.refresh(),
-                          ),
-                        firstPageProgressIndicatorBuilder: (context) => 
-                          const FirstPageProgressIndicator(),
-                        newPageProgressIndicatorBuilder: (context) => 
-                          const NewPageProgressIndicator(),
-                        noItemsFoundIndicatorBuilder: (context) => 
-                          const NoItemsFoundIndicator(),
-                        noMoreItemsIndicatorBuilder: (context) => 
-                          const NoMoreItemsIndicator(),
                       ),
-                    ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -189,7 +192,9 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   Widget _buildFAB() {
     return Semantics(
       identifier: TestIds.btnAddProject,
+      button: true,
       child: FloatingActionButton(
+        key: const Key(TestIds.btnAddProject),
         heroTag: 'add_project_fab',
         onPressed: () => _showCreateProjectBottomSheet(context),
         child: const Icon(Icons.add),

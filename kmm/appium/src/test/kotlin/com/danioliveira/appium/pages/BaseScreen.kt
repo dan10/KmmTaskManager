@@ -1,5 +1,6 @@
 package com.danioliveira.appium.pages
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.metrics.MetricsManager
 import org.openqa.selenium.WebDriver
@@ -19,8 +20,9 @@ import org.openqa.selenium.WebDriver
 open class BaseScreen(
       driver: WebDriver,
       platform: Platform,
+      app: App = App.KMM,
       metricsManager: MetricsManager? = null
-) : BasePage(driver, platform, metricsManager) {
+) : BasePage(driver, platform, app, metricsManager) {
 
     companion object {
         inline fun <reified T : BaseScreen> on(
@@ -28,14 +30,23 @@ open class BaseScreen(
             platform: Platform,
             metricsManager: MetricsManager? = null,
             verifyScreen: Boolean = true
+        ): T = on(driver, platform, App.KMM, metricsManager, verifyScreen)
+
+        inline fun <reified T : BaseScreen> on(
+            driver: WebDriver,
+            platform: Platform,
+            app: App,
+            metricsManager: MetricsManager? = null,
+            verifyScreen: Boolean = true
         ): T {
             val screen = T::class.java
                 .getDeclaredConstructor(
                     WebDriver::class.java,
                     Platform::class.java,
+                    App::class.java,
                     MetricsManager::class.java
                 )
-                .newInstance(driver, platform, metricsManager)
+                .newInstance(driver, platform, app, metricsManager)
 
             if (verifyScreen) {
                 screen.verify()
@@ -57,9 +68,10 @@ open class BaseScreen(
             .getDeclaredConstructor(
                 WebDriver::class.java,
                 Platform::class.java,
+                App::class.java,
                 MetricsManager::class.java
             )
-            .newInstance(driver, platform, metricsManager)
+            .newInstance(driver, platform, app, metricsManager)
         
         if (verifyScreen) {
             screen.verify()

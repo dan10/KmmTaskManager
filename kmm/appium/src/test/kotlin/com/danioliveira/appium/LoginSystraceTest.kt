@@ -1,5 +1,6 @@
 package com.danioliveira.appium
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.drivers.AndroidDriverFactory
 import com.danioliveira.appium.metrics.LegacyMetricsManager
@@ -88,7 +89,7 @@ class LoginSystraceTest {
         logger.info("App launch detected by Appium in ${appiumLaunchTime}ms (includes Appium overhead)")
         
         // Create login page
-        val loginPage = LoginPage(driver, Platform.ANDROID, metricsManager)
+        val loginPage = LoginPage(driver, Platform.ANDROID, App.KMM, metricsManager)
         
         // Execute login flow with metrics tracking
         logger.info("Executing login flow...")

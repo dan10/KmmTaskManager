@@ -1,8 +1,10 @@
 package com.danioliveira.appium.pages
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.locators.Tags
 import com.danioliveira.appium.metrics.MetricsManager
+import com.danioliveira.appium.pages.abstract.AbstractTaskCreatePage
 import org.openqa.selenium.WebDriver
 
 /**
@@ -18,8 +20,9 @@ import org.openqa.selenium.WebDriver
 class TaskCreatePage(
     driver: WebDriver,
     platform: Platform,
+    app: App = App.KMM,
     metricsManager: MetricsManager? = null
-) : BaseScreen(driver, platform, metricsManager) {
+) : AbstractTaskCreatePage(driver, platform, app, metricsManager) {
 
     override fun verify(): TaskCreatePage {
         // Try ID-based first, fall back to instance-based
@@ -36,7 +39,7 @@ class TaskCreatePage(
      * Waits for the title field to appear as an indicator.
      * @return This TaskCreatePage instance for fluent chaining
      */
-    fun waitForCreateForm(): TaskCreatePage {
+    override fun waitForCreateForm(): TaskCreatePage {
         try {
             waitForElement(Tags.TXT_TASK_TITLE)
         } catch (e: Exception) {
@@ -50,8 +53,9 @@ class TaskCreatePage(
      * @param title The task title to enter
      * @return This TaskCreatePage instance for fluent chaining
      */
-    fun enterTitle(title: String): TaskCreatePage {
+    override fun enterTitle(title: String): TaskCreatePage {
         try {
+            clickById(Tags.TXT_TASK_TITLE)
             sendKeysById(Tags.TXT_TASK_TITLE, title)
         } catch (e: Exception) {
             enterTitleByInstance(title)
@@ -64,8 +68,9 @@ class TaskCreatePage(
      * @param description The task description to enter
      * @return This TaskCreatePage instance for fluent chaining
      */
-    fun enterDescription(description: String): TaskCreatePage {
+    override fun enterDescription(description: String): TaskCreatePage {
         try {
+            clickById(Tags.TXT_TASK_DESCRIPTION)
             sendKeysById(Tags.TXT_TASK_DESCRIPTION, description)
         } catch (e: Exception) {
             enterDescriptionByInstance(description)
@@ -77,11 +82,15 @@ class TaskCreatePage(
      * Click the save button to create the task.
      * @return TasksPage instance after task is created
      */
-    fun clickSave(): TasksPage {
+    override fun clickSave(): TasksPage {
         try {
-            clickById(Tags.BTN_SAVE)
+            clickById(Tags.BTN_CREATE_TASK)
         } catch (e: Exception) {
-            clickSaveByInstance()
+            try {
+                clickById(Tags.BTN_SAVE)
+            } catch (e2: Exception) {
+                clickSaveByInstance()
+            }
         }
         return on<TasksPage>()
     }
@@ -90,7 +99,7 @@ class TaskCreatePage(
      * Click the cancel button to dismiss the form.
      * @return TasksPage instance after canceling
      */
-    fun clickCancel(): TasksPage {
+    override fun clickCancel(): TasksPage {
         clickById(Tags.BTN_CANCEL)
         return on<TasksPage>()
     }
@@ -103,7 +112,7 @@ class TaskCreatePage(
      * @param description Optional task description
      * @return TasksPage instance after task is created
      */
-    fun createTask(title: String, description: String? = null): TasksPage {
+    override fun createTask(title: String, description: String?): TasksPage {
         return trackAction("createTask") {
             waitForCreateForm()
                 .enterTitle(title)
@@ -125,7 +134,7 @@ class TaskCreatePage(
      * @param title The task title
      * @return TasksPage instance after task is created
      */
-    fun quickCreate(title: String): TasksPage {
+    override fun quickCreate(title: String): TasksPage {
         return trackAction("quickCreateTask") {
             enterTitle(title)
                 .clickSave()
@@ -142,7 +151,7 @@ class TaskCreatePage(
      * Wait for the task creation form using instance-based finding.
      * @return This TaskCreatePage instance for fluent chaining
      */
-    fun waitForCreateFormByInstance(): TaskCreatePage {
+    private fun waitForCreateFormByInstance(): TaskCreatePage {
         trackAction("waitForCreateForm_instance") {
             try {
                 findEditTextByInstance(0)
@@ -160,7 +169,7 @@ class TaskCreatePage(
      * @param title The task title to enter
      * @return This TaskCreatePage instance for fluent chaining
      */
-    fun enterTitleByInstance(title: String): TaskCreatePage {
+    private fun enterTitleByInstance(title: String): TaskCreatePage {
         sendKeysToEditTextByInstance(0, title)
         return this
     }
@@ -172,7 +181,7 @@ class TaskCreatePage(
      * @param description The task description to enter
      * @return This TaskCreatePage instance for fluent chaining
      */
-    fun enterDescriptionByInstance(description: String): TaskCreatePage {
+    private fun enterDescriptionByInstance(description: String): TaskCreatePage {
         sendKeysToEditTextByInstance(1, description)
         return this
     }
@@ -182,7 +191,7 @@ class TaskCreatePage(
      * Assumes save button is the 4th Button (instance 3).
      * @return TasksPage instance after task is created
      */
-    fun clickSaveByInstance(): TasksPage {
+    private fun clickSaveByInstance(): TasksPage {
         clickButtonByInstance(3)
         return on<TasksPage>()
     }
@@ -194,7 +203,7 @@ class TaskCreatePage(
      * @param title The task title
      * @return TasksPage instance after task is created
      */
-    fun quickCreateByInstance(title: String): TasksPage {
+    override fun quickCreateByInstance(title: String): TasksPage {
         return trackAction("quickCreateTask_instance") {
             enterTitleByInstance(title)
                 .clickSaveByInstance()

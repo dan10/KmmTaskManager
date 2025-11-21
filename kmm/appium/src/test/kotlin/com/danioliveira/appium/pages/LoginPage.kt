@@ -1,8 +1,10 @@
 package com.danioliveira.appium.pages
 
+import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.locators.Tags
 import com.danioliveira.appium.metrics.MetricsManager
+import com.danioliveira.appium.pages.abstract.AbstractLoginPage
 import org.openqa.selenium.WebDriver
 
 /**
@@ -15,63 +17,44 @@ import org.openqa.selenium.WebDriver
  * ```
  */
 class LoginPage(
-    driver: WebDriver, 
+    driver: WebDriver,
     platform: Platform,
+    app: App = App.KMM,
     metricsManager: MetricsManager? = null
-) : BaseScreen(driver, platform, metricsManager) {
+) : AbstractLoginPage(driver, platform, app, metricsManager) {
     
     override fun verify(): LoginPage {
         waitForElement(Tags.BTN_LOGIN)
         return this
     }
     
-    /**
-     * Enter email address.
-     * @param email The email to enter
-     * @return This LoginPage instance for fluent chaining
-     */
-    fun enterEmail(email: String): LoginPage {
+    override fun enterEmail(email: String): LoginPage {
         sendKeysById(Tags.TXT_EMAIL, email)
         return this
     }
     
-    /**
-     * Enter password.
-     * @param password The password to enter
-     * @return This LoginPage instance for fluent chaining
-     */
-    fun enterPassword(password: String): LoginPage {
+    override fun enterPassword(password: String): LoginPage {
         sendKeysById(Tags.TXT_PASSWORD, password)
         return this
     }
     
-    /**
-     * Click the login button.
-     * @return TasksPage instance after successful login
-     */
-    fun clickLogin(): TasksPage {
+    override fun clickLogin(): TasksPage {
         clickById(Tags.BTN_LOGIN)
-        return on<TasksPage>(driver, platform, metricsManager)
+        return on<TasksPage>()
     }
     
-    /**
-     * Click the register link to navigate to registration.
-     * @return RegisterPage instance
-     */
-    fun clickRegisterLink(): RegisterPage {
-        clickById(Tags.LINK_REGISTER)
-        return on<RegisterPage>(driver, platform, metricsManager)
+    override fun clickRegisterLink(): RegisterPage {
+        try {
+            clickById(Tags.LINK_REGISTER)
+        } catch (e: Exception) {
+            trackAction("click_${Tags.LINK_REGISTER}_fallback") {
+                findByText("Sign Up").click()
+            }
+        }
+        return on<RegisterPage>()
     }
     
-    /**
-     * Complete login flow with email and password.
-     * Fluent method that chains email, password, and login.
-     * 
-     * @param email The email address
-     * @param password The password
-     * @return TasksPage instance after successful login
-     */
-    fun login(email: String, password: String): TasksPage {
+    override fun login(email: String, password: String): TasksPage {
         return enterEmail(email)
             .enterPassword(password)
             .clickLogin()

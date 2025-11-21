@@ -64,21 +64,24 @@ class FrameworkComparisonTest {
         logger.info("🚀 Starting Single Iteration Verification")
         logger.info("   Platform: ${config.platform}")
         
-        // Override config for single run
-        val singleRunConfig = config.copy(runs = 1, warmup = 0)
+        // Run single iteration for both frameworks
+        //val cmpResults = runTestSuite(App.KMM, "CMP", runsOverride = 1, warmupOverride = 0)
+        val flutterResults = runTestSuite(App.FLUTTER, "Flutter", runsOverride = 1, warmupOverride = 0)
         
-        // We can't easily inject the config into runTestSuite without changing its signature or the class structure.
-        // Instead, we'll just call runTestSuite with the current config but only for one app to verify it works.
-        // Ideally, we should refactor to pass config to runTestSuite.
+//        logger.info("✅ Single iteration complete")
+//        logger.info("")
+//        logger.info("CMP Results:")
+//        logger.info("   App Launch Time: ${cmpResults.appLaunchTimeMs}ms")
+//        logger.info("   Actions collected: ${cmpResults.actionMetrics.size}")
+//        cmpResults.actionMetrics.forEach {
+//            logger.info("   - ${it.pageName}.${it.actionName}: ${it.durationMs}ms (CPU: ${String.format("%.1f", it.p50Cpu)}%, Mem: ${it.p50Memory.toInt()}MB)")
+//        }
         
-        // For now, let's just run the KMM suite as a smoke test.
-        val cmpResults = runTestSuite(App.KMM, "CMP", runsOverride = 1, warmupOverride = 0)
-        
-        logger.info("✅ Single iteration complete")
-        logger.info("   App Launch Time: ${cmpResults.appLaunchTimeMs}ms")
-        logger.info("   Actions collected: ${cmpResults.actionMetrics.size}")
-        
-        cmpResults.actionMetrics.forEach {
+        logger.info("")
+        logger.info("Flutter Results:")
+        logger.info("   App Launch Time: ${flutterResults.appLaunchTimeMs}ms")
+        logger.info("   Actions collected: ${flutterResults.actionMetrics.size}")
+        flutterResults.actionMetrics.forEach {
             logger.info("   - ${it.pageName}.${it.actionName}: ${it.durationMs}ms (CPU: ${String.format("%.1f", it.p50Cpu)}%, Mem: ${it.p50Memory.toInt()}MB)")
         }
     }
@@ -170,7 +173,9 @@ class FrameworkComparisonTest {
      * Execute the test flow (register user + create tasks).
      */
     private fun executeFlow(driver: WebDriver, app: App, metricsManager: MetricsManager) {
-        val loginPage = PageFactory.createLoginPage(driver, config.platform, app, metricsManager)
+        val loginPage = PageFactory.createLoginPage(driver, config.platform, app, metricsManager).apply {
+            verify()
+        }
         
         // Register user
         val timestamp = System.currentTimeMillis()
@@ -193,7 +198,7 @@ class FrameworkComparisonTest {
         for (title in taskTitles) {
             val createPage = currentTasksPage.openCreateTask()
             Thread.sleep(800) // Give bottom sheet time to appear
-            currentTasksPage = createPage.quickCreateByInstance(title)
+            currentTasksPage = createPage.quickCreate(title)
             Thread.sleep(500) // Brief delay between creations
         }
         
