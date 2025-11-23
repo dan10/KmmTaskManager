@@ -229,6 +229,7 @@ fun withTimeout(timeout: Duration, block: () -> Boolean) {
 fun WebDriver.scrollUp(
     id: String,
     platform: Platform,
+    app: App,
     target: String,
     timeout: Duration = Duration.ofSeconds(30)
 ) {
@@ -238,7 +239,10 @@ fun WebDriver.scrollUp(
     withTimeout(timeout) {
         val elementFound = runCatching {
             when (platform) {
-                ANDROID -> findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"$target\")")).isDisplayed
+                ANDROID -> when (app) {
+                    KMM -> findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"$target\")")).isDisplayed
+                    FLUTTER -> findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"$target\")")).isDisplayed
+                }
                 IOS -> findElement(AppiumBy.iOSNsPredicateString("label == \"$target\"")).isDisplayed
             }
         }.getOrDefault(false)
@@ -391,14 +395,14 @@ class TasksPage : BaseScreen() {
 
     fun scrollDownToTask(taskName: String): TasksPage {
         track("scrollToBottom") {
-            driver.scrollDown(Tags.LIST_TASKS, platform, taskName)
+            driver.scrollDown(Tags.LIST_TASKS, platform, app, taskName)
         }
         return this
     }
 
     fun scrollUpToTask(taskName: String): TasksPage {
         track("scrollToTop") {
-            driver.scrollUp(Tags.LIST_TASKS, platform, taskName)
+            driver.scrollUp(Tags.LIST_TASKS, platform, app,taskName)
         }
         return this
     }

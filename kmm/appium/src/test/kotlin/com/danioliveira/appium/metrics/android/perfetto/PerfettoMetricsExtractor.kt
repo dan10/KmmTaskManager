@@ -430,24 +430,35 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
     // Old executeQuery method removed - now using sessionQuery with explicit session parameter
     
     /**
-     * Extract startup timing.
-     */
-    fun extractStartupTiming(session: TraceProcessor.Session, upid: Long): StartupTiming? {
-        return try {
-            val sql = PerfettoQueries.startupTimingQuery(upid)
-            val results = sessionQuery(session, sql) { row ->
-                StartupTiming(
-                    type = row["startup_type"] as? String ?: "unknown",
-                    durationMs = (row["duration_ms"] as? Number)?.toDouble() ?: 0.0,
-                    startMs = (row["start_ms"] as? Number)?.toDouble() ?: 0.0
-                )
-            }
-            results.firstOrNull()
-        } catch (e: Exception) {
-            logger.warn("Failed to extract startup timing: ${e.message}")
-            null
+ * Extract startup timing.
+ */
+fun extractStartupTiming(session: TraceProcessor.Session, upid: Long): StartupTiming? {
+    return try {
+        val sql = PerfettoQueries.startupTimingQuery(upid)
+        logger.debug("Querying startup timing for UPID: $upid")
+        val results = sessionQuery(session, sql) { row ->
+            val type = row["startup_type"] as? String ?: "unknown"
+            val durationMs = (row["duration_ms"] as? Number)?.toDouble() ?: 0.0
+            val startMs = (row["start_ms"] as? Number)?.toDouble() ?: 0.0
+            logger.debug("Found startup: type=$type, duration=${durationMs}ms, start=${startMs}ms")
+            StartupTiming(
+                type = type,
+                durationMs = durationMs,
+                startMs = startMs
+            )
         }
+        val result = results.firstOrNull()
+        if (result == null) {
+            logger.warn("No startup timing slices found for UPID $upid")
+        } else {
+            logger.info("Startup timing: ${result.type} took ${result.durationMs}ms")
+        }
+        result
+    } catch (e: Exception) {
+        logger.warn("Failed to extract startup timing: ${e.message}")
+        null
     }
+}
     
     /**
      * Extract jank statistics from frame timing.

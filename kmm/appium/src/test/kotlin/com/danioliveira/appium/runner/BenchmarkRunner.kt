@@ -8,6 +8,7 @@ import com.danioliveira.appium.drivers.IOSDriverFactory
 import com.danioliveira.appium.metrics.ImprovedMetricsManager
 import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.metrics.android.AndroidMetricsCollector
+import com.danioliveira.appium.new.BaseScreen.Context.driver
 import org.openqa.selenium.WebDriver
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -26,15 +27,17 @@ class BenchmarkRunner(
     ): MetricsManager {
         val currentRuns = runsOverride ?: config.runs
         val currentWarmup = warmupOverride ?: config.warmup
-
+        
         logger.info("\n📊 Running test suite for $frameworkName")
+        var driver: WebDriver? = null
 
-        val driver = createDriver(app)
+        // Determine package ID before creating driver
         val packageId = when (app) {
             App.KMM -> config.packageName ?: "com.danioliveira.taskmanager"
             App.FLUTTER -> config.packageName ?: "com.example.task_manager_app"
         }
 
+        // Initialize metrics collector BEFORE creating driver
         val androidCollector = if (config.platform == Platform.ANDROID) {
             AndroidMetricsCollector(packageId)
         } else null
@@ -46,8 +49,12 @@ class BenchmarkRunner(
         )
 
         try {
-            // Start performance recording
+            // CRITICAL: Start performance recording BEFORE creating driver
+            // This ensures app launch events are captured in the Perfetto trace
             metricsManager.startPerformanceRecording()
+
+            // NOW create driver - app launch will be captured!
+            driver = createDriver(app)
 
             // Warmup runs (discarded)
             if (currentWarmup > 0) {
@@ -80,7 +87,7 @@ class BenchmarkRunner(
             return metricsManager
 
         } finally {
-            driver.quit()
+            driver?.quit()
         }
     }
 

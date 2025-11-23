@@ -9,8 +9,12 @@
 # Keep attributes for debugging and reflection
 -keepattributes SourceFile,LineNumberTable,*Annotation*,Signature,InnerClasses,EnclosingMethod
 
-# Compose UI - keep test tags and accessibility identifiers
-#-keep class androidx.compose.ui.platform.** { *; }
+# Compose UI - manter apenas as classes necessárias
+-keep class androidx.compose.ui.platform.AndroidComposeView { *; }
+-keep class androidx.compose.ui.platform.AndroidComposeViewAccessibilityDelegateCompat { *; }
+-keepclassmembers class androidx.compose.ui.platform.AndroidComposeView {
+    *** getSemanticsOwner(...);
+}
 -dontwarn androidx.compose.**
 
 

@@ -74,7 +74,8 @@ class PerfettoCollector {
             "sched",    // ESSENTIAL: CPU scheduling and utilization analysis
             "gfx",      // ESSENTIAL: FPS (SurfaceFlinger, VSYNC events)
             "view",     // View system interaction
-            "dalvik"    // Garbage collection events (performance impact)
+            "dalvik",   // Garbage collection events (performance impact)
+            "am"        // ESSENTIAL: Activity Manager (app startup: launching:, activityStart, reportFullyDrawn)
         )
     }
     
