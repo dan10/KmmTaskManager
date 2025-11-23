@@ -110,8 +110,8 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
         
         logger.info("Found app process UPID: $upid")
 
-        // Extract individual metrics using UPID
-        val startup = extractStartupTiming(session, upid)
+        // Extract individual metrics using UPID (except startup which uses package name)
+        val startup = extractStartupTiming(session, packageName)
         val frames = extractFrameTiming(session, upid, startNs, endNs)
         val fpsPerSecondData = extractFpsPerSecond(session, upid, startNs, endNs)
         val memory = extractMemoryUsage(session, upid, startNs, endNs)
@@ -430,32 +430,61 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
     // Old executeQuery method removed - now using sessionQuery with explicit session parameter
     
     /**
- * Extract startup timing.
+ * Extract startup timing using AndroidX Benchmark Macro approach.
+ * Queries for "launching" slices from system_server process.
  */
-fun extractStartupTiming(session: TraceProcessor.Session, upid: Long): StartupTiming? {
+fun extractStartupTiming(session: TraceProcessor.Session, packageName: String): StartupTiming? {
     return try {
-        val sql = PerfettoQueries.startupTimingQuery(upid)
-        logger.debug("Querying startup timing for UPID: $upid")
+        // First, let's see ALL launching slices to diagnose
+        val diagnosticSql = """
+            SELECT
+                slice.name as name,
+                process.name as process_name
+            FROM slice
+                INNER JOIN process_track on slice.track_id = process_track.id
+                INNER JOIN process USING(upid)
+            WHERE slice.name LIKE 'launching%'
+            ORDER BY ts ASC
+        """.trimIndent()
+        
+        logger.debug("=== Diagnostic: Checking for ANY launching slices ===")
+        val allLaunches = sessionQuery(session, diagnosticSql) { row ->
+            val name = row["name"] as? String ?: "unknown"
+            val procName = row["process_name"] as? String ?: "unknown"
+            logger.debug("  Found launching slice: '$name' from process '$procName'")
+            name
+        }
+        logger.debug("Total launching slices found: ${allLaunches.size}")
+        
+        // Now run the actual query
+        val sql = PerfettoQueries.startupTimingQuery(packageName)
+        logger.debug("Querying startup timing for package: $packageName using AndroidX Benchmark approach")
+        
         val results = sessionQuery(session, sql) { row ->
-            val type = row["startup_type"] as? String ?: "unknown"
+            val name = row["startup_type"] as? String ?: "unknown"
             val durationMs = (row["duration_ms"] as? Number)?.toDouble() ?: 0.0
             val startMs = (row["start_ms"] as? Number)?.toDouble() ?: 0.0
-            logger.debug("Found startup: type=$type, duration=${durationMs}ms, start=${startMs}ms")
+            
+            logger.debug("Found startup slice: name='$name', duration=${durationMs}ms, start=${startMs}ms")
+            
             StartupTiming(
-                type = type,
+                type = name,
                 durationMs = durationMs,
                 startMs = startMs
             )
         }
+        
         val result = results.firstOrNull()
         if (result == null) {
-            logger.warn("No startup timing slices found for UPID $upid")
+            logger.warn("No 'launching' slices found for package $packageName from system_server")
+            logger.warn("Query was: $sql")
         } else {
-            logger.info("Startup timing: ${result.type} took ${result.durationMs}ms")
+            logger.info("✅ Startup timing: ${result.type} took ${result.durationMs}ms")
         }
         result
     } catch (e: Exception) {
         logger.warn("Failed to extract startup timing: ${e.message}")
+        e.printStackTrace()
         null
     }
 }

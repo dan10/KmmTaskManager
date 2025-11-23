@@ -250,6 +250,12 @@ class ImprovedMetricsManager(
         
         logger.info("Updating ${actionMetrics.size} actions with trace data...")
         
+        // CRITICAL: Transfer startup time from trace to appLaunchTimeMs
+        if (trace.startupTimeMs != null) {
+            appLaunchTimeMs = trace.startupTimeMs
+            logger.info("✅ App launch time from trace: ${appLaunchTimeMs}ms")
+        }
+        
         actionMetrics.forEachIndexed { index, metric ->
             // Query trace for the specific time window of this action
             // Use the queryTraceSegment method directly from TraceMetrics
@@ -352,6 +358,40 @@ class ImprovedMetricsManager(
         val pageNames = allMetrics.map { it.pageName }.distinct()
         val pageSummaries = pageNames.mapNotNull { getPageSummary(it) }
         
+        // Calculate percentiles from action metrics with percentile data
+        val metricsWithPercentiles = allMetrics.filter { it.p90Cpu > 0.0 }
+        val p90Cpu = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p90Cpu }.average()
+        } else 0.0
+        val p95Cpu = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p95Cpu }.average()
+        } else 0.0
+        val p99Cpu = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p99Cpu }.average()
+        } else 0.0
+        
+        // Memory percentiles
+        val p90Memory = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p90Memory }.average()
+        } else 0.0
+        val p95Memory = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p95Memory }.average()
+        } else 0.0
+        val p99Memory = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p99Memory }.average()
+        } else 0.0
+        
+        // FPS percentiles
+        val p90Fps = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p90Fps }.average()
+        } else 0.0
+        val p95Fps = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p95Fps }.average()
+        } else 0.0
+        val p99Fps = if (metricsWithPercentiles.isNotEmpty()) {
+            metricsWithPercentiles.map { it.p99Fps }.average()
+        } else 0.0
+        
         return TotalMetricsSummary(
             appLaunchTimeMs = appLaunchTimeMs,
             totalActions = allMetrics.size,
@@ -378,7 +418,16 @@ class ImprovedMetricsManager(
             } else 60.0,
             platform = platform.name,
             pageCount = pageNames.size,
-            pageSummaries = pageSummaries
+            pageSummaries = pageSummaries,
+            p90CpuPercent = p90Cpu,
+            p95CpuPercent = p95Cpu,
+            p99CpuPercent = p99Cpu,
+            p90MemoryMb = p90Memory,
+            p95MemoryMb = p95Memory,
+            p99MemoryMb = p99Memory,
+            p90Fps = p90Fps,
+            p95Fps = p95Fps,
+            p99Fps = p99Fps
         )
     }
 

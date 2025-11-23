@@ -64,7 +64,13 @@ class HtmlExporter : ReportExporter {
                 <div class='metric-card memory'>
                     <h4>💾 Memory Usage</h4>
                     <div class='value'>${String.format("%.1f", summary.avgMemoryMb)}</div>
-                    <div class='unit'>MB avg (Peak: ${summary.peakMemoryMb} MB)</div>
+                    <div class='unit'>MB avg</div>
+                    <div class='unit' style='margin-top: 10px; font-size: 14px;'>
+                        Peak: ${summary.peakMemoryMb} MB |
+                        P90: ${String.format("%.1f", summary.p90MemoryMb)} MB |
+                        P95: ${String.format("%.1f", summary.p95MemoryMb)} MB |
+                        P99: ${String.format("%.1f", summary.p99MemoryMb)} MB
+                    </div>
                 </div>
             """.trimIndent())
             
@@ -72,15 +78,26 @@ class HtmlExporter : ReportExporter {
                 <div class='metric-card cpu'>
                     <h4>⚡ CPU Usage</h4>
                     <div class='value'>${String.format("%.1f", summary.avgCpuPercent)}</div>
-                    <div class='unit'>% avg (Peak: ${String.format("%.1f", summary.peakCpuPercent)}%)</div>
+                    <div class='unit'>% avg</div>
+                    <div class='unit' style='margin-top: 10px; font-size: 14px;'>
+                        Peak: ${String.format("%.1f", summary.peakCpuPercent)}% |
+                        P90: ${String.format("%.1f", summary.p90CpuPercent)}% |
+                        P95: ${String.format("%.1f", summary.p95CpuPercent)}% |
+                        P99: ${String.format("%.1f", summary.p99CpuPercent)}%
+                    </div>
                 </div>
             """.trimIndent())
             
             appendLine("""
                 <div class='metric-card render'>
-                    <h4>🎨 Rendering</h4>
+                    <h4>🎨 Rendering (FPS)</h4>
                     <div class='value'>${String.format("%.1f", summary.avgFps)}</div>
-                    <div class='unit'>FPS (${String.format("%.2f", summary.avgFrameTimeMs)}ms/frame)</div>
+                    <div class='unit'>FPS avg (${String.format("%.2f", summary.avgFrameTimeMs)}ms/frame)</div>
+                    <div class='unit' style='margin-top: 10px; font-size: 14px;'>
+                        P90: ${String.format("%.1f", summary.p90Fps)} |
+                        P95: ${String.format("%.1f", summary.p95Fps)} |
+                        P99: ${String.format("%.1f", summary.p99Fps)}
+                    </div>
                 </div>
             """.trimIndent())
             

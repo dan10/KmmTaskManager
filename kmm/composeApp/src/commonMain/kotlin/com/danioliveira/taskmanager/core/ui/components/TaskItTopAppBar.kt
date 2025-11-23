@@ -48,8 +48,10 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.danioliveira.taskmanager.testing.TestTags
 import com.danioliveira.taskmanager.ui.theme.TaskItTheme
 import kmmtaskmanager.composeapp.generated.resources.Res
 import kmmtaskmanager.composeapp.generated.resources.app_name
@@ -276,7 +278,10 @@ fun PrincipalTaskItTopAppBar(
             },
             actions = {
                 if (!showSearch && userInitials != null && onProfileClick != null) {
-                    IconButton(onClick = onProfileClick) {
+                    IconButton(
+                        onClick = onProfileClick,
+                        modifier = Modifier.testTag(TestTags.BTN_PROFILE)
+                    ) {
                         AvatarInitials(
                             initials = userInitials,
                             contentDescription = stringResource(Res.string.content_description_open_profile)

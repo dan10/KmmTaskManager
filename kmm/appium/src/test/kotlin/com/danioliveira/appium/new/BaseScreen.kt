@@ -406,6 +406,39 @@ class TasksPage : BaseScreen() {
         }
         return this
     }
+
+    fun clickProfile(): ProfileScreen {
+        track("clickProfile") {
+            driver.findElement(getLocatorId(Tags.BTN_PROFILE, platform)).click()
+        }
+        return on<ProfileScreen>()
+    }
+}
+
+class ProfileScreen : BaseScreen() {
+    private val logoutButtonLocator = getLocatorId(Tags.BTN_LOGOUT, platform)
+
+    override fun verify(): ProfileScreen {
+        driver.waitUntil(logoutButtonLocator)
+        return this
+    }
+
+    fun clickLogout(): LoginPage {
+        track("clickLogout") {
+            driver.findElement(logoutButtonLocator).click()
+            
+            // Handle confirmation dialog
+            if (platform == Platform.ANDROID) {
+                // Wait for dialog and click Logout
+                driver.waitUntil(AppiumBy.androidUIAutomator("new UiSelector().text(\"Logout\")"))
+                driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"Logout\")")).click()
+            } else {
+                // iOS handling (assuming standard alert)
+                driver.switchTo().alert().accept()
+            }
+        }
+        return on<LoginPage>()
+    }
 }
 
 class RegisterPage : BaseScreen() {

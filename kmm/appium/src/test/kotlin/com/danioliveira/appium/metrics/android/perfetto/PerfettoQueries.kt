@@ -40,28 +40,6 @@ object PerfettoQueries {
     }
     
     /**
-     * Query startup timing for an app.
-     * 
-     * Returns: startup_type (cold/warm/hot), duration_ms
-     * 
-     * Based on AndroidX StartupTimingQuery.kt
-     */
-    fun startupTimingQuery(packageName: String): String {
-        return """
-            SELECT
-                slice.name as startup_type,
-                slice.dur / 1000000.0 as duration_ms,
-                slice.ts / 1000000.0 as start_ms
-            FROM slice
-            WHERE slice.name GLOB 'launching: $packageName'
-                OR slice.name GLOB 'activityStart'
-                OR slice.name GLOB 'reportFullyDrawn'
-            ORDER BY slice.ts
-            LIMIT 1
-        """.trimIndent()
-    }
-    
-    /**
      * Query frame timing using frame_timeline (Android 12+).
      *
      * Returns: vsync_id, dur_ns, jank_type
@@ -372,19 +350,29 @@ object PerfettoQueries {
         """.trimIndent()
     }
 
-    fun startupTimingQuery(upid: Long): String {
+    /**
+     * Query startup timing using AndroidX Benchmark Macro approach.
+     * Based on androidx.benchmark.macro.perfetto.StartupTimingQuery
+     * 
+     * This queries raw slice table with joins to find launching slices from system_server.
+     */
+    fun startupTimingQuery(packageName: String): String {
         return """
             SELECT
                 slice.name as startup_type,
-                slice.dur / 1000000.0 as duration_ms,
-                slice.ts / 1000000.0 as start_ms
+                slice.ts as ts,
+                slice.dur as dur_ns,
+                slice.ts / 1000000.0 as start_ms,
+                slice.dur / 1000000.0 as duration_ms
             FROM slice
-            JOIN process_track ON slice.track_id = process_track.id
-            WHERE process_track.upid = $upid
-                AND (slice.name GLOB 'launching: *'
-                OR slice.name GLOB 'activityStart'
-                OR slice.name GLOB 'reportFullyDrawn')
-            ORDER BY slice.ts
+                INNER JOIN process_track on slice.track_id = process_track.id
+                INNER JOIN process USING(upid)
+            WHERE (
+                -- API 23+:   "launching: <target>"
+                -- API 19-22: "launching"
+                slice.name LIKE 'launching%' AND process.name LIKE 'system_server'
+            )
+            ORDER BY ts ASC
             LIMIT 1
         """.trimIndent()
     }

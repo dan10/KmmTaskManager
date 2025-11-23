@@ -78,7 +78,30 @@ class BenchmarkRunner(
                 // Execute the test flow
                 testFlow(driver, app, metricsManager)
 
-                Thread.sleep(200) // Brief pause between iterations
+                // Reset app state for next iteration
+                if (i < currentRuns) {
+                    logger.info("🔄 Resetting app state for next iteration...")
+                    try {
+                        if (config.platform == Platform.ANDROID) {
+                            (driver as io.appium.java_client.android.AndroidDriver).terminateApp(packageId)
+                            // Clear app data to ensure logout
+                            try {
+                                (driver as io.appium.java_client.android.AndroidDriver).executeScript("mobile: clearApp", mapOf("appId" to packageId))
+                            } catch (e: Exception) {
+                                logger.warn("Failed to clear app data via mobile: clearApp, trying pm clear")
+                                val args = listOf("clear", packageId)
+                                (driver as io.appium.java_client.android.AndroidDriver).executeScript("mobile: shell", mapOf("command" to "pm", "args" to args))
+                            }
+                            (driver as io.appium.java_client.android.AndroidDriver).activateApp(packageId)
+                        } else {
+                            (driver as io.appium.java_client.ios.IOSDriver).terminateApp(packageId)
+                            (driver as io.appium.java_client.ios.IOSDriver).activateApp(packageId)
+                        }
+                        Thread.sleep(2000) // Wait for app to restart
+                    } catch (e: Exception) {
+                        logger.warn("⚠️ Failed to reset app state: ${e.message}")
+                    }
+                }
             }
 
             // Stop performance recording and parse trace

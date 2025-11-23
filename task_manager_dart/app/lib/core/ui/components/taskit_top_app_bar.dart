@@ -133,10 +133,14 @@ class _TaskItTopAppBarState extends State<TaskItTopAppBar> {
                   if (!isSearchActive && widget.userInitials != null && widget.onProfileClick != null)
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: IconButton(
-                        onPressed: widget.onProfileClick,
-                        icon: _AvatarInitials(
-                          initials: widget.userInitials!,
+                      child: Semantics(
+                        identifier: TestIds.btnProfile,
+                        button: true,
+                        child: IconButton(
+                          onPressed: widget.onProfileClick,
+                          icon: _AvatarInitials(
+                            initials: widget.userInitials!,
+                          ),
                         ),
                       ),
                     ),

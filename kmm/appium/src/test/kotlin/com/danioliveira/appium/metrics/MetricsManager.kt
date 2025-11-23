@@ -387,7 +387,16 @@ class LegacyMetricsManager(
             } else 60.0,
             platform = platform.name,
             pageCount = pageMetricsMap.size,
-            pageSummaries = getAllPageSummaries()
+            pageSummaries = getAllPageSummaries(),
+            p90CpuPercent = 0.0,  // Legacy manager doesn't have percentile data
+            p95CpuPercent = 0.0,
+            p99CpuPercent = 0.0,
+            p90MemoryMb = 0.0,
+            p95MemoryMb = 0.0,
+            p99MemoryMb = 0.0,
+            p90Fps = 0.0,
+            p95Fps = 0.0,
+            p99Fps = 0.0
         )
     }
     
@@ -598,6 +607,18 @@ data class TotalMetricsSummary(
     val avgFps: Double,
     val platform: String,
     val pageCount: Int,
-    val pageSummaries: List<PageMetricsSummary>
+    val pageSummaries: List<PageMetricsSummary>,
+    // CPU Percentiles
+    val p90CpuPercent: Double = 0.0,
+    val p95CpuPercent: Double = 0.0,
+    val p99CpuPercent: Double = 0.0,
+    // Memory Percentiles
+    val p90MemoryMb: Double = 0.0,
+    val p95MemoryMb: Double = 0.0,
+    val p99MemoryMb: Double = 0.0,
+    // FPS Percentiles
+    val p90Fps: Double = 0.0,
+    val p95Fps: Double = 0.0,
+    val p99Fps: Double = 0.0
 )
 
