@@ -16,6 +16,7 @@ data class TraceMetrics(
     val frameCount: Int = 0,  // Number of frames rendered
     val screenMetrics: List<ScreenMetrics> = emptyList(),  // Per-screen metrics
     val fpsPerSecond: List<FpsPerSecond> = emptyList(),  // Per-second FPS time series
+    val memoryUsage: List<MemoryUsage> = emptyList(), // Memory usage over time
     val traceStartTs: Long? = null // Absolute start timestamp of the trace (in ms)
 ) {
     val screenCount: Int get() = screens.size
@@ -98,20 +99,37 @@ data class TraceMetrics(
         val p95Cpu = getPercentile(cpuValues, 0.95)
         val p99Cpu = getPercentile(cpuValues, 0.99)
         
-        // For memory, we'd need to parse memory events from the trace
-        // For now, use average/peak from CPU data as placeholder
-        // TODO: Parse memory events from trace if available
-        val avgMemoryMb = 0  // Would need to parse memory events
-        val peakMemoryMb = 0
+        // Calculate Memory metrics
+        val memoryInWindow = memoryUsage.filter {
+            it.timestampMs >= absoluteStart && it.timestampMs <= absoluteEnd
+        }
         
-        // For FPS, filter frame events within the window
-        // Extract frame times from Choreographer events in the trace
-        // This logic was in SystraceCollector but relies on traceFile parsing which is complex to move here entirely
-        // For now, we'll skip FPS calculation in this method or rely on pre-calculated fpsPerSecond if available
+        val avgMemoryMb = if (memoryInWindow.isNotEmpty()) {
+            memoryInWindow.map { it.rssMb }.average().toInt()
+        } else 0
         
-        val avgFps = 0.0
-        val minFps = 0.0
-        val jankCount = 0
+        val peakMemoryMb = if (memoryInWindow.isNotEmpty()) {
+            memoryInWindow.maxOf { it.rssMb }
+        } else 0
+        
+        // Calculate FPS metrics
+        // fpsPerSecond stores timestamp in seconds
+        val startSec = absoluteStart / 1000
+        val endSec = absoluteEnd / 1000
+        
+        val fpsInWindow = fpsPerSecond.filter {
+            it.second >= startSec && it.second <= endSec
+        }
+        
+        val avgFps = if (fpsInWindow.isNotEmpty()) {
+            fpsInWindow.map { it.fps }.average()
+        } else 0.0
+        
+        val minFps = if (fpsInWindow.isNotEmpty()) {
+            fpsInWindow.minOf { it.fps }.toDouble()
+        } else 0.0
+        
+        val jankCount = 0 // Jank count per segment requires frame-level analysis which is complex here
         
         return com.danioliveira.appium.metrics.TraceSegmentMetrics(
             avgCpuPercent = avgCpu,
@@ -188,3 +206,14 @@ data class FpsPerSecond(
     val second: Long,
     val fps: Int
 )
+
+/**
+ * Memory usage data point.
+ */
+data class MemoryUsage(
+    val timestampNs: Long,
+    val rssKb: Long
+) {
+    val timestampMs: Long get() = timestampNs / 1_000_000
+    val rssMb: Int get() = (rssKb / 1024).toInt()
+}

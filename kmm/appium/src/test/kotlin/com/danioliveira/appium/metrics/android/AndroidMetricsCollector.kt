@@ -37,6 +37,29 @@ class AndroidMetricsCollector(private val packageName: String) {
         }
     }
     
+
+    
+    /**
+     * Inject a custom trace marker into the system trace buffer.
+     * Useful for marking start/end of test actions in Perfetto/Systrace.
+     * 
+     * @param label The label for the trace section (e.g. "B|pid|act:ActionName" or "E")
+     */
+    fun injectTraceMarker(label: String) {
+        try {
+            // Write to trace_marker to inject a userspace trace event
+            // We use the shell's echo to write to the file
+            AdbShell.execNoRetry("shell", "echo '$label' > /sys/kernel/tracing/trace_marker")
+        } catch (e: Exception) {
+            // Fallback to legacy path if new path fails
+            try {
+                AdbShell.execNoRetry("shell", "echo '$label' > /sys/kernel/debug/tracing/trace_marker")
+            } catch (e2: Exception) {
+                logger.debug("Failed to inject trace marker: ${e2.message}")
+            }
+        }
+    }
+    
     fun collectMemInfo(): MemInfoMetrics {
         return try {
             val output = AdbShell.exec("shell", "dumpsys", "meminfo", packageName)
@@ -93,7 +116,7 @@ class AndroidMetricsCollector(private val packageName: String) {
         }
     }
     
-    private fun getPid(): Int? {
+    fun getPid(): Int? {
         return try {
             val output = AdbShell.exec("shell", "pidof", packageName)
             val pid = output.trim().toIntOrNull()

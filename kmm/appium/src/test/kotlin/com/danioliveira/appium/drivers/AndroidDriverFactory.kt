@@ -36,6 +36,7 @@ object AndroidDriverFactory {
             App.FLUTTER -> {
                 FlutterAndroidDriver(URI(APPIUM_URL).toURL(), options).also {
                     it.setSetting(Setting.ALLOW_INVISIBLE_ELEMENTS, true)
+                    it.context("NATIVE_APP")
                 }
             }
             App.KMM -> {

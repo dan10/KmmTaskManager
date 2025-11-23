@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/perf/perf_trace.dart';
 import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
@@ -32,28 +33,28 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   void initState() {
     super.initState();
     _viewModel = context.read<ProjectsViewModel>();
-    
+
     // Add listeners for commands
     _viewModel.deleteProject.addListener(_onDeleteResult);
-    
+
     // Check and refresh if needed
     _viewModel.checkAndRefresh();
-    
+
     // Load user initials
     _loadUserInitials();
   }
-  
+
   Future<void> _loadUserInitials() async {
     final secureStorage = context.read<SecureStorage>();
     final user = await secureStorage.getUser();
-    
+
     if (user != null && mounted) {
       setState(() {
         _userInitials = _computeInitials(user.displayName);
       });
     }
   }
-  
+
   String _computeInitials(String displayName) {
     if (displayName.isEmpty) return '';
     final parts = displayName.trim().split(' ');
@@ -71,7 +72,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
 
   void _showSnackBar(String message, {bool isError = false}) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -102,64 +103,72 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final shimmerGradientToUse = isDark ? shimmerGradientDark : shimmerGradient;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          // AppBar with search
-          _buildAppBar(viewModel),
-          // Body content - must be wrapped in Expanded
-          Expanded(
-            child: Shimmer(
-              linearGradient: shimmerGradientToUse,
-              child: RefreshIndicator(
-                onRefresh: () => _handleRefresh(viewModel),
-                child: PagingListener<int, Project>(
-                  controller: viewModel.pagingController,
-                  builder: (context, pagingState, fetchNextPage) {
-                    return Semantics(
-                      identifier: TestIds.listProjects,
-                      child: PagedListView<int, Project>(
-                        state: pagingState,
-                        fetchNextPage: fetchNextPage,
-                        padding: const EdgeInsets.all(16),
-                        builderDelegate: PagedChildBuilderDelegate<Project>(
-                          itemBuilder: (context, project, index) => Semantics(
-                            identifier: TestIds.projectCard(project.id),
-                            child: ProjectCard(
-                              key: Key(TestIds.projectCard(project.id)),
-                              project: project,
-                              onTap: () => _navigateToProjectDetail(context, project.id),
+    return TracedWidget(
+      name: 'ProjectListScreen',
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          children: [
+            // AppBar with search
+            _buildAppBar(viewModel),
+            // Body content - must be wrapped in Expanded
+            Expanded(
+              child: Shimmer(
+                linearGradient: shimmerGradientToUse,
+                child: RefreshIndicator(
+                  onRefresh: () => _handleRefresh(viewModel),
+                  child: PagingListener<int, Project>(
+                    controller: viewModel.pagingController,
+                    builder: (context, pagingState, fetchNextPage) {
+                      return Semantics(
+                        identifier: TestIds.listProjects,
+                        child: PagedListView<int, Project>(
+                          state: pagingState,
+                          fetchNextPage: fetchNextPage,
+                          padding: const EdgeInsets.all(16),
+                          builderDelegate: PagedChildBuilderDelegate<Project>(
+                            itemBuilder: (context, project, index) => Semantics(
+                              identifier: TestIds.projectCard(project.id),
+                              child: ProjectCard(
+                                key: Key(TestIds.projectCard(project.id)),
+                                project: project,
+                                onTap: () => _navigateToProjectDetail(
+                                  context,
+                                  project.id,
+                                ),
+                              ),
                             ),
+                            firstPageErrorIndicatorBuilder: (context) =>
+                                FirstPageErrorIndicator(
+                                  errorMessage: vmState.errorMessage,
+                                  onRetry: () =>
+                                      viewModel.pagingController.refresh(),
+                                ),
+                            newPageErrorIndicatorBuilder: (context) =>
+                                NewPageErrorIndicator(
+                                  onRetry: () =>
+                                      viewModel.pagingController.refresh(),
+                                ),
+                            firstPageProgressIndicatorBuilder: (context) =>
+                                const FirstPageProgressIndicator(),
+                            newPageProgressIndicatorBuilder: (context) =>
+                                const NewPageProgressIndicator(),
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const NoItemsFoundIndicator(),
+                            noMoreItemsIndicatorBuilder: (context) =>
+                                const NoMoreItemsIndicator(),
                           ),
-                          firstPageErrorIndicatorBuilder: (context) =>
-                              FirstPageErrorIndicator(
-                                errorMessage: vmState.errorMessage,
-                                onRetry: () => viewModel.pagingController.refresh(),
-                              ),
-                          newPageErrorIndicatorBuilder: (context) =>
-                              NewPageErrorIndicator(
-                                onRetry: () => viewModel.pagingController.refresh(),
-                              ),
-                          firstPageProgressIndicatorBuilder: (context) =>
-                              const FirstPageProgressIndicator(),
-                          newPageProgressIndicatorBuilder: (context) =>
-                              const NewPageProgressIndicator(),
-                          noItemsFoundIndicatorBuilder: (context) =>
-                              const NoItemsFoundIndicator(),
-                          noMoreItemsIndicatorBuilder: (context) =>
-                              const NoMoreItemsIndicator(),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+        floatingActionButton: _buildFAB(),
       ),
-      floatingActionButton: _buildFAB(),
     );
   }
 
@@ -208,12 +217,12 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   }
 
   void _navigateToProjectDetail(BuildContext context, String projectId) {
-    context.push(
-      AppRoutes.projectDetail.replaceFirst(':projectId', projectId),
-    ).then((_) {
-      // Refresh list when returning from details
-      _viewModel.refresh();
-    });
+    context
+        .push(AppRoutes.projectDetail.replaceFirst(':projectId', projectId))
+        .then((_) {
+          // Refresh list when returning from details
+          _viewModel.refresh();
+        });
   }
 
   void _showCreateProjectBottomSheet(BuildContext context) {
@@ -227,4 +236,3 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     );
   }
 }
-

@@ -6,6 +6,7 @@ import 'package:task_manager_shared/models.dart';
 import '../../core/auth/auth_state.dart';
 import '../../core/data/local/secure_storage.dart';
 import '../../core/l10n/app_l10n.dart';
+import '../../core/perf/perf_trace.dart';
 import '../../core/testing/test_ids.dart';
 
 /// Profile screen displaying user information and logout functionality
@@ -95,7 +96,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
+    return TracedWidget(
+      name: 'ProfileScreen',
+      child: Scaffold(
       appBar: AppBar(
         title: Text(l10n.profileTitle),
         leading: IconButton(
@@ -164,6 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
+      ),
     );
   }
 }

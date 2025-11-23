@@ -283,9 +283,11 @@ class PerformanceSession(
     ): PerformanceMetrics {
         return try {
             PerfettoMetricsExtractor(traceFile).use { extractor ->
-                val memory = extractor.extractMemoryUsage(packageName, startMs * 1_000_000, endMs * 1_000_000)
-                val cpu = extractor.extractCpuUtilization(packageName, startMs * 1_000_000, endMs * 1_000_000)
-                val frames = extractor.extractFrameTiming(packageName, startMs * 1_000_000, endMs * 1_000_000)
+                // Note: using deprecated legacy API - returns empty lists
+                // TODO: migrate to extractMetrics() session-based API
+                val memory = emptyList<com.danioliveira.appium.metrics.android.MemoryUsage>() // extractor.extractMemoryUsage(packageName, startMs, endMs)
+                val cpu = emptyList<com.danioliveira.appium.metrics.android.perfetto.RawCpuUtilization>() // extractor.extractCpuUtilization(packageName, startMs, endMs)
+                val frames = emptyList<com.danioliveira.appium.metrics.android.perfetto.FrameTiming>() // extractor.extractFrameTiming(packageName, startMs, endMs)
                 
                 val memoryValues = memory.map { it.rssMb.toDouble() }
                 val cpuPercent = if (cpu.isNotEmpty()) {

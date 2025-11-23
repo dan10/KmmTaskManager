@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/data/local/secure_storage.dart';
+import '../../../../core/perf/perf_trace.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/testing/test_ids.dart';
 import '../../../../core/ui/components/shimmer.dart';
@@ -86,8 +87,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void _onDeleteResult() {
     if (_viewModel.deleteTask.completed) {
       _viewModel.deleteTask.clearResult();
-      final l10n = AppLocalizations.of(context)!;
-      _showSnackBar(l10n.taskDeletedSuccess);
+      // final l10n = AppLocalizations.of(context)!;
+      // _showSnackBar(l10n.taskDeletedSuccess);
     }
 
     if (_viewModel.deleteTask.error) {
@@ -100,8 +101,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void _onUpdateStatusResult() {
     if (_viewModel.updateTaskStatus.completed) {
       _viewModel.updateTaskStatus.clearResult();
-      final l10n = AppLocalizations.of(context)!;
-      _showSnackBar(l10n.taskUpdatedSuccess);
+      // final l10n = AppLocalizations.of(context)!;
+      // _showSnackBar(l10n.taskUpdatedSuccess);
     }
 
     if (_viewModel.updateTaskStatus.error) {
@@ -119,7 +120,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final shimmerGradientToUse = isDark ? shimmerGradientDark : shimmerGradient;
 
-    return Scaffold(
+    return TracedWidget(
+      name: 'TaskListScreen',
+      child: Scaffold(
       resizeToAvoidBottomInset: false, // Prevent shifting when keyboard appears
       body: Column(
         children: [
@@ -136,6 +139,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   builder: (context, pagingState, fetchNextPage) => 
                     Semantics(
                       identifier: TestIds.listTasks,
+                      container: true,
+                      explicitChildNodes: true,
                       child: CustomScrollView(
                         slivers: [
                           // Progress summary loaded independently
@@ -193,6 +198,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ],
       ),
       floatingActionButton: _buildFAB(),
+      ),
     );
   }
 

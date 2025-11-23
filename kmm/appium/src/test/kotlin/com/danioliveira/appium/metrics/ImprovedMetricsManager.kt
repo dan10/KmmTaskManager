@@ -44,12 +44,26 @@ class ImprovedMetricsManager(
     fun startActionCollection(actionName: String) {
         logger.debug("Starting collection for $actionName")
         
+        // Inject trace marker for Android
+        if (platform == Platform.ANDROID) {
+            // Use Async markers (S) to handle separate adb shell sessions
+            // Format: S|pid|act:ActionName|cookie
+            val pid = androidCollector?.getPid() ?: 0
+            val cookie = actionName.hashCode()
+            androidCollector?.injectTraceMarker("S|$pid|act:$actionName|$cookie")
+        }
+        
         // Clear previous samples
         currentCpuSamples.clear()
         currentMemorySamples.clear()
         
         // Start Background Sampling
         startSampling()
+        
+        // Reset gfxinfo to start fresh for this action
+        if (platform == Platform.ANDROID) {
+            androidCollector?.resetGfxInfo()
+        }
     }
     
     /**
@@ -57,6 +71,15 @@ class ImprovedMetricsManager(
      */
     fun stopActionCollection(pageName: String, actionName: String, startTimeMs: Long): ActionMetrics {
         logger.debug("Stopping collection for $actionName")
+        
+        // Inject trace marker end for Android
+        if (platform == Platform.ANDROID) {
+            // Use Async markers (F) to match the Start marker
+            // Format: F|pid|act:ActionName|cookie
+            val pid = androidCollector?.getPid() ?: 0
+            val cookie = actionName.hashCode()
+            androidCollector?.injectTraceMarker("F|$pid|act:$actionName|$cookie")
+        }
         
         // Stop Sampling
         stopSampling()
@@ -72,15 +95,21 @@ class ImprovedMetricsManager(
         val cpuPercentiles = calculatePercentiles(currentCpuSamples.map { it.value })
         val memPercentiles = calculatePercentiles(currentMemorySamples.map { it.value.toDouble() })
         
+        // Collect FPS from dumpsys (Android only)
+        var gfxMetrics: com.danioliveira.appium.metrics.android.GfxInfoMetrics? = null
+        if (platform == Platform.ANDROID) {
+            gfxMetrics = androidCollector?.collectGfxInfo()
+        }
+        
         return ActionMetrics(
             pageName = pageName,
             actionName = actionName,
             durationMs = durationMs,
             memoryMb = memStats.average.toInt(),
             cpuPercent = cpuStats.average,
-            avgFrameTimeMs = 0.0, // Will be populated from trace later
-            jankPercentage = 0.0, // Will be populated from trace later
-            fps = 0.0, // Will be populated from trace later
+            avgFrameTimeMs = gfxMetrics?.avgFrameTimeMs ?: 0.0,
+            jankPercentage = gfxMetrics?.jankPercentage ?: 0.0,
+            fps = gfxMetrics?.fps ?: 0.0,
             platform = platform.name,
             // Store peak values as well
             deltaMemoryMb = (memStats.max - memStats.min).toInt(),
@@ -231,9 +260,10 @@ class ImprovedMetricsManager(
             
             if (segment != null) {
                 actionMetrics[index] = metric.copy(
-                    avgFrameTimeMs = if (segment.avgFps > 0) 1000.0 / segment.avgFps else 0.0,
-                    jankPercentage = if (segment.jankCount > 0) 100.0 else 0.0, // Simplified jank %
-                    fps = segment.avgFps,
+                    // Only overwrite if trace has valid data, otherwise keep dumpsys data
+                    avgFrameTimeMs = if (segment.avgFps > 0) 1000.0 / segment.avgFps else metric.avgFrameTimeMs,
+                    jankPercentage = if (segment.jankCount > 0) 100.0 else metric.jankPercentage,
+                    fps = if (segment.avgFps > 0) segment.avgFps else metric.fps,
                     // Update CPU/Mem from trace as it's more accurate than polling
                     cpuPercent = segment.avgCpuPercent,
                     memoryMb = if (segment.avgMemoryMb > 0) segment.avgMemoryMb else metric.memoryMb,

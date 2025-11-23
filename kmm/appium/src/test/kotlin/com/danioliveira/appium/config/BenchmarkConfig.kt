@@ -15,7 +15,8 @@ data class BenchmarkConfig(
     val ipaPath: String?,
     val bundleId: String?,
     val packageName: String?,
-    val registerEveryCycle: Boolean
+    val registerEveryCycle: Boolean,
+    val appiumServerUrl: String
 ) {
     companion object {
         fun fromSystemProperties(): BenchmarkConfig {
@@ -44,7 +45,8 @@ data class BenchmarkConfig(
                 ipaPath = ipaPath,
                 bundleId = bundleId,
                 packageName = packageName,
-                registerEveryCycle = registerEveryCycle
+                registerEveryCycle = registerEveryCycle,
+                appiumServerUrl = System.getProperty("appiumUrl", "http://127.0.0.1:4723")
             )
         }
     }

@@ -77,17 +77,17 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
     if (_viewModel.createTask.completed) {
       // Success - dismiss and refresh
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        // final l10n = AppLocalizations.of(context)!;
         Navigator.of(context).pop();
         widget.onDismiss(true);
         
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.taskCreatedSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(l10n.taskCreatedSuccess),
+        //     backgroundColor: Colors.green,
+        //   ),
+        // );
       }
     } else if (_viewModel.createTask.error) {
       // Error - show snackbar with retry option
@@ -314,7 +314,6 @@ class _TaskCreateBottomSheetState extends State<TaskCreateBottomSheet> {
                                       identifier: TestIds.btnCreateTask,
                                       button: true,
                                       child: FilledButton(
-                                        key: const Key(TestIds.btnCreateTask),
                                         onPressed: isValid && !isRunning ? _handleCreate : null,
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(vertical: 16),

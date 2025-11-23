@@ -56,8 +56,12 @@ data class AggregatedResultWithHistograms(
                 if (result.traceFile != null && result.traceFile.exists()) {
                     try {
                         PerfettoMetricsExtractor(result.traceFile).use { extractor ->
-                            // Extract CPU samples
-                            val cpuData = extractor.extractCpuUtilization(packageName)
+                            // Note: using deprecated legacy API - returns empty lists
+                            // TODO: migrate to extractMetrics() session-based API
+                            val cpuData = emptyList<com.danioliveira.appium.metrics.android.perfetto.RawCpuUtilization>() // extractor.extractCpuUtilization(packageName)
+                            val memoryData = emptyList<com.danioliveira.appium.metrics.android.MemoryUsage>() // extractor.extractMemoryUsage(packageName)
+                            val fpsData = emptyList<Pair<Long, Int>>() // extractor.extractFpsPerSecond(packageName)
+                            
                             if (cpuData.isNotEmpty()) {
                                 // Bucket CPU into percentages per time window
                                 val cpuPercentages = bucketizeCpuToPercentages(cpuData)
@@ -66,7 +70,6 @@ data class AggregatedResultWithHistograms(
                             }
                             
                             // Extract memory samples
-                            val memoryData = extractor.extractMemoryUsage(packageName)
                             if (memoryData.isNotEmpty()) {
                                 val memoryMb = memoryData.map { it.rssMb.toDouble() }
                                 allMemorySamples.addAll(memoryMb)
@@ -74,7 +77,6 @@ data class AggregatedResultWithHistograms(
                             }
                             
                             // Extract FPS samples
-                            val fpsData = extractor.extractFpsPerSecond(packageName)
                             if (fpsData.isNotEmpty()) {
                                 val fpsSamples = fpsData.map { it.second.toDouble() }
                                 allFpsSamples.addAll(fpsSamples)
@@ -135,7 +137,7 @@ data class AggregatedResultWithHistograms(
          * Bucketize CPU scheduling slices into time windows and calculate CPU percentage per window.
          */
         private fun bucketizeCpuToPercentages(
-            cpu: List<com.danioliveira.appium.metrics.android.perfetto.CpuUtilization>
+            cpu: List<com.danioliveira.appium.metrics.android.perfetto.RawCpuUtilization>
         ): List<Double> {
             if (cpu.isEmpty()) return emptyList()
             

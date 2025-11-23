@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/perf/perf_trace.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/ui/components/taskit_top_app_bar.dart';
 import '../state/task_details_state.dart';
@@ -110,7 +111,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         }
       },
       child: Builder(
-        builder: (context) => Scaffold(
+        builder: (context) => TracedWidget(
+          name: 'TaskDetailsScreen',
+          child: Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
           appBar: _TaskDetailsAppBar(
           isDeleting: state.isDeleting,
@@ -122,6 +125,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
             state: state,
             onRefresh: () => _viewModel.refresh(),
           ),
+        ),
         ),
       ),
     );

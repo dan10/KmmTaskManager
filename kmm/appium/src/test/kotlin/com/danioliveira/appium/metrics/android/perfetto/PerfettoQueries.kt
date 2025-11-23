@@ -183,34 +183,62 @@ object PerfettoQueries {
                 FROM slice
                 WHERE slice.name LIKE '$sectionNamePattern'
             ),
+            frame_timeline_frames AS (
+                SELECT
+                    actual_frame_timeline_slice.ts,
+                    actual_frame_timeline_slice.dur as dur_ns,
+                    COALESCE(actual_frame_timeline_slice.surface_frame_token, actual_frame_timeline_slice.display_frame_token, 0) as vsync_id,
+                    expected_frame_timeline_slice.dur as expected_dur_ns,
+                    CASE
+                        WHEN actual_frame_timeline_slice.dur > expected_frame_timeline_slice.dur * 1.5
+                            THEN 'jank'
+                        ELSE 'normal'
+                    END as jank_type
+                FROM actual_frame_timeline_slice
+                JOIN expected_frame_timeline_slice ON (
+                    actual_frame_timeline_slice.surface_frame_token = expected_frame_timeline_slice.surface_frame_token
+                    AND actual_frame_timeline_slice.display_frame_token = expected_frame_timeline_slice.display_frame_token
+                )
+                JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
+                JOIN process USING(upid)
+                WHERE process.name LIKE '%$packageName%'
+            ),
             choreographer_frames AS (
                 SELECT
                     slice.ts,
-                    slice.dur as dur_ns
+                    slice.dur as dur_ns,
+                    0 as vsync_id,
+                    16666666 as expected_dur_ns,
+                    CASE
+                        WHEN slice.dur > 16666666 * 1.5
+                            THEN 'jank'
+                        ELSE 'normal'
+                    END as jank_type
                 FROM slice
                 JOIN thread_track ON slice.track_id = thread_track.id
                 JOIN thread USING(utid)
                 JOIN process USING(upid)
                 WHERE slice.name LIKE 'Choreographer#doFrame%'
                     AND process.name LIKE '%$packageName%'
+            ),
+            combined_frames AS (
+                SELECT * FROM frame_timeline_frames
+                UNION ALL
+                SELECT * FROM choreographer_frames WHERE NOT EXISTS (SELECT 1 FROM frame_timeline_frames)
             )
             SELECT
-                choreographer_frames.ts,
-                choreographer_frames.dur_ns,
-                0 as vsync_id,
-                16666666 as expected_dur_ns,
+                combined_frames.ts,
+                combined_frames.dur_ns,
+                combined_frames.vsync_id,
+                combined_frames.expected_dur_ns,
                 trace_sections.section_name,
-                CASE
-                    WHEN choreographer_frames.dur_ns > 16666666 * 1.5
-                        THEN 'jank'
-                    ELSE 'normal'
-                END as jank_type
-            FROM choreographer_frames
+                combined_frames.jank_type
+            FROM combined_frames
             JOIN trace_sections ON (
-                choreographer_frames.ts >= trace_sections.section_start
-                AND choreographer_frames.ts <= trace_sections.section_end
+                combined_frames.ts >= trace_sections.section_start
+                AND combined_frames.ts <= trace_sections.section_end
             )
-            ORDER BY choreographer_frames.ts
+            ORDER BY combined_frames.ts
         """.trimIndent()
     }
     
@@ -324,6 +352,215 @@ object PerfettoQueries {
             else -> ""
         }
     }
+
+    // UPID-based queries (New)
+
+    fun memoryUsageQuery(upid: Long, startNs: Long? = null, endNs: Long? = null): String {
+        val timeFilter = buildTimeFilter(startNs, endNs)
+        return """
+            SELECT
+                ts as timestamp_ns,
+                process.name as process_name,
+                counter.value / 1024 as rss_kb
+            FROM counter
+            JOIN process_counter_track ON counter.track_id = process_counter_track.id
+            JOIN process USING(upid)
+            WHERE process_counter_track.name = 'mem.rss'
+                AND process.upid = $upid
+                $timeFilter
+            ORDER BY ts
+        """.trimIndent()
+    }
+
+    fun startupTimingQuery(upid: Long): String {
+        return """
+            SELECT
+                slice.name as startup_type,
+                slice.dur / 1000000.0 as duration_ms,
+                slice.ts / 1000000.0 as start_ms
+            FROM slice
+            JOIN process_track ON slice.track_id = process_track.id
+            WHERE process_track.upid = $upid
+                AND (slice.name GLOB 'launching: *'
+                OR slice.name GLOB 'activityStart'
+                OR slice.name GLOB 'reportFullyDrawn')
+            ORDER BY slice.ts
+            LIMIT 1
+        """.trimIndent()
+    }
+
+    fun frameTimingQuery(upid: Long, startNs: Long? = null, endNs: Long? = null): String {
+        val timeFilter = buildTimeFilter(startNs, endNs)
+        return """
+            SELECT
+                actual_frame_timeline_slice.name,
+                actual_frame_timeline_slice.ts,
+                actual_frame_timeline_slice.dur as dur_ns,
+                COALESCE(actual_frame_timeline_slice.surface_frame_token, actual_frame_timeline_slice.display_frame_token, 0) as vsync_id,
+                expected_frame_timeline_slice.dur as expected_dur_ns,
+                CASE
+                    WHEN actual_frame_timeline_slice.dur > expected_frame_timeline_slice.dur * 1.5
+                        THEN 'jank'
+                    ELSE 'normal'
+                END as jank_type
+            FROM actual_frame_timeline_slice
+            JOIN expected_frame_timeline_slice ON (
+                actual_frame_timeline_slice.surface_frame_token = expected_frame_timeline_slice.surface_frame_token
+                AND actual_frame_timeline_slice.display_frame_token = expected_frame_timeline_slice.display_frame_token
+            )
+            JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
+            WHERE process_track.upid = $upid
+                $timeFilter
+            ORDER BY actual_frame_timeline_slice.ts
+        """.trimIndent()
+    }
+
+    fun frameTimingEventQuery(upid: Long, startNs: Long? = null, endNs: Long? = null): String {
+        val timeFilter = buildTimeFilter(startNs, endNs)
+        return """
+            SELECT
+                actual_frame_timeline_slice.ts,
+                actual_frame_timeline_slice.dur as dur_ns,
+                COALESCE(actual_frame_timeline_slice.surface_frame_token, actual_frame_timeline_slice.display_frame_token, 0) as vsync_id,
+                expected_frame_timeline_slice.dur as expected_dur_ns,
+                CASE
+                    WHEN actual_frame_timeline_slice.dur > expected_frame_timeline_slice.dur * 1.5
+                        THEN 'jank'
+                    ELSE 'normal'
+                END as jank_type
+            FROM actual_frame_timeline_slice
+            JOIN expected_frame_timeline_slice ON (
+                actual_frame_timeline_slice.surface_frame_token = expected_frame_timeline_slice.surface_frame_token
+                AND actual_frame_timeline_slice.display_frame_token = expected_frame_timeline_slice.display_frame_token
+            )
+            JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
+            WHERE process_track.upid = $upid
+                $timeFilter
+            ORDER BY actual_frame_timeline_slice.ts
+        """.trimIndent()
+    }
+
+    fun fpsPerSecondQuery(upid: Long, startNs: Long? = null, endNs: Long? = null): String {
+        val timeFilter = when {
+            startNs != null && endNs != null -> "AND actual_frame_timeline_slice.ts BETWEEN $startNs AND $endNs"
+            startNs != null -> "AND actual_frame_timeline_slice.ts >= $startNs"
+            endNs != null -> "AND actual_frame_timeline_slice.ts <= $endNs"
+            else -> ""
+        }
+        return """
+            SELECT
+                (actual_frame_timeline_slice.ts + actual_frame_timeline_slice.dur) / 1000000000 AS second,
+                COUNT(*) AS fps
+            FROM actual_frame_timeline_slice
+            JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
+            WHERE process_track.upid = $upid
+                $timeFilter
+            GROUP BY second
+            ORDER BY second
+        """.trimIndent()
+    }
+
+    fun framesInTraceSectionsQuery(upid: Long, sectionNamePattern: String = "act:%"): String {
+        return """
+            WITH trace_sections AS (
+                SELECT
+                    slice.name as section_name,
+                    slice.ts as section_start,
+                    slice.ts + slice.dur as section_end
+                FROM slice
+                WHERE slice.name LIKE '$sectionNamePattern'
+            ),
+            frame_timeline_frames AS (
+                SELECT
+                    actual_frame_timeline_slice.ts,
+                    actual_frame_timeline_slice.dur as dur_ns,
+                    COALESCE(actual_frame_timeline_slice.surface_frame_token, actual_frame_timeline_slice.display_frame_token, 0) as vsync_id,
+                    expected_frame_timeline_slice.dur as expected_dur_ns,
+                    CASE
+                        WHEN actual_frame_timeline_slice.dur > expected_frame_timeline_slice.dur * 1.5
+                            THEN 'jank'
+                        ELSE 'normal'
+                    END as jank_type
+                FROM actual_frame_timeline_slice
+                JOIN expected_frame_timeline_slice ON (
+                    actual_frame_timeline_slice.surface_frame_token = expected_frame_timeline_slice.surface_frame_token
+                    AND actual_frame_timeline_slice.display_frame_token = expected_frame_timeline_slice.display_frame_token
+                )
+                JOIN process_track ON actual_frame_timeline_slice.track_id = process_track.id
+                WHERE process_track.upid = $upid
+            ),
+            choreographer_frames AS (
+                SELECT
+                    slice.ts,
+                    slice.dur as dur_ns,
+                    0 as vsync_id,
+                    16666666 as expected_dur_ns,
+                    CASE
+                        WHEN slice.dur > 16666666 * 1.5
+                            THEN 'jank'
+                        ELSE 'normal'
+                    END as jank_type
+                FROM slice
+                JOIN thread_track ON slice.track_id = thread_track.id
+                JOIN thread USING(utid)
+                JOIN process USING(upid)
+                WHERE slice.name LIKE 'Choreographer#doFrame%'
+                    AND process.upid = $upid
+            ),
+            combined_frames AS (
+                SELECT * FROM frame_timeline_frames
+                UNION ALL
+                SELECT * FROM choreographer_frames WHERE NOT EXISTS (SELECT 1 FROM frame_timeline_frames)
+            )
+            SELECT
+                combined_frames.ts,
+                combined_frames.dur_ns,
+                combined_frames.vsync_id,
+                combined_frames.expected_dur_ns,
+                trace_sections.section_name,
+                combined_frames.jank_type
+            FROM combined_frames
+            JOIN trace_sections ON (
+                combined_frames.ts >= trace_sections.section_start
+                AND combined_frames.ts <= trace_sections.section_end
+            )
+            ORDER BY combined_frames.ts
+        """.trimIndent()
+    }
+
+    fun choreographerFrameQuery(upid: Long, startNs: Long? = null, endNs: Long? = null): String {
+        val timeFilter = buildTimeFilter(startNs, endNs)
+        return """
+            SELECT
+                slice.ts,
+                slice.dur as dur_ns
+            FROM slice
+            JOIN thread_track ON slice.track_id = thread_track.id
+            JOIN thread USING(utid)
+            JOIN process USING(upid)
+            WHERE slice.name LIKE 'Choreographer#doFrame%'
+                AND process.upid = $upid
+                $timeFilter
+            ORDER BY slice.ts
+        """.trimIndent()
+    }
+
+    fun cpuUtilizationQuery(upid: Long, startNs: Long? = null, endNs: Long? = null): String {
+        val timeFilter = buildTimeFilter(startNs, endNs)
+        return """
+            SELECT
+                sched.ts,
+                sched.dur,
+                thread.name as thread_name,
+                process.name as process_name
+            FROM sched
+            JOIN thread USING(utid)
+            JOIN process USING(upid)
+            WHERE process.upid = $upid
+                $timeFilter
+            ORDER BY sched.ts
+        """.trimIndent()
+    }
 }
 
 /**
@@ -349,21 +586,13 @@ data class FrameTiming(
     val expectedDurationMs: Double get() = expectedDurationNs / 1_000_000.0
 }
 
-/**
- * Memory usage data point.
- */
-data class MemoryUsage(
-    val timestampNs: Long,
-    val rssKb: Long
-) {
-    val timestampMs: Long get() = timestampNs / 1_000_000
-    val rssMb: Int get() = (rssKb / 1024).toInt()
-}
+
+
 
 /**
- * CPU utilization data point.
+ * CPU utilization data point (Raw from Perfetto).
  */
-data class CpuUtilization(
+data class RawCpuUtilization(
     val timestampNs: Long,
     val durationNs: Long,
     val threadName: String,

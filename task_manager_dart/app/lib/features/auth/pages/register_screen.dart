@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/applocalization.dart';
+import '../../../core/perf/perf_trace.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/testing/test_ids.dart';
 import '../../../core/ui/components/task_it_input_field.dart';
@@ -82,7 +83,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalization.of(context);
 
-    return Scaffold(
+    return TracedWidget(
+      name: 'RegisterScreen',
+      child: Scaffold(
       backgroundColor: theme.colorScheme.primaryContainer,
       body: Center(
         child: Padding(
@@ -237,6 +240,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

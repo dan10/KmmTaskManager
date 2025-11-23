@@ -61,6 +61,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     systemProperties(System.getProperties().mapKeys { it.key.toString() })
+    systemProperty("appiumUrl", System.getProperty("appiumUrl"))
     maxHeapSize = "4g"
 }
 
