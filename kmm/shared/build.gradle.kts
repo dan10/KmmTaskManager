@@ -21,6 +21,20 @@ kotlin {
 
     jvm()
 
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    swiftExport {
+        moduleName = "Shared"
+
+        export("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1") {
+            moduleName = "KotlinDateTime"
+            flattenPackage = "kotlinx.datetime"
+        }
+    }
+
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.datetime)

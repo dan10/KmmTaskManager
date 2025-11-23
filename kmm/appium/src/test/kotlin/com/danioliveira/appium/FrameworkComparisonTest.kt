@@ -2,6 +2,7 @@ package com.danioliveira.appium
 
 import com.danioliveira.appium.config.App
 import com.danioliveira.appium.config.BenchmarkConfig
+import com.danioliveira.appium.config.Platform
 import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.new.BaseScreen
 import com.danioliveira.appium.new.LoginPage
@@ -77,6 +78,35 @@ class FrameworkComparisonTest {
     }
 
     @Test
+    @DisplayName("Run Single Iteration iOS (Verification)")
+    fun testSingleIterationIOS() {
+        logger.info("🧪 Running single iteration iOS verification test")
+
+        // Run KMM iOS test
+        val kmmMetrics = runner.runTestSuite(
+            app = App.KMM,
+            frameworkName = "Compose Multiplatform iOS",
+            runsOverride = 1,
+            warmupOverride = 0,
+            platformOverride = Platform.IOS,
+            testFlow = ::executeFlow
+        )
+
+        reporter.generateReport(kmmMetrics, "kmm-ios-verification")
+
+        // Uncomment to verify Flutter iOS as well
+//        val flutterMetrics = runner.runTestSuite(
+//            app = App.FLUTTER,
+//            frameworkName = "Flutter iOS",
+//            runsOverride = 1,
+//            warmupOverride = 0,
+//            platformOverride = Platform.IOS,
+//            testFlow = ::executeFlow
+//        )
+//        reporter.generateReport(flutterMetrics, "flutter-ios-verification")
+    }
+
+    @Test
     @DisplayName("Compare Frameworks Performance")
     @Tag("benchmark")
     fun compareFrameworks() {
@@ -129,10 +159,10 @@ class FrameworkComparisonTest {
     /**
      * Execute the test flow (register user + create tasks).
      */
-    private fun executeFlow(driver: WebDriver, app: App, metricsManager: MetricsManager) {
-        // Initialize BaseScreen context for the new page objects
-        BaseScreen.Context.init(driver, config.platform, app, metricsManager)
-        
+    private fun executeFlow(driver: WebDriver, app: App, metricsManager: MetricsManager, platform: Platform) {
+        // Initialize context with the CORRECT platform passed from runner
+        BaseScreen.Context.init(driver, platform, app, metricsManager)
+
         try {
             // Register user
             val timestamp = System.currentTimeMillis()

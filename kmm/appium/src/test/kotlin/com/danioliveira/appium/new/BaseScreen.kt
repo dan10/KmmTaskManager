@@ -1,21 +1,19 @@
 package com.danioliveira.appium.new
 
 import com.danioliveira.appium.config.App
-import com.danioliveira.appium.config.App.*
+import com.danioliveira.appium.config.App.FLUTTER
+import com.danioliveira.appium.config.App.KMM
 import com.danioliveira.appium.config.Platform
-import com.danioliveira.appium.config.Platform.*
+import com.danioliveira.appium.config.Platform.ANDROID
+import com.danioliveira.appium.config.Platform.IOS
 import com.danioliveira.appium.locators.Tags
 import com.danioliveira.appium.metrics.MetricsManager
-import com.danioliveira.appium.new.BaseScreen.Context.driver
 import io.appium.java_client.AppiumBy
-import io.appium.java_client.TouchAction
 import io.appium.java_client.android.AndroidDriver
 import io.appium.java_client.android.nativekey.AndroidKey
 import io.appium.java_client.android.nativekey.KeyEvent
 import io.appium.java_client.ios.IOSDriver
-import kotlinx.coroutines.delay
 import org.openqa.selenium.By
-import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.interactions.PointerInput
@@ -44,6 +42,18 @@ open class BaseScreen {
             screen.verify()
         }
         return screen
+    }
+
+    fun hideKeyboard(name: String = "retorno") {
+        try {
+            if (platform == ANDROID) {
+                (driver as AndroidDriver).pressKey(KeyEvent(AndroidKey.BACK))
+            } else {
+                (driver as IOSDriver).hideKeyboard(name)
+            }
+        } catch (e: Exception) {
+            // Ignore
+        }
     }
 
     companion object {
@@ -121,20 +131,20 @@ open class BaseScreen {
 
 fun getAndroidLocatorId(id: String, framework: App): By =
     when (framework) {
-        App.FLUTTER -> AppiumBy.androidUIAutomator("new UiSelector().resourceId(\"$id\")")
-        App.KMM -> AppiumBy.androidUIAutomator("new UiSelector().resourceId(\"$id\")")
+        FLUTTER -> AppiumBy.androidUIAutomator("new UiSelector().resourceId(\"$id\")")
+        KMM -> AppiumBy.androidUIAutomator("new UiSelector().resourceId(\"$id\")")
     }
 
 fun getLocatorId(id: String, platform: Platform): By =
     when (platform) {
         ANDROID -> getAndroidLocatorId(id, BaseScreen.Context.app)
-        Platform.IOS -> getIOSLocatorId(id, BaseScreen.Context.app)
+        IOS -> getIOSLocatorId(id, BaseScreen.Context.app)
     }
 
 fun getIOSLocatorId(id: String, framework: App): By =
     when (framework) {
-        App.KMM -> AppiumBy.accessibilityId(id)
-        App.FLUTTER -> AppiumBy.accessibilityId(id)
+        KMM -> AppiumBy.accessibilityId(id)
+        FLUTTER -> AppiumBy.accessibilityId(id)
     }
 
 fun WebElement.focusAndWriteText(text: String) {
@@ -144,7 +154,6 @@ fun WebElement.focusAndWriteText(text: String) {
 }
 
 fun WebDriver.waitUntil(locator: By, timeout: Duration = Duration.ofSeconds(30)) {
-    // println("Waiting for element: $locator")
     WebDriverWait(this, timeout).until {
         it.findElement(locator).isDisplayed
     }
@@ -167,6 +176,7 @@ fun WebDriver.scrollDown(
                     KMM -> findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"$target\")")).isDisplayed
                     FLUTTER -> findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"$target\")")).isDisplayed
                 }
+
                 IOS -> findElement(AppiumBy.iOSNsPredicateString("label == \"$target\"")).isDisplayed
             }
         }.getOrDefault(false)
@@ -243,6 +253,7 @@ fun WebDriver.scrollUp(
                     KMM -> findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"$target\")")).isDisplayed
                     FLUTTER -> findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"$target\")")).isDisplayed
                 }
+
                 IOS -> findElement(AppiumBy.iOSNsPredicateString("label == \"$target\"")).isDisplayed
             }
         }.getOrDefault(false)
@@ -309,8 +320,8 @@ class TaskCreatePage : BaseScreen() {
 
     private val taskTitleLocator = when (app) {
         KMM -> when (platform) {
-            Platform.ANDROID -> getEditTextByInstance(0)
-            Platform.IOS -> getLocatorId(Tags.TXT_TASK_TITLE, platform)
+            ANDROID -> getEditTextByInstance(0)
+            IOS -> AppiumBy.xpath("//XCUIElementTypeTextView[@name=\"txt_task_title\"]/XCUIElementTypeOther[1]")
         }
 
         FLUTTER -> getLocatorId(Tags.TXT_TASK_TITLE, platform)
@@ -318,8 +329,8 @@ class TaskCreatePage : BaseScreen() {
 
     private val descriptionLocator = when (app) {
         KMM -> when (platform) {
-            Platform.ANDROID -> getEditTextByInstance(1)
-            Platform.IOS -> getLocatorId(Tags.TXT_TASK_DESCRIPTION, platform)
+            ANDROID -> getEditTextByInstance(1)
+            IOS -> AppiumBy.xpath("**/XCUIElementTypeTextView[`name == \"txt_task_description\"`]/XCUIElementTypeOther[1]")
 
         }
 
@@ -328,8 +339,8 @@ class TaskCreatePage : BaseScreen() {
 
     private val saveButtonLocator = when (app) {
         KMM -> when (platform) {
-            Platform.ANDROID -> getLocatorByInstance("android.widget.Button", 3)
-            Platform.IOS -> getLocatorId(Tags.BTN_CREATE_TASK, platform)
+            ANDROID -> getLocatorByInstance("android.widget.Button", 3)
+            IOS -> AppiumBy.xpath("//XCUIElementTypeButton[@name=\"Criar\"]")
         }
 
         FLUTTER -> getLocatorId(Tags.BTN_CREATE_TASK, platform)
@@ -342,7 +353,7 @@ class TaskCreatePage : BaseScreen() {
 
     fun enterTitle(title: String): TaskCreatePage {
         track("enterTitle") {
-            driver.findElement(taskTitleLocator).focusAndWriteText(title)
+            driver.findElement(taskTitleLocator).focusAndWriteText(title + "\n")
         }
         return this
     }
@@ -358,8 +369,7 @@ class TaskCreatePage : BaseScreen() {
 
     fun clickSave(): TasksPage {
         track("clickSave") {
-            if (platform == Platform.ANDROID)
-                (driver as AndroidDriver).pressKey(KeyEvent(AndroidKey.BACK))
+            hideKeyboard("seguinte")
             verify()
             driver.findElement(saveButtonLocator).click()
         }
@@ -402,7 +412,7 @@ class TasksPage : BaseScreen() {
 
     fun scrollUpToTask(taskName: String): TasksPage {
         track("scrollToTop") {
-            driver.scrollUp(Tags.LIST_TASKS, platform, app,taskName)
+            driver.scrollUp(Tags.LIST_TASKS, platform, app, taskName)
         }
         return this
     }
@@ -426,12 +436,13 @@ class ProfileScreen : BaseScreen() {
     fun clickLogout(): LoginPage {
         track("clickLogout") {
             driver.findElement(logoutButtonLocator).click()
-            
+
             // Handle confirmation dialog
-            if (platform == Platform.ANDROID) {
+            if (platform == ANDROID) {
                 // Wait for dialog and click Logout
                 driver.waitUntil(AppiumBy.androidUIAutomator("new UiSelector().text(\"Logout\")"))
-                driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"Logout\")")).click()
+                driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"Logout\")"))
+                    .click()
             } else {
                 // iOS handling (assuming standard alert)
                 driver.switchTo().alert().accept()
@@ -483,17 +494,6 @@ class RegisterPage : BaseScreen() {
         return this
     }
 
-    fun hideKeyboard() {
-        try {
-            if (platform == Platform.ANDROID) {
-                (driver as AndroidDriver).hideKeyboard()
-            } else {
-                driver.findElement(AppiumBy.accessibilityId("Done")).click()
-            }
-        } catch (e: Exception) {
-            // Ignore
-        }
-    }
 
     fun clickRegister(): TasksPage {
         track("clickRegister") {
@@ -550,6 +550,7 @@ class LoginPage : BaseScreen() {
         track("enterPassword") {
             driver.findElement(passwordLocator).focusAndWriteText(password)
         }
+
         return this
     }
 

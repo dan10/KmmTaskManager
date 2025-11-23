@@ -9,9 +9,10 @@ import UIKit
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
     
-    // Register performance tracing channel
+    // Register performance tracing channel for iOS signposts
     if let controller = window?.rootViewController as? FlutterViewController {
-      PerfTraceChannel.register(with: controller.engine!.registrarForPlugin("PerfTraceChannel")!)
+      let registrar = self.registrar(forPlugin: "PerfTraceChannel")!
+      PerfTraceChannel.register(with: registrar)
     }
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

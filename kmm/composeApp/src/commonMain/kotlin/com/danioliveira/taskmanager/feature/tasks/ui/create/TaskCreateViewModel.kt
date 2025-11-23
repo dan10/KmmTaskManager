@@ -26,7 +26,7 @@ class TaskCreateViewModel(
     val effects: SharedFlow<TaskCreateEffect> = _effects.asSharedFlow()
 
     fun initialize(projectId: String?) {
-        state = state.copy(projectId = projectId)
+        state = TaskCreateState(projectId = projectId)
     }
 
     fun handleActions(action: TaskCreateAction) {

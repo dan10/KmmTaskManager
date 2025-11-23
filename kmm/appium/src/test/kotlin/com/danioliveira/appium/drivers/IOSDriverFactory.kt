@@ -41,7 +41,7 @@ object IOSDriverFactory {
     
     private fun getBundleId(app: App): String = when (app) {
         App.KMM -> "com.danioliveira.taskmanager.KmmTaskManager"
-        App.FLUTTER -> "com.example.task_manager_app"
+        App.FLUTTER -> "com.danieloliveira.taskManagerApp"
     }
 }
 

@@ -1,10 +1,11 @@
 import Flutter
+import UIKit
 import os.signpost
 
-/// Platform channel for performance tracing.
-/// Emits markers visible in Instruments as signpost intervals.
+@available(iOS 12.0, *)
 class PerfTraceChannel: NSObject, FlutterPlugin {
-    private static let log = OSLog(subsystem: "com.danioliveira.taskmanager", category: "Flutter")
+    private static let subsystem = "com.danieloliveira.taskManagerApp"
+    private static let log = OSLog(subsystem: subsystem, category: "Performance")
     
     static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
@@ -18,43 +19,38 @@ class PerfTraceChannel: NSObject, FlutterPlugin {
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "begin":
-            guard let args = call.arguments as? [String: Any],
-                  let name = args["name"] as? String else {
-                result(FlutterError(
-                    code: "INVALID_ARGUMENT",
-                    message: "name is required",
-                    details: nil
-                ))
-                return
+            if let args = call.arguments as? [String: Any],
+               let name = args["name"] as? String {
+                beginTrace(name: name)
+                // Return a dummy cookie (iOS doesn't need it)
+                result(0)
+            } else {
+                result(FlutterError(code: "INVALID_ARGS", message: "Missing trace name", details: nil))
             }
-            
-            let signpostId = OSSignpostID(log: Self.log)
-            // Prefix with "act:" to match KMM convention
-            os_signpost(.begin, log: Self.log, name: "act", "act:%{public}s", name)
-            
-            // Return signpost ID as cookie
-            result(Int(signpostId.rawValue))
             
         case "end":
-            guard let args = call.arguments as? [String: Any],
-                  let name = args["name"] as? String,
-                  let cookie = args["cookie"] as? Int else {
-                result(FlutterError(
-                    code: "INVALID_ARGUMENT",
-                    message: "name and cookie are required",
-                    details: nil
-                ))
-                return
+            if let args = call.arguments as? [String: Any],
+               let name = args["name"] as? String {
+                endTrace(name: name)
+                result(nil)
+            } else {
+                result(FlutterError(code: "INVALID_ARGS", message: "Missing trace name", details: nil))
             }
-            
-            let signpostId = OSSignpostID(rawValue: UInt64(cookie))
-            os_signpost(.end, log: Self.log, name: "act", "act:%{public}s", name)
-            
-            result(nil)
             
         default:
             result(FlutterMethodNotImplemented)
         }
     }
+    
+    private func beginTrace(name: String) {
+        if #available(iOS 12.0, *) {
+            os_signpost(.begin, log: PerfTraceChannel.log, name: "PerformanceTrace", "%{public}s", name)
+        }
+    }
+    
+    private func endTrace(name: String) {
+        if #available(iOS 12.0, *) {
+            os_signpost(.end, log: PerfTraceChannel.log, name: "PerformanceTrace", "%{public}s", name)
+        }
+    }
 }
-

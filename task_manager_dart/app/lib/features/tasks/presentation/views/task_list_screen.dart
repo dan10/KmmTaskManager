@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:task_manager_shared/models.dart';
 
 import '../../../../core/data/local/secure_storage.dart';
-import '../../../../core/perf/perf_trace.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/testing/test_ids.dart';
 import '../../../../core/ui/components/shimmer.dart';
@@ -120,9 +119,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final shimmerGradientToUse = isDark ? shimmerGradientDark : shimmerGradient;
 
-    return TracedWidget(
-      name: 'TaskListScreen',
-      child: Scaffold(
+    return Scaffold(
       resizeToAvoidBottomInset: false, // Prevent shifting when keyboard appears
       body: Column(
         children: [
@@ -198,7 +195,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ],
       ),
       floatingActionButton: _buildFAB(),
-      ),
     );
   }
 

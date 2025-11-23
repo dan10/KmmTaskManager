@@ -55,8 +55,9 @@ fun TaskCreateBottomSheet(
     TraceLifecycle("TaskCreateBottomSheet")
     
     val snackbarHostState = remember { SnackbarHostState() }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
-    LaunchedEffect(projectId) {
+    LaunchedEffect(projectId, sheetState.isVisible) {
         viewModel.initialize(projectId)
     }
 
@@ -67,7 +68,7 @@ fun TaskCreateBottomSheet(
     )
 
     ModalBottomSheet(
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = sheetState,
         onDismissRequest = { onDismiss(false) },
         modifier = Modifier.enableTestTagsAsResourceId()
     ) {
@@ -183,6 +184,7 @@ private fun TaskCreateTitleField(state: TaskCreateState) {
         isError = state.titleError != null,
         errorMessage = state.titleError ?: "",
         enabled = !state.isSaving,
+        lineLimits = TextFieldLineLimits.SingleLine,
         modifier = Modifier
             .fillMaxWidth(),
         textFieldModifier = Modifier.testTag(TestTags.TXT_TASK_TITLE)

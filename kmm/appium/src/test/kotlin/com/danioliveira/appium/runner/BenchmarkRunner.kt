@@ -8,10 +8,10 @@ import com.danioliveira.appium.drivers.IOSDriverFactory
 import com.danioliveira.appium.metrics.ImprovedMetricsManager
 import com.danioliveira.appium.metrics.MetricsManager
 import com.danioliveira.appium.metrics.android.AndroidMetricsCollector
-import com.danioliveira.appium.new.BaseScreen.Context.driver
+import io.appium.java_client.android.AndroidDriver
+import io.appium.java_client.ios.IOSDriver
 import org.openqa.selenium.WebDriver
 import org.slf4j.LoggerFactory
-import java.net.URL
 
 class BenchmarkRunner(
     private val config: BenchmarkConfig
@@ -23,27 +23,31 @@ class BenchmarkRunner(
         frameworkName: String,
         runsOverride: Int? = null,
         warmupOverride: Int? = null,
-        testFlow: (WebDriver, App, MetricsManager) -> Unit
+        platformOverride: Platform? = null,
+        testFlow: (WebDriver, App, MetricsManager, Platform) -> Unit
     ): MetricsManager {
         val currentRuns = runsOverride ?: config.runs
         val currentWarmup = warmupOverride ?: config.warmup
-        
-        logger.info("\n📊 Running test suite for $frameworkName")
+        val currentPlatform = platformOverride ?: config.platform
+
+        logger.info("\n📊 Running test suite for $frameworkName on $currentPlatform")
         var driver: WebDriver? = null
 
         // Determine package ID before creating driver
         val packageId = when (app) {
             App.KMM -> config.packageName ?: "com.danioliveira.taskmanager"
-            App.FLUTTER -> config.packageName ?: "com.example.task_manager_app"
+            App.FLUTTER -> config.packageName ?: if (currentPlatform == Platform.ANDROID)
+                "com.example.task_manager_app"
+            else "com.danioliveira.taskManagerApp"
         }
 
         // Initialize metrics collector BEFORE creating driver
-        val androidCollector = if (config.platform == Platform.ANDROID) {
+        val androidCollector = if (currentPlatform == Platform.ANDROID) {
             AndroidMetricsCollector(packageId)
         } else null
 
         val metricsManager = ImprovedMetricsManager(
-            platform = config.platform,
+            platform = currentPlatform,
             packageOrBundleId = packageId,
             androidCollector = androidCollector
         )
@@ -54,14 +58,14 @@ class BenchmarkRunner(
             metricsManager.startPerformanceRecording()
 
             // NOW create driver - app launch will be captured!
-            driver = createDriver(app)
+            driver = createDriver(app, currentPlatform)
 
             // Warmup runs (discarded)
             if (currentWarmup > 0) {
                 logger.info("🔥 Running $currentWarmup warmup iterations (data will be discarded)...")
                 repeat(currentWarmup) { iteration ->
                     logger.info("   Warmup iteration ${iteration + 1}/$currentWarmup")
-                    testFlow(driver, app, metricsManager)
+                    testFlow(driver, app, metricsManager, currentPlatform)
                     Thread.sleep(2000) // Brief pause between iterations
                 }
                 metricsManager.reset() // Clear warmup data
@@ -73,26 +77,32 @@ class BenchmarkRunner(
                 logger.info("Running iteration $i/$currentRuns...")
 
                 // Execute the test flow
-                testFlow(driver, app, metricsManager)
+                testFlow(driver, app, metricsManager, currentPlatform)
 
                 // Reset app state for next iteration
                 if (i < currentRuns) {
                     logger.info("🔄 Resetting app state for next iteration...")
                     try {
                         if (config.platform == Platform.ANDROID) {
-                            (driver as io.appium.java_client.android.AndroidDriver).terminateApp(packageId)
+                            (driver as AndroidDriver).terminateApp(packageId)
                             // Clear app data to ensure logout
                             try {
-                                (driver as io.appium.java_client.android.AndroidDriver).executeScript("mobile: clearApp", mapOf("appId" to packageId))
+                                driver.executeScript(
+                                    "mobile: clearApp",
+                                    mapOf("appId" to packageId)
+                                )
                             } catch (e: Exception) {
                                 logger.warn("Failed to clear app data via mobile: clearApp, trying pm clear")
                                 val args = listOf("clear", packageId)
-                                (driver as io.appium.java_client.android.AndroidDriver).executeScript("mobile: shell", mapOf("command" to "pm", "args" to args))
+                                (driver as AndroidDriver).executeScript(
+                                    "mobile: shell",
+                                    mapOf("command" to "pm", "args" to args)
+                                )
                             }
-                            (driver as io.appium.java_client.android.AndroidDriver).activateApp(packageId)
+                            (driver as AndroidDriver).activateApp(packageId)
                         } else {
-                            (driver as io.appium.java_client.ios.IOSDriver).terminateApp(packageId)
-                            (driver as io.appium.java_client.ios.IOSDriver).activateApp(packageId)
+                            (driver as IOSDriver).terminateApp(packageId)
+                            driver.activateApp(packageId)
                         }
                         Thread.sleep(2000) // Wait for app to restart
                     } catch (e: Exception) {
@@ -111,9 +121,10 @@ class BenchmarkRunner(
         }
     }
 
-    private fun createDriver(app: App): WebDriver {
-        val appConfig = config.copy(app = app)
-        return when (config.platform) {
+    private fun createDriver(app: App, platform: Platform): WebDriver {
+        val appConfig =
+            config.copy(app = app, platform = platform)
+        return when (platform) {
             Platform.ANDROID -> AndroidDriverFactory.create(appConfig)
             Platform.IOS -> IOSDriverFactory.create(appConfig)
         }
