@@ -367,7 +367,7 @@ class PerfettoCollector {
             appendLine("        name: \"linux.process_stats\"")
             appendLine("        process_stats_config {")
             appendLine("            scan_all_processes_on_start: true")
-            appendLine("            proc_stats_poll_ms: 1000")  // Poll every 1 second for memory RSS
+            appendLine("            proc_stats_poll_ms: 250")  // Poll every 250ms for memory RSS
             appendLine("        }")
             appendLine("    }")
             appendLine("}")

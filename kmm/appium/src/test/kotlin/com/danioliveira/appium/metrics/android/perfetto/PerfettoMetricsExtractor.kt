@@ -246,9 +246,16 @@ class PerfettoMetricsExtractor(private val traceFile: File) : AutoCloseable {
         }
         
         // Filter data to this screen's time range
-        val screenCpu = cpu.filter { it.timestampNs in sectionStartNs..sectionEndNs }
+        // Use overlap check: slice overlaps if slice.start < section.end AND slice.end > section.start
+        val screenCpu = cpu.filter { 
+            val sliceEnd = it.timestampNs + it.durationNs
+            it.timestampNs < sectionEndNs && sliceEnd > sectionStartNs
+        }
         val screenMemory = memory.filter { it.timestampNs in sectionStartNs..sectionEndNs }
-        val screenFrames = frames.filter { it.timestampNs in sectionStartNs..sectionEndNs }
+        val screenFrames = frames.filter { 
+            val frameEnd = it.timestampNs + it.durationNs
+            it.timestampNs < sectionEndNs && frameEnd > sectionStartNs
+        }
         
         // Calculate CPU stats
         val cpuPercentages = if (screenCpu.isNotEmpty()) {

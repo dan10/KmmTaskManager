@@ -58,7 +58,7 @@ class FrameworkComparisonTest {
         val kmmMetrics = runner.runTestSuite(
             app = App.KMM,
             frameworkName = "Compose Multiplatform",
-            runsOverride = 2,
+            runsOverride = 1,
             warmupOverride = 0,
             testFlow = ::executeFlow
         )

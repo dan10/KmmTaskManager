@@ -46,11 +46,10 @@ class ImprovedMetricsManager(
         
         // Inject trace marker for Android
         if (platform == Platform.ANDROID) {
-            // Use Async markers (S) to handle separate adb shell sessions
-            // Format: S|pid|act:ActionName|cookie
+            // Use synchronous markers (B/E) for better Perfetto capture
+            // Format: B|pid|act:ActionName
             val pid = androidCollector?.getPid() ?: 0
-            val cookie = actionName.hashCode()
-            androidCollector?.injectTraceMarker("S|$pid|act:$actionName|$cookie")
+            androidCollector?.injectTraceMarker("B|$pid|act:$actionName")
         }
         
         // Clear previous samples
@@ -74,11 +73,9 @@ class ImprovedMetricsManager(
         
         // Inject trace marker end for Android
         if (platform == Platform.ANDROID) {
-            // Use Async markers (F) to match the Start marker
-            // Format: F|pid|act:ActionName|cookie
-            val pid = androidCollector?.getPid() ?: 0
-            val cookie = actionName.hashCode()
-            androidCollector?.injectTraceMarker("F|$pid|act:$actionName|$cookie")
+            // Use synchronous end marker (E)
+            // Format: E
+            androidCollector?.injectTraceMarker("E")
         }
         
         // Stop Sampling
@@ -257,28 +254,42 @@ class ImprovedMetricsManager(
         }
         
         actionMetrics.forEachIndexed { index, metric ->
-            // Query trace for the specific time window of this action
-            // Use the queryTraceSegment method directly from TraceMetrics
-            val segment = trace.queryTraceSegment(
-                metric.startTimeRelativeToTraceMs,
-                metric.endTimeRelativeToTraceMs
-            )
+            // Try to find pre-calculated metrics for this action (from trace markers)
+            val screenMetrics = trace.getScreenMetricsByName(metric.actionName)
             
-            if (segment != null) {
+            if (screenMetrics != null) {
+                logger.info("✅ Found trace metrics for '${metric.actionName}'")
                 actionMetrics[index] = metric.copy(
-                    // Only overwrite if trace has valid data, otherwise keep dumpsys data
-                    avgFrameTimeMs = if (segment.avgFps > 0) 1000.0 / segment.avgFps else metric.avgFrameTimeMs,
-                    jankPercentage = if (segment.jankCount > 0) 100.0 else metric.jankPercentage,
-                    fps = if (segment.avgFps > 0) segment.avgFps else metric.fps,
-                    // Update CPU/Mem from trace as it's more accurate than polling
-                    cpuPercent = segment.avgCpuPercent,
-                    memoryMb = if (segment.avgMemoryMb > 0) segment.avgMemoryMb else metric.memoryMb,
-                    // Update CPU percentiles from trace
-                    p50Cpu = segment.p50Cpu,
-                    p90Cpu = segment.p90Cpu,
-                    p95Cpu = segment.p95Cpu,
-                    p99Cpu = segment.p99Cpu
+                    avgFrameTimeMs = if (screenMetrics.fpsAvg > 0) 1000.0 / screenMetrics.fpsAvg else metric.avgFrameTimeMs,
+                    jankPercentage = screenMetrics.jankPercentage,
+                    fps = if (screenMetrics.fpsAvg > 0) screenMetrics.fpsAvg else metric.fps,
+                    cpuPercent = screenMetrics.cpuAvg,
+                    memoryMb = if (screenMetrics.memoryAvg > 0) screenMetrics.memoryAvg else metric.memoryMb,
+                    p50Cpu = 0.0, // ScreenMetrics doesn't have percentiles yet, could add later
+                    p90Cpu = 0.0,
+                    p95Cpu = 0.0,
+                    p99Cpu = 0.0
                 )
+            } else {
+                // Fallback to time-based query if marker not found
+                val segment = trace.queryTraceSegment(
+                    metric.startTimeRelativeToTraceMs,
+                    metric.endTimeRelativeToTraceMs
+                )
+                
+                if (segment != null) {
+                    actionMetrics[index] = metric.copy(
+                        avgFrameTimeMs = if (segment.avgFps > 0) 1000.0 / segment.avgFps else metric.avgFrameTimeMs,
+                        jankPercentage = if (segment.jankCount > 0) 100.0 else metric.jankPercentage,
+                        fps = if (segment.avgFps > 0) segment.avgFps else metric.fps,
+                        cpuPercent = segment.avgCpuPercent,
+                        memoryMb = if (segment.avgMemoryMb > 0) segment.avgMemoryMb else metric.memoryMb,
+                        p50Cpu = segment.p50Cpu,
+                        p90Cpu = segment.p90Cpu,
+                        p95Cpu = segment.p95Cpu,
+                        p99Cpu = segment.p99Cpu
+                    )
+                }
             }
         }
     }

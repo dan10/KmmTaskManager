@@ -72,9 +72,6 @@ class BenchmarkRunner(
             for (i in 1..currentRuns) {
                 logger.info("Running iteration $i/$currentRuns...")
 
-                // Reset metrics for this iteration
-                metricsManager.reset()
-
                 // Execute the test flow
                 testFlow(driver, app, metricsManager)
 
