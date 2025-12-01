@@ -14,7 +14,7 @@ abstract class ProjectResponseDto with _$ProjectResponseDto {
     String? description,
     @Default(0) int completed,
     @Default(0) int inProgress,
-    @Default(0) int total,
+    @JsonKey(name: 'totalTasks') @Default(0) int total,
     String? creatorId,
     @Default([]) List<String> memberIds,
     User? creator,

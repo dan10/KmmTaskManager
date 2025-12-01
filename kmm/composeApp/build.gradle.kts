@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    id("io.github.ttypic.swiftklib") version "0.6.4"
 }
 
 kotlin {
@@ -18,10 +19,16 @@ kotlin {
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
+        iosTarget.compilations {
+            val main by getting {
+                cinterops {
+                    create("Tracer")
+                }
+            }
+        }
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
@@ -34,6 +41,8 @@ kotlin {
             implementation(libs.androidx.appcompat)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.core.splashscreen)
+            implementation(libs.androidx.tracing)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
         }
@@ -47,14 +56,16 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
-            implementation(compose.material3)
+            //implementation(compose.material3)
+            implementation(libs.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(projects.pagingCompose)
+            implementation(libs.androidx.paging.common)
+            implementation(libs.androidx.paging.compose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
@@ -70,6 +81,7 @@ kotlin {
             implementation(libs.androidx.datastore.preferences)
             implementation(libs.androidx.datastore.preferences.core)
             implementation(libs.material.icons.core)
+            implementation(libs.compose.shimmer)
         }
 
         all {
@@ -77,7 +89,13 @@ kotlin {
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
                 optIn("kotlin.uuid.ExperimentalUuidApi")
                 optIn("kotlinx.coroutines.FlowPreview")
+                optIn("androidx.compose.animation.ExperimentalSharedTransitionApi")
+                optIn("androidx.compose.material3.ExperimentalMaterial3Api")
             }
+        }
+
+        compilerOptions {
+            freeCompilerArgs.add("-Xcontext-parameters")
         }
     }
 }
@@ -105,7 +123,12 @@ android {
 
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -116,4 +139,12 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+swiftklib {
+    create("Tracer") {
+        path = file("native/Tracer")
+        packageName("com.danioliveira.taskmanager.perf.native")
+        minIos.set(15)
+    }
 }

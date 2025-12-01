@@ -1,0 +1,489 @@
+package com.danioliveira.taskmanager.feature.projects.ui.details
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
+import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.Project
+import com.danioliveira.taskmanager.core.domain.model.Task
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
+import com.danioliveira.taskmanager.core.ui.components.TaskItErrorState
+import com.danioliveira.taskmanager.core.ui.components.TaskItInfoCard
+import com.danioliveira.taskmanager.core.ui.components.TaskItLoadingState
+import com.danioliveira.taskmanager.core.ui.components.TaskItTopAppBar
+import com.danioliveira.taskmanager.core.ui.components.TaskListPaging
+import com.danioliveira.taskmanager.feature.tasks.ui.create.TaskCreateBottomSheet
+import com.danioliveira.taskmanager.testing.enableTestTagsAsResourceId
+import com.danioliveira.taskmanager.ui.theme.TaskItTheme
+import kmmtaskmanager.composeapp.generated.resources.Res
+import kmmtaskmanager.composeapp.generated.resources.content_description_create_task
+import kmmtaskmanager.composeapp.generated.resources.ic_empty_tasks
+import kmmtaskmanager.composeapp.generated.resources.project_details_title
+import kmmtaskmanager.composeapp.generated.resources.project_progress_title
+import kmmtaskmanager.composeapp.generated.resources.project_status_completed
+import kmmtaskmanager.composeapp.generated.resources.project_status_in_progress
+import kmmtaskmanager.composeapp.generated.resources.project_status_total_tasks
+import kmmtaskmanager.composeapp.generated.resources.project_tasks_title
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.datetime.LocalDateTime
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
+import perf.TraceLifecycle
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+
+@Composable
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+fun ProjectDetailsScreen(
+    onBack: () -> Unit,
+    navigateToTaskDetail: (Uuid) -> Unit,
+    viewModel: ProjectDetailsViewModel = koinViewModel()
+) {
+    TraceLifecycle("ProjectDetailsScreen")
+    
+    var showCreateTaskBottomSheet by remember { mutableStateOf(false) }
+    var projectIdForTask by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+        viewModel.checkAndRefresh()
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.onBack = onBack
+        viewModel.onCreateTask = { projectId ->
+            projectIdForTask = projectId
+            showCreateTaskBottomSheet = true
+        }
+    }
+
+    val state = viewModel.state
+    val pagingItems = viewModel.taskFlow.collectAsLazyPagingItems()
+
+    ProjectDetailsScreen(
+        state = state,
+        onBack = onBack,
+        pagingItems = pagingItems,
+        navigateToTaskDetail = navigateToTaskDetail,
+        actions = viewModel::handleActions
+    )
+    
+    // Task Create BottomSheet for this project
+    if (showCreateTaskBottomSheet && projectIdForTask != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showCreateTaskBottomSheet = false
+                projectIdForTask = null
+            },
+            sheetState = sheetState,
+            modifier = Modifier.enableTestTagsAsResourceId()
+        ) {
+            TaskCreateBottomSheet(
+                projectId = projectIdForTask,
+                onDismiss = {
+                    showCreateTaskBottomSheet = false
+                    projectIdForTask = null
+                }
+            )
+        }
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
+private fun ProjectDetailsScreen(
+    state: ProjectDetailsState,
+    onBack: () -> Unit,
+    pagingItems: LazyPagingItems<Task>,
+    navigateToTaskDetail: (Uuid) -> Unit,
+    actions: (ProjectDetailsAction) -> Unit
+) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            ProjectDetailsTopBar(
+                title = state.project?.name ?: stringResource(Res.string.project_details_title),
+                onBack = onBack
+            )
+        },
+        floatingActionButton = {
+            CreateTaskFAB(
+                onClick = { actions(ProjectDetailsAction.CreateTask) }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                state.isLoading -> TaskItLoadingState()
+                state.errorMessage != null -> TaskItErrorState(state.errorMessage)
+                else -> ProjectDetailsContent(
+                    project = state.project,
+                    pagingItems = pagingItems,
+                    navigateToTaskDetail = navigateToTaskDetail,
+                    onTaskStatusChange = { taskId, status ->
+                        actions(
+                            ProjectDetailsAction.UpdateTaskStatus(
+                                taskId = taskId,
+                                status = status
+                            )
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
+private fun ProjectDetailsTopBar(
+    title: String,
+    onBack: () -> Unit
+) {
+    with(sts) {
+        TaskItTopAppBar(
+            title = title,
+            showNavigationIcon = true,
+            onNavigateBack = onBack,
+        )
+    }
+}
+
+@Composable
+private fun CreateTaskFAB(onClick: () -> Unit) {
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.primary
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = stringResource(Res.string.content_description_create_task),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+}
+
+context(sts: SharedTransitionScope, avs: AnimatedVisibilityScope)
+@Composable
+private fun ProjectDetailsContent(
+    project: Project?,
+    pagingItems: LazyPagingItems<Task>,
+    navigateToTaskDetail: (Uuid) -> Unit,
+    onTaskStatusChange: (String, String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        project?.let {
+            ProjectHeader(it)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        TaskListPaging(
+            pagingItems = pagingItems,
+            showProjectName = false,
+            enableSwipe = true,
+            onTaskClick = { task ->
+                navigateToTaskDetail(task.id)
+            },
+            onTaskCheckedChange = { taskId, checked ->
+                val newStatus = if (checked) TaskStatus.DONE.name else TaskStatus.TODO.name
+                onTaskStatusChange(taskId, newStatus)
+            },
+            onTaskSwipeComplete = { task ->
+                val newStatus = if (task.status == TaskStatus.DONE) TaskStatus.TODO.name else TaskStatus.DONE.name
+                onTaskStatusChange(task.id.toString(), newStatus)
+            },
+            onTaskSwipeDelete = { task ->
+                // TODO: Add delete action to ProjectDetailsAction
+            },
+            header = {
+                item {
+                    Text(
+                        text = stringResource(Res.string.project_tasks_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+            },
+            emptyContent = { EmptyProjectTasks() }
+        )
+    }
+}
+
+
+@Composable
+private fun EmptyProjectTasks() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 48.dp, horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.ic_empty_tasks),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
+            modifier = Modifier
+                .size(120.dp)
+                .padding(bottom = 24.dp)
+        )
+
+        Text(
+            text = "No Tasks Yet",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Create your first task for this project",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun ProjectHeader(project: Project) {
+    TaskItInfoCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            ProjectStatus(
+                label = stringResource(Res.string.project_status_total_tasks),
+                value = project.total
+            )
+            ProjectStatus(
+                label = stringResource(Res.string.project_status_in_progress),
+                value = project.inProgress
+            )
+            ProjectStatus(
+                label = stringResource(Res.string.project_status_completed),
+                value = project.completed
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(Res.string.project_progress_title),
+            style = MaterialTheme.typography.labelMedium
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+
+        val progressPercentage = if (project.total > 0) {
+            (project.completed * 100) / project.total
+        } else {
+            0
+        }
+
+        LinearProgressIndicator(
+            progress = { progressPercentage / 100f },
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = ProgressIndicatorDefaults.linearTrackColor,
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(
+                text = "$progressPercentage%",
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+    }
+}
+
+@Composable
+fun ProjectStatus(label: String, value: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Text(text = label, style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+@Preview
+@Composable
+private fun ProjectDetailsTopBarPreview() {
+    TaskItTheme {
+        SharedTransitionLayout {
+            AnimatedVisibility(true) {
+                ProjectDetailsTopBar(
+                    title = "Project Details",
+                    onBack = {}
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalUuidApi::class)
+@Preview
+@Composable
+private fun ProjectDetailsScreenPreview() {
+    val mockProject = Project(
+        id = "project-1",
+        name = "Website Redesign",
+        completed = 5,
+        inProgress = 3,
+        total = 10,
+        description = "Redesign the company website"
+    )
+
+    val mockState = ProjectDetailsState(
+        isLoading = false,
+        project = mockProject,
+        errorMessage = null
+    )
+
+    val mockTasks = List(5) { index ->
+        Task(
+            id = Uuid.random(),
+            title = "Task ${index + 1}",
+            description = "Description for task ${index + 1}",
+            status = when (index % 3) {
+                0 -> TaskStatus.TODO
+                1 -> TaskStatus.IN_PROGRESS
+                else -> TaskStatus.DONE
+            },
+            priority = when (index % 3) {
+                0 -> Priority.HIGH
+                1 -> Priority.MEDIUM
+                else -> Priority.LOW
+            },
+            dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
+            projectName = "Website Redesign",
+            createdAt = LocalDateTime.parse("2024-11-01T00:00:00")
+        )
+    }
+
+    val pagingData = PagingData.from(mockTasks)
+    val mockTaskFlow = MutableStateFlow(pagingData)
+
+    TaskItTheme {
+        SharedTransitionLayout {
+
+            AnimatedVisibility(true) {
+                ProjectDetailsScreen(
+                    state = mockState,
+                    onBack = {},
+                    pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+                    navigateToTaskDetail = { _ -> },
+                    actions = {}
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalUuidApi::class)
+@Preview
+@Composable
+private fun ProjectDetailsContentPreview() {
+    val mockProject = Project(
+        id = "project-1",
+        name = "Website Redesign",
+        completed = 5,
+        inProgress = 3,
+        total = 10,
+        description = "Redesign the company website"
+    )
+
+    val mockTasks = List(5) { index ->
+        Task(
+            id = Uuid.random(),
+            title = "Task ${index + 1}",
+            description = "Description for task ${index + 1}",
+            status = when (index % 3) {
+                0 -> TaskStatus.TODO
+                1 -> TaskStatus.IN_PROGRESS
+                else -> TaskStatus.DONE
+            },
+            priority = when (index % 3) {
+                0 -> Priority.HIGH
+                1 -> Priority.MEDIUM
+                else -> Priority.LOW
+            },
+            dueDate = LocalDateTime.parse("2024-12-${index + 10}T00:00:00"),
+            projectName = "Website Redesign",
+            createdAt = LocalDateTime.parse("2024-11-01T00:00:00")
+        )
+    }
+
+    val pagingData = PagingData.from(mockTasks)
+    val mockTaskFlow = MutableStateFlow(pagingData)
+
+    TaskItTheme {
+        SharedTransitionLayout {
+            AnimatedVisibility(true) {
+                ProjectDetailsContent(
+                    project = mockProject,
+                    pagingItems = mockTaskFlow.collectAsLazyPagingItems(),
+                    navigateToTaskDetail = { _ -> },
+                    onTaskStatusChange = { _, _ -> }
+                )
+            }
+        }
+    }
+}

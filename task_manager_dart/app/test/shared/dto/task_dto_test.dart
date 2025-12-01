@@ -6,7 +6,7 @@ void main() {
     group('TaskCreateRequestDto', () {
       group('Validation', () {
         test('should be valid with correct data', () {
-          final dto = TaskCreateRequestDto(
+          const dto = TaskCreateRequestDto(
             title: 'Valid Task Title',
             description: 'This is a valid task description that is long enough',
             priority: Priority.medium,
@@ -18,7 +18,7 @@ void main() {
 
         test('should validate title correctly', () {
           // Empty title
-          var dto = TaskCreateRequestDto(
+          var dto = const TaskCreateRequestDto(
             title: '',
             description: 'Valid description that is long enough',
             priority: Priority.medium,
@@ -27,7 +27,7 @@ void main() {
           expect(errors['title'], 'Title cannot be empty.');
 
           // Title too short
-          dto = TaskCreateRequestDto(
+          dto = const TaskCreateRequestDto(
             title: 'AB',
             description: 'Valid description that is long enough',
             priority: Priority.medium,
@@ -45,7 +45,7 @@ void main() {
           expect(errors['title'], 'Title cannot exceed 100 characters.');
 
           // Valid title
-          dto = TaskCreateRequestDto(
+          dto = const TaskCreateRequestDto(
             title: 'Valid Title',
             description: 'Valid description that is long enough',
             priority: Priority.medium,
@@ -56,7 +56,7 @@ void main() {
 
         test('should validate description correctly', () {
           // Empty description
-          var dto = TaskCreateRequestDto(
+          var dto = const TaskCreateRequestDto(
             title: 'Valid Title',
             description: '',
             priority: Priority.medium,
@@ -65,7 +65,7 @@ void main() {
           expect(errors['description'], 'Description cannot be empty.');
 
           // Description too short
-          dto = TaskCreateRequestDto(
+          dto = const TaskCreateRequestDto(
             title: 'Valid Title',
             description: 'Short',
             priority: Priority.medium,
@@ -83,7 +83,7 @@ void main() {
           expect(errors['description'], 'Description cannot exceed 500 characters.');
 
           // Valid description
-          dto = TaskCreateRequestDto(
+          dto = const TaskCreateRequestDto(
             title: 'Valid Title',
             description: 'This is a valid description',
             priority: Priority.medium,
@@ -117,7 +117,7 @@ void main() {
           expect(errors.containsKey('dueDate'), false);
 
           // No due date
-          dto = TaskCreateRequestDto(
+          dto = const TaskCreateRequestDto(
             title: 'Valid Title',
             description: 'Valid description that is long enough',
             priority: Priority.medium,
@@ -150,7 +150,7 @@ void main() {
         });
 
         test('should serialize without optional fields', () {
-          final dto = TaskCreateRequestDto(
+          const dto = TaskCreateRequestDto(
             title: 'Test Task',
             description: 'Test Description',
             priority: Priority.medium,
@@ -167,21 +167,21 @@ void main() {
         });
 
         test('should handle all priority levels', () {
-          final lowDto = TaskCreateRequestDto(
+          const lowDto = TaskCreateRequestDto(
             title: 'Test Task',
             description: 'Test Description',
             priority: Priority.low,
           );
           expect(lowDto.toJson()['priority'], 'LOW');
 
-          final mediumDto = TaskCreateRequestDto(
+          const mediumDto = TaskCreateRequestDto(
             title: 'Test Task',
             description: 'Test Description',
             priority: Priority.medium,
           );
           expect(mediumDto.toJson()['priority'], 'MEDIUM');
 
-          final highDto = TaskCreateRequestDto(
+          const highDto = TaskCreateRequestDto(
             title: 'Test Task',
             description: 'Test Description',
             priority: Priority.high,
@@ -267,7 +267,7 @@ void main() {
     group('TaskUpdateRequestDto', () {
       group('Validation', () {
         test('should be valid with correct data', () {
-          final dto = TaskUpdateRequestDto(
+          const dto = TaskUpdateRequestDto(
             title: 'Valid Task Title',
             description: 'This is a valid task description that is long enough',
             priority: Priority.medium,
@@ -278,7 +278,7 @@ void main() {
         });
 
         test('should be valid with no updates', () {
-          final dto = TaskUpdateRequestDto();
+          const dto = TaskUpdateRequestDto();
 
           expect(dto.isValid, true);
           expect(dto.validate(), isEmpty);
@@ -286,40 +286,40 @@ void main() {
         });
 
         test('should validate title when provided', () {
-          var dto = TaskUpdateRequestDto(title: 'A');
+          var dto = const TaskUpdateRequestDto(title: 'A');
           var errors = dto.validate();
           expect(errors['title'], 'Title must be at least 3 characters long.');
 
-          dto = TaskUpdateRequestDto(title: 'Valid Title');
+          dto = const TaskUpdateRequestDto(title: 'Valid Title');
           errors = dto.validate();
           expect(errors.containsKey('title'), false);
         });
 
         test('should validate description when provided', () {
-          var dto = TaskUpdateRequestDto(description: 'Short');
+          var dto = const TaskUpdateRequestDto(description: 'Short');
           var errors = dto.validate();
           expect(errors['description'], 'Description must be at least 10 characters long.');
 
-          dto = TaskUpdateRequestDto(description: 'Valid description');
+          dto = const TaskUpdateRequestDto(description: 'Valid description');
           errors = dto.validate();
           expect(errors.containsKey('description'), false);
         });
 
         test('should detect updates correctly', () {
-          expect(TaskUpdateRequestDto().hasUpdates, false);
-          expect(TaskUpdateRequestDto(title: 'Title').hasUpdates, true);
-          expect(TaskUpdateRequestDto(description: 'Description').hasUpdates, true);
-          expect(TaskUpdateRequestDto(status: TaskStatus.done).hasUpdates, true);
-          expect(TaskUpdateRequestDto(priority: Priority.high).hasUpdates, true);
+          expect(const TaskUpdateRequestDto().hasUpdates, false);
+          expect(const TaskUpdateRequestDto(title: 'Title').hasUpdates, true);
+          expect(const TaskUpdateRequestDto(description: 'Description').hasUpdates, true);
+          expect(const TaskUpdateRequestDto(status: TaskStatus.done).hasUpdates, true);
+          expect(const TaskUpdateRequestDto(priority: Priority.high).hasUpdates, true);
           expect(TaskUpdateRequestDto(dueDate: DateTime.now()).hasUpdates, true);
-          expect(TaskUpdateRequestDto(projectId: 'project1').hasUpdates, true);
-          expect(TaskUpdateRequestDto(assigneeId: 'user1').hasUpdates, true);
+          expect(const TaskUpdateRequestDto(projectId: 'project1').hasUpdates, true);
+          expect(const TaskUpdateRequestDto(assigneeId: 'user1').hasUpdates, true);
         });
       });
 
       group('Serialization', () {
         test('should serialize only provided fields', () {
-          final dto = TaskUpdateRequestDto(
+          const dto = TaskUpdateRequestDto(
             title: 'Updated Title',
             priority: Priority.high,
           );
@@ -336,13 +336,13 @@ void main() {
         });
 
         test('should handle all status levels', () {
-          final todoDto = TaskUpdateRequestDto(status: TaskStatus.todo);
+          const todoDto = TaskUpdateRequestDto(status: TaskStatus.todo);
           expect(todoDto.toJson()['status'], 'TODO');
 
-          final inProgressDto = TaskUpdateRequestDto(status: TaskStatus.inProgress);
+          const inProgressDto = TaskUpdateRequestDto(status: TaskStatus.inProgress);
           expect(inProgressDto.toJson()['status'], 'IN_PROGRESS');
 
-          final doneDto = TaskUpdateRequestDto(status: TaskStatus.done);
+          const doneDto = TaskUpdateRequestDto(status: TaskStatus.done);
           expect(doneDto.toJson()['status'], 'DONE');
         });
       });

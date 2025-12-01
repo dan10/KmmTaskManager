@@ -212,14 +212,14 @@ void main() {
 
   group('ProjectResponseDto', () {
     test('should create instance with all fields', () {
-      final creator = User(
+      const creator = User(
         id: 'creator1',
         displayName: 'Creator User',
         email: 'creator@example.com',
         createdAt: '2024-01-01T00:00:00.000Z',
       );
 
-      final member = User(
+      const member = User(
         id: 'member1',
         displayName: 'Member User',
         email: 'member@example.com',
@@ -256,7 +256,7 @@ void main() {
     });
 
     test('should serialize to JSON correctly', () {
-      final creator = User(
+      const creator = User(
         id: 'creator1',
         displayName: 'Creator User',
         email: 'creator@example.com',
@@ -295,7 +295,7 @@ void main() {
     });
 
     test('should convert to Project model correctly', () {
-      final dto = ProjectResponseDto(
+      const dto = ProjectResponseDto(
         id: 'project1',
         name: 'Test Project',
         description: 'Test Description',

@@ -3,11 +3,13 @@ package com.danioliveira.taskmanager.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.danioliveira.taskmanager.domain.JwtConfig
-import com.danioliveira.taskmanager.routes.toUUID
+import com.danioliveira.taskmanager.utils.toUuid
 import io.ktor.server.application.ApplicationEnvironment
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import java.util.Date
+import kotlin.uuid.ExperimentalUuidApi
 
+@OptIn(ExperimentalUuidApi::class)
 object JwtConfig {
     private lateinit var secret: String
     private lateinit var issuer: String
@@ -63,7 +65,7 @@ object JwtConfig {
             val userID = credential.payload.getClaim("userId").asString()
 
             if (userID.isNotEmpty())
-                UserPrincipal(userID.toUUID())
+                UserPrincipal(userID.toUuid())
             else null
         }
     }

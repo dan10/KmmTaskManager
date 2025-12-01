@@ -1,7 +1,9 @@
 package com.danioliveira.taskmanager.auth
 
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 class UserPrincipal(
-    val userId: UUID,
+    val userId: Uuid,
 )

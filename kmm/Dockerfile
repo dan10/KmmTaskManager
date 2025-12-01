@@ -1,5 +1,5 @@
 # Stage 1: Cache Gradle dependencies
-FROM gradle:latest AS cache
+FROM gradle:9.1.0-jdk21-alpine AS cache
 RUN mkdir -p /home/gradle/cache_home
 ENV GRADLE_USER_HOME=/home/gradle/cache_home
 COPY gradle.properties /home/gradle/app/gradle.properties
@@ -12,7 +12,7 @@ WORKDIR /home/gradle/app
 RUN gradle server:build --no-daemon
 
 # Stage 2: Build Application
-FROM gradle:latest AS build
+FROM gradle:9.1.0-jdk21-alpine AS build
 COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
 # Copy all necessary project files for KMP structure
 COPY --chown=gradle:gradle gradle.properties /home/gradle/src/gradle.properties

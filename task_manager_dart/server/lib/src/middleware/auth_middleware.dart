@@ -1,5 +1,7 @@
 import 'package:shelf/shelf.dart';
 import '../services/jwt_service.dart';
+import '../exceptions/app_exception.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 class AuthMiddleware {
   final JwtService _jwtService;
@@ -41,9 +43,10 @@ class AuthMiddleware {
           });
 
           return await handler(modifiedRequest);
-        } catch (e) {
-          print('Auth middleware exception: $e');
-          return Response.unauthorized('Invalid token');
+        } on JWTException catch (e) {
+          // Only catch JWT-specific exceptions
+          print('Auth middleware JWT exception: $e');
+          return Response.unauthorized('Invalid token: ${e.message}');
         }
       };
     };

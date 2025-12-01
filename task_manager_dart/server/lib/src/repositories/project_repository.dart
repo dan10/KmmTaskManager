@@ -1,6 +1,7 @@
 import 'package:postgres/postgres.dart';
 import 'package:task_manager_shared/models.dart' as shared_models;
 import '../exceptions/custom_exceptions.dart'; // Import new exceptions
+import '../utils/uuid_utils.dart';
 
 abstract class ProjectRepository {
   Future<List<shared_models.Project>> getProjects({
@@ -19,10 +20,20 @@ abstract class ProjectRepository {
   Future<bool> delete(String id);
 
   Future<List<shared_models.Project>> findByMemberId(String userId);
+  
+  // Project member management methods
+  Future<Map<String, String>> assignUserToProject(
+      String projectId, String userId, String assignedBy);
+  
+  Future<bool> removeUserFromProject(String projectId, String userId);
+  
+  Future<List<shared_models.User>> getUsersByProject(String projectId);
+  
+  Future<bool> isUserAssignedToProject(String projectId, String userId);
 }
 
 class ProjectRepositoryImpl implements ProjectRepository {
-  final PostgreSQLConnection _db;
+  final Connection _db;
 
   ProjectRepositoryImpl(this._db);
 
@@ -34,10 +45,10 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }) async {
     var sql = StringBuffer('''
       SELECT DISTINCT p.id, p.name, p.description, p.creator_id FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN project_assignments pm ON p.id = pm.project_id
     ''');
 
-    final substitutionValues = <String, dynamic>{
+    final parameters = <String, dynamic>{
       'limit': size,
       'offset': page * size,
     };
@@ -47,12 +58,12 @@ class ProjectRepositoryImpl implements ProjectRepository {
     // Only filter by creator if creatorId is provided
     if (creatorId != null && creatorId.isNotEmpty) {
       whereClause.add('(p.creator_id = @creatorId OR pm.user_id = @creatorId)');
-      substitutionValues['creatorId'] = creatorId;
+      parameters['creatorId'] = creatorId;
     }
 
     if (query != null && query.isNotEmpty) {
       whereClause.add('(p.name ILIKE @searchQuery OR p.description ILIKE @searchQuery)');
-      substitutionValues['searchQuery'] = '%$query%';
+      parameters['searchQuery'] = '%$query%';
     }
 
     if (whereClause.isNotEmpty) {
@@ -61,21 +72,18 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
     sql.write(' ORDER BY p.name LIMIT @limit OFFSET @offset');
 
-    final result = await _db.query(
-      sql.toString(),
-      substitutionValues: substitutionValues,
+    final result = await _db.execute(
+      Sql.named(sql.toString()),
+      parameters: parameters,
     );
 
-    // Note: _mapProjectFromRow expects specific column order if using indexed access.
-    // The query explicitly lists columns now, so mapping by name is safer if order changes.
-    // For now, _mapProjectFromRow uses indexed access.
-    // id (0), name (1), description (2), creator_id (3)
     final projects = result.map((row) {
+      final columnMap = row.toColumnMap();
       return shared_models.Project(
-        id: row[0] as String,
-        name: row[1] as String,
-        description: row[2] as String,
-        creatorId: row[3] as String,
+        id: columnMap['id'] as String,
+        name: columnMap['name'] as String,
+        description: columnMap['description'] as String,
+        creatorId: columnMap['creator_id'] as String,
         memberIds: [], // Will be populated separately
       );
     }).toList();
@@ -91,7 +99,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
       int page, int size, String? query) async {
     var sql = StringBuffer(
         'SELECT DISTINCT p.id, p.name, p.description, p.creator_id FROM projects p');
-    final substitutionValues = <String, dynamic>{
+    final parameters = <String, dynamic>{
       'limit': size,
       'offset': page * size,
     };
@@ -99,22 +107,23 @@ class ProjectRepositoryImpl implements ProjectRepository {
     if (query != null && query.isNotEmpty) {
       sql.write(
           ' WHERE (p.name ILIKE @searchQuery OR p.description ILIKE @searchQuery)');
-      substitutionValues['searchQuery'] = '%$query%';
+      parameters['searchQuery'] = '%$query%';
     }
 
     sql.write(' ORDER BY p.name LIMIT @limit OFFSET @offset');
 
-    final result = await _db.query(
-      sql.toString(),
-      substitutionValues: substitutionValues,
+    final result = await _db.execute(
+      Sql.named(sql.toString()),
+      parameters: parameters,
     );
 
     final projects = result.map((row) {
+      final columnMap = row.toColumnMap();
       return shared_models.Project(
-        id: row[0] as String,
-        name: row[1] as String,
-        description: row[2] as String,
-        creatorId: row[3] as String,
+        id: columnMap['id'] as String,
+        name: columnMap['name'] as String,
+        description: columnMap['description'] as String,
+        creatorId: columnMap['creator_id'] as String,
         memberIds: [], // Will be populated separately
       );
     }).toList();
@@ -128,46 +137,45 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
   // Helper to check if a project exists
   Future<bool> _projectExists(String projectId) async {
-    final result = await _db.query(
-      'SELECT 1 FROM projects WHERE id = @projectId LIMIT 1',
-      substitutionValues: {'projectId': projectId},
+    final result = await _db.execute(
+      Sql.named('SELECT 1 FROM projects WHERE id = @projectId LIMIT 1'),
+      parameters: {'projectId': projectId},
     );
     return result.isNotEmpty;
   }
 
   // Helper to check if a user exists
   Future<bool> _userExists(String userId) async {
-    final result = await _db.query(
-      'SELECT 1 FROM users WHERE id = @userId LIMIT 1',
-      substitutionValues: {'userId': userId},
+    final result = await _db.execute(
+      Sql.named('SELECT 1 FROM users WHERE id = @userId LIMIT 1'),
+      parameters: {'userId': userId},
     );
     return result.isNotEmpty;
   }
 
   // Helper to check if a user is already a member of a project
   Future<bool> _isProjectMember(String projectId, String userId) async {
-    final result = await _db.query(
-      'SELECT 1 FROM project_members WHERE project_id = @projectId AND user_id = @userId LIMIT 1',
-      substitutionValues: {'projectId': projectId, 'userId': userId},
+    final result = await _db.execute(
+      Sql.named('SELECT 1 FROM project_assignments WHERE project_id = @projectId AND user_id = @userId LIMIT 1'),
+      parameters: {'projectId': projectId, 'userId': userId},
     );
     return result.isNotEmpty;
   }
 
   Future<shared_models.Project?> findById(String id) async {
-    final result = await _db.query(
-      'SELECT id, name, description, creator_id FROM projects WHERE id = @id', // Explicit columns
-      substitutionValues: {'id': id},
+    final result = await _db.execute(
+      Sql.named('SELECT id, name, description, creator_id FROM projects WHERE id = @id'),
+      parameters: {'id': id},
     );
 
     if (result.isEmpty) return null;
 
-    // Use the same mapping logic as in getAllProjects for consistency
-    final projectData = result.first;
+    final columnMap = result.first.toColumnMap();
     final project = shared_models.Project(
-      id: projectData[0] as String,
-      name: projectData[1] as String,
-      description: projectData[2] as String,
-      creatorId: projectData[3] as String,
+      id: columnMap['id'] as String,
+      name: columnMap['name'] as String,
+      description: columnMap['description'] as String,
+      creatorId: columnMap['creator_id'] as String,
       memberIds: [], // Placeholder
     );
     final members = await _getProjectMembers(id);
@@ -175,13 +183,13 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   Future<shared_models.Project> create(shared_models.Project project) async {
-    final result = await _db.query(
-      '''
+    final result = await _db.execute(
+      Sql.named('''
       INSERT INTO projects (id, name, description, creator_id)
       VALUES (@id, @name, @description, @creatorId)
       RETURNING *
-      ''',
-      substitutionValues: {
+      '''),
+      parameters: {
         'id': project.id,
         'name': project.name,
         'description': project.description,
@@ -189,27 +197,28 @@ class ProjectRepositoryImpl implements ProjectRepository {
       },
     );
 
-    // Add project members
+    // Add project members (creator assigns themselves)
     for (final memberId in project.memberIds) {
       await _db.execute(
-        '''
-        INSERT INTO project_members (project_id, user_id)
-        VALUES (@projectId, @userId)
-        ''',
-        substitutionValues: {
+        Sql.named('''
+        INSERT INTO project_assignments (id, project_id, user_id, assigned_by)
+        VALUES (@id, @projectId, @userId, @assignedBy)
+        '''),
+        parameters: {
+          'id': UuidUtils.generate(), // Generate unique UUIDv7
           'projectId': project.id,
           'userId': memberId,
+          'assignedBy': project.creatorId, // Creator assigns members
         },
       );
     }
 
-    // Use the same mapping logic as in getAllProjects for consistency
-    final createdRow = result.first;
+    final columnMap = result.first.toColumnMap();
     final createdProject = shared_models.Project(
-      id: createdRow[0] as String,
-      name: createdRow[1] as String,
-      description: createdRow[2] as String,
-      creatorId: createdRow[3] as String,
+      id: columnMap['id'] as String,
+      name: columnMap['name'] as String,
+      description: columnMap['description'] as String,
+      creatorId: columnMap['creator_id'] as String,
       memberIds: [], // Placeholder, will be filled by project.memberIds used in loop
     );
     final members =
@@ -219,13 +228,14 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
   Future<shared_models.Project> update(shared_models.Project project) async {
     await _db.execute(
-      '''
+      Sql.named('''
       UPDATE projects
       SET name = @name,
-          description = @description
+          description = @description,
+          updated_at = CURRENT_TIMESTAMP
       WHERE id = @id
-      ''',
-      substitutionValues: {
+      '''),
+      parameters: {
         'id': project.id,
         'name': project.name,
         'description': project.description,
@@ -234,19 +244,21 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
     // Update project members
     await _db.execute(
-      'DELETE FROM project_members WHERE project_id = @projectId',
-      substitutionValues: {'projectId': project.id},
+      Sql.named('DELETE FROM project_assignments WHERE project_id = @projectId'),
+      parameters: {'projectId': project.id},
     );
 
     for (final memberId in project.memberIds) {
       await _db.execute(
-        '''
-        INSERT INTO project_members (project_id, user_id)
-        VALUES (@projectId, @userId)
-        ''',
-        substitutionValues: {
+        Sql.named('''
+        INSERT INTO project_assignments (id, project_id, user_id, assigned_by)
+        VALUES (@id, @projectId, @userId, @assignedBy)
+        '''),
+        parameters: {
+          'id': UuidUtils.generate(), // Generate unique UUIDv7
           'projectId': project.id,
           'userId': memberId,
+          'assignedBy': project.creatorId,
         },
       );
     }
@@ -262,18 +274,18 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
   Future<bool> delete(String id) async {
     await _db.execute(
-      'DELETE FROM project_members WHERE project_id = @id',
-      substitutionValues: {'id': id},
+      Sql.named('DELETE FROM project_assignments WHERE project_id = @id'),
+      parameters: {'id': id},
     );
     await _db.execute(
-      'DELETE FROM projects WHERE id = @id',
-      substitutionValues: {'id': id},
+      Sql.named('DELETE FROM projects WHERE id = @id'),
+      parameters: {'id': id},
     );
     return true;
   }
 
   Future<Map<String, String>> assignUserToProject(
-      String projectId, String userId) async {
+      String projectId, String userId, String assignedBy) async {
     if (!await _projectExists(projectId)) {
       throw ProjectNotFoundException(id: projectId);
     }
@@ -285,14 +297,17 @@ class ProjectRepositoryImpl implements ProjectRepository {
           message: 'User $userId is already assigned to project $projectId.');
     }
 
+    final assignmentId = UuidUtils.generate(); // Generate unique UUIDv7
     await _db.execute(
-      '''
-      INSERT INTO project_members (project_id, user_id) 
-      VALUES (@projectId, @userId)
-      ''',
-      substitutionValues: {
+      Sql.named('''
+      INSERT INTO project_assignments (id, project_id, user_id, assigned_by)
+      VALUES (@id, @projectId, @userId, @assignedBy)
+      '''),
+      parameters: {
+        'id': assignmentId,
         'projectId': projectId,
         'userId': userId,
+        'assignedBy': assignedBy,
       },
     );
     return {'projectId': projectId, 'userId': userId};
@@ -303,24 +318,24 @@ class ProjectRepositoryImpl implements ProjectRepository {
     // but DELETE won't fail if they don't, it just won't affect rows.
     // The main concern is if the assignment existed.
     final result = await _db.execute(
-      '''
-      DELETE FROM project_members
+      Sql.named('''
+      DELETE FROM project_assignments
       WHERE project_id = @projectId AND user_id = @userId
-      ''',
-      substitutionValues: {
+      '''),
+      parameters: {
         'projectId': projectId,
         'userId': userId,
       },
     );
-    return result > 0; // Returns true if a row was deleted
+    return result.affectedRows > 0; // Returns true if a row was deleted
   }
 
   Future<List<String>> _getProjectMembers(String projectId) async {
-    final result = await _db.query(
-      'SELECT user_id FROM project_members WHERE project_id = @projectId',
-      substitutionValues: {'projectId': projectId},
+    final result = await _db.execute(
+      Sql.named('SELECT user_id FROM project_assignments WHERE project_id = @projectId'),
+      parameters: {'projectId': projectId},
     );
-    return result.map((row) => row[0] as String).toList();
+    return result.map((row) => row.toColumnMap()['user_id'] as String).toList();
   }
 
   // _mapProjectFromRow is no longer needed as mapping is done inline or specifically.
@@ -330,22 +345,29 @@ class ProjectRepositoryImpl implements ProjectRepository {
       throw ProjectNotFoundException(id: projectId);
     }
 
-    final result = await _db.query(
-      '''
-      SELECT u.id, u.email, u.display_name, u.google_id, u.created_at FROM users u 
-      JOIN project_members pm ON u.id = pm.user_id 
+    final result = await _db.execute(
+      Sql.named('''
+      SELECT u.id, u.email, u.display_name, u.google_id, u.created_at FROM users u
+      JOIN project_assignments pm ON u.id = pm.user_id
       WHERE pm.project_id = @projectId
-      ''',
-      substitutionValues: {'projectId': projectId},
+      '''),
+      parameters: {'projectId': projectId},
     );
 
     return result.map((row) {
+      final columnMap = row.toColumnMap();
+      // Handle created_at which can be DateTime or String
+      final createdAtValue = columnMap['created_at'];
+      final createdAtString = createdAtValue is DateTime
+          ? createdAtValue.toIso8601String()
+          : createdAtValue as String;
+
       return shared_models.User(
-        id: row[0] as String,
-        email: row[1] as String,
-        displayName: row[2] as String,
-        googleId: row[3] as String?,
-        createdAt: row[4] as String,
+        id: columnMap['id'] as String,
+        email: columnMap['email'] as String,
+        displayName: columnMap['display_name'] as String,
+        googleId: columnMap['google_id'] as String?,
+        createdAt: createdAtString,
       );
     }).toList();
   }
@@ -355,23 +377,24 @@ class ProjectRepositoryImpl implements ProjectRepository {
       throw UserNotFoundException(id: userId);
     }
 
-    final result = await _db.query(
-      '''
+    final result = await _db.execute(
+      Sql.named('''
       SELECT DISTINCT p.id, p.name, p.description, p.creator_id
       FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN project_assignments pm ON p.id = pm.project_id
       WHERE p.creator_id = @userId OR pm.user_id = @userId
       ORDER BY p.name
-      ''',
-      substitutionValues: {'userId': userId},
+      '''),
+      parameters: {'userId': userId},
     );
 
     final projects = result.map((row) {
+      final columnMap = row.toColumnMap();
       return shared_models.Project(
-        id: row[0] as String,
-        name: row[1] as String,
-        description: row[2] as String,
-        creatorId: row[3] as String,
+        id: columnMap['id'] as String,
+        name: columnMap['name'] as String,
+        description: columnMap['description'] as String,
+        creatorId: columnMap['creator_id'] as String,
         memberIds: [], // Will be populated separately
       );
     }).toList();
@@ -388,23 +411,24 @@ class ProjectRepositoryImpl implements ProjectRepository {
       throw UserNotFoundException(id: userId);
     }
 
-    final result = await _db.query(
-      '''
+    final result = await _db.execute(
+      Sql.named('''
       SELECT DISTINCT p.id, p.name, p.description, p.creator_id
       FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
+      LEFT JOIN project_assignments pm ON p.id = pm.project_id
       WHERE p.creator_id = @userId OR pm.user_id = @userId
       ORDER BY p.name
-      ''',
-      substitutionValues: {'userId': userId},
+      '''),
+      parameters: {'userId': userId},
     );
 
     final projects = result.map((row) {
+      final columnMap = row.toColumnMap();
       return shared_models.Project(
-        id: row[0] as String,
-        name: row[1] as String,
-        description: row[2] as String,
-        creatorId: row[3] as String,
+        id: columnMap['id'] as String,
+        name: columnMap['name'] as String,
+        description: columnMap['description'] as String,
+        creatorId: columnMap['creator_id'] as String,
         memberIds: [], // Will be populated separately
       );
     }).toList();
@@ -414,5 +438,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
       projects[i] = projects[i].copyWith(memberIds: members);
     }
     return projects;
+  }
+
+  Future<bool> isUserAssignedToProject(String projectId, String userId) async {
+    return _isProjectMember(projectId, userId);
   }
 }

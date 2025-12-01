@@ -10,17 +10,13 @@ import kotlin.uuid.Uuid
 
 object UuidNavType : NavType<Uuid>(isNullableAllowed = false) {
 
-    override fun put(bundle: SavedState, key: String, value: Uuid) {
-        bundle.write {
-            putString(key, value.toString())
-        }
-    }
+    override fun put(bundle: SavedState, key: String, value: Uuid) =
+        bundle.write { putString(key, value.toString()) }
 
-    override fun get(bundle: SavedState, key: String): Uuid? {
-        return bundle.read {
-            getString(key).takeIf { it.isNotEmpty() }?.let { parseValue(it) }
-        }
-    }
+
+    override fun get(bundle: SavedState, key: String): Uuid? =
+        bundle.read { parseValue(getString(key)) }
+
 
     override fun parseValue(value: String): Uuid {
         return Uuid.parseHexDash(value)

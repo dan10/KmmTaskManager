@@ -16,25 +16,24 @@ kotlin {
         }
     }
 
-    val xcframeworkName = "Shared"
-    val xcf = XCFramework(xcframeworkName)
+    iosArm64()
+    iosSimulatorArm64()
 
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach {
-        it.binaries.framework {
-            baseName = xcframeworkName
+    jvm()
 
-            // Specify CFBundleIdentifier to uniquely identify the framework
-            binaryOption("bundleId", "com.danioliveira.taskmanager.${xcframeworkName}")
-            xcf.add(this)
-            isStatic = true
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    swiftExport {
+        moduleName = "Shared"
+
+        export("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1") {
+            moduleName = "KotlinDateTime"
+            flattenPackage = "kotlinx.datetime"
         }
     }
 
-    jvm()
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
 
     sourceSets {
         commonMain.dependencies {

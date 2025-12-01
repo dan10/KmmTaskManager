@@ -1,6 +1,6 @@
 import 'package:task_manager_shared/models.dart';
 
-import '../../lib/data/services/project_api_service.dart';
+import 'package:task_manager_app/features/projects/data/services/project_api_service.dart';
 
 class MockProjectApiService implements ProjectApiService {
   bool _shouldThrowError = false;

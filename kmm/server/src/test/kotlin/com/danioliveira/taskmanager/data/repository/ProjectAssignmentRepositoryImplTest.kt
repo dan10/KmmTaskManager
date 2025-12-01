@@ -8,7 +8,10 @@ import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -17,13 +20,16 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import com.danioliveira.taskmanager.utils.toUuid
+import com.danioliveira.taskmanager.utils.randomV7
 
+@OptIn(ExperimentalUuidApi::class)
 class ProjectAssignmentRepositoryImplTest {
     private lateinit var assignmentRepository: ProjectAssignmentRepository
     private lateinit var userRepository: UserRepository
     private lateinit var projectRepository: ProjectRepository
-    private lateinit var testUserId: UUID
-    private lateinit var testProjectId: UUID
+    private lateinit var testUserId: Uuid
+    private lateinit var testProjectId: Uuid
 
     @BeforeTest
     fun setUp() = runBlocking {
@@ -37,13 +43,13 @@ class ProjectAssignmentRepositoryImplTest {
         val user = dbQuery {
             userRepository.create("test_assign@example.com", "password", "Test User", null)
         }
-        testUserId = UUID.fromString(user.id)
+        testUserId = user.id.toUuid()
 
         // Create a test project
         val project = dbQuery {
             projectRepository.create("Test Project", "Test Project Description", testUserId)
         }
-        testProjectId = UUID.fromString(project.id)
+        testProjectId = project.id.toUuid()
     }
 
     @AfterTest
@@ -58,7 +64,7 @@ class ProjectAssignmentRepositoryImplTest {
         val secondUser = dbQuery {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Assign the second user to the project
         val assignment = dbQuery {
@@ -85,7 +91,7 @@ class ProjectAssignmentRepositoryImplTest {
             userRepository.create("second4@example.com", "password", "Second User", null)
         }
 
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         dbQuery {
             assignmentRepository.assignUserToProject(testProjectId, secondUserId)
@@ -105,7 +111,7 @@ class ProjectAssignmentRepositoryImplTest {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
 
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Assign the second user to the project
         dbQuery {
@@ -141,7 +147,7 @@ class ProjectAssignmentRepositoryImplTest {
         val secondUser = dbQuery {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Try to remove a user that is not assigned to the project
         val removed = dbQuery {
@@ -158,17 +164,17 @@ class ProjectAssignmentRepositoryImplTest {
         val user1 = dbQuery {
             userRepository.create("user1@example.com", "password", "User 1", null)
         }
-        val user1Id = UUID.fromString(user1.id)
+        val user1Id = user1.id.toUuid()
 
         val user2 = dbQuery {
             userRepository.create("user2@example.com", "password", "User 2", null)
         }
-        val user2Id = UUID.fromString(user2.id)
+        val user2Id = user2.id.toUuid()
 
         val user3 = dbQuery {
             userRepository.create("user3@example.com", "password", "User 3", null)
         }
-        val user3Id = UUID.fromString(user3.id)
+        val user3Id = user3.id.toUuid()
 
         // Assign users 1 and 2 to the project
         dbQuery {
@@ -196,18 +202,18 @@ class ProjectAssignmentRepositoryImplTest {
         val secondUser = dbQuery {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Create multiple projects
         val project1 = dbQuery {
             projectRepository.create("Project 1", "Description 1", testUserId)
         }
-        val project1Id = UUID.fromString(project1.id)
+        val project1Id = project1.id.toUuid()
 
         val project2 = dbQuery {
             projectRepository.create("Project 2", "Description 2", testUserId)
         }
-        val project2Id = UUID.fromString(project2.id)
+        val project2Id = project2.id.toUuid()
 
         // Assign the second user to projects 1 and 2
         dbQuery {
@@ -234,7 +240,7 @@ class ProjectAssignmentRepositoryImplTest {
         val secondUser = dbQuery {
             userRepository.create("second@example.com", "password", "Second User", null)
         }
-        val secondUserId = UUID.fromString(secondUser.id)
+        val secondUserId = secondUser.id.toUuid()
 
         // Check if the user is assigned to the project (should be false)
         val isAssignedBefore = dbQuery {

@@ -1,6 +1,6 @@
 package com.danioliveira.taskmanager.api.request
 
-import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.api.response.TaskStatusResponse
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 data class ProjectTaskUpdateRequest(
     val title: String? = null,
     val description: String? = null,
-    val status: TaskStatus? = null,
+    val status: TaskStatusResponse? = null,
     val dueDate: LocalDateTime? = null,
     val assigneeId: String? = null
 )

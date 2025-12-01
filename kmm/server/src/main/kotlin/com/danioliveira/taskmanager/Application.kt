@@ -19,6 +19,8 @@ import io.ktor.server.application.log
 import io.ktor.server.config.property
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.resources.Resources
+import io.ktor.server.response.*
+import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 
 fun main(args: Array<String>) = EngineMain.main(args)
@@ -47,6 +49,11 @@ fun Application.module() {
 fun Application.configureRouting() {
     install(Resources)
     routing {
+        // Simple health endpoint so host/curl checks succeed (returns 200 + JSON)
+        get("/health") {
+            call.respond(mapOf("status" to "ok"))
+        }
+
         authRoutes()
         projectRoutes()
         projectTaskRoutes()

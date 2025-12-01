@@ -5,17 +5,19 @@ import com.danioliveira.taskmanager.api.request.ProjectCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskCreateRequest
 import com.danioliveira.taskmanager.api.request.TaskUpdateRequest
 import com.danioliveira.taskmanager.createTestUser
-import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.domain.exceptions.ForbiddenException
 import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
-import com.danioliveira.taskmanager.routes.toUUID
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.junit.Test
 import org.koin.test.inject
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -23,7 +25,10 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Clock
+import com.danioliveira.taskmanager.utils.toUuid
+import com.danioliveira.taskmanager.utils.randomV7
 
+@OptIn(ExperimentalUuidApi::class)
 class TaskServiceTest : BaseServiceTest() {
     private val taskService: TaskService by inject()
     private val projectService: ProjectService by inject()
@@ -42,7 +47,7 @@ class TaskServiceTest : BaseServiceTest() {
 
         // Create an actual project in the database
         val projectResponse = projectService.createProject(
-            creatorId.toUUID(), ProjectCreateRequest(
+            creatorId.toUuid(), ProjectCreateRequest(
                 name = "Test Project for Tasks",
                 description = "Project for testing task listing"
             )
@@ -50,7 +55,7 @@ class TaskServiceTest : BaseServiceTest() {
         val projectId = projectResponse.id
 
         // Assign the assignee to the project
-        projectService.assignUserToProject(projectId.toUUID(), assigneeId.toUUID(), creatorId.toUUID())
+        projectService.assignUserToProject(projectId.toUuid(), assigneeId.toUuid(), creatorId.toUuid())
 
         // Create task 1
         val request1 = TaskCreateRequest(
@@ -199,7 +204,7 @@ class TaskServiceTest : BaseServiceTest() {
         val task3 = taskService.create(request3, creatorId)
 
         // Find tasks by assignee1
-        val assignee1Tasks = taskService.findAllByAssigneeId(assignee1Id.toUUID())
+        val assignee1Tasks = taskService.findAllByAssigneeId(assignee1Id.toUuid())
 
         // Verify the correct tasks were returned
         assertEquals(2, assignee1Tasks.total)
@@ -209,7 +214,7 @@ class TaskServiceTest : BaseServiceTest() {
         assertFalse(assignee1Tasks.items.any { it.id == task3.id })
 
         // Find tasks by assignee2
-        val assignee2Tasks = taskService.findAllByAssigneeId(assignee2Id.toUUID())
+        val assignee2Tasks = taskService.findAllByAssigneeId(assignee2Id.toUuid())
 
         // Verify the correct tasks were returned
         assertEquals(1, assignee2Tasks.total)
@@ -250,7 +255,7 @@ class TaskServiceTest : BaseServiceTest() {
     fun `test find task by id - not found`() = runTest {
         // Try to find a task that doesn't exist
         try {
-            taskService.findById(UUID.randomUUID().toString())
+            taskService.findById(Uuid.randomV7().toString())
             fail("Expected NotFoundException was not thrown")
         } catch (e: NotFoundException) {
             // Expected exception
@@ -266,7 +271,7 @@ class TaskServiceTest : BaseServiceTest() {
 
         // Create an actual project in the database
         val projectResponse = projectService.createProject(
-            creatorId.toUUID(), ProjectCreateRequest(
+            creatorId.toUuid(), ProjectCreateRequest(
                 name = "Test Project",
                 description = "Test Project Description"
             )
@@ -274,7 +279,7 @@ class TaskServiceTest : BaseServiceTest() {
         val projectId = projectResponse.id
 
         // Assign the assignee to the project
-        projectService.assignUserToProject(projectId.toUUID(), assigneeId.toUUID(), creatorId.toUUID())
+        projectService.assignUserToProject(projectId.toUuid(), assigneeId.toUuid(), creatorId.toUuid())
 
         val dueDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val request = TaskCreateRequest(
@@ -309,7 +314,7 @@ class TaskServiceTest : BaseServiceTest() {
 
         // Create an actual project in the database
         val projectResponse = projectService.createProject(
-            creatorId.toUUID(), ProjectCreateRequest(
+            creatorId.toUuid(), ProjectCreateRequest(
                 name = "Test Project Not In",
                 description = "Test Project Description Not In"
             )
@@ -411,7 +416,7 @@ class TaskServiceTest : BaseServiceTest() {
         )
 
         try {
-            taskService.update(UUID.randomUUID().toString(), updateRequest)
+            taskService.update(Uuid.randomV7().toString(), updateRequest)
             fail("Expected NotFoundException was not thrown")
         } catch (e: NotFoundException) {
             // Expected exception
@@ -455,7 +460,7 @@ class TaskServiceTest : BaseServiceTest() {
     @Test
     fun `test delete task - not found`() = runTest {
         // Try to delete a task that doesn't exist
-        val result = taskService.delete(UUID.randomUUID().toString())
+        val result = taskService.delete(Uuid.randomV7().toString())
 
         // Verify the result is false
         assertFalse(result)
@@ -499,7 +504,7 @@ class TaskServiceTest : BaseServiceTest() {
 
         // Try to assign a task that doesn't exist
         try {
-            taskService.assign(UUID.randomUUID().toString(), assigneeId)
+            taskService.assign(Uuid.randomV7().toString(), assigneeId)
             fail("Expected NotFoundException was not thrown")
         } catch (e: NotFoundException) {
             // Expected exception
@@ -541,7 +546,7 @@ class TaskServiceTest : BaseServiceTest() {
     fun `test change task status - not found`() = runTest {
         // Try to change the status of a task that doesn't exist
         try {
-            taskService.changeStatus(UUID.randomUUID().toString(), TaskStatus.IN_PROGRESS.name)
+            taskService.changeStatus(Uuid.randomV7().toString(), TaskStatus.IN_PROGRESS.name)
             fail("Expected NotFoundException was not thrown")
         } catch (e: NotFoundException) {
             // Expected exception
@@ -612,7 +617,7 @@ class TaskServiceTest : BaseServiceTest() {
         kotlinx.coroutines.delay(10)
 
         // Get task progress for the user
-        val progress = taskService.getUserTaskProgress(userId.toUUID())
+        val progress = taskService.getUserTaskProgress(userId.toUuid())
 
         // Verify the progress counts
         assertNotNull(progress)
@@ -626,7 +631,7 @@ class TaskServiceTest : BaseServiceTest() {
         val userId = createTestUser(email = "no_tasks_user@example.com", displayName = "No Tasks User")
 
         // Get task progress for the user
-        val progress = taskService.getUserTaskProgress(userId.toUUID())
+        val progress = taskService.getUserTaskProgress(userId.toUuid())
 
         // Verify all counts are zero
         assertNotNull(progress)

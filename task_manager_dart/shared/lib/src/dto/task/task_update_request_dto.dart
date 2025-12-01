@@ -13,7 +13,6 @@ abstract class TaskUpdateRequestDto with _$TaskUpdateRequestDto {
     TaskStatus? status,
     Priority? priority,
     DateTime? dueDate,
-    String? projectId,
     String? assigneeId,
   }) = _TaskUpdateRequestDto;
 
@@ -30,7 +29,6 @@ extension TaskUpdateRequestDtoExtension on TaskUpdateRequestDto {
     if (status != null) result['status'] = status;
     if (priority != null) result['priority'] = priority;
     if (dueDate != null) result['dueDate'] = dueDate!.toIso8601String();
-    if (projectId != null) result['projectId'] = projectId;
     if (assigneeId != null) result['assigneeId'] = assigneeId;
     
     return result;
@@ -73,6 +71,5 @@ extension TaskUpdateRequestDtoExtension on TaskUpdateRequestDto {
                         status != null || 
                         priority != null || 
                         dueDate != null || 
-                        projectId != null || 
                         assigneeId != null;
 } 

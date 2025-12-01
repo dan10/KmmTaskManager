@@ -22,6 +22,14 @@ abstract class TaskService {
       String taskId, String assigneeId); // New
   Future<shared_models.TaskDto> changeTaskStatus(
       String taskId, shared_models.TaskStatus newStatus); // New
+  Future<shared_models.TaskProgress> getTaskProgress(String userId); // New
+  Future<List<shared_models.TaskDto>> getTasksAssignedDueOn(
+    String userId,
+    DateTime startUtc,
+    DateTime endUtc, {
+    int page = 0,
+    int size = 10,
+  });
 }
 
 class TaskServiceImpl implements TaskService {
@@ -109,5 +117,26 @@ class TaskServiceImpl implements TaskService {
     // Repository now throws TaskNotFoundException
     return _repository.changeTaskStatus(taskId, newStatus);
     // No need to check for null if repo guarantees to throw or return valid object.
+  }
+
+  @override
+  Future<shared_models.TaskProgress> getTaskProgress(String userId) async {
+    return _repository.getTaskProgress(userId);
+  }
+
+  Future<List<shared_models.TaskDto>> getTasksAssignedDueOn(
+    String userId,
+    DateTime startUtc,
+    DateTime endUtc, {
+    int page = 0,
+    int size = 10,
+  }) async {
+    return _repository.getTasksAssignedDueOn(
+      assigneeId: userId,
+      startUtc: startUtc,
+      endUtc: endUtc,
+      page: page,
+      size: size,
+    );
   }
 }

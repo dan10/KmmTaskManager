@@ -12,8 +12,8 @@ import com.danioliveira.taskmanager.api.routes.Projects
 import com.danioliveira.taskmanager.api.routes.Tasks
 import com.danioliveira.taskmanager.auth.JwtConfig
 import com.danioliveira.taskmanager.createTestUser
-import com.danioliveira.taskmanager.domain.Priority
-import com.danioliveira.taskmanager.domain.TaskStatus
+import com.danioliveira.taskmanager.core.domain.model.Priority
+import com.danioliveira.taskmanager.core.domain.model.TaskStatus
 import com.danioliveira.taskmanager.generateTestToken
 import com.danioliveira.taskmanager.withAuth
 import io.ktor.client.call.body
@@ -901,6 +901,309 @@ class TaskRoutesTest : KoinTest {
 
         // Verify the task status was changed
         assertEquals(TaskStatus.DONE, responseBody.status)
+    }
+
+    @Test
+    fun `test get tasks assigned due on specific date`() = testApplication {
+        environment {
+            config = ApplicationConfig("application_test.conf")
+        }
+
+        val client = createClient {
+            install(Resources)
+            install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        // Create a test user
+        val userId = createTestUser(
+            email = "calendar@example.com",
+            displayName = "Calendar User"
+        )
+
+        // Create tasks with different due dates
+        val today = LocalDateTime.parse("2024-12-15T10:00:00")
+        val tomorrow = LocalDateTime.parse("2024-12-16T10:00:00")
+        val yesterday = LocalDateTime.parse("2024-12-14T10:00:00")
+
+        // Task due today - HIGH priority
+        client.post(Tasks()) {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+            setBody(
+                TaskCreateRequest(
+                    title = "Task Due Today High",
+                    description = "Should appear in results",
+                    projectId = null,
+                    assigneeId = userId,
+                    priority = Priority.HIGH,
+                    dueDate = today
+                )
+            )
+        }
+
+        // Task due today - MEDIUM priority
+        client.post(Tasks()) {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+            setBody(
+                TaskCreateRequest(
+                    title = "Task Due Today Medium",
+                    description = "Should appear in results",
+                    projectId = null,
+                    assigneeId = userId,
+                    priority = Priority.MEDIUM,
+                    dueDate = today
+                )
+            )
+        }
+
+        // Task due today - LOW priority
+        client.post(Tasks()) {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+            setBody(
+                TaskCreateRequest(
+                    title = "Task Due Today Low",
+                    description = "Should appear in results",
+                    projectId = null,
+                    assigneeId = userId,
+                    priority = Priority.LOW,
+                    dueDate = today
+                )
+            )
+        }
+
+        // Task due tomorrow (should not appear)
+        client.post(Tasks()) {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+            setBody(
+                TaskCreateRequest(
+                    title = "Task Due Tomorrow",
+                    description = "Should not appear",
+                    projectId = null,
+                    assigneeId = userId,
+                    priority = Priority.HIGH,
+                    dueDate = tomorrow
+                )
+            )
+        }
+
+        // Task due yesterday (should not appear)
+        client.post(Tasks()) {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+            setBody(
+                TaskCreateRequest(
+                    title = "Task Due Yesterday",
+                    description = "Should not appear",
+                    projectId = null,
+                    assigneeId = userId,
+                    priority = Priority.HIGH,
+                    dueDate = yesterday
+                )
+            )
+        }
+
+        // Task with DONE status (should not appear)
+        val doneTaskResponse = client.post(Tasks()) {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+            setBody(
+                TaskCreateRequest(
+                    title = "Task Done Today",
+                    description = "Should not appear because it's done",
+                    projectId = null,
+                    assigneeId = userId,
+                    priority = Priority.HIGH,
+                    dueDate = today
+                )
+            )
+        }
+        val doneTaskId = doneTaskResponse.body<TaskResponse>().id
+        client.post(Tasks.Id.Status(Tasks.Id(taskId = doneTaskId))) {
+            contentType(ContentType.Application.Json)
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+            setBody(TaskStatusChangeRequest(TaskStatus.DONE.name))
+        }
+
+        // Get tasks due on 2024-12-15
+        val response = client.get(Tasks.Assigned.DueOn(date = "2024-12-15")) {
+            withAuth(generateTestToken(userId, "calendar@example.com"))
+        }
+
+        // Verify the response
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val responseBody = response.body<PaginatedResponse<TaskResponse>>()
+
+        // Should return exactly 3 tasks (excluding DONE task and tasks from other days)
+        assertEquals(3, responseBody.items.size)
+        assertEquals(3, responseBody.total)
+
+        // Verify tasks are ordered by priority (HIGH > MEDIUM > LOW)
+        assertEquals("Task Due Today High", responseBody.items[0].title)
+        assertEquals(Priority.HIGH, responseBody.items[0].priority)
+
+        assertEquals("Task Due Today Medium", responseBody.items[1].title)
+        assertEquals(Priority.MEDIUM, responseBody.items[1].priority)
+
+        assertEquals("Task Due Today Low", responseBody.items[2].title)
+        assertEquals(Priority.LOW, responseBody.items[2].priority)
+
+        // Verify all tasks have the correct due date
+        responseBody.items.forEach { task ->
+            assertEquals(today, task.dueDate)
+            assertEquals(userId, task.assigneeId)
+        }
+    }
+
+    @Test
+    fun `test get tasks assigned due on date with no tasks`() = testApplication {
+        environment {
+            config = ApplicationConfig("application_test.conf")
+        }
+
+        val client = createClient {
+            install(Resources)
+            install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        // Create a test user
+        val userId = createTestUser(
+            email = "empty@example.com",
+            displayName = "Empty User"
+        )
+
+        // Get tasks due on a date with no tasks
+        val response = client.get(Tasks.Assigned.DueOn(date = "2025-01-01")) {
+            withAuth(generateTestToken(userId, "empty@example.com"))
+        }
+
+        // Verify the response
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val responseBody = response.body<PaginatedResponse<TaskResponse>>()
+
+        // Should return empty list
+        assertEquals(0, responseBody.items.size)
+        assertEquals(0, responseBody.total)
+    }
+
+    @Test
+    fun `test get tasks assigned due on date with pagination`() = testApplication {
+        environment {
+            config = ApplicationConfig("application_test.conf")
+        }
+
+        val client = createClient {
+            install(Resources)
+            install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        // Create a test user with unique email to avoid conflicts
+        val userId = createTestUser(
+            email = "pagination-test-${System.currentTimeMillis()}@example.com",
+            displayName = "Pagination User"
+        )
+
+        // Use a unique date to avoid conflicts with other tests
+        val dueDate = LocalDateTime.parse("2025-03-15T10:00:00")
+
+        // Create exactly 5 tasks for this test
+        repeat(5) { index ->
+            client.post(Tasks()) {
+                contentType(ContentType.Application.Json)
+                withAuth(generateTestToken(userId, userId))
+                setBody(
+                    TaskCreateRequest(
+                        title = "Pagination Task $index",
+                        description = "Description $index",
+                        projectId = null,
+                        assigneeId = userId,
+                        priority = Priority.MEDIUM,
+                        dueDate = dueDate
+                    )
+                )
+            }
+        }
+
+        // Get first page (size 2)
+        val page1Response = client.get(Tasks.Assigned.DueOn(date = "2025-03-15", page = 0, size = 2)) {
+            withAuth(generateTestToken(userId, userId))
+        }
+
+        assertEquals(HttpStatusCode.OK, page1Response.status)
+        val page1Body = page1Response.body<PaginatedResponse<TaskResponse>>()
+
+        assertEquals(2, page1Body.items.size)
+        assertEquals(5, page1Body.total)
+        // Note: PaginatedResponse doesn't expose page/size/totalPages in the current implementation
+        // These assertions are commented out for now
+        // assertEquals(0, page1Body.page)
+        // assertEquals(2, page1Body.size)
+        // assertEquals(3, page1Body.totalPages)
+
+        // Get second page
+        val page2Response = client.get(Tasks.Assigned.DueOn(date = "2025-03-15", page = 1, size = 2)) {
+            withAuth(generateTestToken(userId, userId))
+        }
+
+        assertEquals(HttpStatusCode.OK, page2Response.status)
+        val page2Body = page2Response.body<PaginatedResponse<TaskResponse>>()
+
+        assertEquals(2, page2Body.items.size)
+        assertEquals(5, page2Body.total)
+        // assertEquals(1, page2Body.page)
+
+        // Get third page
+        val page3Response = client.get(Tasks.Assigned.DueOn(date = "2025-03-15", page = 2, size = 2)) {
+            withAuth(generateTestToken(userId, userId))
+        }
+
+        assertEquals(HttpStatusCode.OK, page3Response.status)
+        val page3Body = page3Response.body<PaginatedResponse<TaskResponse>>()
+
+        assertEquals(1, page3Body.items.size)
+        assertEquals(5, page3Body.total)
+        // assertEquals(2, page3Body.page)
+    }
+
+    @Test
+    fun `test get tasks assigned due on date with invalid date format`() = testApplication {
+        environment {
+            config = ApplicationConfig("application_test.conf")
+        }
+
+        val client = createClient {
+            install(Resources)
+            install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        }
+
+        JwtConfig.init(application.property<DomainJwtConfig>("ktor.jwt"))
+
+        // Create a test user
+        val userId = createTestUser(
+            email = "invalid@example.com",
+            displayName = "Invalid User"
+        )
+
+        // Try to get tasks with invalid date format
+        val response = client.get(Tasks.Assigned.DueOn(date = "invalid-date")) {
+            withAuth(generateTestToken(userId, "invalid@example.com"))
+        }
+
+        // Should return bad request or internal server error
+        assertTrue(
+            response.status == HttpStatusCode.BadRequest ||
+            response.status == HttpStatusCode.InternalServerError
+        )
     }
 
     //

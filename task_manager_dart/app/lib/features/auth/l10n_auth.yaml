@@ -1,0 +1,4 @@
+arb-dir: lib/features/auth/l10n
+template-arb-file: auth_en.arb
+output-localization-file: auth_l10n.dart
+output-class: AuthLocalizations

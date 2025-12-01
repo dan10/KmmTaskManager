@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:uuid/uuid.dart';
 import '../middleware/auth_middleware.dart';
 import '../services/project_service.dart';
+import '../utils/uuid_utils.dart';
 import 'package:task_manager_shared/models.dart' as shared_models;
 import '../util/shelf_helpers.dart';
 import '../exceptions/custom_exceptions.dart';
@@ -15,12 +15,12 @@ class ProjectRoutes {
 
   ProjectRoutes(this._projectService, this._authMiddleware) {
     final baseRouter = Router()
-      ..get('/projects', _getProjects)
-      ..get('/projects/<id>', _getProjectById)
-      ..post('/projects', _createProject)
-      ..put('/projects/<id>', _updateProject)
-      ..delete('/projects/<id>', _deleteProject)
-      ..get('/projects/member/<userId>', _getProjectsByMember);
+      ..get('/', _getProjects)
+      ..get('/<id>', _getProjectById)
+      ..post('/', _createProject)
+      ..put('/<id>', _updateProject)
+      ..delete('/<id>', _deleteProject)
+      ..get('/member/<userId>', _getProjectsByMember);
     
     // Wrap the router with auth middleware using Pipeline
     final handler = Pipeline()
@@ -97,7 +97,7 @@ class ProjectRoutes {
       }
 
       // Convert to Project model for service layer
-      final projectId = const Uuid().v4();
+      final projectId = UuidUtils.generate();
       final project = shared_models.Project(
         id: projectId,
         name: createRequest.name,

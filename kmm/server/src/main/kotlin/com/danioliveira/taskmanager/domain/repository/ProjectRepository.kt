@@ -2,9 +2,11 @@ package com.danioliveira.taskmanager.domain.repository
 
 import com.danioliveira.taskmanager.api.response.PaginatedResponse
 import com.danioliveira.taskmanager.api.response.ProjectResponse
-import org.jetbrains.exposed.v1.core.Transaction
-import java.util.UUID
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 interface ProjectRepository {
 
     /**
@@ -15,8 +17,8 @@ interface ProjectRepository {
      * @param ownerId the owner of the project
      * @return the newly created project
      */
-    context(transaction: Transaction)
-    suspend fun create(name: String, description: String?, ownerId: UUID): ProjectResponse
+    context(transaction: R2dbcTransaction)
+    suspend fun create(name: String, description: String?, ownerId: Uuid): ProjectResponse
 
     /**
      * Finds a project by id.
@@ -24,10 +26,10 @@ interface ProjectRepository {
      * @param id the id of the project
      * @return the project [ProjectResponse] with the given id, or null if no such project exists
      */
-    context(transaction: Transaction)
-    suspend fun findById(id: UUID): ProjectResponse
+    context(transaction: R2dbcTransaction)
+    suspend fun findById(id: Uuid): ProjectResponse
 
-    suspend fun existsById(id: UUID): Boolean
+    suspend fun existsById(id: Uuid): Boolean
 
     /**
      * Finds all projects owned by the given user with pagination.
@@ -38,9 +40,9 @@ interface ProjectRepository {
      * @param query optional query to filter projects by name
      * @return a paginated response of projects [ProjectResponse] owned by the user
      */
-    context(transaction: Transaction)
+    context(transaction: R2dbcTransaction)
     suspend fun findAllByOwner(
-        ownerId: UUID,
+        ownerId: Uuid,
         page: Int = 0,
         size: Int = 10,
         query: String? = null
@@ -54,8 +56,8 @@ interface ProjectRepository {
      * @param description the new description of the project
      * @return true if the project was updated, false otherwise
      */
-    context(transaction: Transaction)
-    suspend fun update(id: UUID, name: String, description: String?): Boolean
+    context(transaction: R2dbcTransaction)
+    suspend fun update(id: Uuid, name: String, description: String?): Boolean
 
     /**
      * Deletes a project by id.
@@ -63,6 +65,6 @@ interface ProjectRepository {
      * @param id the id of the project to delete
      * @return true if the project was deleted, false otherwise
      */
-    context(transaction: Transaction)
-    suspend fun delete(id: UUID): Boolean
+    context(transaction: R2dbcTransaction)
+    suspend fun delete(id: Uuid): Boolean
 }

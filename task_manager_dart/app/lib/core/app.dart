@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_manager_app/core/routing/app_router.dart';
+import 'package:task_manager_app/core/theme/theme.dart';
 
-import '../navigation/app_router.dart';
-import 'theme/app_theme.dart';
+import '../core/data/local/secure_storage.dart';
+import 'auth/auth_state.dart';
 
 class TaskManagerApp extends StatelessWidget {
   const TaskManagerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final secureStorage = Provider.of<SecureStorage>(context, listen: false);
+    final authState = Provider.of<AuthState>(context, listen: false);
+    
     return MaterialApp.router(
       title: 'Task Manager',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: TaskItTheme.light(),
+      darkTheme: TaskItTheme.dark(),
       themeMode: ThemeMode.system,
-      routerConfig: AppRouter.router,
+      routerConfig: createAppRouter(secureStorage, authState),
       debugShowCheckedModeBanner: false,
     );
   }

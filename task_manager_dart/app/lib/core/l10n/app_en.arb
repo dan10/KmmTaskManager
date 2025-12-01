@@ -1,0 +1,540 @@
+{
+  "@@locale": "en",
+  "appName": "TaskIt",
+  
+  "@@context": "Authentication feature strings",
+  "authAppName": "Task Manager",
+  "@authAppName": {
+    "description": "App name displayed on auth screens"
+  },
+  "authLoginTitle": "Welcome Back",
+  "@authLoginTitle": {
+    "description": "Login screen title"
+  },
+  "authRegisterTitle": "Create Account",
+  "@authRegisterTitle": {
+    "description": "Register screen title"
+  },
+  "authEmail": "Email",
+  "@authEmail": {
+    "description": "Email field label"
+  },
+  "authEmailHint": "Enter your email",
+  "@authEmailHint": {
+    "description": "Email field hint text"
+  },
+  "authPassword": "Password",
+  "@authPassword": {
+    "description": "Password field label"
+  },
+  "authPasswordHint": "Enter your password",
+  "@authPasswordHint": {
+    "description": "Password field hint text"
+  },
+  "authConfirmPassword": "Confirm Password",
+  "@authConfirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "authName": "Name",
+  "@authName": {
+    "description": "Name field label for registration"
+  },
+  "authNameHint": "Enter your full name",
+  "@authNameHint": {
+    "description": "Name field hint text"
+  },
+  "authLoginButton": "Login",
+  "@authLoginButton": {
+    "description": "Login button text"
+  },
+  "authRegisterButton": "Create Account",
+  "@authRegisterButton": {
+    "description": "Register button text"
+  },
+  "authSignUp": "Sign Up",
+  "@authSignUp": {
+    "description": "Sign up link text"
+  },
+  "authSignIn": "Sign In",
+  "@authSignIn": {
+    "description": "Sign in link text"
+  },
+  "authWithoutAccount": "Don't have an account?",
+  "@authWithoutAccount": {
+    "description": "Text asking if user doesn't have an account"
+  },
+  "authAlreadyHaveAccount": "Already have an account?",
+  "@authAlreadyHaveAccount": {
+    "description": "Text asking if user already has an account"
+  },
+  "authEmailError": "Please enter a valid email address",
+  "@authEmailError": {
+    "description": "Error message for invalid email"
+  },
+  "authPasswordError": "Password must be at least 8 characters",
+  "@authPasswordError": {
+    "description": "Error message for invalid password"
+  },
+  "authPasswordTooShort": "Password must be at least {minLength} characters",
+  "@authPasswordTooShort": {
+    "description": "Error message when password is too short",
+    "placeholders": {
+      "minLength": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "authNameError": "Name should not be empty",
+  "@authNameError": {
+    "description": "Error message for empty name field"
+  },
+  "authNameTooShort": "Name must be at least 2 characters",
+  "@authNameTooShort": {
+    "description": "Error message when name is too short"
+  },
+  "authConfirmPasswordError": "Passwords do not match",
+  "@authConfirmPasswordError": {
+    "description": "Error message when passwords don't match"
+  },
+  "authLoginError": "Login failed: {error}",
+  "@authLoginError": {
+    "description": "Generic login error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Invalid credentials"
+      }
+    }
+  },
+  "authRegisterError": "Registration failed: {error}",
+  "@authRegisterError": {
+    "description": "Generic registration error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Email already exists"
+      }
+    }
+  },
+  "authForgotPassword": "Forgot Password?",
+  "@authForgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "authResetPassword": "Reset Password",
+  "@authResetPassword": {
+    "description": "Reset password button text"
+  },
+  "authLogout": "Logout",
+  "@authLogout": {
+    "description": "Logout button text"
+  },
+  "authLoggingIn": "Logging in...",
+  "@authLoggingIn": {
+    "description": "Loading text while logging in"
+  },
+  "authCreatingAccount": "Creating account...",
+  "@authCreatingAccount": {
+    "description": "Loading text while creating account"
+  },
+  
+  "@@context": "Task feature strings",
+  "taskDetailsTitle": "Task Details",
+  "@taskDetailsTitle": {
+    "description": "Title for task details screen"
+  },
+  "taskEditTitle": "Edit Task",
+  "@taskEditTitle": {
+    "description": "Title for task edit screen"
+  },
+  "taskListTitle": "Tasks",
+  "@taskListTitle": {
+    "description": "Title for task list screen"
+  },
+  "taskSearchPlaceholder": "Search tasks...",
+  "@taskSearchPlaceholder": {
+    "description": "Placeholder text for task search field"
+  },
+  "taskNotFound": "Task not found",
+  "@taskNotFound": {
+    "description": "Message when task cannot be found"
+  },
+  "taskLoadError": "Failed to load task details",
+  "@taskLoadError": {
+    "description": "Error message when task details fail to load"
+  },
+  "taskDeletedSuccess": "Task deleted successfully",
+  "@taskDeletedSuccess": {
+    "description": "Success message after deleting a task"
+  },
+  "taskDeletedError": "Failed to delete task",
+  "@taskDeletedError": {
+    "description": "Error message when deleting a task fails"
+  },
+  "taskUpdatedSuccess": "Task updated successfully",
+  "@taskUpdatedSuccess": {
+    "description": "Success message after updating a task"
+  },
+  "taskUpdatedError": "Failed to update task",
+  "@taskUpdatedError": {
+    "description": "Error message when updating a task fails"
+  },
+  "taskCreatedSuccess": "Task created successfully",
+  "@taskCreatedSuccess": {
+    "description": "Success message after creating a task"
+  },
+  "taskCreatedError": "Failed to create task: {error}",
+  "@taskCreatedError": {
+    "description": "Error message when creating a task fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "taskDeleteDialogTitle": "Delete Task",
+  "@taskDeleteDialogTitle": {
+    "description": "Title for delete task confirmation dialog"
+  },
+  "taskDeleteDialogMessage": "Are you sure you want to delete this task? This action cannot be undone.",
+  "@taskDeleteDialogMessage": {
+    "description": "Message for delete task confirmation dialog"
+  },
+  "taskDescriptionLabel": "Description",
+  "@taskDescriptionLabel": {
+    "description": "Label for task description section"
+  },
+  "taskInformationLabel": "Task Information",
+  "@taskInformationLabel": {
+    "description": "Label for task information section"
+  },
+  "taskDatesLabel": "Dates",
+  "@taskDatesLabel": {
+    "description": "Label for task dates section"
+  },
+  "taskDueDateLabel": "Due Date",
+  "@taskDueDateLabel": {
+    "description": "Label for task due date field"
+  },
+  "taskNoDueDate": "No due date",
+  "@taskNoDueDate": {
+    "description": "Text shown when task has no due date"
+  },
+  "taskSetDueDate": "Set due date",
+  "@taskSetDueDate": {
+    "description": "Placeholder text for setting due date"
+  },
+  "taskStatusLabel": "Status",
+  "@taskStatusLabel": {
+    "description": "Label for task status field"
+  },
+  "taskPriorityLabel": "Priority",
+  "@taskPriorityLabel": {
+    "description": "Label for task priority field"
+  },
+  "taskPriorityText": "{priority} Priority",
+  "@taskPriorityText": {
+    "description": "Text showing task priority level",
+    "placeholders": {
+      "priority": {
+        "type": "String",
+        "example": "High"
+      }
+    }
+  },
+  "taskCreatedAtLabel": "Created",
+  "@taskCreatedAtLabel": {
+    "description": "Label for task created date"
+  },
+  "taskUpdatedAtLabel": "Last Updated",
+  "@taskUpdatedAtLabel": {
+    "description": "Label for task last updated date"
+  },
+  "taskTitleLabel": "Title",
+  "@taskTitleLabel": {
+    "description": "Label for task title field"
+  },
+  "taskTitleHint": "Enter task title",
+  "@taskTitleHint": {
+    "description": "Hint text for task title field"
+  },
+  "taskDescriptionHint": "Enter task description",
+  "@taskDescriptionHint": {
+    "description": "Hint text for task description field"
+  },
+  "taskDescriptionOptionalHint": "Enter task description (optional)",
+  "@taskDescriptionOptionalHint": {
+    "description": "Hint text for optional task description field"
+  },
+  "taskDueDateOptionalHint": "Select due date (optional)",
+  "@taskDueDateOptionalHint": {
+    "description": "Hint text for optional due date field"
+  },
+  "taskTitleRequired": "Title *",
+  "@taskTitleRequired": {
+    "description": "Label indicating title is required"
+  },
+  "taskStatusTodo": "To Do",
+  "@taskStatusTodo": {
+    "description": "Label for todo task status"
+  },
+  "taskStatusInProgress": "In Progress",
+  "@taskStatusInProgress": {
+    "description": "Label for in progress task status"
+  },
+  "taskStatusDone": "Done",
+  "@taskStatusDone": {
+    "description": "Label for done task status"
+  },
+  "taskPriorityHigh": "High",
+  "@taskPriorityHigh": {
+    "description": "Label for high priority"
+  },
+  "taskPriorityMedium": "Medium",
+  "@taskPriorityMedium": {
+    "description": "Label for medium priority"
+  },
+  "taskPriorityLow": "Low",
+  "@taskPriorityLow": {
+    "description": "Label for low priority"
+  },
+  "taskPriorityNone": "None",
+  "@taskPriorityNone": {
+    "description": "Label for no priority"
+  },
+  "taskCreateTitle": "Create Task",
+  "@taskCreateTitle": {
+    "description": "Title for create task bottom sheet"
+  },
+  "taskEmptyTitle": "No Tasks Yet",
+  "@taskEmptyTitle": {
+    "description": "Title shown when task list is empty"
+  },
+  "taskEmptySubtitle": "Create your first task to get started",
+  "@taskEmptySubtitle": {
+    "description": "Subtitle shown when task list is empty"
+  },
+  "taskEmptyTip1": "• Tap the + button to create a task",
+  "@taskEmptyTip1": {
+    "description": "First tip in empty task list"
+  },
+  "taskEmptyTip2": "• Add a title and description",
+  "@taskEmptyTip2": {
+    "description": "Second tip in empty task list"
+  },
+  "taskEmptyTip3": "• Set priority and due date",
+  "@taskEmptyTip3": {
+    "description": "Third tip in empty task list"
+  },
+  "taskProgressTitle": "Your Progress",
+  "@taskProgressTitle": {
+    "description": "Title for progress summary section"
+  },
+  "taskProgressNoTasks": "No tasks yet",
+  "@taskProgressNoTasks": {
+    "description": "Text shown when there are no tasks"
+  },
+  "taskProgressCompleted": "{completed} of {total} completed",
+  "@taskProgressCompleted": {
+    "description": "Text showing how many tasks are completed",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "5"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "taskProgressCount": "{completed}/{total}",
+  "@taskProgressCount": {
+    "description": "Short format showing completed tasks count",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "5"
+      },
+      "total": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "taskProgressWelcome": "Welcome! Let's add your first task.",
+  "@taskProgressWelcome": {
+    "description": "Welcome message when there are no tasks"
+  },
+  "taskProgressEncouragement": "You're making steady progress",
+  "@taskProgressEncouragement": {
+    "description": "Encouragement message when making progress"
+  },
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Cancel button text"
+  },
+  "commonDelete": "Delete",
+  "@commonDelete": {
+    "description": "Delete button text"
+  },
+  "commonUpdate": "Update",
+  "@commonUpdate": {
+    "description": "Update button text"
+  },
+  "commonRetry": "Retry",
+  "@commonRetry": {
+    "description": "Retry button text"
+  },
+  "commonNA": "N/A",
+  "@commonNA": {
+    "description": "Not available abbreviation"
+  },
+  
+  "@@context": "Project feature strings",
+  "projectsTitle": "Projects",
+  "@projectsTitle": {
+    "description": "Title for projects screen"
+  },
+  "projectsSearchPlaceholder": "Search projects...",
+  "@projectsSearchPlaceholder": {
+    "description": "Placeholder text for project search field"
+  },
+  "projectsEmptyTitle": "No Projects Yet",
+  "@projectsEmptyTitle": {
+    "description": "Title shown when project list is empty"
+  },
+  "projectsEmptySubtitle": "Create your first project to organize your tasks",
+  "@projectsEmptySubtitle": {
+    "description": "Subtitle shown when project list is empty"
+  },
+  "projectsLoadError": "Failed to load projects",
+  "@projectsLoadError": {
+    "description": "Error message when projects fail to load"
+  },
+  "projectsLoadMoreError": "Failed to load more projects",
+  "@projectsLoadMoreError": {
+    "description": "Error message when loading more projects fails"
+  },
+  "projectDeletedSuccess": "Project deleted successfully",
+  "@projectDeletedSuccess": {
+    "description": "Success message after deleting a project"
+  },
+  "projectDeletedError": "Failed to delete project",
+  "@projectDeletedError": {
+    "description": "Error message when deleting a project fails"
+  },
+  "projectCreatedSuccess": "Project created successfully",
+  "@projectCreatedSuccess": {
+    "description": "Success message after creating a project"
+  },
+  "projectCreatedError": "Failed to create project",
+  "@projectCreatedError": {
+    "description": "Error message when creating a project fails"
+  },
+  "projectUpdatedSuccess": "Project updated successfully",
+  "@projectUpdatedSuccess": {
+    "description": "Success message after updating a project"
+  },
+  "projectUpdatedError": "Failed to update project",
+  "@projectUpdatedError": {
+    "description": "Error message when updating a project fails"
+  },
+  "projectDetailsTitle": "Project Details",
+  "@projectDetailsTitle": {
+    "description": "Title for project details screen"
+  },
+  "projectCreateTitle": "Create Project",
+  "@projectCreateTitle": {
+    "description": "Title for create project screen"
+  },
+  "projectEditTitle": "Edit Project",
+  "@projectEditTitle": {
+    "description": "Title for edit project screen"
+  },
+  "projectNameLabel": "Project Name",
+  "@projectNameLabel": {
+    "description": "Label for project name field"
+  },
+  "projectNameHint": "Enter project name",
+  "@projectNameHint": {
+    "description": "Hint text for project name field"
+  },
+  "projectDescriptionLabel": "Description",
+  "@projectDescriptionLabel": {
+    "description": "Label for project description field"
+  },
+  "projectDescriptionHint": "Enter project description (optional)",
+  "@projectDescriptionHint": {
+    "description": "Hint text for project description field"
+  },
+  "projectNameRequired": "Project name is required",
+  "@projectNameRequired": {
+    "description": "Error message when project name is empty"
+  },
+  
+  "@@context": "Calendar feature strings",
+  "calendarTitle": "Calendar",
+  "@calendarTitle": {
+    "description": "Title for calendar screen"
+  },
+  "calendarTasksFor": "Tasks for {date}",
+  "@calendarTasksFor": {
+    "description": "Header showing tasks for selected date",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "January 15, 2024"
+      }
+    }
+  },
+  "calendarTaskCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
+  "@calendarTaskCount": {
+    "description": "Shows the number of tasks",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "calendarNoTasksForDate": "No tasks scheduled for this date",
+  "@calendarNoTasksForDate": {
+    "description": "Message when no tasks are found for selected date"
+  },
+  
+  "@@context": "Profile feature strings",
+  "profileTitle": "Profile",
+  "@profileTitle": {
+    "description": "Title for profile screen"
+  },
+  "profileDisplayName": "Display Name",
+  "@profileDisplayName": {
+    "description": "Label for display name field"
+  },
+  "profileEmail": "Email",
+  "@profileEmail": {
+    "description": "Label for email field"
+  },
+  "profileLogout": "Logout",
+  "@profileLogout": {
+    "description": "Logout button text"
+  },
+  "profileLogoutConfirmTitle": "Logout",
+  "@profileLogoutConfirmTitle": {
+    "description": "Title for logout confirmation dialog"
+  },
+  "profileLogoutConfirmMessage": "Are you sure you want to logout?",
+  "@profileLogoutConfirmMessage": {
+    "description": "Message for logout confirmation dialog"
+  },
+  "profileErrorLoading": "Unable to load user information",
+  "@profileErrorLoading": {
+    "description": "Error message when user info fails to load"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  }
+}

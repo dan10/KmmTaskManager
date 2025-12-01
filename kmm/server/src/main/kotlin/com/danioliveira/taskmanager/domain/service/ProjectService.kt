@@ -10,16 +10,19 @@ import com.danioliveira.taskmanager.domain.exceptions.NotFoundException
 import com.danioliveira.taskmanager.domain.repository.ProjectAssignmentRepository
 import com.danioliveira.taskmanager.domain.repository.ProjectRepository
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import org.jetbrains.exposed.v1.core.Transaction
-import java.util.UUID
+import com.danioliveira.taskmanager.utils.toUuid
+import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 class ProjectService(
     private val repository: ProjectRepository,
     private val userRepository: UserRepository,
     private val assignmentRepository: ProjectAssignmentRepository,
 ) {
     suspend fun getProjectsByOwner(
-        ownerId: UUID,
+        ownerId: Uuid,
         page: Int = 0,
         size: Int = 10,
         query: String? = null
@@ -28,7 +31,7 @@ class ProjectService(
             repository.findAllByOwner(ownerId, page, size, query)
         }
 
-    suspend fun createProject(ownerId: UUID, request: ProjectCreateRequest): ProjectResponse =
+    suspend fun createProject(ownerId: Uuid, request: ProjectCreateRequest): ProjectResponse =
         dbQuery {
             repository.create(
                 name = request.name,
@@ -37,8 +40,8 @@ class ProjectService(
             )
         }
 
-    context(_: Transaction)
-    private suspend fun validateProjectAccess(projectId: UUID, userId: UUID) {
+    context(_: R2dbcTransaction)
+    private suspend fun validateProjectAccess(projectId: Uuid, userId: Uuid) = with(this) {
         val project = repository.findById(projectId)
 
         val isOwner = project.ownerId == userId.toString()
@@ -49,14 +52,14 @@ class ProjectService(
         }
     }
 
-    suspend fun getProjectById(id: UUID, userId: UUID): ProjectResponse = dbQuery {
+    suspend fun getProjectById(id: Uuid, userId: Uuid): ProjectResponse = dbQuery {
         validateProjectAccess(id, userId)
         repository.findById(id = id)
     }
 
     suspend fun updateProject(
-        projectId: UUID,
-        userId: UUID,
+        projectId: Uuid,
+        userId: Uuid,
         request: ProjectUpdateRequest
     ): Boolean = dbQuery {
         validateProjectAccess(projectId, userId)
@@ -67,7 +70,7 @@ class ProjectService(
         )
     }
 
-    suspend fun deleteProject(projectId: UUID, userId: UUID): Boolean = dbQuery {
+    suspend fun deleteProject(projectId: Uuid, userId: Uuid): Boolean = dbQuery {
         val project = repository.findById(projectId)
 
         if (project.ownerId != userId.toString()) {
@@ -77,7 +80,7 @@ class ProjectService(
         repository.delete(projectId)
     }
 
-    suspend fun assignUserToProject(projectId: UUID, userId: UUID, creatorId: UUID) = dbQuery {
+    suspend fun assignUserToProject(projectId: Uuid, userId: Uuid, creatorId: Uuid) = dbQuery {
         val projectExists = repository.existsById(id = projectId)
         if (!projectExists) {
             throw NotFoundException("Project", projectId.toString())
@@ -92,24 +95,24 @@ class ProjectService(
         assignmentRepository.assignUserToProject(projectId, userId)
     }
 
-    suspend fun removeUserFromProject(projectId: UUID, userId: UUID, creatorId: UUID): Boolean =
+    suspend fun removeUserFromProject(projectId: Uuid, userId: Uuid, creatorId: Uuid): Boolean =
         dbQuery {
             validateProjectAccess(projectId, creatorId)
             assignmentRepository.removeUserFromProject(projectId, userId)
         }
 
-    suspend fun getUsersByProject(projectId: UUID): List<String> = dbQuery {
+    suspend fun getUsersByProject(projectId: Uuid): List<String> = dbQuery {
         assignmentRepository.findUsersByProject(projectId).map { it.toString() }
     }
 
-    suspend fun getProjectsByUser(userId: UUID): List<String> = dbQuery {
+    suspend fun getProjectsByUser(userId: Uuid): List<String> = dbQuery {
         assignmentRepository.findProjectsByUser(userId).map { it.toString() }
     }
 
     suspend fun isUserAssignedToProject(projectId: String, userId: String): Boolean = dbQuery {
         assignmentRepository.isUserAssignedToProject(
-            UUID.fromString(projectId),
-            UUID.fromString(userId)
+            projectId.toUuid(),
+            userId.toUuid()
         )
     }
 }

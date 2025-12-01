@@ -3,17 +3,22 @@ package com.danioliveira.taskmanager.data.repository
 import com.danioliveira.taskmanager.TestDatabase
 import com.danioliveira.taskmanager.data.dbQuery
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import com.danioliveira.taskmanager.routes.toUUID
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import com.danioliveira.taskmanager.utils.toUuid
+import com.danioliveira.taskmanager.utils.randomV7
 
+@OptIn(ExperimentalUuidApi::class)
 class UserRepositoryImplTest {
     private lateinit var repository: UserRepository
 
@@ -69,7 +74,7 @@ class UserRepositoryImplTest {
 
         // Find the user by ID
         val foundUser = dbQuery {
-            repository.findById(user.id.toUUID())
+            repository.findById(user.id.toUuid())
         }
 
         // Verify the user was found
@@ -91,7 +96,7 @@ class UserRepositoryImplTest {
 
         // Try to find a user that doesn't exist by ID
         val userById = dbQuery {
-            repository.findById(UUID.randomUUID())
+            repository.findById(Uuid.randomV7())
         }
 
         // Verify the user was not found

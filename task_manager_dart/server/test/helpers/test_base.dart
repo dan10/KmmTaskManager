@@ -6,7 +6,7 @@ import 'dart:io';
 import 'dart:math';
 
 class TestBase {
-  late PostgreSQLConnection connection;
+  late Connection connection;
   late TestPostgresContainer container;
   late String containerName;
   late int port;
@@ -52,16 +52,18 @@ class TestBase {
       await Future.delayed(Duration(seconds: 20));
 
       // Initialize the connection
-      connection = PostgreSQLConnection(
-        'localhost',
-        port,
-        'task_manager_test',
-        username: 'postgres',
-        password: 'postgres',
+      connection = await Connection.open(
+        Endpoint(
+          host: 'localhost',
+          database: 'task_manager_test',
+          port: port,
+          username: 'postgres',
+          password: 'postgres',
+        ),
+        settings: ConnectionSettings(
+          sslMode: SslMode.disable,
+        ),
       );
-
-      // Open the connection and wait for it to be ready
-      await connection.open();
 
       // Create the database tables
       await Database.createTables(connection);

@@ -1,7 +1,9 @@
 services:
   # Application server (Ktor Backend)
   app:
-    build: .
+    build:
+        context: .
+        dockerfile: Dockerfile
     container_name: ktor-app # Explicit container name can be helpful
     ports:
       - "8081:8081" # Assuming Ktor runs on 8081 internally
@@ -59,7 +61,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
     networks:
       - app-network
     deploy:

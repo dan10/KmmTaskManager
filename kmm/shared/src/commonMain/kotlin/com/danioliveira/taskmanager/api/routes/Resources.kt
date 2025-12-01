@@ -65,7 +65,25 @@ class Tasks() {
     
     // GET /v1/tasks/assigned - Get tasks assigned to user  
     @Resource(Routes.TASKS_ASSIGNED)
-    class Assigned(val parent: Tasks = Tasks(), val page: Int = 0, val size: Int = 10, val query: String? = null)
+    class Assigned(val parent: Tasks = Tasks(), val page: Int = 0, val size: Int = 10, val query: String? = null) {
+        
+        // GET /v1/tasks/assigned/due-on - Get tasks assigned to user due on a specific date
+        @Resource("due-on")
+        class DueOn(
+            val parent: Assigned,
+            val date: String,
+            val page: Int = 0,
+            val size: Int = 10
+        ) {
+            // Secondary constructor for convenience
+            constructor(date: String, page: Int = 0, size: Int = 10) : this(
+                parent = Assigned(page = page, size = size),
+                date = date,
+                page = page,
+                size = size
+            )
+        }
+    }
     
     // GET /v1/tasks/stats - Get task statistics (counts by status)
     @Resource(Routes.TASKS_STATS)

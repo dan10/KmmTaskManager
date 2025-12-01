@@ -15,8 +15,10 @@ import com.danioliveira.taskmanager.domain.exceptions.UnauthorizedException
 import com.danioliveira.taskmanager.domain.exceptions.ValidationException
 import com.danioliveira.taskmanager.domain.model.UserWithPassword
 import com.danioliveira.taskmanager.domain.repository.UserRepository
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 class UserService(
     private val repository: UserRepository,
     private val googleConfig: GoogleConfig
@@ -25,7 +27,7 @@ class UserService(
         repository.findByEmail(email)
     }
 
-    suspend fun findById(id: UUID): UserWithPassword = dbQuery {
+    suspend fun findById(id: Uuid): UserWithPassword = dbQuery {
         repository.findById(id) ?: throw NotFoundException("User", id.toString())
     }
 

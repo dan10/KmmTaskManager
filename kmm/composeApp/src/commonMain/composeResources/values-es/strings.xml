@@ -22,6 +22,7 @@
     <string name="title_password_error">La contraseña debe tener al menos 8 caracteres</string>
 
     <!-- RegisterScreen strings -->
+    <string name="title_create_account">Crear Cuenta</string>
     <string name="title_name">Nombre</string>
     <string name="title_name_error">Por favor, introduce un nombre</string>
     <string name="title_register_button">Registrar</string>
@@ -112,6 +113,7 @@
     <string name="task_title_label">Título</string>
     <string name="task_title_error">El título es obligatorio</string>
     <string name="task_description_label">Descripción</string>
+    <string name="task_created_label">Creada el</string>
     <string name="task_status_label">Estado</string>
     <string name="task_priority_label">Prioridad</string>
     <string name="task_due_date_label">Fecha de Vencimiento (DD/MM/AAAA)</string>
@@ -141,6 +143,7 @@
     <string name="date_picker_placeholder">DD/MM/AAAA</string>
 
     <!-- Priority strings -->
+    <string name="priority_none">Ninguna</string>
     <string name="priority_high">Alta</string>
     <string name="priority_medium">Media</string>
     <string name="priority_low">Baja</string>
@@ -157,4 +160,15 @@
     <string name="task_no_due_date">Sin fecha de vencimiento</string>
     <string name="content_description_edit_task">Editar Tarea</string>
     <string name="content_description_delete_task">Eliminar Tarea</string>
+    <string name="task_description_section">Descripción</string>
+    <string name="task_information_section">Información de la Tarea</string>
+    <string name="task_due_date_field">Fecha de Vencimiento</string>
+    <string name="task_status_field">Estado</string>
+    <string name="task_priority_field">Prioridad</string>
+    <string name="task_priority_suffix">Prioridad</string>
+    <string name="task_dates_section">Fechas</string>
+    <string name="task_created_field">Creada</string>
+    <string name="task_last_updated_field">Última Actualización</string>
+    <string name="task_no_details_error">No hay detalles de tarea disponibles</string>
+    <string name="date_not_available">—</string>
 </resources>

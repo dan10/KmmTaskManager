@@ -1,3 +1,4 @@
+import 'package:postgres/postgres.dart';
 import 'package:test/test.dart';
 import 'package:task_manager_shared/models.dart';
 import '../../lib/src/services/project_service.dart';
@@ -25,8 +26,8 @@ void main() {
     Future<void> _setupTestData() async {
       // Create test users
       await testBase.connection.execute(
-        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
-        substitutionValues: {
+        Sql.named('INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)'),
+        parameters: {
           'id': 'user-1',
           'name': 'Test User 1',
           'email': 'test1@example.com',
@@ -36,8 +37,8 @@ void main() {
       );
 
       await testBase.connection.execute(
-        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
-        substitutionValues: {
+        Sql.named('INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)'),
+        parameters: {
           'id': 'user-2',
           'name': 'Test User 2',
           'email': 'test2@example.com',
@@ -47,8 +48,8 @@ void main() {
       );
 
       await testBase.connection.execute(
-        'INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)',
-        substitutionValues: {
+        Sql.named('INSERT INTO users (id, display_name, email, google_id, created_at) VALUES (@id, @name, @email, @googleId, @createdAt)'),
+        parameters: {
           'id': 'user-3',
           'name': 'Test User 3',
           'email': 'test3@example.com',

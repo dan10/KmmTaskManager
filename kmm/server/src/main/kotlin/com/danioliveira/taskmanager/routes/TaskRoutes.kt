@@ -16,6 +16,7 @@ import io.ktor.server.resources.put
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
+import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Routes for task management following Routes.md specification:
@@ -36,6 +37,7 @@ import org.koin.ktor.ext.inject
  * Task Assignment:
  * POST /v1/tasks/{id}/assign - Assign task to user
  */
+@OptIn(ExperimentalUuidApi::class)
 fun Route.taskRoutes() {
     val taskService by inject<TaskService>()
 
@@ -90,6 +92,13 @@ fun Route.taskRoutes() {
         get<Tasks.Assigned> { res ->
             val userId = userPrincipal()
             val tasks = taskService.findAllByAssigneeId(userId, res.page, res.size, res.query)
+            call.respond(tasks)
+        }
+
+        // Get tasks assigned to current user due on a specific date: GET /v1/tasks/assigned/due-on
+        get<Tasks.Assigned.DueOn> { res ->
+            val userId = userPrincipal()
+            val tasks = taskService.findAssignedDueOn(userId, res.date, res.page, res.size)
             call.respond(tasks)
         }
 

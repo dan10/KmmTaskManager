@@ -1,6 +1,7 @@
 import 'package:task_manager_shared/models.dart';
 
-import '../../lib/data/repositories/project_repository.dart';
+import 'package:task_manager_app/features/projects/data/repositories/project_repository.dart';
+import 'package:task_manager_app/core/utils/result.dart';
 
 class MockProjectRepository implements ProjectRepository {
   bool _shouldThrowError = false;
@@ -105,7 +106,7 @@ class MockProjectRepository implements ProjectRepository {
   }
 
   @override
-  Future<PaginatedResponse<Project>> getProjects({
+  Future<Result<PaginatedResponse<Project>>> getProjects({
     int page = 0,
     int size = 10,
     String? query,
@@ -113,28 +114,29 @@ class MockProjectRepository implements ProjectRepository {
     await _simulateDelay();
     
     if (_shouldThrowError) {
-      throw Exception('Mock error: Failed to fetch projects');
+      return Result.error(Exception('Mock error: Failed to fetch projects'));
     }
 
-    return _getProjectsResponse ?? PaginatedResponse<Project>(
+    final response = _getProjectsResponse ?? PaginatedResponse<Project>(
       items: [],
       page: page,
       size: size,
       total: 0,
       totalPages: 0,
     );
+    return Result.ok(response);
   }
 
   @override
-  Future<Project> getProject(String projectId) async {
+  Future<Result<Project>> getProject(String projectId) async {
     await _simulateDelay();
     lastProjectId = projectId;
     
     if (_shouldThrowError) {
-      throw Exception('Mock error: Failed to fetch project');
+      return Result.error(Exception('Mock error: Failed to fetch project'));
     }
 
-    return _getProjectResponse ?? const Project(
+    final project = _getProjectResponse ?? const Project(
       id: 'mock-id',
       name: 'Mock Project',
       description: 'Mock Description',
@@ -143,60 +145,85 @@ class MockProjectRepository implements ProjectRepository {
       total: 0,
       memberIds: [],
     );
+    return Result.ok(project);
   }
 
   @override
-  Future<Project> createProject(CreateProjectRequestDto request) async {
+  Future<Result<Project>> createProject({required String name, String? description}) async {
     await _simulateDelay();
-    lastCreateRequest = request;
     
     if (_shouldThrowError) {
-      throw Exception('Mock error: Failed to create project');
+      return Result.error(Exception('Mock error: Failed to create project'));
     }
 
-    return _createProjectResponse ?? Project(
+    final project = _createProjectResponse ?? Project(
       id: 'mock-id',
-      name: request.name,
-      description: request.description,
+      name: name,
+      description: description,
       completed: 0,
       inProgress: 0,
       total: 0,
       memberIds: const [],
     );
+    return Result.ok(project);
   }
 
   @override
-  Future<Project> updateProject(String projectId, ProjectUpdateRequestDto request) async {
+  Future<Result<Project>> updateProject(String projectId, {String? name, String? description}) async {
     await _simulateDelay();
     lastProjectId = projectId;
-    lastUpdateRequest = request;
     
     if (_shouldThrowError) {
-      throw Exception('Mock error: Failed to update project');
+      return Result.error(Exception('Mock error: Failed to update project'));
     }
 
-    return _updateProjectResponse ?? Project(
+    final project = _updateProjectResponse ?? Project(
       id: projectId,
-      name: request.name ?? 'Updated Project',
-      description: request.description,
+      name: name ?? 'Updated Project',
+      description: description,
       completed: 0,
       inProgress: 0,
       total: 0,
-      memberIds: request.memberIds ?? const [],
+      memberIds: const [],
     );
+    return Result.ok(project);
   }
 
   @override
-  Future<void> deleteProject(String projectId) async {
+  Future<Result<void>> deleteProject(String projectId) async {
     await _simulateDelay();
     lastDeleteProjectId = projectId;
     
     if (_shouldThrowError || !_deleteProjectSuccess) {
-      throw Exception('Mock error: Failed to delete project');
+      return Result.error(Exception('Mock error: Failed to delete project'));
     }
+    
+    return Result.ok(null);
   }
 
   @override
+  Future<Result<PaginatedResponse<TaskDto>>> getProjectTasks({
+    required String projectId,
+    int page = 0,
+    int size = 10,
+    String? query,
+  }) async {
+    await _simulateDelay();
+    
+    if (_shouldThrowError) {
+      return Result.error(Exception('Mock error: Failed to fetch project tasks'));
+    }
+
+    return Result.ok(PaginatedResponse<TaskDto>(
+      items: [],
+      page: page,
+      size: size,
+      total: 0,
+      totalPages: 0,
+    ));
+  }
+
+  // Deprecated methods - kept for backwards compatibility with tests
   Future<Project> addMember(String projectId, String userId) async {
     await _simulateDelay();
     lastAddMemberProjectId = projectId;
@@ -217,7 +244,6 @@ class MockProjectRepository implements ProjectRepository {
     );
   }
 
-  @override
   Future<Project> removeMember(String projectId, String userId) async {
     await _simulateDelay();
     lastRemoveMemberProjectId = projectId;
@@ -238,7 +264,6 @@ class MockProjectRepository implements ProjectRepository {
     );
   }
 
-  @override
   Future<Map<String, dynamic>> getProjectStats(String projectId) async {
     await _simulateDelay();
     lastStatsProjectId = projectId;
